@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.7.2 — Fullscreen viewer correction
+
+- Open the viewer from cached/full metadata immediately when available.
+- Prefer original media over sample/preview media in fullscreen.
+- Rebuild the media element when enrichment changes the type from image placeholder to video.
+- Implement real fit-both, fit-width, fit-height, and original-size scaling against the viewer stage.
+- Make **Fit** restore configured fit behavior and **1:1** display native pixel size.
+- Preserve thumbnail-first fallback only when full metadata is not yet available.
+
 ## 1.2.7.1 — Booru Enhancer Extended
 
 Initial public compatibility-fork release based on upstream Booru Enhancer 1.2.7.
