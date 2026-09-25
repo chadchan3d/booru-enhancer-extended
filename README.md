@@ -12,6 +12,9 @@ This fork preserves practical compatibility fixes and quality-of-life improvemen
 
 ## Extended changes
 
+- Rule34.xxx metadata is loaded on demand for the item being hovered or opened, reducing background gallery requests.
+- Video previews/viewer show loading, buffering, and failure states when needed.
+
 - Rule34.xxx gallery-container and layout fixes.
 - Current e621/e926 thumbnail markup support.
 - Thumbnail-size and fixed-column controls that stay within the viewport.
@@ -40,4 +43,5 @@ The upstream userscript declares the **MIT License**. This repository preserves 
 
 ## Maintainer
 
-**ChadChan3D**
+**ChadChan3D**  
+Project site: https://chadchan3d.com/category/assets/
