@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Booru Enhancer Extended
 // @namespace    https://github.com/chadchan3d/booru-enhancer-extended
-// @version      1.2.7.2
+// @version      1.2.7.3
 // @description  Unofficial extended fork of Booru Enhancer with Rule34.xxx and e621/e926 compatibility fixes and hover/gallery improvements.
 // @author       itachi-re
 // @contributor  ChadChan3D
@@ -66,10 +66,18 @@
 
 /**
  * =============================================================================
- *  BOORU ENHANCER EXTENDED  —  v1.2.7.2
+ *  BOORU ENHANCER EXTENDED  —  v1.2.7.3
  * =============================================================================
- *  EXTENDED FORK CHANGELOG — v1.2.7.2
+ *  EXTENDED FORK CHANGELOG — v1.2.7.3
  *  ------------------------------------------------------------------------
+ *  - Rule34.xxx gallery metadata is now interaction-driven instead of eagerly
+ *    batch-enriched across the whole page; per-post requests are deduplicated.
+ *  - Hover and fullscreen video previews show delayed Loading/Buffering states
+ *    and a clear failure state while retaining the still thumbnail/poster.
+ *  - Removed settings that had no runtime behavior and simplified misleading
+ *    options; settings labels/values are now user-facing and sections collapse.
+ *  - Settings UI now follows its theme, updates accent/position live, and
+ *    includes ChadChan3D authorship with the canonical project-site link.
  *  - Fullscreen viewer now opens cached/full media when available, upgrades
  *    placeholders to original media, and rebuilds IMG/VIDEO elements when
  *    metadata reveals a different media type.
@@ -156,7 +164,7 @@
 	window.__BOORU_ENHANCER_LOADED__ = true;
 
 	const BE = (window.BE = window.BE || {});
-	BE.VERSION = '1.2.7.2';
+	BE.VERSION = '1.2.7.3';
 
 	/* ============================================================ *
 	 *  EVENT BUS
@@ -347,57 +355,106 @@
 	 * ============================================================ */
 	BE.settings = (() => {
 		const SCHEMA = {
-			'general.enabled': { cat: 'General', type: 'bool', def: true, label: 'Enable Booru Enhancer on this site' },
-			'general.theme': { cat: 'General', type: 'select', def: 'dark', choices: ['dark', 'light'], label: 'Theme' },
+			'general.enabled': {
+				cat: 'General', type: 'bool', def: true,
+				label: 'Enable Booru Enhancer on this site',
+				description: 'Disabling takes effect after the page is reloaded.',
+			},
+			'general.theme': {
+				cat: 'General', type: 'select', def: 'dark',
+				choices: ['dark', 'light'],
+				choiceLabels: { dark: 'Dark', light: 'Light' },
+				label: 'Theme',
+			},
 			'general.accentColor': { cat: 'General', type: 'color', def: '#ff8ac6', label: 'Accent color' },
-			'general.toolbarPosition': { cat: 'General', type: 'select', def: 'bottom-right', choices: ['bottom-right', 'bottom-left', 'top-right', 'top-left'], label: 'Toolbar position' },
+			'general.toolbarPosition': {
+				cat: 'General', type: 'select', def: 'bottom-right',
+				choices: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+				choiceLabels: {
+					'bottom-right': 'Bottom right',
+					'bottom-left': 'Bottom left',
+					'top-right': 'Top right',
+					'top-left': 'Top left',
+				},
+				label: 'Toolbar position',
+			},
 
-			'media.mode': { cat: 'Media', type: 'select', def: 'post-page', choices: ['always', 'post-page', 'on-click', 'disabled'], label: 'Load original media' },
-			'media.neverUpscale': { cat: 'Media', type: 'bool', def: true, label: 'Never upscale beyond native resolution' },
-			'media.hoverPreview': { cat: 'Media', type: 'bool', def: true, label: 'Hover preview on thumbnails' },
-			'media.thumbQuality': { cat: 'Media', type: 'select', def: 'sample', choices: ['preview', 'sample', 'original'], label: 'Grid thumbnail quality' },
+			'media.hoverPreview': {
+				cat: 'Media', type: 'bool', def: true,
+				label: 'Hover preview on thumbnails',
+				description: 'Shows a larger preview when you hover a grid thumbnail.',
+			},
+			'media.thumbQuality': {
+				cat: 'Media', type: 'select', def: 'sample',
+				choices: ['preview', 'sample', 'original'],
+				choiceLabels: { preview: 'Preview', sample: 'Sample', original: 'Original' },
+				label: 'Grid thumbnail quality',
+				description: 'Higher quality can use more bandwidth. Availability depends on the current site.',
+			},
 
 			'download.filenameTemplate': { cat: 'Downloads', type: 'text', def: '{character} - {artist} ({id})', label: 'Filename template' },
-				   'download.maxCharacters': { cat: 'Downloads', type: 'number', def: 3, min: 1, max: 10, label: 'Max characters in filename' },
-				   'download.tagDelimiter': { cat: 'Downloads', type: 'text', def: ', ', label: 'Tag delimiter' },
-				   'download.retries': { cat: 'Downloads', type: 'number', def: 3, min: 0, max: 10, label: 'Retry attempts on failure' },
-				   'download.openMode': { cat: 'Downloads', type: 'select', def: 'new-tab', choices: ['new-tab', 'background-tab', 'popup', 'browser-viewer'], label: '"Open original" behavior' },
+			'download.maxCharacters': { cat: 'Downloads', type: 'number', def: 3, min: 1, max: 10, label: 'Max characters in filename' },
+			'download.tagDelimiter': { cat: 'Downloads', type: 'text', def: ', ', label: 'Tag delimiter' },
+			'download.retries': { cat: 'Downloads', type: 'number', def: 3, min: 0, max: 10, label: 'Retry attempts on failure' },
+			'download.openMode': {
+				cat: 'Downloads', type: 'select', def: 'new-tab',
+				choices: ['new-tab', 'popup'],
+				choiceLabels: { 'new-tab': 'New tab', popup: 'Popup window' },
+				label: 'Open original in',
+			},
 
-				   'viewer.enabled': { cat: 'Viewer', type: 'bool', def: true, label: 'Enable fullscreen viewer' },
-				   'viewer.autoplayVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Autoplay videos/animations' },
-				   'viewer.loopVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Loop videos' },
-				   'viewer.muteVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Start videos muted' },
-				   'viewer.rememberVolume': { cat: 'Viewer', type: 'bool', def: true, label: 'Remember volume between videos' },
-				   'viewer.fitMode': { cat: 'Viewer', type: 'select', def: 'fit-both', choices: ['fit-both', 'fit-width', 'fit-height', 'original-size'], label: 'Default fit mode' },
+			'viewer.enabled': { cat: 'Viewer', type: 'bool', def: true, label: 'Enable fullscreen viewer' },
+			'viewer.autoplayVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Autoplay videos/animations' },
+			'viewer.loopVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Loop videos' },
+			'viewer.muteVideo': { cat: 'Viewer', type: 'bool', def: true, label: 'Start videos muted' },
+			'viewer.rememberVolume': { cat: 'Viewer', type: 'bool', def: true, label: 'Remember volume between videos' },
+			'viewer.fitMode': {
+				cat: 'Viewer', type: 'select', def: 'fit-both',
+				choices: ['fit-both', 'fit-width', 'fit-height', 'original-size'],
+				choiceLabels: {
+					'fit-both': 'Fit to window',
+					'fit-width': 'Fit width',
+					'fit-height': 'Fit height',
+					'original-size': 'Original size (1:1)',
+				},
+				label: 'Default fit mode',
+			},
 
-				   'gallery.infiniteScroll': { cat: 'Gallery', type: 'bool', def: true, label: 'Infinite scrolling (replaces pagination)' },
-				   'gallery.gridDensity': { cat: 'Gallery', type: 'range', def: 0, min: 0, max: 10, label: 'Grid columns (0 = auto-fit by size)' },
-				   'gallery.thumbnailSize': { cat: 'Gallery', type: 'range', def: 220, min: 120, max: 500, label: 'Thumbnail size (px)' },
-				   'gallery.gridGap': { cat: 'Gallery', type: 'range', def: 8, min: 0, max: 20, label: 'Grid gap (px)' },
-				   'gallery.compactMode': { cat: 'Gallery', type: 'bool', def: false, label: 'Compact mode' },
+			'gallery.infiniteScroll': {
+				cat: 'Gallery', type: 'bool', def: true,
+				label: 'Infinite scrolling',
+				description: 'Automatically loads the next page as you scroll.',
+			},
+			'gallery.gridDensity': {
+				cat: 'Gallery', type: 'range', def: 0, min: 0, max: 10,
+				label: 'Grid columns (0 = automatic)', valueFormat: 'columns',
+			},
+			'gallery.thumbnailSize': {
+				cat: 'Gallery', type: 'range', def: 220, min: 120, max: 500,
+				label: 'Thumbnail size', unit: 'px',
+			},
+			'gallery.gridGap': {
+				cat: 'Gallery', type: 'range', def: 8, min: 0, max: 20,
+				label: 'Grid gap', unit: 'px',
+			},
+			'gallery.compactMode': {
+				cat: 'Gallery', type: 'bool', def: false,
+				label: 'Compact mode',
+				description: 'Uses square thumbnails and smaller thumbnail controls.',
+			},
 
-				   'tags.colorize': { cat: 'Tags', type: 'bool', def: true, label: 'Colorize tags by category' },
-				   'tags.showCounts': { cat: 'Tags', type: 'bool', def: true, label: 'Show tag post counts' },
-				   'tags.collapseThreshold': { cat: 'Tags', type: 'number', def: 25, min: 5, max: 200, label: 'Collapse tag list above N tags' },
+			'keys.download': { cat: 'Keybinds', type: 'text', def: 'd', label: 'Download' },
+			'keys.favorite': { cat: 'Keybinds', type: 'text', def: 'f', label: 'Favorite' },
+			'keys.openOriginal': { cat: 'Keybinds', type: 'text', def: 'o', label: 'Open original' },
+			'keys.next': { cat: 'Keybinds', type: 'text', def: 'ArrowRight', label: 'Next post' },
+			'keys.prev': { cat: 'Keybinds', type: 'text', def: 'ArrowLeft', label: 'Previous post' },
+			'keys.close': { cat: 'Keybinds', type: 'text', def: 'Escape', label: 'Close viewer' },
+			'keys.playPause': {
+				cat: 'Keybinds', type: 'text', def: ' ',
+				label: 'Play/pause video', description: 'Default: Space',
+			},
 
-				   'filter.blacklist': { cat: 'Filters', type: 'textarea', def: '', label: 'Blacklisted tags (one per line, supports rating:*, -tag)' },
-				   'filter.whitelist': { cat: 'Filters', type: 'textarea', def: '', label: 'Whitelist overrides (one per line)' },
-				   'filter.hideVideos': { cat: 'Filters', type: 'bool', def: false, label: 'Hide videos' },
-				   'filter.hideAnimations': { cat: 'Filters', type: 'bool', def: false, label: 'Hide animated images/GIFs' },
-				   'filter.minResolution': { cat: 'Filters', type: 'number', def: 0, min: 0, max: 10000, label: 'Hide posts below width (px), 0 = off' },
-				   'filter.hideAIGenerated': { cat: 'Filters', type: 'bool', def: false, label: 'Hide posts tagged ai-generated' },
-
-				   'keys.download': { cat: 'Keybinds', type: 'text', def: 'd', label: 'Download' },
-				   'keys.favorite': { cat: 'Keybinds', type: 'text', def: 'f', label: 'Favorite' },
-				   'keys.openOriginal': { cat: 'Keybinds', type: 'text', def: 'o', label: 'Open original (new tab)' },
-				   'keys.viewOriginal': { cat: 'Keybinds', type: 'text', def: 'v', label: 'Toggle viewer' },
-				   'keys.next': { cat: 'Keybinds', type: 'text', def: 'ArrowRight', label: 'Next post' },
-				   'keys.prev': { cat: 'Keybinds', type: 'text', def: 'ArrowLeft', label: 'Previous post' },
-				   'keys.close': { cat: 'Keybinds', type: 'text', def: 'Escape', label: 'Close viewer' },
-				   'keys.playPause': { cat: 'Keybinds', type: 'text', def: ' ', label: 'Play/pause video' },
-				   'keys.commandPalette': { cat: 'Keybinds', type: 'text', def: 'k', label: 'Command palette (needs Ctrl)' },
-
-				   'debug.verboseLogging': { cat: 'Debug', type: 'bool', def: false, label: 'Verbose console logging' },
+			'debug.verboseLogging': { cat: 'Debug', type: 'bool', def: false, label: 'Verbose console logging' },
 		};
 
 		const values = new Map();
@@ -407,8 +464,13 @@
 
 		function load() {
 			for (const key of Object.keys(SCHEMA)) {
+				const def = SCHEMA[key];
 				const stored = BE.store.get('setting:' + key);
-				values.set(key, stored !== undefined ? stored : keyDefault(key));
+				let value = stored !== undefined ? stored : keyDefault(key);
+				if (def.type === 'select' && Array.isArray(def.choices) && !def.choices.includes(value)) {
+					value = def.def;
+				}
+				values.set(key, value);
 			}
 			loaded = true;
 		}
@@ -457,12 +519,6 @@
 						   BE.log.error('settings import failed', err);
 						   return false;
 					   }
-				   },
-				   blacklistTags() {
-					   return String(this.get('filter.blacklist')).split('\n').map((s) => s.trim().toLowerCase()).filter(Boolean);
-				   },
-				   whitelistTags() {
-					   return String(this.get('filter.whitelist')).split('\n').map((s) => s.trim().toLowerCase()).filter(Boolean);
 				   },
 				   _load: load,
 		};
@@ -1498,6 +1554,7 @@
 		let requestToken = 0;
 		let activeUpgradeUrl = '';
 		let pendingUpgradeMedia = null;
+		let stateTimer = null;
 
 		const MAX_WIDTH_PX = 1100;
 		const MAX_WIDTH_VW = 0.75;
@@ -1566,6 +1623,33 @@
 			hoverEl.style.top = `${top}px`;
 		}
 
+		function clearMediaState() {
+			clearTimeout(stateTimer);
+			stateTimer = null;
+			hoverEl?.querySelector('.be-media-state')?.remove();
+		}
+
+		function showMediaState(text, token, delay = 0, error = false) {
+			clearTimeout(stateTimer);
+			const renderState = () => {
+				if (!hoverEl || token !== requestToken || hoverEl.style.display === 'none') return;
+				hoverEl.querySelector('.be-media-state')?.remove();
+				const state = document.createElement('div');
+				state.className = 'be-media-state';
+				if (!error) {
+					const spinner = document.createElement('span');
+					spinner.className = 'be-media-spinner';
+					state.appendChild(spinner);
+				}
+				const label = document.createElement('span');
+				label.textContent = text;
+				state.appendChild(label);
+				hoverEl.appendChild(state);
+			};
+			if (delay > 0) stateTimer = setTimeout(renderState, delay);
+			else renderState();
+		}
+
 		function stopCurrentMedia() {
 			if (!hoverEl) return;
 			const video = hoverEl.querySelector('video');
@@ -1609,6 +1693,7 @@
 			if (!hoverEl || token !== requestToken || !media) return false;
 			stopCurrentMedia();
 			if (pendingUpgradeMedia === media) pendingUpgradeMedia = null;
+			clearMediaState();
 			hoverEl.innerHTML = '';
 			styleMedia(media);
 			hoverEl.appendChild(media);
@@ -1678,7 +1763,10 @@
 			if (!resolved?.url || token !== requestToken) return;
 
 			const currentThumbUrl = sourceImg.currentSrc || sourceImg.src || '';
-			if (resolved.mediaType !== 'video' && resolved.url === currentThumbUrl) return;
+			if (resolved.mediaType !== 'video' && resolved.url === currentThumbUrl) {
+				clearMediaState();
+				return;
+			}
 			if (activeUpgradeUrl === resolved.url) return;
 			activeUpgradeUrl = resolved.url;
 
@@ -1686,6 +1774,7 @@
 
 			if (isVideo) {
 				cancelPendingUpgrade();
+				showMediaState('Loading video…', token, 180);
 				const video = document.createElement('video');
 				pendingUpgradeMedia = video;
 				video.src = resolved.url;
@@ -1702,13 +1791,34 @@
 						try { video.pause(); } catch { /* noop */ }
 						return;
 					}
+					clearMediaState();
 					if (installMedia(video, sourceImg, token)) video.play().catch(() => {});
 				};
 
-				if (video.readyState >= 2) ready();
-				else video.addEventListener('loadeddata', ready, { once: true });
+				video.addEventListener('loadeddata', ready, { once: true });
+				video.addEventListener('canplay', () => {
+					if (token === requestToken) clearMediaState();
+				});
+				video.addEventListener('playing', () => {
+					if (token === requestToken) clearMediaState();
+				});
+				const buffering = () => {
+					if (token === requestToken && hoverEl?.contains(video)) {
+						showMediaState('Buffering…', token, 180);
+					}
+				};
+				video.addEventListener('waiting', buffering);
+				video.addEventListener('stalled', buffering);
+				video.addEventListener('error', () => {
+					if (token !== requestToken || activeUpgradeUrl !== resolved.url) return;
+					pendingUpgradeMedia = null;
+					showMediaState('Video failed to load', token, 0, true);
+				}, { once: true });
 
-				try { video.load(); } catch { /* noop */ }
+				if (video.readyState >= 2) ready();
+				else {
+					try { video.load(); } catch { /* noop */ }
+				}
 				return;
 			}
 
@@ -1725,6 +1835,12 @@
 				if (token !== requestToken || activeUpgradeUrl !== resolved.url) return;
 				installMedia(image, sourceImg, token);
 			}, { once: true });
+			image.addEventListener('error', () => {
+				if (token === requestToken) {
+					pendingUpgradeMedia = null;
+					clearMediaState();
+				}
+			}, { once: true });
 			image.src = resolved.url;
 		}
 
@@ -1733,12 +1849,15 @@
 
 			const token = ++requestToken;
 			activeUpgradeUrl = '';
+			clearMediaState();
 			cancelPendingUpgrade();
 
 			// Instant response from the already-loaded grid thumbnail.
 			showImmediateThumbnail(img, token);
 
-			// Upgrade in place only after better media has actually loaded.
+			// e621 exposes useful media URLs directly in the thumbnail markup.
+			// Rule34 generally does not, so it stays thumbnail-first and resolves
+			// only the hovered post instead of preloading the whole gallery.
 			const direct = directUpgradeFromDom(img);
 			if (direct?.url) upgradeWhenReady(direct, img, token);
 
@@ -1750,6 +1869,9 @@
 
 			try {
 				let post = BE.modules.gallery?.getCachedPost?.(postId) || null;
+				if (!post && /(^|\.)rule34\.xxx$/.test(location.hostname)) {
+					showMediaState('Loading preview…', token, 220);
+				}
 				if (!post) {
 					if (BE.modules.gallery?.enrichSinglePost) {
 						post = await BE.modules.gallery.enrichSinglePost(postId);
@@ -1758,10 +1880,15 @@
 					}
 				}
 
-				if (!post || token !== requestToken) return;
+				if (!post || token !== requestToken) {
+					if (token === requestToken) clearMediaState();
+					return;
+				}
 				const resolved = mediaFromPost(post);
 				if (resolved?.url) upgradeWhenReady(resolved, img, token);
+				else clearMediaState();
 			} catch (err) {
+				if (token === requestToken) clearMediaState();
 				BE.log.debug('[Hover] metadata fetch failed; keeping immediate thumbnail preview', err);
 			}
 		}
@@ -1769,6 +1896,7 @@
 		function hide() {
 			requestToken++;
 			activeUpgradeUrl = '';
+			clearMediaState();
 			cancelPendingUpgrade();
 			if (!hoverEl) return;
 			stopCurrentMedia();
@@ -1780,7 +1908,6 @@
 
 		return { show, hide };
 	})();
-
 	/* ============================================================ *
 	 *  VIEWER
 	 * ============================================================ */
@@ -1805,6 +1932,7 @@
 		let dragStart = { x: 0, y: 0 };
 		let manualZoom = false;
 		let mediaGeneration = 0;
+		let mediaStateTimer = null;
 
 		function init() {
 			overlay = BE.dom.create('div', { id: 'be-viewer-overlay' });
@@ -1994,8 +2122,36 @@
 			}
 		}
 
+		function clearMediaState() {
+			clearTimeout(mediaStateTimer);
+			mediaStateTimer = null;
+			stage?.querySelector('.be-media-state')?.remove();
+		}
+
+		function showMediaState(text, generation, delay = 0, error = false) {
+			clearTimeout(mediaStateTimer);
+			const renderState = () => {
+				if (!stage || generation !== mediaGeneration || !isOpen()) return;
+				stage.querySelector('.be-media-state')?.remove();
+				const state = document.createElement('div');
+				state.className = 'be-media-state';
+				if (!error) {
+					const spinner = document.createElement('span');
+					spinner.className = 'be-media-spinner';
+					state.appendChild(spinner);
+				}
+				const label = document.createElement('span');
+				label.textContent = text;
+				state.appendChild(label);
+				stage.appendChild(state);
+			};
+			if (delay > 0) mediaStateTimer = setTimeout(renderState, delay);
+			else renderState();
+		}
+
 		function onMediaReady(el, generation) {
 			if (el !== mediaEl || generation !== mediaGeneration) return;
+			clearMediaState();
 			if (!manualZoom) applyConfiguredFit();
 			else render();
 		}
@@ -2027,6 +2183,25 @@
 					el.addEventListener('volumechange', () => BE.store.set('viewer:volume', el.volume));
 				}
 				el.addEventListener('loadedmetadata', () => onMediaReady(el, generation));
+				el.addEventListener('loadeddata', () => onMediaReady(el, generation));
+				el.addEventListener('canplay', () => {
+					if (el === mediaEl && generation === mediaGeneration) clearMediaState();
+				});
+				el.addEventListener('playing', () => {
+					if (el === mediaEl && generation === mediaGeneration) clearMediaState();
+				});
+				const buffering = () => {
+					if (el === mediaEl && generation === mediaGeneration) {
+						showMediaState('Buffering…', generation, 180);
+					}
+				};
+				el.addEventListener('waiting', buffering);
+				el.addEventListener('stalled', buffering);
+				el.addEventListener('error', () => {
+					if (el === mediaEl && generation === mediaGeneration) {
+						showMediaState('Video failed to load', generation, 0, true);
+					}
+				});
 			} else {
 				el.decoding = 'async';
 				el.fetchPriority = 'high';
@@ -2047,6 +2222,13 @@
 			stage.innerHTML = '';
 			mediaEl = buildMedia(post);
 			stage.appendChild(mediaEl);
+			if (mediaEl.tagName === 'VIDEO') {
+				showMediaState('Loading video…', mediaGeneration, 180);
+			} else if (post?.metadataPending) {
+				showMediaState('Loading media…', mediaGeneration, 220);
+			} else {
+				clearMediaState();
+			}
 
 			// If the media is already cached/ready, its load event may have
 			// happened before insertion; fit again on the next frame.
@@ -2091,6 +2273,7 @@
 
 			currentPost = post;
 			updateStatus(post);
+			clearMediaState();
 
 			if (!mediaEl) {
 				replaceMedia(post);
@@ -2110,6 +2293,7 @@
 			if (nextUrl && nextUrl !== previousUrl && mediaEl.src !== nextUrl) {
 				if (mediaEl.tagName === 'VIDEO') {
 					if (post.previewUrl && guessMediaType(post.previewUrl) !== 'video') mediaEl.poster = post.previewUrl;
+					showMediaState('Loading video…', mediaGeneration, 180);
 					mediaEl.src = nextUrl;
 					try { mediaEl.load(); } catch { /* noop */ }
 					if (BE.settings.get('viewer.autoplayVideo')) mediaEl.play().catch(() => {});
@@ -2123,6 +2307,7 @@
 
 		function close() {
 			if (overlay) overlay.style.display = 'none';
+			clearMediaState();
 			stopMedia(mediaEl);
 			mediaEl = null;
 			if (stage) stage.innerHTML = '';
@@ -2148,6 +2333,7 @@
 		let loadedPostIds = new Set();
 		let enrichedPostIds = new Set();
 		const postCache = new Map();
+		const postInflight = new Map();
 		let state = 'IDLE';
 		let retryTimer = null;
 		let paginatorEl = null;
@@ -2356,6 +2542,7 @@
 				previewUrl,
 				mediaType: guessMediaType(originalUrl || sampleUrl || previewUrl),
 				postUrl,
+				metadataPending: !originalUrl,
 			});
 
 			const ids = orderedPostIds();
@@ -2630,14 +2817,22 @@
 		async function enrichSinglePost(postId) {
 			const key = String(postId);
 			if (postCache.has(key)) return postCache.get(key);
-			try {
-				const post = await BE.adapters.active.fetchPost(postId);
-				if (post) postCache.set(key, post);
-				return post;
-			} catch (err) {
-				BE.log.debug('[Gallery] enrichSinglePost failed for', postId, err);
-				return null;
-			}
+			if (postInflight.has(key)) return postInflight.get(key);
+
+			const request = (async () => {
+				try {
+					const post = await BE.adapters.active.fetchPost(postId);
+					if (post) postCache.set(key, post);
+					return post;
+				} catch (err) {
+					BE.log.debug('[Gallery] enrichSinglePost failed for', postId, err);
+					return null;
+				} finally {
+					postInflight.delete(key);
+				}
+			})();
+			postInflight.set(key, request);
+			return request;
 		}
 
 		function getCachedPost(postId) {
@@ -2649,6 +2844,10 @@
 		// per-click network round-trip afterwards. Never blocks initial render.
 		async function enrichThumbnails(root = galleryContainer) {
 			if (!root || !BE.adapters.active || typeof BE.adapters.active.fetchThumbBatch !== 'function') return;
+			if (/(^|\.)rule34\.xxx$/.test(location.hostname)) {
+				BE.log.debug('[Gallery] Rule34 background metadata enrichment deferred to hover/click');
+				return;
+			}
 
 			const ids = BE.adapters.active.getThumbElements(root)
 			.map((img) => img.dataset.bePostId || BE.adapters.active.getThumbPostId(img))
@@ -2914,6 +3113,8 @@
 		let currentPostCache = null;
 
 		function injectStyles() {
+			document.documentElement.dataset.beUiTheme = BE.settings.get('general.theme') || 'dark';
+			document.documentElement.style.setProperty('--be-accent', BE.settings.get('general.accentColor') || '#ff8ac6');
 			const css = `
 			:root {
 				--be-accent: ${BE.settings.get('general.accentColor') || '#ff8ac6'};
@@ -3116,6 +3317,142 @@
 				cursor: pointer;
 				font-size: 11px;
 			}
+			@keyframes be-media-spin {
+				to { transform: rotate(360deg); }
+			}
+			.be-media-state {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 20;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 7px 11px;
+				border-radius: 6px;
+				background: rgba(0,0,0,0.72);
+				color: #fff;
+				font: 600 13px/1.3 -apple-system, "Segoe UI", Roboto, sans-serif;
+				box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+				pointer-events: none;
+				white-space: nowrap;
+			}
+			.be-media-spinner {
+				width: 13px;
+				height: 13px;
+				border: 2px solid rgba(255,255,255,.35);
+				border-top-color: #fff;
+				border-radius: 50%;
+				animation: be-media-spin .8s linear infinite;
+				flex: 0 0 auto;
+			}
+			.be-settings-panel {
+				--be-settings-bg: #17191d;
+				--be-settings-fg: #f2f2f2;
+				--be-settings-muted: #aeb3bd;
+				--be-settings-border: #353941;
+				--be-settings-field: #22252b;
+				width: min(380px, calc(100vw - 20px));
+				max-height: min(86vh, 820px);
+				background: var(--be-settings-bg);
+				color: var(--be-settings-fg);
+				border-color: var(--be-settings-border);
+				border-radius: 10px;
+				box-sizing: border-box;
+			}
+			.be-settings-panel[data-be-theme="light"] {
+				--be-settings-bg: #fff;
+				--be-settings-fg: #171717;
+				--be-settings-muted: #646b75;
+				--be-settings-border: #d9dde3;
+				--be-settings-field: #f5f6f8;
+			}
+			.be-settings-header h2 {
+				margin: 0;
+				font-size: 17px;
+			}
+			.be-settings-header p {
+				margin: 4px 0 12px;
+				font-size: 11px;
+				color: var(--be-settings-muted);
+			}
+			.be-settings-section {
+				border-top: 1px solid var(--be-settings-border);
+			}
+			.be-settings-section > summary {
+				cursor: pointer;
+				padding: 10px 2px;
+				font-weight: 700;
+				font-size: 13px;
+				user-select: none;
+			}
+			.be-settings-section-body {
+				padding: 0 2px 4px;
+			}
+			.be-settings-row {
+				margin: 0 0 12px;
+			}
+			.be-settings-row label {
+				color: var(--be-settings-fg);
+			}
+			.be-settings-description {
+				margin-top: 4px;
+				color: var(--be-settings-muted);
+				font-size: 11px;
+				line-height: 1.35;
+			}
+			.be-settings-value {
+				display: inline-block;
+				margin-left: 7px;
+				color: var(--be-settings-muted);
+				font-size: 11px;
+				font-weight: 600;
+				vertical-align: middle;
+			}
+			.be-settings-panel select,
+			.be-settings-panel input[type="text"],
+			.be-settings-panel input[type="number"],
+			.be-settings-panel textarea {
+				box-sizing: border-box;
+				width: 100%;
+				background: var(--be-settings-field);
+				color: var(--be-settings-fg);
+				border: 1px solid var(--be-settings-border);
+				border-radius: 4px;
+				padding: 5px 7px;
+			}
+			.be-settings-panel input[type="range"] {
+				width: calc(100% - 86px);
+				vertical-align: middle;
+			}
+			.be-settings-toolbar {
+				border-bottom-color: var(--be-settings-border);
+			}
+			.be-settings-toolbar .be-settings-reset {
+				background: #555;
+			}
+			.be-settings-footer {
+				margin-top: 8px;
+				padding-top: 10px;
+				border-top: 1px solid var(--be-settings-border);
+				color: var(--be-settings-muted);
+				font-size: 11px;
+				line-height: 1.5;
+				text-align: center;
+			}
+			.be-settings-footer a {
+				color: var(--be-accent);
+				text-decoration: none;
+			}
+			.be-settings-footer a:hover {
+				text-decoration: underline;
+			}
+			:root[data-be-ui-theme="light"] .be-toolbar {
+				background: rgba(245,245,247,.94);
+				box-shadow: 0 2px 10px rgba(0,0,0,.18);
+			}
+
 			`;
 			_GM.addStyle(css);
 		}
@@ -3275,12 +3612,38 @@
 			panel = document.createElement('div');
 			panel.id = 'be-settings-panel';
 			panel.className = 'be-settings-panel';
+			panel.dataset.beTheme = BE.settings.get('general.theme') || 'dark';
+
+			const header = document.createElement('div');
+			header.className = 'be-settings-header';
+			const title = document.createElement('h2');
+			title.textContent = 'Booru Enhancer Extended';
+			const note = document.createElement('p');
+			note.textContent = 'Most changes apply immediately.';
+			header.appendChild(title);
+			header.appendChild(note);
+			panel.appendChild(header);
+
+			const applyLiveSetting = (key, value) => {
+				BE.settings.set(key, value);
+				if (key === 'general.theme') {
+					panel.dataset.beTheme = value;
+					document.documentElement.dataset.beUiTheme = value;
+				}
+				if (key === 'general.accentColor') {
+					document.documentElement.style.setProperty('--be-accent', value);
+				}
+				if (key === 'general.toolbarPosition' && toolbarRoot) {
+					toolbarRoot.className = `be-pos-${value}`;
+				}
+			};
 
 			const topBar = document.createElement('div');
 			topBar.className = 'be-settings-toolbar';
-			const mkTop = (label, fn) => {
+			const mkTop = (label, fn, className = '') => {
 				const b = document.createElement('button');
 				b.textContent = label;
+				if (className) b.classList.add(className);
 				b.addEventListener('click', fn);
 				topBar.appendChild(b);
 				return b;
@@ -3300,18 +3663,45 @@
 			mkTop('Reset', () => {
 				if (!confirm('Reset all Booru Enhancer settings to defaults?')) return;
 				BE.settings.resetAll();
+				document.documentElement.dataset.beUiTheme = BE.settings.get('general.theme') || 'dark';
+				document.documentElement.style.setProperty('--be-accent', BE.settings.get('general.accentColor') || '#ff8ac6');
 				panel.remove();
 				createSettingsPanel();
 				BE.modules.toast.show('Settings reset to defaults', 'success');
-			});
+			}, 'be-settings-reset');
 			mkTop('Close', () => { panel.style.display = 'none'; });
 			panel.appendChild(topBar);
 
-			const categories = BE.settings.categories();
-			for (const cat of categories) {
-				const h = document.createElement('h3');
-				h.textContent = cat;
-				panel.appendChild(h);
+			const friendlyValue = (key, value, def) => {
+				if (key === 'gallery.gridDensity') {
+					return Number(value) === 0 ? 'Automatic' : `${value} columns`;
+				}
+				if (def.unit) return `${value} ${def.unit}`;
+				return String(value);
+			};
+
+			const displayTextValue = (key, value) => {
+				if (key === 'keys.playPause' && value === ' ') return 'Space';
+				return String(value ?? '');
+			};
+
+			const storedTextValue = (key, value) => {
+				if (key === 'keys.playPause' && String(value).trim().toLowerCase() === 'space') return ' ';
+				return value;
+			};
+
+			const initiallyOpen = new Set(['General', 'Media', 'Viewer', 'Gallery']);
+			for (const cat of BE.settings.categories()) {
+				const section = document.createElement('details');
+				section.className = 'be-settings-section';
+				section.open = initiallyOpen.has(cat);
+
+				const summary = document.createElement('summary');
+				summary.textContent = cat;
+				section.appendChild(summary);
+
+				const body = document.createElement('div');
+				body.className = 'be-settings-section-body';
 
 				for (const key of BE.settings.byCategory(cat)) {
 					const def = BE.settings.SCHEMA[key];
@@ -3326,63 +3716,82 @@
 					if (def.type === 'bool') {
 						input = document.createElement('input');
 						input.type = 'checkbox';
-						input.checked = BE.settings.get(key);
-						input.addEventListener('change', () => BE.settings.set(key, input.checked));
+						input.checked = !!BE.settings.get(key);
+						input.addEventListener('change', () => applyLiveSetting(key, input.checked));
 					} else if (def.type === 'select') {
 						input = document.createElement('select');
 						for (const choice of def.choices) {
 							const opt = document.createElement('option');
 							opt.value = choice;
-							opt.textContent = choice;
+							opt.textContent = def.choiceLabels?.[choice] || choice;
 							input.appendChild(opt);
 						}
 						input.value = BE.settings.get(key);
-						input.addEventListener('change', () => BE.settings.set(key, input.value));
+						input.addEventListener('change', () => applyLiveSetting(key, input.value));
 					} else if (def.type === 'color') {
 						input = document.createElement('input');
 						input.type = 'color';
 						input.value = BE.settings.get(key);
-						input.addEventListener('input', () => BE.settings.set(key, input.value));
+						input.addEventListener('input', () => applyLiveSetting(key, input.value));
 					} else if (def.type === 'range' || def.type === 'number') {
 						const valSpan = document.createElement('span');
-						valSpan.textContent = ` [${BE.settings.get(key)}]`;
-						valSpan.style.fontWeight = 'bold';
+						valSpan.className = 'be-settings-value';
+						valSpan.textContent = friendlyValue(key, BE.settings.get(key), def);
 
 						input = document.createElement('input');
 						input.type = def.type === 'range' ? 'range' : 'number';
 						input.min = def.min;
 						input.max = def.max;
 						input.value = BE.settings.get(key);
-						input.style.width = '90%';
 						input.addEventListener('input', () => {
-							valSpan.textContent = ` [${input.value}]`;
-							BE.settings.set(key, Number(input.value));
+							const value = Number(input.value);
+							valSpan.textContent = friendlyValue(key, value, def);
+							applyLiveSetting(key, value);
 						});
 						row.appendChild(input);
 						row.appendChild(valSpan);
-						panel.appendChild(row);
-						continue;
-					} else if (def.type === 'textarea') {
-						input = document.createElement('textarea');
-						input.value = BE.settings.get(key);
-						input.style.width = '100%';
-						input.style.height = '60px';
-						input.addEventListener('change', () => BE.settings.set(key, input.value));
 					} else {
 						input = document.createElement('input');
 						input.type = 'text';
-						input.value = BE.settings.get(key);
-						input.style.width = '100%';
-						input.addEventListener('change', () => BE.settings.set(key, input.value));
+						input.value = displayTextValue(key, BE.settings.get(key));
+						input.addEventListener('change', () => {
+							applyLiveSetting(key, storedTextValue(key, input.value));
+							input.value = displayTextValue(key, BE.settings.get(key));
+						});
 					}
-					row.appendChild(input);
-					panel.appendChild(row);
+
+					if (def.type !== 'range' && def.type !== 'number') row.appendChild(input);
+
+					if (def.description) {
+						const desc = document.createElement('div');
+						desc.className = 'be-settings-description';
+						desc.textContent = def.description;
+						row.appendChild(desc);
+					}
+					body.appendChild(row);
 				}
+				section.appendChild(body);
+				panel.appendChild(section);
 			}
+
+			const footer = document.createElement('div');
+			footer.className = 'be-settings-footer';
+			const version = document.createElement('div');
+			version.textContent = `Booru Enhancer Extended · v${BE.VERSION}`;
+			const credit = document.createElement('div');
+			credit.appendChild(document.createTextNode('Extended by ChadChan3D · '));
+			const site = document.createElement('a');
+			site.href = 'https://chadchan3d.com/category/assets/';
+			site.target = '_blank';
+			site.rel = 'noopener';
+			site.textContent = 'chadchan3d.com/assets/';
+			credit.appendChild(site);
+			footer.appendChild(version);
+			footer.appendChild(credit);
+			panel.appendChild(footer);
 
 			document.body.appendChild(panel);
 		}
-
 		function invalidateCurrentPost() { currentPostCache = null; }
 
 		return {
