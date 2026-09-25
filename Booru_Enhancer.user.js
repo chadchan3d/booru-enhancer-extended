@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Booru Enhancer Extended
 // @namespace    https://github.com/chadchan3d/booru-enhancer-extended
-// @version      1.2.7.1
+// @version      1.2.7.2
 // @description  Unofficial extended fork of Booru Enhancer with Rule34.xxx and e621/e926 compatibility fixes and hover/gallery improvements.
 // @author       itachi-re
 // @contributor  ChadChan3D
@@ -66,10 +66,15 @@
 
 /**
  * =============================================================================
- *  BOORU ENHANCER EXTENDED  —  v1.2.7.1
+ *  BOORU ENHANCER EXTENDED  —  v1.2.7.2
  * =============================================================================
- *  EXTENDED FORK CHANGELOG — v1.2.7.1
+ *  EXTENDED FORK CHANGELOG — v1.2.7.2
  *  ------------------------------------------------------------------------
+ *  - Fullscreen viewer now opens cached/full media when available, upgrades
+ *    placeholders to original media, and rebuilds IMG/VIDEO elements when
+ *    metadata reveals a different media type.
+ *  - Viewer fit modes now calculate real stage-relative scale; Fit restores
+ *    configured fit behavior and 1:1 means native pixel size.
  *  - Rule34.xxx gallery container/layout fixes.
  *  - e621/e926 current-thumbnail markup compatibility.
  *  - Independent thumbnail sizing with viewport-safe fixed-column clamping.
@@ -151,7 +156,7 @@
 	window.__BOORU_ENHANCER_LOADED__ = true;
 
 	const BE = (window.BE = window.BE || {});
-	BE.VERSION = '1.2.7.1';
+	BE.VERSION = '1.2.7.2';
 
 	/* ============================================================ *
 	 *  EVENT BUS
@@ -1788,6 +1793,8 @@
 		let onNext = null;
 		let onPrev = null;
 
+		// zoom is an absolute scale relative to the media's native pixels.
+		// Fit modes calculate an appropriate starting scale; 1:1 is exactly 1.
 		let zoom = 1;
 		let rotation = 0;
 		let flipH = false;
@@ -1796,17 +1803,19 @@
 		let panY = 0;
 		let dragging = false;
 		let dragStart = { x: 0, y: 0 };
+		let manualZoom = false;
+		let mediaGeneration = 0;
 
 		function init() {
 			overlay = BE.dom.create('div', { id: 'be-viewer-overlay' });
 			overlay.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,0.92);z-index:999998;display:none;align-items:center;justify-content:center;flex-direction:column;user-select:none;';
 
 			stage = BE.dom.create('div', { class: 'be-viewer-stage' });
-			stage.style.cssText = 'position:relative;width:100%;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+			stage.style.cssText = 'position:relative;width:100%;min-height:0;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;box-sizing:border-box;';
 			overlay.appendChild(stage);
 
 			const bar = BE.dom.create('div', { class: 'be-viewer-toolbar' });
-			bar.style.cssText = 'display:flex;gap:6px;padding:8px;background:rgba(0,0,0,0.6);flex-wrap:wrap;justify-content:center;';
+			bar.style.cssText = 'display:flex;gap:6px;padding:8px;background:rgba(0,0,0,0.6);flex-wrap:wrap;justify-content:center;flex:0 0 auto;';
 			const mkBtn = (label, title, fn) => {
 				const b = document.createElement('button');
 				b.textContent = label;
@@ -1820,9 +1829,9 @@
 			mkBtn('◀', 'Previous (←)', () => onPrev && onPrev());
 			mkBtn('▶', 'Next (→)', () => onNext && onNext());
 			mkBtn('−', 'Zoom out', () => applyZoom(-0.25));
-			mkBtn('Fit', 'Reset zoom/pan', resetTransform);
+			mkBtn('Fit', 'Fit using the configured viewer mode', resetTransform);
 			mkBtn('+', 'Zoom in', () => applyZoom(0.25));
-			mkBtn('1:1', 'Original size', () => setZoomAbs(1));
+			mkBtn('1:1', 'Original pixel size', () => setZoomAbs(1, true));
 			mkBtn('⟲', 'Rotate left', () => { rotation -= 90; render(); });
 			mkBtn('⟳', 'Rotate right', () => { rotation += 90; render(); });
 			mkBtn('⇋', 'Flip horizontal', () => { flipH = !flipH; render(); });
@@ -1834,7 +1843,7 @@
 			overlay.appendChild(bar);
 
 			statusEl = BE.dom.create('div', { class: 'be-viewer-status' });
-			statusEl.style.cssText = 'position:absolute;top:8px;left:12px;color:#fff;font:12px/1.4 sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.8);';
+			statusEl.style.cssText = 'position:absolute;top:8px;left:12px;color:#fff;font:12px/1.4 sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:2;';
 			overlay.appendChild(statusEl);
 
 			overlay.addEventListener('click', (e) => { if (e.target === overlay || e.target === stage) close(); });
@@ -1843,6 +1852,10 @@
 				e.preventDefault();
 				applyZoom(e.deltaY < 0 ? 0.15 : -0.15);
 			}, { passive: false });
+
+			window.addEventListener('resize', BE.dom.debounce(() => {
+				if (isOpen() && mediaEl && !manualZoom) applyConfiguredFit();
+			}, 100));
 
 			document.addEventListener('keydown', onKeydown);
 			document.body.appendChild(overlay);
@@ -1857,12 +1870,12 @@
 			if (!overlay || overlay.style.display !== 'flex') return;
 			const keys = {
 				[BE.settings.get('keys.close') || 'Escape']: close,
-						 [BE.settings.get('keys.next') || 'ArrowRight']: () => onNext && onNext(),
-						 [BE.settings.get('keys.prev') || 'ArrowLeft']: () => onPrev && onPrev(),
-						 [BE.settings.get('keys.download') || 'd']: () => currentPost && BE.modules.downloader.downloadPost(currentPost),
-						 [BE.settings.get('keys.favorite') || 'f']: () => currentPost && BE.modules.favorites.toggle(currentPost),
-						 [BE.settings.get('keys.openOriginal') || 'o']: () => currentPost && openOriginalInNewTab(currentPost),
-						 [BE.settings.get('keys.playPause') || ' ']: () => togglePlayPause(),
+				[BE.settings.get('keys.next') || 'ArrowRight']: () => onNext && onNext(),
+				[BE.settings.get('keys.prev') || 'ArrowLeft']: () => onPrev && onPrev(),
+				[BE.settings.get('keys.download') || 'd']: () => currentPost && BE.modules.downloader.downloadPost(currentPost),
+				[BE.settings.get('keys.favorite') || 'f']: () => currentPost && BE.modules.favorites.toggle(currentPost),
+				[BE.settings.get('keys.openOriginal') || 'o']: () => currentPost && openOriginalInNewTab(currentPost),
+				[BE.settings.get('keys.playPause') || ' ']: () => togglePlayPause(),
 			};
 			const fn = keys[e.key];
 			if (fn) { e.preventDefault(); fn(); }
@@ -1870,33 +1883,96 @@
 
 		function togglePlayPause() {
 			if (mediaEl && mediaEl.tagName === 'VIDEO') {
-				mediaEl.paused ? mediaEl.play() : mediaEl.pause();
+				mediaEl.paused ? mediaEl.play().catch(() => {}) : mediaEl.pause();
 			}
 		}
 
-		function resetTransform() {
-			zoom = 1; rotation = 0; flipH = false; flipV = false; panX = 0; panY = 0;
+		function inferMediaType(post) {
+			if (post?.mediaType && post.mediaType !== 'unknown') return post.mediaType;
+			const guessed = guessMediaType(post?.originalUrl || post?.sampleUrl || post?.previewUrl || '');
+			return guessed === 'video' ? 'video' : (guessed === 'gif' ? 'gif' : 'image');
+		}
+
+		function bestMediaUrl(post) {
+			// A fullscreen viewer should favor the best available media, not
+			// the grid thumbnail. The fallback order is intentional.
+			return post?.originalUrl || post?.sampleUrl || post?.previewUrl || '';
+		}
+
+		function intrinsicSize(el = mediaEl) {
+			if (!el) return { width: 0, height: 0 };
+			if (el.tagName === 'VIDEO') {
+				return { width: el.videoWidth || currentPost?.width || 0, height: el.videoHeight || currentPost?.height || 0 };
+			}
+			return { width: el.naturalWidth || currentPost?.width || 0, height: el.naturalHeight || currentPost?.height || 0 };
+		}
+
+		function configuredFitScale() {
+			if (!stage || !mediaEl) return 1;
+
+			const { width, height } = intrinsicSize();
+			if (!(width > 0) || !(height > 0)) return 1;
+
+			const rect = stage.getBoundingClientRect();
+			const availableWidth = Math.max(1, rect.width - 24);
+			const availableHeight = Math.max(1, rect.height - 24);
+			const widthScale = availableWidth / width;
+			const heightScale = availableHeight / height;
+			const mode = BE.settings.get('viewer.fitMode') || 'fit-both';
+
+			if (mode === 'original-size') return 1;
+			if (mode === 'fit-width') return Math.max(0.01, widthScale);
+			if (mode === 'fit-height') return Math.max(0.01, heightScale);
+			return Math.max(0.01, Math.min(widthScale, heightScale));
+		}
+
+		function applyConfiguredFit() {
+			manualZoom = false;
+			zoom = configuredFitScale();
+			panX = 0;
+			panY = 0;
 			render();
 		}
 
-		function applyZoom(delta) {
-			setZoomAbs(Math.min(8, Math.max(0.1, zoom + delta)));
+		function resetTransform() {
+			rotation = 0;
+			flipH = false;
+			flipV = false;
+			panX = 0;
+			panY = 0;
+			applyConfiguredFit();
 		}
 
-		function setZoomAbs(z) {
+		function applyZoom(delta) {
+			setZoomAbs(Math.min(8, Math.max(0.05, zoom + delta)), true);
+		}
+
+		function setZoomAbs(z, manual = true) {
 			zoom = z;
+			if (manual) manualZoom = true;
 			render();
 		}
 
 		function render() {
 			if (!mediaEl) return;
 			mediaEl.style.transform =
-			`translate(${panX}px, ${panY}px) scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`;
+				`translate(${panX}px, ${panY}px) scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`;
+		}
+
+		function canPan() {
+			if (!stage || !mediaEl) return false;
+			const { width, height } = intrinsicSize();
+			if (!(width > 0) || !(height > 0)) return false;
+			const quarterTurns = Math.abs(Math.round(rotation / 90)) % 2;
+			const renderedWidth = (quarterTurns ? height : width) * zoom;
+			const renderedHeight = (quarterTurns ? width : height) * zoom;
+			const rect = stage.getBoundingClientRect();
+			return renderedWidth > rect.width || renderedHeight > rect.height;
 		}
 
 		function setupDrag(el) {
 			el.addEventListener('pointerdown', (e) => {
-				if (zoom <= 1) return;
+				if (!canPan()) return;
 				dragging = true;
 				dragStart = { x: e.clientX - panX, y: e.clientY - panY };
 				el.setPointerCapture(e.pointerId);
@@ -1911,27 +1987,78 @@
 			el.addEventListener('pointercancel', () => { dragging = false; });
 		}
 
+		function stopMedia(el) {
+			if (el?.tagName === 'VIDEO') {
+				try { el.pause(); } catch { /* noop */ }
+				try { el.removeAttribute('src'); el.load(); } catch { /* noop */ }
+			}
+		}
+
+		function onMediaReady(el, generation) {
+			if (el !== mediaEl || generation !== mediaGeneration) return;
+			if (!manualZoom) applyConfiguredFit();
+			else render();
+		}
+
 		function buildMedia(post) {
-			const isVideo = post.mediaType === 'video';
+			const type = inferMediaType(post);
+			const isVideo = type === 'video';
 			const el = document.createElement(isVideo ? 'video' : 'img');
-			el.style.cssText = 'max-width:90vw;max-height:75vh;object-fit:contain;cursor:grab;touch-action:none;';
+			const generation = ++mediaGeneration;
+
+			el.style.cssText = 'display:block;width:auto;height:auto;max-width:none;max-height:none;object-fit:contain;cursor:grab;touch-action:none;transform-origin:center center;will-change:transform;';
+			el.dataset.beMediaType = isVideo ? 'video' : 'image';
+
+			const url = bestMediaUrl(post);
+
 			if (isVideo) {
-				el.src = post.sampleUrl || post.previewUrl || post.originalUrl;
-				el.autoplay = BE.settings.get('viewer.autoplayVideo');
-				el.loop = BE.settings.get('viewer.loopVideo');
-				el.muted = BE.settings.get('viewer.muteVideo');
+				el.autoplay = !!BE.settings.get('viewer.autoplayVideo');
+				el.loop = !!BE.settings.get('viewer.loopVideo');
+				el.muted = !!BE.settings.get('viewer.muteVideo');
+				el.defaultMuted = !!BE.settings.get('viewer.muteVideo');
 				el.controls = true;
+				el.playsInline = true;
+				el.preload = 'auto';
+				if (post.previewUrl && guessMediaType(post.previewUrl) !== 'video') el.poster = post.previewUrl;
+
 				if (BE.settings.get('viewer.rememberVolume')) {
 					const vol = BE.store.get('viewer:volume', 1);
 					el.volume = vol;
 					el.addEventListener('volumechange', () => BE.store.set('viewer:volume', el.volume));
 				}
+				el.addEventListener('loadedmetadata', () => onMediaReady(el, generation));
 			} else {
-				el.src = post.sampleUrl || post.previewUrl || post.originalUrl;
 				el.decoding = 'async';
+				el.fetchPriority = 'high';
+				el.addEventListener('load', () => onMediaReady(el, generation));
 			}
+
 			setupDrag(el);
+			if (url) el.src = url;
 			return el;
+		}
+
+		function replaceMedia(post, { preserveManualZoom = false } = {}) {
+			const old = mediaEl;
+			if (!preserveManualZoom) manualZoom = false;
+			dragging = false;
+
+			stopMedia(old);
+			stage.innerHTML = '';
+			mediaEl = buildMedia(post);
+			stage.appendChild(mediaEl);
+
+			// If the media is already cached/ready, its load event may have
+			// happened before insertion; fit again on the next frame.
+			requestAnimationFrame(() => {
+				if (!manualZoom) applyConfiguredFit();
+				else render();
+			});
+		}
+
+		function updateStatus(post) {
+			if (!statusEl) return;
+			statusEl.textContent = `#${post.id || '?'}${post.width && post.height ? ` · ${post.width}×${post.height}` : ''}`;
 		}
 
 		function open(post, navigation = {}) {
@@ -1939,32 +2066,70 @@
 			currentPost = post;
 			onNext = navigation.next || null;
 			onPrev = navigation.prev || null;
-			resetTransform();
 
-			stage.innerHTML = '';
-			mediaEl = buildMedia(post);
-			stage.appendChild(mediaEl);
-			statusEl.textContent = `#${post.id || '?'}${post.width && post.height ? ` · ${post.width}×${post.height}` : ''}`;
+			rotation = 0;
+			flipH = false;
+			flipV = false;
+			panX = 0;
+			panY = 0;
+			zoom = 1;
+			manualZoom = false;
 
 			overlay.style.display = 'flex';
+			replaceMedia(post);
+			updateStatus(post);
 			BE.bus.emit('viewer:open', post);
 		}
 
 		function updatePost(post) {
-			if (!currentPost || currentPost.id !== post.id) return;
+			if (!currentPost || String(currentPost.id) !== String(post.id)) return;
+
+			const previousType = inferMediaType(currentPost);
+			const nextType = inferMediaType(post);
+			const previousUrl = bestMediaUrl(currentPost);
+			const nextUrl = bestMediaUrl(post);
+
 			currentPost = post;
-			if (mediaEl && post.originalUrl && mediaEl.src !== post.originalUrl) {
-				mediaEl.src = post.originalUrl;
+			updateStatus(post);
+
+			if (!mediaEl) {
+				replaceMedia(post);
+				return;
 			}
-			statusEl.textContent = `#${post.id || '?'}${post.width && post.height ? ` · ${post.width}×${post.height}` : ''}`;
+
+			// Critical: metadata can reveal that the thumbnail placeholder was
+			// actually a video. An <img> cannot be "updated" into a <video> by
+			// assigning a .webm URL; rebuild the element when media type changes.
+			const currentElementType = mediaEl.tagName === 'VIDEO' ? 'video' : 'image';
+			const wantedElementType = nextType === 'video' ? 'video' : 'image';
+			if (currentElementType !== wantedElementType || previousType !== nextType) {
+				replaceMedia(post);
+				return;
+			}
+
+			if (nextUrl && nextUrl !== previousUrl && mediaEl.src !== nextUrl) {
+				if (mediaEl.tagName === 'VIDEO') {
+					if (post.previewUrl && guessMediaType(post.previewUrl) !== 'video') mediaEl.poster = post.previewUrl;
+					mediaEl.src = nextUrl;
+					try { mediaEl.load(); } catch { /* noop */ }
+					if (BE.settings.get('viewer.autoplayVideo')) mediaEl.play().catch(() => {});
+				} else {
+					mediaEl.src = nextUrl;
+				}
+			} else if (!manualZoom) {
+				applyConfiguredFit();
+			}
 		}
 
 		function close() {
 			if (overlay) overlay.style.display = 'none';
-			if (mediaEl && mediaEl.tagName === 'VIDEO') { try { mediaEl.pause(); } catch { /* noop */ } }
+			stopMedia(mediaEl);
+			mediaEl = null;
+			if (stage) stage.innerHTML = '';
 			currentPost = null;
 			onNext = null;
 			onPrev = null;
+			dragging = false;
 		}
 
 		function isOpen() { return !!overlay && overlay.style.display === 'flex'; }
@@ -2166,13 +2331,30 @@
 			const postId = img.dataset.bePostId || BE.adapters.active.getThumbPostId(img);
 			if (!postId) return;
 
-			const previewUrl = img.src || img.dataset.src;
+			const previewUrl =
+				img.dataset.bePreviewUrl ||
+				thumb?.dataset?.previewUrl ||
+				img.currentSrc ||
+				img.src ||
+				img.dataset.src ||
+				'';
+			const sampleUrl =
+				img.dataset.beSampleUrl ||
+				thumb?.dataset?.sampleUrl ||
+				previewUrl;
+			const originalUrl =
+				img.dataset.beOriginalUrl ||
+				thumb?.dataset?.fileUrl ||
+				'';
 			const postUrl = thumb.closest('a')?.href || img.closest('a')?.href || location.href;
 
-			const minimalPost = emptyPost({
+			const cachedPost = getCachedPost(postId);
+			const initialPost = cachedPost || emptyPost({
 				id: postId,
+				originalUrl,
+				sampleUrl,
 				previewUrl,
-				sampleUrl: previewUrl,
+				mediaType: guessMediaType(originalUrl || sampleUrl || previewUrl),
 				postUrl,
 			});
 
@@ -2186,14 +2368,16 @@
 				if (nextImg) openViewerForThumb(nextImg, nextImg.closest('.be-thumb-wrap') || nextImg);
 			};
 
-				BE.modules.viewer.open(minimalPost, {
-					next: () => navigateBy(1),
-									   prev: () => navigateBy(-1),
-				});
+			BE.modules.viewer.open(initialPost, {
+				next: () => navigateBy(1),
+				prev: () => navigateBy(-1),
+			});
 
+			if (!cachedPost) {
 				enrichSinglePost(postId).then((fullPost) => {
 					if (fullPost) BE.modules.viewer.updatePost(fullPost);
 				}).catch((err) => BE.log.error('enrichment failed', err));
+			}
 		}
 
 		function buildThumbActions(wrap, img) {
