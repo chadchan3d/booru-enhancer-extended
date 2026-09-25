@@ -2182,7 +2182,11 @@
 					el.volume = vol;
 					el.addEventListener('volumechange', () => BE.store.set('viewer:volume', el.volume));
 				}
-				el.addEventListener('loadedmetadata', () => onMediaReady(el, generation));
+				el.addEventListener('loadedmetadata', () => {
+					if (el !== mediaEl || generation !== mediaGeneration) return;
+					if (!manualZoom) applyConfiguredFit();
+					else render();
+				});
 				el.addEventListener('loadeddata', () => onMediaReady(el, generation));
 				el.addEventListener('canplay', () => {
 					if (el === mediaEl && generation === mediaGeneration) clearMediaState();
@@ -3658,13 +3662,20 @@
 				if (!json) return;
 				const ok = BE.settings.importJSON(json);
 				BE.modules.toast.show(ok ? 'Settings imported' : 'Import failed — invalid JSON', ok ? 'success' : 'error');
-				if (ok) { panel.remove(); createSettingsPanel(); }
+				if (ok) {
+					document.documentElement.dataset.beUiTheme = BE.settings.get('general.theme') || 'dark';
+					document.documentElement.style.setProperty('--be-accent', BE.settings.get('general.accentColor') || '#ff8ac6');
+					if (toolbarRoot) toolbarRoot.className = `be-pos-${BE.settings.get('general.toolbarPosition') || 'bottom-right'}`;
+					panel.remove();
+					createSettingsPanel();
+				}
 			});
 			mkTop('Reset', () => {
 				if (!confirm('Reset all Booru Enhancer settings to defaults?')) return;
 				BE.settings.resetAll();
 				document.documentElement.dataset.beUiTheme = BE.settings.get('general.theme') || 'dark';
 				document.documentElement.style.setProperty('--be-accent', BE.settings.get('general.accentColor') || '#ff8ac6');
+				if (toolbarRoot) toolbarRoot.className = `be-pos-${BE.settings.get('general.toolbarPosition') || 'bottom-right'}`;
 				panel.remove();
 				createSettingsPanel();
 				BE.modules.toast.show('Settings reset to defaults', 'success');
