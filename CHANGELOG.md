@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.7.3 — Rule34 loading and settings UX
+
+- Defer Rule34.xxx gallery metadata enrichment until hover/click instead of batch-fetching the full gallery at startup.
+- Deduplicate in-flight per-post metadata requests so hover and click share the same work.
+- Add delayed **Loading video…**, **Buffering…**, and failure states to hover and fullscreen video playback.
+- Keep the existing thumbnail/poster visible while slow media resolves.
+- Remove settings with no runtime behavior: original-media mode, never-upscale, Tags, Filters, Toggle viewer, and Command palette.
+- Reduce **Open original in** to the two behaviors currently implemented: New tab and Popup window.
+- Keep **Grid thumbnail quality** and present select choices with user-facing labels.
+- Make settings sections collapsible, show slider values with units, and make the settings theme/accent/toolbar position update live.
+- Add the settings footer: **Extended by ChadChan3D · chadchan3d.com/assets/**, linked directly to the canonical assets URL.
+
 ## 1.2.7.2 — Fullscreen viewer correction
 
 - Open the viewer from cached/full metadata immediately when available.
