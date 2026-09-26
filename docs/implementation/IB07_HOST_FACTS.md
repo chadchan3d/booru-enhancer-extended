@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `207d79063e283f9918e4fc86225f9cedf45f4211`  
+**Production source blob:** `dc55026e11a14bd264b024d9727bb167c3873c1a`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -213,3 +213,20 @@ Production behavior now:
 - favorite/action behavior remains unavailable pending evidence.
 
 This admission is based on direct e926 observation, not inheritance from e621.
+
+
+## e926 native image-post integration
+
+Passive V1-N on `/posts/6736232` independently established the e926 native image-post contract.
+
+Commit:
+
+- `b9ebaf39ec0703fe7316285d8bb4e07d5deb243a`
+
+Production source blob:
+
+- `dc55026e11a14bd264b024d9727bb167c3873c1a`
+
+Production now admits the observed e926 image-post native parser using `#image-container[data-id]`, native tag rows and native source links with no endpoint request.
+
+e926 additionally exposed a contributor category and multiple source links. Contributor and species are retained only through `allTags` because the current Post model has no dedicated slots. The scalar `source` field retains the first native source link; IB07 does not expand the model to a source array.
