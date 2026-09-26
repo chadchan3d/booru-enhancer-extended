@@ -2299,14 +2299,20 @@
 			? 'video'
 			: (fileExt === 'gif' ? 'gif' : 'image');
 
-		let source = '';
+		const categorized = {
+			artist: [],
+			character: [],
+			copyright: [],
+			general: [],
+			meta: [],
+		};
 		if (postPage) {
-			const info = document.querySelector('#post-information');
-			if (info) {
-				const sourceContainer = [...info.querySelectorAll('li, dd, div, span, p')]
-					.find((el) => /^source\s*:/i.test((el.textContent || '').trim()));
-				const sourceLink = sourceContainer?.querySelector('a[href]');
-				if (sourceLink?.href) source = sourceLink.href;
+			for (const li of document.querySelectorAll('#tag-list li.tag-list-item[data-category][data-name]')) {
+				const category = String(li.dataset?.category || '');
+				if (!(category in categorized)) continue;
+				let name = String(li.dataset?.name || '');
+				try { name = decodeURIComponent(name); } catch { }
+				if (name) categorized[category].push(name);
 			}
 		}
 
@@ -2323,13 +2329,15 @@
 			rating: { s: 'safe', q: 'questionable', e: 'explicit' }[d.rating] || 'unknown',
 			score: Number(d.score || 0) || 0,
 			favCount: Number(d.favCount || 0) || 0,
-			artists: [],
-			characters: [],
-			copyrights: [],
-			generalTags: [],
-			metaTags: [],
+			artists: categorized.artist,
+			characters: categorized.character,
+			copyrights: categorized.copyright,
+			generalTags: categorized.general,
+			metaTags: categorized.meta,
 			allTags,
-			source,
+			// Source is visibly present on the observed page, but its exact
+			// element contract has not yet been captured. Unknown stays unknown.
+			source: '',
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: 'e621',
