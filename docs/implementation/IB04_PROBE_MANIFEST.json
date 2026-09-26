@@ -41,7 +41,7 @@
   ],
   "production_conformance_artifact": {
     "path": "tests/browser/ib04/IB04_Production_Conformance.user.js",
-    "git_blob": "5d4dff0c2943764e41babf07c9608e80917359ba",
+    "git_blob": "d282a13c745b5bfcfd95fddd9d516166c4881532",
     "derived_from_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
     "local_only_match": "http://127.0.0.1:8775/*",
     "public_connects_removed": true,
