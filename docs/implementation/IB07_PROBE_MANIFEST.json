@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_E621_IMAGE_POST_NATIVE_COMPLETE_E926_V1N_NEXT",
-  "production_source_blob": "7cff91aba24b3cb5cb96e4c23015ffad1d68ace2",
+  "status": "ACTIVE_E926_LISTING_NATIVE_INTEGRATED_POST_V1N_NEXT",
+  "production_source_blob": "207d79063e283f9918e4fc86225f9cedf45f4211",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -191,5 +191,20 @@
     "category_mapping_commit": "c065308a0780d71d48b33dd5efad925190852fdf",
     "source_parser": "EXACT_NATIVE_SELECTOR",
     "source_mapping_commit": "8d3927e72b9b51ebd9b9b1b495e11a5c1cc938e3"
+  },
+  "e926_native_listing_integration": {
+    "commit": "5df9891e1f9e051aef0f9dc46f4f526541c6c021",
+    "source_blob": "207d79063e283f9918e4fc86225f9cedf45f4211",
+    "context": "e926.net /posts listing",
+    "remote_resolver": false,
+    "native_preview_sample_original": true,
+    "native_original_dimensions": true,
+    "native_original_bytes": true,
+    "native_md5": true,
+    "pending_flag_observed": true,
+    "post_page_inherited_from_e621": false,
+    "synthetic_pagination": false,
+    "favorite_action": false,
+    "live_production_conformance": "OPEN_NOT_RUN"
   }
 }
