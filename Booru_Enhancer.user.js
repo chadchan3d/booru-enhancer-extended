@@ -691,8 +691,12 @@
 	BE.store = (() => {
 		const NS = 'be:';
 		const cache = new Map();
+		const rawCache = new Map();
+		const parseErrors = new Map();
 		let ready = false;
-		const readyCallbacks = [];
+		let initResult = { ok: false, error: null };
+		let resolveReady;
+		const readyPromise = new Promise((resolve) => { resolveReady = resolve; });
 
 		function safeParse(raw) {
 			if (raw === undefined || raw === null) return { ok: false };
@@ -701,36 +705,126 @@
 			catch { return { ok: false }; }
 		}
 
+		function indexRaw(key, raw) {
+			rawCache.set(key, raw);
+			const parsed = safeParse(raw);
+			if (parsed.ok) {
+				cache.set(key, parsed.value);
+				parseErrors.delete(key);
+			} else {
+				cache.delete(key);
+				parseErrors.set(key, raw);
+			}
+		}
+
 		async function init() {
+			let firstError = null;
 			try {
 				const keys = await _GM.listValues();
-				await Promise.all((keys || []).filter((k) => typeof k === 'string' && k.startsWith(NS)).map(async (k) => {
-					let raw;
-					try { raw = await _GM.getValue(k); } catch (err) { BE.log.error('store.get failed for', k, err); return; }
-					const parsed = safeParse(raw);
-					if (parsed.ok) cache.set(k.slice(NS.length), parsed.value);
-				}));
-			} catch (err) { BE.log.error('store init failed', err); }
+				for (const fullKey of (keys || []).filter((k) => typeof k === 'string' && k.startsWith(NS))) {
+					try {
+						const raw = await _GM.getValue(fullKey);
+						indexRaw(fullKey.slice(NS.length), raw);
+					} catch (err) {
+						firstError ||= err;
+						BE.log.error('store.get failed for', fullKey, err);
+					}
+				}
+			} catch (err) {
+				firstError ||= err;
+				BE.log.error('store init failed', err);
+			}
 			ready = true;
-			readyCallbacks.splice(0).forEach((cb) => cb());
+			initResult = { ok: !firstError, error: firstError };
+			resolveReady(initResult);
+		}
+
+		async function setPersisted(key, value) {
+			const raw = JSON.stringify(value);
+			await _GM.setValue(NS + key, raw);
+			indexRaw(key, raw);
+			return true;
+		}
+
+		async function setRawPersisted(key, raw) {
+			await _GM.setValue(NS + key, raw);
+			indexRaw(key, raw);
+			return true;
+		}
+
+		async function deletePersisted(key) {
+			await _GM.deleteValue(NS + key);
+			cache.delete(key);
+			rawCache.delete(key);
+			parseErrors.delete(key);
+			return true;
+		}
+
+		async function restoreRaw(snapshot) {
+			const wanted = new Set(Object.keys(snapshot || {}));
+			for (const [key, raw] of Object.entries(snapshot || {})) {
+				await setRawPersisted(key, raw);
+			}
+			for (const key of [...rawCache.keys()]) {
+				if (!wanted.has(key)) await deletePersisted(key);
+			}
+			return true;
 		}
 
 		return {
-			whenReady(cb) { ready ? cb() : readyCallbacks.push(cb); },
-				get isReady() { return ready; },
-				get(key, fallback) { return cache.has(key) ? cache.get(key) : fallback; },
-				set(key, value) {
-					cache.set(key, value);
-					Promise.resolve(_GM.setValue(NS + key, JSON.stringify(value))).catch((e) => {
-						BE.log.error('store.set failed to persist', key, e);
-					});
-				},
-				delete(key) {
-					cache.delete(key);
-					Promise.resolve(_GM.deleteValue(NS + key)).catch(() => {});
-				},
-				keys(prefix = '') { return [...cache.keys()].filter((k) => k.startsWith(prefix)); },
-				_init: init,
+			whenReady(cb) { ready ? cb(initResult) : readyPromise.then(cb); },
+			ready() { return readyPromise; },
+			get isReady() { return ready; },
+			get initResult() { return initResult; },
+			get(key, fallback) { return cache.has(key) ? cache.get(key) : fallback; },
+			getRaw(key) { return rawCache.has(key) ? rawCache.get(key) : undefined; },
+			hasRaw(key) { return rawCache.has(key); },
+			hasParseError(key) { return parseErrors.has(key); },
+			keys(prefix = '') { return [...cache.keys()].filter((k) => k.startsWith(prefix)); },
+			rawKeys(prefix = '') { return [...rawCache.keys()].filter((k) => k.startsWith(prefix)); },
+			snapshotRaw() { return Object.fromEntries([...rawCache.entries()]); },
+			setPersisted,
+			setRawPersisted,
+			deletePersisted,
+			restoreRaw,
+			set(key, value) {
+				const hadCache = cache.has(key);
+				const previousValue = cache.get(key);
+				const hadRaw = rawCache.has(key);
+				const previousRaw = rawCache.get(key);
+				const hadParseError = parseErrors.has(key);
+				const previousParseError = parseErrors.get(key);
+				const raw = JSON.stringify(value);
+				cache.set(key, value);
+				rawCache.set(key, raw);
+				parseErrors.delete(key);
+				return Promise.resolve(_GM.setValue(NS + key, raw)).then(() => true).catch((e) => {
+					if (hadCache) cache.set(key, previousValue); else cache.delete(key);
+					if (hadRaw) rawCache.set(key, previousRaw); else rawCache.delete(key);
+					if (hadParseError) parseErrors.set(key, previousParseError); else parseErrors.delete(key);
+					BE.log.error('store.set failed to persist', key, e);
+					return false;
+				});
+			},
+			delete(key) {
+				const hadCache = cache.has(key);
+				const previousValue = cache.get(key);
+				const hadRaw = rawCache.has(key);
+				const previousRaw = rawCache.get(key);
+				const hadParseError = parseErrors.has(key);
+				const previousParseError = parseErrors.get(key);
+				cache.delete(key);
+				rawCache.delete(key);
+				parseErrors.delete(key);
+				return Promise.resolve(_GM.deleteValue(NS + key)).then(() => true).catch((e) => {
+					if (hadCache) cache.set(key, previousValue);
+					if (hadRaw) rawCache.set(key, previousRaw);
+					if (hadParseError) parseErrors.set(key, previousParseError);
+					BE.log.error('store.delete failed to persist', key, e);
+					return false;
+				});
+			},
+			_init: init,
 		};
 	})();
 	BE.store._init();
@@ -739,6 +833,10 @@
 	 *  SETTINGS SCHEMA
 	 * ============================================================ */
 	BE.settings = (() => {
+		const SETTINGS_SCHEMA_VERSION = 1;
+		const SCHEMA_VERSION_KEY = 'settings:schemaVersion';
+		const RECOVERY_KEY = 'settings:recoverySnapshot';
+		const KNOWN_NONSETTING_KEYS = new Set(['viewer:volume']);
 		const SCHEMA = {
 			'general.enabled': {
 				cat: 'General', type: 'bool', def: true,
@@ -840,72 +938,323 @@
 			},
 
 			'debug.verboseLogging': { cat: 'Debug', type: 'bool', def: false, label: 'Verbose console logging' },
-		};
+		};;
 
 		const values = new Map();
+		const invalidKnown = new Map();
 		let loaded = false;
+		let migrationInfo = null;
 
 		function keyDefault(key) { return SCHEMA[key]?.def; }
 
-		function load() {
-			for (const key of Object.keys(SCHEMA)) {
-				const def = SCHEMA[key];
-				const stored = BE.store.get('setting:' + key);
-				let value = stored !== undefined ? stored : keyDefault(key);
-				if (def.type === 'select' && Array.isArray(def.choices) && !def.choices.includes(value)) {
-					value = def.def;
+		function validateValue(def, value) {
+			if (!def) return { ok: false, reason: 'unknown-setting' };
+			if (def.type === 'bool') return typeof value === 'boolean' ? { ok: true, value } : { ok: false, reason: 'expected-boolean' };
+			if (def.type === 'number' || def.type === 'range') {
+				if (typeof value !== 'number' || !Number.isFinite(value)) return { ok: false, reason: 'expected-finite-number' };
+				if (def.min !== undefined && value < def.min) return { ok: false, reason: 'below-min' };
+				if (def.max !== undefined && value > def.max) return { ok: false, reason: 'above-max' };
+				return { ok: true, value };
+			}
+			if (def.type === 'select') {
+				return Array.isArray(def.choices) && def.choices.includes(value)
+					? { ok: true, value }
+					: { ok: false, reason: 'invalid-choice' };
+			}
+			if (def.type === 'text') return typeof value === 'string' ? { ok: true, value } : { ok: false, reason: 'expected-string' };
+			if (def.type === 'color') {
+				return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+					? { ok: true, value }
+					: { ok: false, reason: 'invalid-color' };
+			}
+			return { ok: false, reason: 'unsupported-schema-type' };
+		}
+
+		function decodeSettingRaw(raw, def) {
+			if (typeof raw !== 'string') return { ok: true, value: raw, encoding: 'typed' };
+			try { return { ok: true, value: JSON.parse(raw), encoding: 'json-string' }; }
+			catch {
+				if (def && (def.type === 'text' || def.type === 'select' || def.type === 'color')) {
+					return { ok: true, value: raw, encoding: 'typed-string' };
 				}
-				values.set(key, value);
+				return { ok: false, raw, reason: 'malformed-storage-value' };
+			}
+		}
+
+		function decodeMarker(raw) {
+			if (raw === undefined) return { ok: true, value: 0 };
+			if (typeof raw === 'number') return Number.isInteger(raw) && raw >= 0 ? { ok: true, value: raw } : { ok: false };
+			if (typeof raw === 'string') {
+				try {
+					const value = JSON.parse(raw);
+					return Number.isInteger(value) && value >= 0 ? { ok: true, value } : { ok: false };
+				} catch { return { ok: false }; }
+			}
+			return { ok: false };
+		}
+
+		function loadResolved() {
+			values.clear();
+			invalidKnown.clear();
+			for (const [key, def] of Object.entries(SCHEMA)) {
+				const storeKey = 'setting:' + key;
+				if (!BE.store.hasRaw(storeKey)) {
+					values.set(key, keyDefault(key));
+					continue;
+				}
+				const raw = BE.store.getRaw(storeKey);
+				const decoded = decodeSettingRaw(raw, def);
+				if (!decoded.ok) {
+					values.set(key, keyDefault(key));
+					invalidKnown.set(key, { raw, reason: decoded.reason });
+					continue;
+				}
+				const checked = validateValue(def, decoded.value);
+				if (!checked.ok) {
+					values.set(key, keyDefault(key));
+					invalidKnown.set(key, { raw, decoded: decoded.value, reason: checked.reason });
+					continue;
+				}
+				values.set(key, checked.value);
 			}
 			loaded = true;
 		}
 
+		function provenance() {
+			const meaningful = BE.store.rawKeys().filter((key) => key !== SCHEMA_VERSION_KEY && key !== RECOVERY_KEY);
+			return meaningful.length ? 'LEGACY_OR_EXISTING' : 'AMBIGUOUS_EMPTY';
+		}
+
+		async function migrate() {
+			const marker = decodeMarker(BE.store.getRaw(SCHEMA_VERSION_KEY));
+			if (!marker.ok) {
+				migrationInfo = { ok: false, error: 'INVALID_SCHEMA_MARKER', canMount: false };
+				return migrationInfo;
+			}
+			if (marker.value > SETTINGS_SCHEMA_VERSION) {
+				migrationInfo = {
+					ok: false,
+					error: 'UNSUPPORTED_NEWER_SCHEMA',
+					canMount: false,
+					storedSchemaVersion: marker.value,
+				};
+				return migrationInfo;
+			}
+			if (marker.value < SETTINGS_SCHEMA_VERSION) {
+				try {
+					await BE.store.setPersisted(SCHEMA_VERSION_KEY, SETTINGS_SCHEMA_VERSION);
+				} catch (err) {
+					migrationInfo = { ok: false, error: 'SCHEMA_WRITE_FAILED', canMount: false, detail: String(err?.message || err) };
+					return migrationInfo;
+				}
+			}
+			loadResolved();
+			migrationInfo = {
+				ok: true,
+				canMount: true,
+				schemaVersion: SETTINGS_SCHEMA_VERSION,
+				provenance: provenance(),
+				invalidKeys: [...invalidKnown.keys()],
+			};
+			return migrationInfo;
+		}
+
+		async function initialize() {
+			const storeResult = await BE.store.ready();
+			if (!storeResult?.ok) {
+				migrationInfo = { ok: false, error: 'STORE_INIT_FAILED', canMount: false, detail: String(storeResult?.error?.message || storeResult?.error || '') };
+				return migrationInfo;
+			}
+			return migrate();
+		}
+
+		function collectExportState() {
+			const storedValues = {};
+			const absentKeys = [];
+			const invalidKnownRaw = {};
+			for (const [key, def] of Object.entries(SCHEMA)) {
+				const storeKey = 'setting:' + key;
+				if (!BE.store.hasRaw(storeKey)) {
+					absentKeys.push(key);
+					continue;
+				}
+				const raw = BE.store.getRaw(storeKey);
+				const decoded = decodeSettingRaw(raw, def);
+				const checked = decoded.ok ? validateValue(def, decoded.value) : { ok: false, reason: decoded.reason };
+				if (checked.ok) storedValues[key] = checked.value;
+				else invalidKnownRaw[key] = raw;
+			}
+			const unknownRaw = {};
+			for (const key of BE.store.rawKeys()) {
+				if (key === SCHEMA_VERSION_KEY || key === RECOVERY_KEY || KNOWN_NONSETTING_KEYS.has(key)) continue;
+				if (key.startsWith('setting:') && SCHEMA[key.slice('setting:'.length)]) continue;
+				unknownRaw[key] = BE.store.getRaw(key);
+			}
+			return { storedValues, absentKeys, invalidKnownRaw, unknownRaw };
+		}
+
+		function normalizeImport(parsed) {
+			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return { ok: false, reason: 'invalid-envelope' };
+
+			if (parsed.__booruEnhancerSettings === true && ('storedValues' in parsed || 'absentKeys' in parsed || 'unknownRaw' in parsed)) {
+				const schemaVersion = parsed.schemaVersion;
+				if (!Number.isInteger(schemaVersion) || schemaVersion < 0) return { ok: false, reason: 'invalid-schema-version' };
+				if (schemaVersion > SETTINGS_SCHEMA_VERSION) return { ok: false, reason: 'newer-schema' };
+				if (!parsed.storedValues || typeof parsed.storedValues !== 'object' || Array.isArray(parsed.storedValues)) return { ok: false, reason: 'invalid-stored-values' };
+				if (!Array.isArray(parsed.absentKeys)) return { ok: false, reason: 'invalid-absent-keys' };
+				const unknownRaw = parsed.unknownRaw === undefined ? {} : parsed.unknownRaw;
+				if (!unknownRaw || typeof unknownRaw !== 'object' || Array.isArray(unknownRaw)) return { ok: false, reason: 'invalid-unknown-raw' };
+				const invalidKnownRaw = parsed.recovery?.invalidKnownRaw === undefined ? {} : parsed.recovery.invalidKnownRaw;
+				if (!invalidKnownRaw || typeof invalidKnownRaw !== 'object' || Array.isArray(invalidKnownRaw)) return { ok: false, reason: 'invalid-recovery-map' };
+
+				const storedValues = {};
+				for (const [key, value] of Object.entries(parsed.storedValues)) {
+					const checked = validateValue(SCHEMA[key], value);
+					if (!checked.ok) return { ok: false, reason: 'invalid-known-value:' + key };
+					storedValues[key] = checked.value;
+				}
+				const absentKeys = new Set();
+				for (const key of parsed.absentKeys) {
+					if (!SCHEMA[key]) return { ok: false, reason: 'unknown-absent-key:' + key };
+					if (key in storedValues || key in invalidKnownRaw) return { ok: false, reason: 'conflicting-known-state:' + key };
+					absentKeys.add(key);
+				}
+				for (const key of Object.keys(invalidKnownRaw)) {
+					if (!SCHEMA[key]) return { ok: false, reason: 'invalid-recovery-key:' + key };
+					if (key in storedValues) return { ok: false, reason: 'conflicting-known-state:' + key };
+				}
+				for (const key of Object.keys(unknownRaw)) {
+					if (key === SCHEMA_VERSION_KEY || key === RECOVERY_KEY || KNOWN_NONSETTING_KEYS.has(key)) return { ok: false, reason: 'reserved-unknown-key:' + key };
+					if (key.startsWith('setting:') && SCHEMA[key.slice('setting:'.length)]) return { ok: false, reason: 'known-key-in-unknown-map:' + key };
+				}
+				for (const key of Object.keys(SCHEMA)) {
+					if (!(key in storedValues) && !absentKeys.has(key) && !(key in invalidKnownRaw)) {
+						return { ok: false, reason: 'incomplete-known-state:' + key };
+					}
+				}
+				return { ok: true, storedValues, absentKeys, invalidKnownRaw, unknownRaw };
+			}
+
+			const legacyValues = parsed.values && typeof parsed.values === 'object' && !Array.isArray(parsed.values)
+				? parsed.values
+				: parsed;
+			const storedValues = {};
+			const unknownRaw = {};
+			for (const [key, value] of Object.entries(legacyValues)) {
+				if (key === '__booruEnhancerSettings' || key === 'version' || key === 'productVersion' || key === 'schemaVersion') continue;
+				if (SCHEMA[key]) {
+					const checked = validateValue(SCHEMA[key], value);
+					if (!checked.ok) return { ok: false, reason: 'invalid-known-value:' + key };
+					storedValues[key] = checked.value;
+				} else {
+					unknownRaw['setting:' + key] = JSON.stringify(value);
+				}
+			}
+			return { ok: true, storedValues, absentKeys: new Set(), invalidKnownRaw: {}, unknownRaw, legacyPartial: true };
+		}
+
+		async function importJSON(json) {
+			let parsed;
+			try { parsed = JSON.parse(json); }
+			catch (err) {
+				BE.log.error('settings import failed', err);
+				return false;
+			}
+			const normalized = normalizeImport(parsed);
+			if (!normalized.ok) {
+				BE.log.warn('[Settings] import rejected:', normalized.reason);
+				return false;
+			}
+
+			const prior = BE.store.snapshotRaw();
+			try {
+				await BE.store.setPersisted(RECOVERY_KEY, {
+					schemaVersion: SETTINGS_SCHEMA_VERSION,
+					raw: prior,
+				});
+
+				for (const [key, value] of Object.entries(normalized.storedValues)) {
+					await BE.store.setPersisted('setting:' + key, value);
+				}
+				for (const [key, raw] of Object.entries(normalized.invalidKnownRaw)) {
+					await BE.store.setRawPersisted('setting:' + key, raw);
+				}
+				for (const key of normalized.absentKeys) {
+					if (BE.store.hasRaw('setting:' + key)) await BE.store.deletePersisted('setting:' + key);
+				}
+				for (const [key, raw] of Object.entries(normalized.unknownRaw)) {
+					await BE.store.setRawPersisted(key, raw);
+				}
+				await BE.store.setPersisted(SCHEMA_VERSION_KEY, SETTINGS_SCHEMA_VERSION);
+				await BE.store.deletePersisted(RECOVERY_KEY);
+				loadResolved();
+				for (const key of Object.keys(SCHEMA)) BE.bus.emit('settings:changed', { key, val: values.get(key) });
+				return true;
+			} catch (err) {
+				BE.log.error('settings import persistence failed', err);
+				try {
+					await BE.store.restoreRaw(prior);
+					if (BE.store.hasRaw(RECOVERY_KEY)) await BE.store.deletePersisted(RECOVERY_KEY);
+				} catch (restoreErr) {
+					BE.log.error('settings import rollback failed; recovery snapshot retained when possible', restoreErr);
+				}
+				loadResolved();
+				return false;
+			}
+		}
+
 		return {
 			SCHEMA,
+			SETTINGS_SCHEMA_VERSION,
 			get isLoaded() { return loaded; },
-				   get(key) {
-					   if (!loaded) {
-						   BE.log.debug('settings.get() called before load — returning default for', key);
-						   return keyDefault(key);
-					   }
-					   return values.has(key) ? values.get(key) : keyDefault(key);
-				   },
-				   set(key, val) {
-					   values.set(key, val);
-					   BE.store.set('setting:' + key, val);
-					   BE.bus.emit('settings:changed', { key, val });
-				   },
-				   reset(key) {
-					   const def = keyDefault(key);
-					   this.set(key, def);
-					   return def;
-				   },
-				   resetAll() { for (const key of Object.keys(SCHEMA)) this.reset(key); },
-				   categories() {
-					   const set = [];
-					   for (const def of Object.values(SCHEMA)) if (!set.includes(def.cat)) set.push(def.cat);
-					   return set;
-				   },
-				   byCategory(cat) { return Object.entries(SCHEMA).filter(([, d]) => d.cat === cat).map(([k]) => k); },
-				   exportJSON() {
-					   const out = {};
-					   for (const key of Object.keys(SCHEMA)) out[key] = this.get(key);
-					   return JSON.stringify({ __booruEnhancerSettings: true, version: BE.VERSION, values: out }, null, 2);
-				   },
-				   importJSON(json) {
-					   try {
-						   const parsed = JSON.parse(json);
-						   const values_ = parsed.values || parsed;
-						   for (const [key, val] of Object.entries(values_)) {
-							   if (SCHEMA[key] !== undefined) this.set(key, val);
-						   }
-						   return true;
-					   } catch (err) {
-						   BE.log.error('settings import failed', err);
-						   return false;
-					   }
-				   },
-				   _load: load,
+			get migrationInfo() { return migrationInfo; },
+			get invalidKeys() { return [...invalidKnown.keys()]; },
+			get(key) {
+				if (!loaded) {
+					BE.log.debug('settings.get() called before load — returning default for', key);
+					return keyDefault(key);
+				}
+				return values.has(key) ? values.get(key) : keyDefault(key);
+			},
+			set(key, val) {
+				const checked = validateValue(SCHEMA[key], val);
+				if (!checked.ok) {
+					BE.log.warn('[Settings] rejected invalid value for', key, checked.reason);
+					return false;
+				}
+				values.set(key, checked.value);
+				invalidKnown.delete(key);
+				void BE.store.set('setting:' + key, checked.value);
+				BE.bus.emit('settings:changed', { key, val: checked.value });
+				return true;
+			},
+			reset(key) {
+				const def = keyDefault(key);
+				this.set(key, def);
+				return def;
+			},
+			resetAll() { for (const key of Object.keys(SCHEMA)) this.reset(key); },
+			categories() {
+				const set = [];
+				for (const def of Object.values(SCHEMA)) if (!set.includes(def.cat)) set.push(def.cat);
+				return set;
+			},
+			byCategory(cat) { return Object.entries(SCHEMA).filter(([, d]) => d.cat === cat).map(([k]) => k); },
+			exportJSON() {
+				const state = collectExportState();
+				return JSON.stringify({
+					__booruEnhancerSettings: true,
+					productVersion: BE.VERSION,
+					schemaVersion: SETTINGS_SCHEMA_VERSION,
+					storedValues: state.storedValues,
+					absentKeys: state.absentKeys,
+					unknownRaw: state.unknownRaw,
+					recovery: { invalidKnownRaw: state.invalidKnownRaw },
+				}, null, 2);
+			},
+			importJSON,
+			_initialize: initialize,
+			_load: loadResolved,
 		};
 	})();
 
@@ -4114,11 +4463,11 @@
 				navigator.clipboard?.writeText(json).catch(() => {});
 				BE.modules.toast.show('Settings copied to clipboard', 'success');
 			});
-			mkTop('Import', () => {
+			mkTop('Import', async () => {
 				const json = prompt('Paste exported Booru Enhancer settings JSON:');
 				if (!json) return;
-				const ok = BE.settings.importJSON(json);
-				BE.modules.toast.show(ok ? 'Settings imported' : 'Import failed — invalid JSON', ok ? 'success' : 'error');
+				const ok = await BE.settings.importJSON(json);
+				BE.modules.toast.show(ok ? 'Settings imported' : 'Import failed — invalid or unsupported settings data', ok ? 'success' : 'error');
 				if (ok) {
 					document.documentElement.dataset.beUiTheme = BE.settings.get('general.theme') || 'dark';
 					document.documentElement.style.setProperty('--be-accent', BE.settings.get('general.accentColor') || '#ff8ac6');
@@ -4311,6 +4660,7 @@
 	 *  logged with a reason instead of a silent `return`.
 	 * ============================================================ */
 	let _beInitialized = false;
+	let _beInitializing = null;
 
 	function safeStage(name, fn) {
 		try {
@@ -4323,24 +4673,23 @@
 		}
 	}
 	BE.modules.init = function init() {
-		// Idempotent: calling BE.init()/BE.modules.init() twice (e.g. after an
-		// SPA navigation) must never create duplicate toolbars/listeners.
 		if (_beInitialized) {
 			BE.log.debug('[Init] already initialized, re-applying page-specific UI only');
 			refreshForCurrentPage();
-			return;
+			return Promise.resolve(true);
 		}
-		_beInitialized = true;
+		if (_beInitializing) return _beInitializing;
 
-		BE.log.info('[Init] Starting...');
-		BE.log.info(`[Init] Host: ${location.hostname}`);
+		_beInitializing = (async () => {
+			BE.log.info('[Init] Starting...');
+			BE.log.info(`[Init] Host: ${location.hostname}`);
 
-		BE.store.whenReady(() => {
-			let settingsOk = safeStage('Settings', () => BE.settings._load());
-			if (!settingsOk) {
-				BE.log.warn('[Init] Settings failed to load — continuing with schema defaults.');
+			const settingsResult = await BE.settings._initialize();
+			if (!settingsResult?.ok || !settingsResult?.canMount) {
+				BE.log.error('[Init] Settings migration/resolution failed; enhancer mount withheld.', settingsResult);
+				return false;
 			}
-			BE.log.info('[Init] Settings loaded');
+			BE.log.info('[Init] Settings resolved before dependent mount');
 
 			let adapter = null;
 			const adapterOk = safeStage('Adapter detection', () => {
@@ -4355,45 +4704,46 @@
 
 			if (!adapter) {
 				BE.log.error('[Init] FATAL: no adapter available (not even generic). Booru Enhancer cannot run on this page.');
-				return;
+				return false;
 			}
 
-			// general.enabled may be undefined/corrupt in storage — treat
-			// anything except an explicit `false` as enabled.
 			const enabled = BE.settings.get('general.enabled') !== false;
 			if (!enabled) {
+				_beInitialized = true;
 				BE.log.info('[Init] Booru Enhancer is disabled in settings for this site. Registering menu command only.');
 				safeStage('Menu commands', () => BE.modules.menu.register());
-				return;
+				return true;
 			}
 
-			// 1. IMMEDIATE UI INIT — must appear regardless of storage/API state.
 			safeStage('UI styles', () => BE.modules.ui.injectStyles());
 			safeStage('Toolbar', () => BE.modules.ui.createToolbar());
 			safeStage('Post action bar', () => BE.modules.ui.createPostActionBar());
 			safeStage('Menu commands', () => BE.modules.menu.register());
 			BE.log.info('[Init] UI initialized');
 
-			// 2. IMMEDIATE GALLERY BINDING & LAYOUT
 			let container = null;
 			safeStage('Gallery init', () => {
 				container = adapter.getGalleryContainer();
 				if (container) BE.modules.gallery.init(container);
 			});
-				BE.log.info(`[Init] Gallery initialized (container: ${container ? 'found' : 'none on this page'})`);
+			BE.log.info(`[Init] Gallery initialized (container: ${container ? 'found' : 'none on this page'})`);
 
-				// 3. ASYNC METADATA ENRICHMENT — never blocks the UI above.
-				setTimeout(() => safeStage('Metadata enrichment', () => BE.modules.gallery.enrichThumbnails()), 0);
+			setTimeout(() => safeStage('Metadata enrichment', () => BE.modules.gallery.enrichThumbnails()), 0);
 
-				// 4. ASYNC INFINITE SCROLL — set up as soon as the gallery exists,
-				// no arbitrary fixed delay beyond letting the container settle.
-				if (BE.settings.get('gallery.infiniteScroll') && container) {
-					safeStage('Infinite scroll', () => BE.modules.gallery.setupInfiniteScroll());
-				}
+			if (BE.settings.get('gallery.infiniteScroll') && container) {
+				safeStage('Infinite scroll', () => BE.modules.gallery.setupInfiniteScroll());
+			}
 
-				// 5. Viewer/hover/favorites are lazily initialized on first use,
-				// so a failure there can never block startup.
+			_beInitialized = true;
+			return true;
+		})().catch((err) => {
+			BE.log.error('[Init] initialization failed before completion', err);
+			return false;
+		}).finally(() => {
+			_beInitializing = null;
 		});
+
+		return _beInitializing;
 	};
 
 	function refreshForCurrentPage() {
