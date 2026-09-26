@@ -1,6 +1,6 @@
 # IB07 V1-N — Rule34.xxx native observation
 
-**State:** listing observation PASS; post observation OPEN  
+**State:** listing observation PASS; image-post native media observation PASS; native metadata completeness OPEN  
 **Account context:** user reported passive native browsing with enhancer/test scripts disabled; account state not independently verified  
 **Observed listing route:** `https://rule34.xxx/index.php?page=post&s=list`
 
@@ -71,3 +71,47 @@ Still unknown from listing evidence:
 The Rule34 **listing/native-facts** row has sufficient V1-N evidence to use these DOM facts directly.
 
 No API/DAPI/HTML resolver is admitted by this observation. Rule34 post-page V1-N remains OPEN, and G-HOST remains OPEN until the exact post facts and any actually missing required fields are measured.
+
+
+## Image-post observation
+
+Observed native post:
+
+- public post ID: `18867124`;
+- native post route: `/index.php?page=post&s=view&id=18867124`.
+
+### Main post media
+
+The actual native post image is explicitly identified by:
+
+- element: `<img id="image">`;
+- rendered/sample media origin: `wimg.rule34.xxx`;
+- sample path shape: `/samples/<bucket>/sample_<hash>.jpg?<postId>`;
+- observed rendered intrinsic dimensions: 850 × 478.
+
+The page also exposes an explicit native **Original image** link:
+
+- origin: `wimg.rule34.xxx`;
+- original path shape: `/images/<bucket>/<hash>.jpeg?<postId>`;
+- link has native `Post.highres()` behavior.
+
+Therefore, for this observed Rule34 image-post context, both sample and original media URLs are native DOM facts. No DAPI/API/HTML resolver request is needed merely to discover either URL.
+
+### Broad-selector false positives
+
+The passive capture also returned 300 × 250 `<video>` / `<source>` elements from another CDN. They are not identified by Rule34 as the post media and are outside the `#image` post-media contract. They are treated as unrelated page media/advertising and must not enter the Post model.
+
+This is evidence that future extraction must prefer the host's exact native post-media selector over broad `video` discovery.
+
+### Still unknown
+
+This observation does **not** establish:
+
+- original intrinsic dimensions;
+- original byte size;
+- whether the original URL extension always reflects authoritative media type for every Rule34 post;
+- video-post native structure;
+- GIF/animated post native structure;
+- favorite-state/action behavior.
+
+The observed original link is sufficient only for this image-post media-discovery row.
