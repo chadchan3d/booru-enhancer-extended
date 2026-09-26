@@ -3546,7 +3546,23 @@
 			}
 		}
 
-		return { init, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll };
+		function dispose() {
+			BE.modules.hover.hide();
+			if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+			if (sentinel) { sentinel.remove(); sentinel = null; }
+			clearTimeout(retryTimer);
+			retryTimer = null;
+			restorePaginatorVisibility();
+			disposeCardOwners();
+			galleryOwner?.dispose();
+			galleryOwner = null;
+			galleryContainer = null;
+			paginatorEl = null;
+			settingsListenerAttached = false;
+			resizeListenerAttached = false;
+		}
+
+		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll };
 	})();
 
 	/* ============================================================ *
