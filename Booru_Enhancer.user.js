@@ -4326,7 +4326,6 @@
 			BE.modules.hover.hide();
 			if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
 			if (sentinel) { sentinel.remove(); sentinel = null; }
-			retryTimer = null;
 			restorePaginatorVisibility();
 			disposeCardOwners();
 			galleryOwner?.dispose();
