@@ -88,7 +88,7 @@ Artifact:
 
 Git blob:
 
-`5d4dff0c2943764e41babf07c9608e80917359ba`
+`d282a13c745b5bfcfd95fddd9d516166c4881532`
 
 Only its metadata differs from production to make it safe for the local fixture:
 
@@ -102,6 +102,8 @@ The production code body is otherwise the current IB04 candidate.
 The current fixture revision is Git blob:
 
 `ee7d4ac0ddecdcfd3e9b3712ec6c533d48e5e5b1`
+
+The production-conformance postamble also normalizes the original E-stage fixture at runtime, so the operator may reuse the previously extracted local fixture/server.
 
 The browser conformance run checks the actual integrated gallery/viewer call sites, including responsive node ownership, hover restore, synchronous takeover ordering, native controls, viewer focus return, media-failure fallback, full gallery disposal, repeated re-init/dispose and native-listener survival.
 
