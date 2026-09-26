@@ -2277,23 +2277,38 @@
 	/* ============================================================ *
 	 *  E621 / E926 ADAPTER
 	 * ============================================================ */
-	function normalizeE621NativeListingArticle(article) {
-		if (!article || location.hostname !== 'e621.net') return null;
-		const d = article.dataset || {};
+	function normalizeE621NativeElement(element, { postPage = false } = {}) {
+		if (!element || location.hostname !== 'e621.net') return null;
+		const d = element.dataset || {};
 		const id = String(d.id || '');
 		if (!id) return null;
 
 		const fileExt = String(d.fileExt || '').toLowerCase();
 		const fileUrl = d.fileUrl || '';
 		const sampleUrl = d.sampleUrl || fileUrl;
-		const img = article.querySelector('picture img, img');
-		const previewUrl = img?.currentSrc || d.previewWebp || d.previewUrl || sampleUrl || fileUrl;
+		const img = postPage
+			? document.querySelector('#image-container img#image, img#image')
+			: element.querySelector('picture img, img');
+		const previewUrl = postPage
+			? (d.previewWebp || d.previewUrl || img?.currentSrc || img?.src || sampleUrl || fileUrl)
+			: (img?.currentSrc || d.previewWebp || d.previewUrl || sampleUrl || fileUrl);
 		const allTags = String(d.tags || '').split(/\s+/).filter(Boolean);
 		const createdAtRaw = String(d.createdAt || '');
 		const createdAt = createdAtRaw.replace(/^"(.*)"$/, '$1');
 		const mediaType = fileExt === 'webm' || fileExt === 'mp4'
 			? 'video'
 			: (fileExt === 'gif' ? 'gif' : 'image');
+
+		let source = '';
+		if (postPage) {
+			const info = document.querySelector('#post-information');
+			if (info) {
+				const sourceContainer = [...info.querySelectorAll('li, dd, div, span, p')]
+					.find((el) => /^source\s*:/i.test((el.textContent || '').trim()));
+				const sourceLink = sourceContainer?.querySelector('a[href]');
+				if (sourceLink?.href) source = sourceLink.href;
+			}
+		}
 
 		return emptyPost({
 			id,
@@ -2314,7 +2329,7 @@
 			generalTags: [],
 			metaTags: [],
 			allTags,
-			source: '',
+			source,
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: 'e621',
@@ -2327,7 +2342,16 @@
 		if (!wanted) return null;
 		const article = [...document.querySelectorAll('article.thumbnail, article.post-preview, article[data-id]')]
 			.find((el) => String(el.dataset?.id || '') === wanted);
-		return normalizeE621NativeListingArticle(article);
+		return normalizeE621NativeElement(article);
+	}
+
+	function e621NativePostPage(id) {
+		if (location.hostname !== 'e621.net') return null;
+		const wanted = String(id || '');
+		if (!wanted) return null;
+		const container = document.querySelector('#image-container[data-id]');
+		if (!container || String(container.dataset?.id || '') !== wanted) return null;
+		return normalizeE621NativeElement(container, { postPage: true });
 	}
 
 	BE.core.registerAdapter({
@@ -2348,9 +2372,9 @@
 		getThumbWrapper: (img) => img.closest('article.thumbnail, article.post-preview, article[id^="post_"]') || img.closest('a') || img.parentElement,
 		getGalleryContainer: (root = document) => root.querySelector('#posts-container, .posts-container'),
 		async fetchPost(id) {
-			// IB07: e621 listing cards already expose rendition and core metadata.
-			// Post-page behavior remains unknown until its own V1-N observation.
-			return e621NativeListingPost(id);
+			// IB07: use only observed native e621 facts. Post pages use
+			// #image-container; listings use article.thumbnail data attributes.
+			return e621NativePostPage(id) || e621NativeListingPost(id);
 		},
 		async fetchThumbBatch(ids) {
 			if (!ids.length || location.hostname !== 'e621.net') return [];
