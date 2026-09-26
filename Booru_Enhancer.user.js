@@ -3036,8 +3036,8 @@
 			}
 		}
 
-		function buildThumbActions(wrap, img) {
-			if (wrap.querySelector('.be-thumb-actions')) return;
+		function buildThumbActions(wrap, img, owner) {
+			if (!owner || wrap.querySelector('.be-thumb-actions')) return;
 			const bar = BE.dom.create('div', { class: 'be-thumb-actions' });
 			bar.style.cssText = 'position:absolute;top:4px;right:4px;display:flex;gap:3px;opacity:0;transition:opacity .15s;z-index:5;';
 			const mk = (label, title, action) => {
@@ -3053,9 +3053,9 @@
 			mk('⭳', 'Download', 'download');
 			mk('⤢', 'Open original', 'open');
 			if (BE.modules.favorites.supported()) mk('★', 'Favorite', 'favorite');
-			wrap.appendChild(bar);
-			wrap.addEventListener('pointerenter', () => { bar.style.opacity = '1'; });
-			wrap.addEventListener('pointerleave', () => { bar.style.opacity = '0'; });
+			owner.add(bar, wrap);
+			owner.on(wrap, 'pointerenter', () => { bar.style.opacity = '1'; });
+			owner.on(wrap, 'pointerleave', () => { bar.style.opacity = '0'; });
 		}
 
 		// Requirement 3 / 29: resolve the actual per-post wrapper for a
@@ -3089,94 +3089,62 @@
 		// initial gallery render and dynamically-inserted (infinite scroll)
 		// thumbnails, per Requirement 17, so the two paths can never drift
 		// out of sync with each other.
-		function applySiteThumbMedia(img, wrap) {
-			if (BE.adapters.active?.id !== 'e621' || !img || !wrap) return;
-
-			const previewUrl =
-				wrap.dataset.previewUrl ||
-				img.dataset.previewUrl ||
-				img.dataset.bePreviewUrl ||
-				img.currentSrc ||
-				img.src ||
-				'';
-			const sampleUrl =
-				wrap.dataset.sampleUrl ||
-				img.dataset.sampleUrl ||
-				img.dataset.beSampleUrl ||
-				'';
-			const originalUrl =
-				wrap.dataset.fileUrl ||
-				img.dataset.fileUrl ||
-				img.dataset.beOriginalUrl ||
-				'';
-
+		function applySiteThumbMedia(img, wrap, owner) {
+			if (BE.adapters.active?.id !== 'e621' || !img || !wrap || !owner) return;
+			const previewUrl = wrap.dataset.previewUrl || img.dataset.previewUrl || img.dataset.bePreviewUrl || img.currentSrc || img.src || '';
+			const sampleUrl = wrap.dataset.sampleUrl || img.dataset.sampleUrl || img.dataset.beSampleUrl || '';
+			const originalUrl = wrap.dataset.fileUrl || img.dataset.fileUrl || img.dataset.beOriginalUrl || '';
 			const quality = BE.settings.get('media.thumbQuality') || 'sample';
 			let targetUrl = previewUrl;
-
-			if (quality === 'sample') {
-				targetUrl = sampleUrl || previewUrl;
-			} else if (quality === 'original') {
-				// A video URL cannot be placed into <img>. For video posts,
-				// keep the best still/sample image available in the grid.
-				targetUrl = guessMediaType(originalUrl) === 'video'
-					? (sampleUrl || previewUrl)
-					: (originalUrl || sampleUrl || previewUrl);
-			}
-
+			if (quality === 'sample') targetUrl = sampleUrl || previewUrl;
+			else if (quality === 'original') targetUrl = guessMediaType(originalUrl) === 'video' ? (sampleUrl || previewUrl) : (originalUrl || sampleUrl || previewUrl);
 			if (!targetUrl || guessMediaType(targetUrl) === 'video') return;
 
-			// e621 uses <picture>/<source>; changing only img.src can leave a
-			// source element in control. Point all sources at the selected
-			// thumbnail media so the visible image really follows the setting.
+			// Keep the native responsive tree intact. Each source is temporarily
+			// pointed at the selected rendition and is restored through the owner.
 			const picture = img.closest('picture');
 			if (picture) {
-				for (const source of picture.querySelectorAll('source')) {
-					source.remove();
-				}
+				for (const source of picture.querySelectorAll('source')) owner.ownAttribute(source, 'srcset', targetUrl);
 			}
-			img.removeAttribute('srcset');
-			if (img.src !== targetUrl) img.src = targetUrl;
+			owner.ownAttribute(img, 'srcset', targetUrl);
+			owner.ownAttribute(img, 'src', targetUrl);
+		}
 
-			const nativeHoverLink = wrap.querySelector('a.thm-link');
-			if (nativeHoverLink) {
-				nativeHoverLink.removeAttribute('data-hover-text');
-				nativeHoverLink.removeAttribute('title');
+		function suppressHoverAttributes(owner, el) {
+			if (!owner || !el) return;
+			const title = el.getAttribute('title');
+			const hoverText = el.getAttribute('data-hover-text');
+			const accessible = title || hoverText || '';
+			if (accessible && !el.hasAttribute('aria-label') && el.matches('a, button, [role="button"]')) {
+				owner.ownAttribute(el, 'aria-label', accessible);
 			}
+			if (title !== null) owner.ownAttribute(el, 'title', null);
+			if (hoverText !== null) owner.ownAttribute(el, 'data-hover-text', null);
 		}
 
 		function suppressNativeThumbHover(img, wrap) {
-			if (!img || !wrap) return;
-
-			const isRule34 = /(^|\.)rule34\.xxx$/.test(location.hostname);
-			if (!isRule34) return;
-
-			const candidates = [
-				img,
-				img.closest('a'),
-				wrap,
-				...wrap.querySelectorAll('[title], [data-hover-text]')
-			].filter(Boolean);
-
-			for (const el of new Set(candidates)) {
-				el.removeAttribute('title');
-				el.removeAttribute('data-hover-text');
-			}
+			if (!img || !wrap || !BE.settings.get('media.hoverPreview')) return;
+			const adapterId = BE.adapters.active?.id;
+			if (adapterId !== 'e621' && !/(^|\\.)rule34\\.xxx$/.test(location.hostname)) return;
+			const owner = getHoverOwner(wrap, img);
+			if (!owner) return;
+			const candidates = adapterId === 'e621'
+				? [wrap.querySelector('a.thm-link')].filter(Boolean)
+				: [img, img.closest('a'), wrap, ...wrap.querySelectorAll('[title], [data-hover-text]')].filter(Boolean);
+			for (const el of new Set(candidates)) suppressHoverAttributes(owner, el);
 		}
 
 		function enhanceThumbnail(img) {
 			const wrap = getWrapperForImg(img);
-			if (wrap) {
-				wrap.classList.add('be-thumb-wrap');
-				if (getComputedStyle(wrap).position === 'static') wrap.style.position = 'relative';
-				buildThumbActions(wrap, img);
-			}
-			img.classList.add('be-thumb-img');
-
+			if (!wrap) return null;
+			const owner = getCardOwner(wrap, img);
+			owner.ownClass(wrap, 'be-thumb-wrap', true);
+			if (getComputedStyle(wrap).position === 'static') owner.ownStyle(wrap, 'position', 'relative');
+			buildThumbActions(wrap, img, owner);
+			owner.ownClass(img, 'be-thumb-img', true);
 			const postId = BE.adapters.active.getThumbPostId(img);
-			if (postId) {
-				img.dataset.bePostId = postId;
-			}
-			applySiteThumbMedia(img, wrap);
+			if (postId) owner.ownAttribute(img, 'data-be-post-id', postId);
+			applySiteThumbMedia(img, wrap, owner);
 			suppressNativeThumbHover(img, wrap);
 			return wrap;
 		}
