@@ -1,6 +1,6 @@
 {
   "checkpoint": "IB05",
-  "status": "E_PASS_P_INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "status": "PASS_TC_IMPLEMENTATION_PATH",
   "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
   "production_source_changed": true,
   "schema_model": {
@@ -26,11 +26,11 @@
     "result_summary": "tests/browser/ib05/TC_SETTINGS_MOUNT_RESULT_SUMMARY.json"
   },
   "gate_status": {
-    "G_SETTINGS": "PASS_E_STAGE_TC",
+    "G_SETTINGS": "PASS_PRODUCTION_TC",
     "G_RUNTIME_TC_STORAGE": "PASS_FROM_IB03",
     "G_OWN_TC_MOUNT_LIFECYCLE": "PASS_FROM_IB04"
   },
-  "production_activation": "INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "production_activation": "PASS_TC_IMPLEMENTATION_PATH",
   "production_integration": {
     "commit": "d69877431fe6839cb375e0aa9128ba47a7447912",
     "source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
@@ -45,7 +45,7 @@
       "recoverable validated import with rollback attempt",
       "unsupported newer-schema mount block"
     ],
-    "production_conformance": "OPEN_NOT_RUN",
+    "production_conformance": "PASS_12_OF_12_TC",
     "cleanup_commit": "38275808fb78b54cb444868110aa015aa376a83a",
     "static_conformance": "PASS"
   },
@@ -62,6 +62,14 @@
       "explicit legacy preferences",
       "unsupported newer schema"
     ],
-    "status": "OPEN_NOT_RUN"
-  }
+    "status": "PASS_12_OF_12_TC",
+    "result_summary": "tests/browser/ib05/TC_PRODUCTION_RESULT_SUMMARY.json"
+  },
+  "boundaries": [
+    "IB05 complete for the active TC implementation path only.",
+    "VC / TF / VF remain untested for IB05 and are not claimed.",
+    "No live-site settings behavior is certified by this checkpoint.",
+    "No IB06 request-gate behavior is included or claimed."
+  ],
+  "next_checkpoint": "IB06 — Small enhancer-HTTP request gate"
 }
