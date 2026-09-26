@@ -2277,66 +2277,110 @@
 	/* ============================================================ *
 	 *  E621 / E926 ADAPTER
 	 * ============================================================ */
+	function normalizeE621NativeListingArticle(article) {
+		if (!article || location.hostname !== 'e621.net') return null;
+		const d = article.dataset || {};
+		const id = String(d.id || '');
+		if (!id) return null;
+
+		const fileExt = String(d.fileExt || '').toLowerCase();
+		const fileUrl = d.fileUrl || '';
+		const sampleUrl = d.sampleUrl || fileUrl;
+		const img = article.querySelector('picture img, img');
+		const previewUrl = img?.currentSrc || d.previewWebp || d.previewUrl || sampleUrl || fileUrl;
+		const allTags = String(d.tags || '').split(/\s+/).filter(Boolean);
+		const createdAtRaw = String(d.createdAt || '');
+		const createdAt = createdAtRaw.replace(/^"(.*)"$/, '$1');
+		const mediaType = fileExt === 'webm' || fileExt === 'mp4'
+			? 'video'
+			: (fileExt === 'gif' ? 'gif' : 'image');
+
+		return emptyPost({
+			id,
+			originalUrl: fileUrl,
+			sampleUrl,
+			previewUrl,
+			mediaType,
+			width: Number(d.width || 0) || 0,
+			height: Number(d.height || 0) || 0,
+			fileSize: Number(d.size || 0) || 0,
+			md5: d.md5 || '',
+			rating: { s: 'safe', q: 'questionable', e: 'explicit' }[d.rating] || 'unknown',
+			score: Number(d.score || 0) || 0,
+			favCount: Number(d.favCount || 0) || 0,
+			artists: [],
+			characters: [],
+			copyrights: [],
+			generalTags: [],
+			metaTags: [],
+			allTags,
+			source: '',
+			postUrl: location.origin + '/posts/' + id,
+			createdAt,
+			siteId: 'e621',
+		});
+	}
+
+	function e621NativeListingPost(id) {
+		if (location.hostname !== 'e621.net') return null;
+		const wanted = String(id || '');
+		if (!wanted) return null;
+		const article = [...document.querySelectorAll('article.thumbnail, article.post-preview, article[data-id]')]
+			.find((el) => String(el.dataset?.id || '') === wanted);
+		return normalizeE621NativeListingArticle(article);
+	}
+
 	BE.core.registerAdapter({
 		id: 'e621',
 		hostPattern: /e621\.net$|e926\.net$/,
 		priority: 10,
 		isPostPage: () => /\/posts\/\d+/.test(location.pathname),
-							getPostId: () => (location.pathname.match(/\/posts\/(\d+)/) || [])[1] || null,
-							getThumbElements: (root) => BE.dom.qsa('article.thumbnail img, article.post-preview img, #posts-container img', root),
-							getThumbPostId: (img) => {
-								const art = img.closest('article.thumbnail, article.post-preview, article[id^="post_"]');
-								const dataId = art?.dataset?.id;
-								if (dataId) return String(dataId);
-								const idAttr = art?.id?.match(/post_(\d+)/)?.[1];
-								if (idAttr) return idAttr;
-								return (img.closest('a')?.getAttribute('href')?.match(/\/posts\/(\d+)/) || [])[1] || null;
-							},
-							getThumbWrapper: (img) => img.closest('article.thumbnail, article.post-preview, article[id^="post_"]') || img.closest('a') || img.parentElement,
-							getGalleryContainer: (root = document) => root.querySelector('#posts-container, .posts-container'),
-							async fetchPost(id) {
-								const data = await BE.net.json(`${location.origin}/posts/${id}.json`, {
-									headers: { 'User-Agent': `BooruEnhancer/${BE.VERSION} (userscript)` },
-								});
-								return data.post ? normalizeE621(data.post) : null;
-							},
-							async fetchThumbBatch(ids) {
-								if (!ids.length) return [];
-								const tags = `id:${ids.join(',')}`;
-								const data = await BE.net.json(`${location.origin}/posts.json?tags=${encodeURIComponent(tags)}&limit=${ids.length}`, {
-									headers: { 'User-Agent': `BooruEnhancer/${BE.VERSION} (userscript)` },
-								});
-								return (data.posts || []).map(normalizeE621);
-							},
-							favoriteSelector: '#add-to-favorites, #remove-from-favorites',
-							pagination: {
-								containerSelectors: ['#paginator', 'nav.paginator', 'section#paginating-nav'],
-								getPageIdentity(url) {
-									const u = safeURL(url);
-									if (!u) return '1';
-									return u.searchParams.get('page') || u.searchParams.get('b') || u.searchParams.get('a') || '1';
-								},
-								getNextUrl(doc) {
-									const link = findFirstNextLink(doc, [
-										'a[rel="next"]', 'a.next',
-										'#paginator a[rel="next"]', 'nav.paginator a[rel="next"]',
-										'section#paginating-nav a[rel="next"]',
-									]);
-									return link?.href || null;
-								},
-								calculateNextUrl(currentUrl) {
-									const u = safeURL(currentUrl);
-									if (!u) return null;
-									if (u.searchParams.has('b') || u.searchParams.has('a')) return null;
-									const page = parseInt(u.searchParams.get('page') || '1', 10);
-									u.searchParams.set('page', String(page + 1));
-									return u.toString();
-								},
-								getPostIdentity(el) {
-									const art = el.closest('article[id^="post_"]');
-									return art?.id?.match(/post_(\d+)/)?.[1] || null;
-								},
-							},
+		getPostId: () => (location.pathname.match(/\/posts\/(\d+)/) || [])[1] || null,
+		getThumbElements: (root) => BE.dom.qsa('article.thumbnail img, article.post-preview img, #posts-container img', root),
+		getThumbPostId: (img) => {
+			const art = img.closest('article.thumbnail, article.post-preview, article[id^="post_"]');
+			const dataId = art?.dataset?.id;
+			if (dataId) return String(dataId);
+			const idAttr = art?.id?.match(/post_(\d+)/)?.[1];
+			if (idAttr) return idAttr;
+			return (img.closest('a')?.getAttribute('href')?.match(/\/posts\/(\d+)/) || [])[1] || null;
+		},
+		getThumbWrapper: (img) => img.closest('article.thumbnail, article.post-preview, article[id^="post_"]') || img.closest('a') || img.parentElement,
+		getGalleryContainer: (root = document) => root.querySelector('#posts-container, .posts-container'),
+		async fetchPost(id) {
+			// IB07: e621 listing cards already expose rendition and core metadata.
+			// Post-page behavior remains unknown until its own V1-N observation.
+			return e621NativeListingPost(id);
+		},
+		async fetchThumbBatch(ids) {
+			if (!ids.length || location.hostname !== 'e621.net') return [];
+			return ids.map((id) => e621NativeListingPost(id)).filter(Boolean);
+		},
+		pagination: {
+			containerSelectors: ['#paginator', 'nav.paginator', 'section#paginating-nav'],
+			getPageIdentity(url) {
+				const u = safeURL(url);
+				if (!u) return '1';
+				return u.searchParams.get('page') || u.searchParams.get('b') || u.searchParams.get('a') || '1';
+			},
+			getNextUrl(doc) {
+				const link = findFirstNextLink(doc, [
+					'a[rel="next"]', 'a.next',
+					'#paginator a[rel="next"]', 'nav.paginator a[rel="next"]',
+					'section#paginating-nav a[rel="next"]',
+				]);
+				return link?.href || null;
+			},
+			calculateNextUrl() {
+				// No synthetic numeric continuation until a native continuation
+				// strategy is actually observed for this route/context.
+				return null;
+			},
+			getPostIdentity(el) {
+				const art = el.closest('article.thumbnail, article.post-preview, article[data-id], article[id^="post_"]');
+				return art?.dataset?.id || art?.id?.match(/post_(\d+)/)?.[1] || null;
+			},
+		},
 	});
 
 	function normalizeE621(p) {
