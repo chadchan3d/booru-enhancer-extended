@@ -2335,9 +2335,9 @@
 			generalTags: categorized.general,
 			metaTags: categorized.meta,
 			allTags,
-			// Source is visibly present on the observed page, but its exact
-			// element contract has not yet been captured. Unknown stays unknown.
-			source: '',
+			source: postPage
+				? (document.querySelector('#post-information li.source-links .source-link a[href]')?.href || '')
+				: '',
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: 'e621',
