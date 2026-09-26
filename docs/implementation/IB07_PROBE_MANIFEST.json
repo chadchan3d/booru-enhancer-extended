@@ -21,7 +21,7 @@
     "gelbooru.com"
   ],
   "g_host": {
-    "rule34.xxx/listing": "OPEN_V1N",
+    "rule34.xxx/listing": "V1N_NATIVE_FACTS_PASS_G_HOST_STILL_OPEN",
     "rule34.xxx/post": "OPEN_V1N",
     "e621.net/listing": "OPEN_V1N",
     "e621.net/post": "OPEN_V1N",
@@ -37,7 +37,16 @@
     "mutations": 0,
     "live_media_discovery_downloads": 0,
     "account_context_must_be_labeled": true,
-    "signed_query_tokens_must_not_be_committed": true
+    "signed_query_tokens_must_not_be_committed": true,
+    "rule34_listing": {
+      "status": "PASS",
+      "evidence_doc": "docs/implementation/IB07_RULE34_V1N.md",
+      "observed_cards": 3,
+      "native_identity": true,
+      "native_thumbnail": true,
+      "native_pagination": true,
+      "network_used": false
+    }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
   "next_evidence": "V1-N passive native listing/post captures"
