@@ -1,8 +1,8 @@
 {
   "checkpoint": "IB06",
-  "status": "E_PASS_PRODUCTION_INTEGRATION_ELIGIBLE",
-  "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
-  "production_source_changed": false,
+  "status": "E_PASS_P_INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "production_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+  "production_source_changed": true,
   "model_evidence": {
     "path": "tests/request/ib06/model-result.json",
     "tests": 21,
@@ -60,10 +60,34 @@
     "result_summary": "tests/browser/ib06/TC_REQUEST_GATE_RESULT_SUMMARY.json"
   },
   "gate_status": {
-    "G_REQUEST": "PASS_E_STAGE_TC",
+    "G_REQUEST": "PASS_E_STAGE_TC_PRODUCTION_CONFORMANCE_PENDING",
     "G_RUNTIME_TC_REQUEST": "PASS_FROM_IB03",
     "G_SETTINGS_TC": "PASS_FROM_IB05",
     "G_OWN_TC": "PASS_FROM_IB04"
   },
-  "production_activation": "ELIGIBLE_CONFORMANCE_REQUIRED"
+  "production_activation": "INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "production_integration": {
+    "commits": [
+      "eb96a1b9f3c1b23df7dba1ee6cc445fbcde099b5",
+      "1f16ec8646bf539f3cc44937007e4f6f02fff0cd"
+    ],
+    "source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+    "public_version": "1.2.7.3",
+    "scope": [
+      "single BE.net logical-operation gate for enhancer HTTP",
+      "equivalent read dedupe and consumer counts",
+      "foreground/background queue mechanics and queued promotion",
+      "typed terminal outcomes",
+      "finite compatibility attempt budget",
+      "Retry-After endpoint cooldown",
+      "optional endpoint concurrency/spacing policy inputs with no real-host numeric defaults",
+      "logical consumer release separate from physical transport abort",
+      "native-to-privileged Gelbooru transport fallback inside one finite attempt plan",
+      "favorite remote action marked as non-deduped non-retried mutation",
+      "infinite-scroll terminal failure no longer replenishes a fresh outer retry budget"
+    ],
+    "static_conformance": "PASS_15_OF_15",
+    "mock_conformance": "PASS_11_OF_11",
+    "production_browser_conformance": "OPEN_NOT_RUN"
+  }
 }
