@@ -1,14 +1,14 @@
 # IB05 — Settings Schema, Migration and Mount Barrier
 
-**Checkpoint state:** E-stage in progress — isolated model PASS; real-manager V5-O browser evidence OPEN  
-**Production source changed during IB05:** NO  
-**Production source blob:** `4f43d0dc57cbbbe70726e36263fc6854d0bd0cad`
+**Checkpoint state:** E-stage PASS in TC; production integration implemented; production conformance OPEN  
+**Production source changed during IB05:** YES — bounded IB05 integration only  
+**Production source blob:** `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`
 
 ## Controlling invariant
 
 Preferences must resolve before preference-dependent effects mount. Migration must be idempotent, recoverable, preserve effective legacy choices, preserve unknown/inert values, and never infer installation age from an empty store.
 
-IB05 production integration remains blocked until the E-stage G-SETTINGS evidence passes.
+The E-stage G-SETTINGS premise has passed in the active TC cell. Production integration is therefore permitted, but IB05 remains open until the integrated production artifact passes conformance.
 
 ## E-model result
 
@@ -56,23 +56,56 @@ The model demonstrated:
 - The initial schema migration writes only the schema marker; it does not rewrite existing preferences.
 - Import must validate completely before replacement and recover the prior snapshot on write failure.
 
-## Remaining E-stage requirement
+## Real-manager E-stage result
 
-The blueprint also requires V5-O in a real userscript manager using isolated storage:
+The TC browser gate ran in Tampermonkey 5.5.0 × Chrome 153 × Windows 10 / Win32.
 
-- actual GM get/set/list/delete round-trip;
-- production-like JSON-string setting values and typed storage values;
-- delayed migration with first-dependent-mount timestamp;
-- rejected migration with zero dependent mount;
-- empty-store ambiguity after a written schema marker;
-- malformed/unknown preservation;
-- unsupported newer-schema blocking;
-- test storage isolated from production preferences.
+Result:
 
-Artifact:
+- 10 tests;
+- 10 passed;
+- 0 failed;
+- isolated userscript storage only;
+- no production preference access;
+- no external network.
 
-- `tests/browser/ib05/IB05_Settings_Mount_Gate.user.js`
+Sanitized evidence:
 
-**G-SETTINGS remains OPEN until that browser result is reviewed.**
+- `tests/browser/ib05/TC_SETTINGS_MOUNT_RESULT_SUMMARY.json`
 
-No changes to `BE.store`, `BE.settings`, init ordering, import/export, or public release metadata are permitted before that result passes.
+This closes the IB05 E-stage G-SETTINGS premise for the active TC path.
+
+## Production integration
+
+Commit:
+
+- `d69877431fe6839cb375e0aa9128ba47a7447912`
+
+Production source blob:
+
+- `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`
+
+Integrated scope is intentionally narrow:
+
+- settings schema version 1, separate from product version 1.2.7.3;
+- store raw-value/recovery visibility without changing the `be:` namespace;
+- validated bool/number/range/select/text/color values;
+- legacy-safe effective defaults for malformed known settings while preserving their raw values;
+- schema 0 → 1 migration writes only the schema marker;
+- ambiguous empty storage remains ambiguous and keeps legacy Sample + append-on defaults;
+- unsupported newer schema blocks enhancer mount rather than down-converting;
+- settings initialization is awaited before adapter/UI/gallery mount;
+- export preserves absent known keys, invalid-known raw recovery values and inert unknown raw keys;
+- import validates the full envelope before replacement, keeps legacy import compatibility, and attempts exact snapshot rollback on persistence failure.
+
+No IB06 request-gate work, host policy, new default policy, route work, or release-version bump entered this change.
+
+## Remaining checkpoint requirement
+
+The E-stage browser gate is complete. The remaining requirement is conformance of the actual integrated production artifact:
+
+- source/static conformance against blob `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`;
+- a local-only derived production browser run using a separate userscript identity;
+- direct checks that the integrated store/settings/init path preserves legacy choices, does not persist absent defaults, validates imports, retains inert unknown values, and reaches preference-dependent UI only after settings are loaded.
+
+**IB05 remains OPEN until production conformance passes.**
