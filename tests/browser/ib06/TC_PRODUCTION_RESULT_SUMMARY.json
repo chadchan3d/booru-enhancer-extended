@@ -1,0 +1,55 @@
+{
+  "checkpoint": "IB06",
+  "probe": "IB06 Production Conformance 1.0.0",
+  "production_version": "1.2.7.3",
+  "production_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+  "conformance_artifact": {
+    "path": "tests/browser/ib06/IB06_Production_Conformance.user.js",
+    "git_blob": "410730444919fc3fc823210685030a999372a3c8"
+  },
+  "runtime_cell": {
+    "manager": "Tampermonkey 5.5.0",
+    "browser": "Chrome 153",
+    "platform": "Windows 10 / Win32"
+  },
+  "source_contract": {
+    "production_body_retained": true,
+    "localhost_only": true,
+    "separate_userscript_identity": true,
+    "production_preferences_accessed": false,
+    "live_site": false
+  },
+  "result": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_cases": [
+    "P01 production gate dedupes equivalent actual manager reads",
+    "P02 one released production consumer does not abort while another remains",
+    "P03 last released production consumer requests physical abort observed by server",
+    "P04 production transient read has one finite two-attempt budget",
+    "P05 production transient read can recover on its second and final attempt",
+    "P06 401 and 404 are typed terminal outcomes with no production retry",
+    "P07 HTTP 200 auth body is typed auth-required and is not retried",
+    "P08 malformed JSON is structural and does not replenish attempts",
+    "P09 Retry-After cooldown is local to one production endpoint key",
+    "P10 foreground join promotes queued production read without preempting active work",
+    "P11 production mutations never dedupe and never automatically retry",
+    "P12 native-to-privileged fallback shares one finite production attempt budget"
+  ],
+  "boundaries": {
+    "real_browser": true,
+    "real_manager_transport": true,
+    "localhost_only": true,
+    "production_preferences": false,
+    "live_site": false,
+    "host_budgets_assigned": false,
+    "ib07": false,
+    "vc": false,
+    "tf": false,
+    "vf": false
+  },
+  "conclusion": "IB06 production conformance PASS for the active TC implementation path. G-REQUEST closes for this scoped path; IB07 is eligible. Broader runtime cells, live-site behavior, and host-specific budgets remain unclaimed."
+}
