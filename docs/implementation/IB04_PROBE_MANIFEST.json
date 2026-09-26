@@ -1,48 +1,66 @@
 {
   "checkpoint": "IB04",
-  "status": "BLOCKED_ON_REAL_TC_BROWSER_RUN",
-  "stage": "E_PREPARED",
-  "runtime_cell": "TC — Tampermonkey × Chrome/Chromium",
-  "probe": {
-    "path": "tests/browser/ib04/IB04_Browser_Ownership_Probe.user.js",
-    "version": "1.0.0",
-    "sha256": "ff6921b9efc491ac4279a9fd35b378e64cf7db1ed70b23ab0b4e25a53c78e17c"
-  },
-  "fixture": {
-    "path": "tests/browser/ib04/fixture.html",
-    "sha256": "b588ec5265cc7a5a4ab2120ba22081964ad381ea58a0fcc21ad423d0b68a3b24"
-  },
-  "server": {
-    "path": "tests/browser/ib04/server.cjs",
-    "sha256": "ce5abe85c31c9f508e5758fcd017dbfb76c222b1e94890c35b933370d493d406",
-    "origin": "http://127.0.0.1:8775"
-  },
-  "packet": {
-    "name": "IB04_Browser_Ownership_Packet.zip",
-    "sha256": "5bce5ebb5386936e7b220a5bfc22686736e3b3505918bc43a636163d42a85db0",
-    "zip_test": "PASS",
-    "committed_binary": false
-  },
-  "local_static_qualification": {
-    "syntax": "PASS",
-    "static_checks": "PASS",
-    "external_runtime_requests": false,
-    "production_site_logic": false
-  },
-  "browser_cases": 18,
-  "production_ownership_integrated": false,
-  "g_own_promoted": [],
-  "sanitation": {
+  "status": "P_INTEGRATED_PRODUCTION_BROWSER_CONFORMANCE_PENDING",
+  "stage": "E_PASS_P_IMPLEMENTED",
+  "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
+  "e_stage": {
+    "probe": "IB04 Browser Ownership Probe 1.0.0",
+    "probe_sha256": "ff6921b9efc491ac4279a9fd35b378e64cf7db1ed70b23ab0b4e25a53c78e17c",
+    "fixture_sha256_at_execution": "b588ec5265cc7a5a4ab2120ba22081964ad381ea58a0fcc21ad423d0b68a3b24",
+    "tests": 18,
+    "passed": 18,
+    "failed": 0,
     "status": "PASS",
-    "files_scanned": 8,
-    "findings": [],
-    "checked": [
-      "local user/workspace paths",
-      "private personal names",
-      "location names",
-      "email addresses",
-      "token/key/credential patterns"
-    ]
+    "scope": "named local browser ownership effects in TC"
   },
-  "next_required_evidence": "Run exact probe in TC and return complete JSON result before any production ownership integration."
+  "production_integration": {
+    "source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
+    "commits": [
+      "9faa012d4f59aad5ff035165de5a0643184995bc",
+      "ea1d9380113efc9ef7729ba290920b240351ef50",
+      "5270345d2726b425e67fbd39e9a13c9dbfbc5c15",
+      "edeabcdaae28d73bfe2aac222f67705b0b106223",
+      "1cca41345e6ab74151a5967a7b803c71afd7e396",
+      "2f6cb1dfd1981333d615ffa994a628d590d46489",
+      "01fd0f96555745e390ea16fc7ce6a84e50360b8b"
+    ],
+    "static_conformance": "PASS",
+    "browser_conformance": "OPEN_NOT_RUN"
+  },
+  "integrated_effects": [
+    "bounded attribute/class/style ownership with later-native-write invalidation",
+    "owned gallery delegated listeners and settings/resize cleanup",
+    "owned per-thumbnail action UI and wrapper/image classes",
+    "e621 responsive-source preservation without source-node removal",
+    "hover suppression only while enhanced hover is enabled, with accessible replacement",
+    "viewer lifecycle disposer and focus-return context",
+    "viewer media-failure native fallback link",
+    "synchronous viewer takeover must succeed before preventDefault",
+    "nested native controls and modifier/middle clicks bypass takeover",
+    "bounded gallery disposal"
+  ],
+  "production_conformance_artifact": {
+    "path": "tests/browser/ib04/IB04_Production_Conformance.user.js",
+    "git_blob": "5d4dff0c2943764e41babf07c9608e80917359ba",
+    "derived_from_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
+    "local_only_match": "http://127.0.0.1:8775/*",
+    "public_connects_removed": true,
+    "update_urls_removed": true,
+    "appended_test_postamble": true,
+    "current_fixture_git_blob": "ee7d4ac0ddecdcfd3e9b3712ec6c533d48e5e5b1"
+  },
+  "gate_status": {
+    "G_OWN_E_TC": "PASS",
+    "G_OWN_PRODUCTION_TC": "OPEN_NOT_RUN",
+    "VC": "OPEN_NOT_RUN",
+    "TF": "OPEN_NOT_RUN",
+    "VF": "OPEN_NOT_RUN"
+  },
+  "boundaries": [
+    "No live-site ownership certification.",
+    "No route-world certification.",
+    "No blanket permission for future mutation classes.",
+    "Production checkpoint remains open until the derived production conformance build passes in TC."
+  ],
+  "next_required_evidence": "Run IB04_Production_Conformance.user.js on the local fixture in TC and return the JSON result."
 }
