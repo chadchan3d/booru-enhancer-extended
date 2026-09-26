@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `e4f169f6c3514c1555612142c32216b88f83aaec`  
+**Production source blob:** `1f7c9669f6fcca4e128e51672788675ed7f0b291`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -145,3 +145,22 @@ Production behavior now:
 - existing native next-link detection is retained, but no continuation was observed in V1-N and no synthetic fallback is admitted.
 
 The current e621 post-page strategy remains OPEN until passive post markup is observed.
+
+
+## e621 native image-post integration
+
+Passive V1-N on `/posts/6736194` observed `#image-container[data-id]` carrying the same core file/rendition dataset as the listing card.
+
+Commit:
+
+- `3e44cbfebcb2b7331060c4680de7a59caf0f61e5`
+
+Production source blob:
+
+- `1f7c9669f6fcca4e128e51672788675ed7f0b291`
+
+The e621 adapter now resolves the observed image-post core metadata natively from `#image-container`, with no endpoint request. It also attempts to read Source only from a native source anchor inside `#post-information`.
+
+Category-specific tag arrays remain intentionally empty until the exact `#tag-list` DOM grouping is observed. The visible text proves categories exist, but that is not enough to justify guessed selectors.
+
+e926 remains separate and unresolved.
