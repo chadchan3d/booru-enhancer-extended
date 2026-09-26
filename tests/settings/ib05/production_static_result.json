@@ -1,0 +1,32 @@
+{
+  "checkpoint": "IB05",
+  "stage": "P_STATIC",
+  "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
+  "summary": {
+    "checks": 13,
+    "passed": 13,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "checks": {
+    "syntax": true,
+    "schemaVersionDistinct": true,
+    "rawStoreSnapshot": true,
+    "markerOnlyMigration": true,
+    "newerSchemaBlocks": true,
+    "emptyAmbiguous": true,
+    "invalidPreserved": true,
+    "unknownPreserved": true,
+    "importValidatedBeforeWrites": true,
+    "importRecovery": true,
+    "awaitedMountBarrier": true,
+    "asyncUiImport": true,
+    "publicVersionUnchanged": true
+  },
+  "boundaries": {
+    "browser_runtime_conformance": false,
+    "live_site": false,
+    "network": false,
+    "ib06_request_gate": false
+  }
+}
