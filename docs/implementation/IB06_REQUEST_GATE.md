@@ -1,6 +1,6 @@
 # IB06 — Small Enhancer HTTP Request Gate
 
-**Checkpoint state:** E-stage PASS in TC; production integration implemented; production conformance OPEN  
+**Checkpoint state:** PASS for active TC implementation path  
 **Production source changed during IB06:** YES — bounded IB06 integration only  
 **Production source blob:** `74adf9e192d2c00c1d493588cc9202388326402d`
 
@@ -164,4 +164,48 @@ Artifacts:
 - `tests/request/ib06/production_static_result.json`
 - `tests/request/ib06/production_gate_mock_result.json`
 
-**IB06 remains OPEN pending real-browser conformance of source blob `74adf9e192d2c00c1d493588cc9202388326402d`.**
+## Production conformance result
+
+The integrated production body passed real-browser conformance in Tampermonkey 5.5.0 × Chrome 153 × Windows 10 / Win32.
+
+Result:
+
+- 12 tests;
+- 12 passed;
+- 0 failed;
+- production source blob `74adf9e192d2c00c1d493588cc9202388326402d`;
+- derived conformance blob `410730444919fc3fc823210685030a999372a3c8`.
+
+Sanitized evidence:
+
+- `tests/browser/ib06/TC_PRODUCTION_RESULT_SUMMARY.json`
+
+The production run directly demonstrated:
+
+- equivalent reads share one actual manager transport;
+- releasing one consumer does not abort while another remains;
+- releasing the final consumer can produce a server-observed physical abort;
+- transient reads respect one finite two-attempt budget;
+- a transient read may recover on its second and final attempt;
+- 401 and 404 are typed terminal outcomes and are not retried;
+- HTTP-200 auth bodies are typed auth-required without retry;
+- malformed expected JSON is structural and does not replenish attempts;
+- Retry-After cooldown is isolated to its endpoint key;
+- a foreground join promotes queued shared work without preempting active work;
+- mutations neither dedupe nor retry automatically;
+- native-fetch → privileged fallback consumes one shared finite attempt budget.
+
+## Gate state
+
+- **G-REQUEST E-stage TC:** PASS
+- **G-REQUEST production TC:** PASS
+- **G-RUNTIME TC request primitive:** PASS from IB03
+- **G-OWN TC lifecycle:** PASS from IB04
+- **G-SETTINGS TC:** PASS from IB05
+- VC / TF / VF: not claimed
+- live-site HTTP behavior: not claimed
+- real-host concurrency/spacing budgets: not claimed
+
+**IB06 is complete for the active TC implementation path. IB07 is now eligible.**
+
+This checkpoint does not authorize or claim host-specific resolver policy, new site activation, route/world observation, download semantics or later capabilities.
