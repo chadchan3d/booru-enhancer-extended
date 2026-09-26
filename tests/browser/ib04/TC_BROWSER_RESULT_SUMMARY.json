@@ -1,0 +1,41 @@
+{
+  "checkpoint":"IB04",
+  "stage":"V6-B controlled browser fixture",
+  "cell":"TC",
+  "browser":"Chrome 153.0.0.0",
+  "userscript_manager":"Tampermonkey 5.5.0",
+  "platform":"Windows 10 / Win32",
+  "probe":"IB04 Browser Ownership Probe 1.0.0",
+  "tests":18,
+  "passed":18,
+  "failed":0,
+  "status":"PASS",
+  "passed_contracts":[
+    "static restoration and native node identity",
+    "five mount/dispose cycles and listener cleanup",
+    "later native title mutation survives",
+    "same-value native write invalidates stale restoration",
+    "repeated native edits preserve latest value",
+    "moved responsive source preserves identity and location",
+    "native card replacement survives stale disposal",
+    "late work cannot resurrect disposed source",
+    "focused owned control returns native origin",
+    "later user/native focus is not stolen",
+    "missing origin uses declared fallback",
+    "missing origin+fallback declares reload recovery",
+    "synchronous viewer failure preserves actual native navigation",
+    "later viewer media failure exposes usable native fallback",
+    "modifier/middle/native controls avoid takeover",
+    "accessible hover replacement restores cleanly",
+    "append failure retains readable content; explicit disposal removes owned addition",
+    "native listener survives enhancer disposal"
+  ],
+  "boundaries":{
+    "real_browser":true,
+    "live_site":false,
+    "production_userscript":false,
+    "route_world":false,
+    "network":false
+  },
+  "disposition":"G-OWN E-stage PASS for the named fixture effects in TC; production conformance still required."
+}
