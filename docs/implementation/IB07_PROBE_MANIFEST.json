@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_E621_CATEGORY_DOM_CAPTURE_NEXT",
-  "production_source_blob": "1f7c9669f6fcca4e128e51672788675ed7f0b291",
+  "status": "ACTIVE_E621_SOURCE_DOM_CAPTURE_NEXT",
+  "production_source_blob": "2b929fdb0fc6363e25ecbdd452e3b2c61a50d9ca",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -24,7 +24,7 @@
     "rule34.xxx/listing": "PASS_NATIVE_ONLY",
     "rule34.xxx/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_OPEN",
     "e621.net/listing": "PASS_NATIVE_ONLY_METADATA_PAGINATION_CONTINUATION_OPEN",
-    "e621.net/post": "PASS_NATIVE_ONLY_IMAGE_CORE_CATEGORY_STRUCTURE_OPEN",
+    "e621.net/post": "PASS_NATIVE_ONLY_IMAGE_CORE_AND_TAG_CATEGORIES_SOURCE_ELEMENT_OPEN",
     "e926.net/listing": "OPEN_V1N",
     "e926.net/post": "OPEN_V1N",
     "gelbooru.com/listing": "OPEN_V1N",
@@ -106,17 +106,29 @@
       "native_all_tags": true,
       "native_source_visible": true,
       "categorized_tag_groups_visible": true,
-      "categorized_tag_dom_structure": "OPEN",
+      "categorized_tag_dom_structure": "PASS",
       "resolver_request_needed_for_core_facts": false,
       "excluded_contexts": [
         "video",
         "gif/animated",
         "favorite/action"
-      ]
+      ],
+      "native_tag_contract": "#tag-list li.tag-list-item[data-category][data-name]",
+      "supported_categories_mapped": [
+        "artist",
+        "character",
+        "copyright",
+        "general",
+        "meta"
+      ],
+      "species_category_observed": true,
+      "species_model_slot": false,
+      "species_handling": "retained in allTags; not reclassified",
+      "source_element_contract": "OPEN"
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "e621.net #tag-list category DOM structure",
+  "next_evidence": "e621.net post-information Source DOM element",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
@@ -152,10 +164,12 @@
   },
   "e621_native_post_integration": {
     "commit": "3e44cbfebcb2b7331060c4680de7a59caf0f61e5",
-    "source_blob": "1f7c9669f6fcca4e128e51672788675ed7f0b291",
+    "source_blob": "2b929fdb0fc6363e25ecbdd452e3b2c61a50d9ca",
     "remote_resolver": false,
     "category_selectors_guessed": false,
     "e926_inherited": false,
-    "live_production_conformance": "OPEN_NOT_RUN"
+    "live_production_conformance": "OPEN_NOT_RUN",
+    "category_mapping_commit": "c065308a0780d71d48b33dd5efad925190852fdf",
+    "source_parser": "REMOVED_PENDING_NATIVE_DOM_EVIDENCE"
   }
 }
