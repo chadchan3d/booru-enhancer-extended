@@ -1,0 +1,33 @@
+{
+  "checkpoint": "IB05",
+  "status": "E_MODEL_PASS_V5_O_BROWSER_PENDING",
+  "production_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
+  "production_source_changed": false,
+  "schema_model": {
+    "version": 1,
+    "product_version": "1.2.7.3",
+    "settings_count": 30
+  },
+  "model_evidence": {
+    "path": "tests/settings/ib05/model-result.json",
+    "tests": 23,
+    "passed": 23,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "browser_evidence": {
+    "path": "tests/browser/ib05/IB05_Settings_Mount_Gate.user.js",
+    "git_blob": "4b53bf0704a3d0380ce0949dab3914500210db33",
+    "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
+    "status": "OPEN_NOT_RUN",
+    "isolated_userscript_identity": true,
+    "production_preferences_accessed": false,
+    "external_network": false
+  },
+  "gate_status": {
+    "G_SETTINGS": "OPEN_V5_O_BROWSER_PENDING",
+    "G_RUNTIME_TC_STORAGE": "PASS_FROM_IB03",
+    "G_OWN_TC_MOUNT_LIFECYCLE": "PASS_FROM_IB04"
+  },
+  "production_activation": "BLOCKED_UNTIL_BROWSER_GATE_PASS"
+}
