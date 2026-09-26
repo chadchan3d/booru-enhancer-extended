@@ -6,8 +6,8 @@ const PORT=8777;
 const root=__dirname;
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,`http://127.0.0.1:${PORT}`);
-  const file=url.pathname==='/'?'fixture.html':url.pathname.slice(1);
-  if(file!=='fixture.html'){
+  const file=url.pathname==='/'?'production-fixture.html':url.pathname.slice(1);
+  if(file!=='production-fixture.html'){
     res.writeHead(404,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});
     return res.end('not found');
   }
