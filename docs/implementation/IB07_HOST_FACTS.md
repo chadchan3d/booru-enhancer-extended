@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `2b929fdb0fc6363e25ecbdd452e3b2c61a50d9ca`  
+**Production source blob:** `7cff91aba24b3cb5cb96e4c23015ffad1d68ace2`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -175,3 +175,14 @@ Commit:
 - `c065308a0780d71d48b33dd5efad925190852fdf`
 
 The speculative Source-element parser was removed. Source remains unknown until its exact native DOM structure is captured.
+
+
+## e621 native image-post Source mapping
+
+The Source row was observed as `#post-information li.source-links .source-link a[href]` and is now mapped directly.
+
+Commit:
+
+- `8d3927e72b9b51ebd9b9b1b495e11a5c1cc938e3`
+
+The observed e621 image-post native strategy is now complete for core Post-model facts. It remains deliberately scoped away from video/GIF post structures, pagination continuation and favorite/action behavior.
