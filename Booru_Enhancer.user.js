@@ -495,6 +495,197 @@
 	};
 
 	/* ============================================================ *
+	 *  BOUNDED EFFECT OWNERSHIP
+	 * ============================================================ */
+	BE.ownership = {
+		create({ origin = null, fallback = null } = {}) {
+			let disposed = false;
+			let focusOrigin = origin;
+			let focusFallback = fallback;
+			const additions = [];
+			const listeners = [];
+			const timers = new Set();
+			const cleanups = [];
+			const attrRecords = [];
+			const attrIndex = new WeakMap();
+			const classRecords = [];
+			const classIndex = new WeakMap();
+			const styleRecords = [];
+			const styleIndex = new WeakMap();
+
+			function drain(record) {
+				if (!record?.observer) return;
+				for (const mutation of record.observer.takeRecords()) {
+					if (mutation.type === 'attributes') record.nativeTouched = true;
+				}
+			}
+			function observeAttribute(record, attributeName) {
+				record.observer.observe(record.node, {
+					attributes: true,
+					attributeFilter: [attributeName],
+					attributeOldValue: true,
+				});
+			}
+			function getAttrRecord(node, name) {
+				let map = attrIndex.get(node);
+				if (!map) { map = new Map(); attrIndex.set(node, map); }
+				if (map.has(name)) return map.get(name);
+				const record = {
+					node, name,
+					originalPresent: node.hasAttribute(name),
+					originalValue: node.getAttribute(name),
+					nativeTouched: false,
+					observer: null,
+				};
+				record.observer = new MutationObserver((mutations) => {
+					if (mutations.some((m) => m.type === 'attributes' && m.attributeName === name)) record.nativeTouched = true;
+				});
+				map.set(name, record);
+				attrRecords.push(record);
+				return record;
+			}
+			function ownAttribute(node, name, value) {
+				if (disposed || !node) return false;
+				const record = getAttrRecord(node, name);
+				drain(record);
+				record.observer.disconnect();
+				if (record.nativeTouched) { observeAttribute(record, name); return false; }
+				if (value === null || value === undefined) node.removeAttribute(name);
+				else node.setAttribute(name, String(value));
+				observeAttribute(record, name);
+				return true;
+			}
+			function getClassRecord(node) {
+				if (classIndex.has(node)) return classIndex.get(node);
+				const record = { node, original: new Map(), nativeTouched: false, observer: null };
+				record.observer = new MutationObserver((mutations) => {
+					if (mutations.some((m) => m.type === 'attributes' && m.attributeName === 'class')) record.nativeTouched = true;
+				});
+				classIndex.set(node, record);
+				classRecords.push(record);
+				return record;
+			}
+			function ownClass(node, className, present = true) {
+				if (disposed || !node) return false;
+				const record = getClassRecord(node);
+				drain(record);
+				record.observer.disconnect();
+				if (!record.original.has(className)) record.original.set(className, node.classList.contains(className));
+				if (record.nativeTouched) { observeAttribute(record, 'class'); return false; }
+				node.classList.toggle(className, !!present);
+				observeAttribute(record, 'class');
+				return true;
+			}
+			function getStyleRecord(node) {
+				if (styleIndex.has(node)) return styleIndex.get(node);
+				const record = { node, original: new Map(), nativeTouched: false, observer: null };
+				record.observer = new MutationObserver((mutations) => {
+					if (mutations.some((m) => m.type === 'attributes' && m.attributeName === 'style')) record.nativeTouched = true;
+				});
+				styleIndex.set(node, record);
+				styleRecords.push(record);
+				return record;
+			}
+			function ownStyle(node, property, value, priority = '') {
+				if (disposed || !node) return false;
+				const record = getStyleRecord(node);
+				drain(record);
+				record.observer.disconnect();
+				if (!record.original.has(property)) {
+					record.original.set(property, {
+						value: node.style.getPropertyValue(property),
+						priority: node.style.getPropertyPriority(property),
+					});
+				}
+				if (record.nativeTouched) { observeAttribute(record, 'style'); return false; }
+				if (value === null || value === undefined || value === '') node.style.removeProperty(property);
+				else node.style.setProperty(property, String(value), priority);
+				observeAttribute(record, 'style');
+				return true;
+			}
+			function add(node, parent, before = null) {
+				if (disposed || !node || !parent) return null;
+				if (before) parent.insertBefore(node, before); else parent.appendChild(node);
+				additions.push(node);
+				return node;
+			}
+			function on(node, type, fn, options) {
+				if (disposed || !node || typeof fn !== 'function') return fn;
+				node.addEventListener(type, fn, options);
+				listeners.push([node, type, fn, options]);
+				return fn;
+			}
+			function timeout(fn, ms) {
+				if (disposed) return null;
+				const id = setTimeout(() => { timers.delete(id); if (!disposed) fn(); }, ms);
+				timers.add(id);
+				return id;
+			}
+			function guard(fn) {
+				return (...args) => disposed ? undefined : fn(...args);
+			}
+			function cleanup(fn) {
+				if (typeof fn === 'function') cleanups.push(fn);
+				return fn;
+			}
+			function setFocusTargets(nextOrigin, nextFallback = null) {
+				focusOrigin = nextOrigin || null;
+				focusFallback = nextFallback || null;
+			}
+			function dispose() {
+				if (disposed) return { alreadyDisposed: true, focusOutcome: 'unchanged', reloadRecommended: false };
+				disposed = true;
+				for (const record of [...attrRecords, ...classRecords, ...styleRecords]) {
+					drain(record);
+					record.observer.disconnect();
+				}
+				for (const [node, type, fn, options] of listeners.splice(0)) {
+					try { node.removeEventListener(type, fn, options); } catch { /* noop */ }
+				}
+				for (const id of timers) clearTimeout(id);
+				timers.clear();
+				for (const record of attrRecords) {
+					if (record.nativeTouched || !record.node.isConnected) continue;
+					if (record.originalPresent) record.node.setAttribute(record.name, record.originalValue);
+					else record.node.removeAttribute(record.name);
+				}
+				for (const record of classRecords) {
+					if (record.nativeTouched || !record.node.isConnected) continue;
+					for (const [className, wasPresent] of record.original) record.node.classList.toggle(className, wasPresent);
+				}
+				for (const record of styleRecords) {
+					if (record.nativeTouched || !record.node.isConnected) continue;
+					for (const [property, original] of record.original) {
+						if (original.value) record.node.style.setProperty(property, original.value, original.priority);
+						else record.node.style.removeProperty(property);
+					}
+				}
+				const active = document.activeElement;
+				const removingFocusedOwned = additions.some((node) => node === active || node.contains?.(active));
+				for (const node of [...additions].reverse()) {
+					try { if (node.isConnected) node.remove(); } catch { /* noop */ }
+				}
+				let focusOutcome = 'unchanged';
+				let reloadRecommended = false;
+				if (removingFocusedOwned) {
+					if (focusOrigin?.isConnected && typeof focusOrigin.focus === 'function') { focusOrigin.focus(); focusOutcome = 'origin'; }
+					else if (focusFallback?.isConnected && typeof focusFallback.focus === 'function') { focusFallback.focus(); focusOutcome = 'fallback'; }
+					else { focusOutcome = 'unresolved'; reloadRecommended = true; }
+				}
+				for (const fn of cleanups.splice(0)) {
+					try { fn(); } catch (err) { BE.log.warn('[Ownership] cleanup failed', err); }
+				}
+				return { alreadyDisposed: false, focusOutcome, reloadRecommended };
+			}
+			return {
+				ownAttribute, ownClass, ownStyle, add, on, timeout, guard, cleanup,
+				setFocusTargets, dispose,
+				get disposed() { return disposed; },
+			};
+		},
+	};
+
+	/* ============================================================ *
 	 *  STORAGE
 	 * ============================================================ */
 	BE.store = (() => {
