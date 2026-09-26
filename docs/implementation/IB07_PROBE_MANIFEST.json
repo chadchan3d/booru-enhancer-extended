@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_RULE34_NATIVE_INTEGRATED_E621_V1N_NEXT",
-  "production_source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
+  "status": "ACTIVE_E621_LISTING_NATIVE_INTEGRATED_POST_V1N_NEXT",
+  "production_source_blob": "e4f169f6c3514c1555612142c32216b88f83aaec",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -112,5 +112,21 @@
     "family_thumbnail_batch_resolver": "DISABLED_PENDING_SCOPED_G_HOST",
     "family_favorite_action": "DISABLED_PENDING_ACTION_EVIDENCE",
     "candidate_helpers_retained": true
+  },
+  "e621_native_listing_integration": {
+    "commit": "4918893ca5a7c626652e97068a9069a4f212955c",
+    "source_blob": "e4f169f6c3514c1555612142c32216b88f83aaec",
+    "context": "e621.net /posts listing",
+    "remote_resolver": false,
+    "native_preview_sample_original": true,
+    "native_original_dimensions": true,
+    "native_original_bytes": true,
+    "native_md5": true,
+    "categorized_tags": "UNKNOWN",
+    "source": "UNKNOWN",
+    "e926_inherited": false,
+    "synthetic_pagination": false,
+    "favorite_action": false,
+    "live_production_conformance": "OPEN_NOT_RUN"
   }
 }
