@@ -38,6 +38,7 @@ function qualify({ id, historical, observed, defect, contract, control }) {
     expected,
   };
   results.push(record);
+  if (!oracleQualified || !expected) process.stderr.write(`[IB01 ${id}] ${JSON.stringify(record)}\n`);
   assert.equal(oracleQualified, true, `${id}: oracle control is not sensitive`);
   assert.equal(expected, true, `${id}: observed behavior does not match ${profile} expectation`);
 }
