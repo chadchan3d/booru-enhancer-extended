@@ -25,7 +25,7 @@
     "rule34.xxx/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_OPEN",
     "e621.net/listing": "PASS_NATIVE_ONLY_METADATA_PAGINATION_CONTINUATION_OPEN",
     "e621.net/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_PAGINATION_ACTION_OPEN",
-    "e926.net/listing": "OPEN_V1N",
+    "e926.net/listing": "PASS_NATIVE_ONLY_METADATA_PAGINATION_CONTINUATION_OPEN",
     "e926.net/post": "OPEN_V1N",
     "gelbooru.com/listing": "OPEN_V1N",
     "gelbooru.com/post": "OPEN_V1N"
@@ -126,10 +126,28 @@
       "species_handling": "retained in allTags; not reclassified",
       "source_element_contract": "PASS",
       "source_selector": "#post-information li.source-links .source-link a[href]"
+    },
+    "e926_listing": {
+      "status": "PASS_NATIVE_METADATA",
+      "evidence_doc": "docs/implementation/IB07_E926_V1N.md",
+      "observed_cards": 3,
+      "native_identity": true,
+      "native_preview_url": true,
+      "native_sample_url": true,
+      "native_original_url": true,
+      "native_original_dimensions": true,
+      "native_original_bytes": true,
+      "native_extension": true,
+      "native_md5": true,
+      "native_tags": true,
+      "native_flags": true,
+      "pending_flag_observed": true,
+      "native_next_link_observed": false,
+      "resolver_request_needed_for_observed_listing_facts": false
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "e926.net V1-N passive native listing/post capture",
+  "next_evidence": "e926.net V1-N passive native post capture",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
