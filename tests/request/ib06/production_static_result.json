@@ -1,0 +1,34 @@
+{
+  "checkpoint": "IB06",
+  "stage": "P_STATIC",
+  "production_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+  "summary": {
+    "checks": 15,
+    "passed": 15,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "checks": {
+    "syntax": true,
+    "gatePresent": true,
+    "typedOutcomes": true,
+    "mutationSingleAttempt": true,
+    "readDedupe": true,
+    "consumerCounts": true,
+    "physicalAbortSeparate": true,
+    "retryAfterCooldown": true,
+    "endpointPolicyNoGuessedDefault": true,
+    "nativeFallbackInsideGate": true,
+    "noDirectSiteFetch": true,
+    "favoriteMutationMarked": true,
+    "noGalleryOuterRetry": true,
+    "galleryAuthClassifier": true,
+    "publicVersion": true
+  },
+  "boundaries": {
+    "realBrowser": false,
+    "liveSite": false,
+    "hostBudgetsAssigned": false,
+    "ib07": false
+  }
+}
