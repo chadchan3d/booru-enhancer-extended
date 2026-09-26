@@ -1,0 +1,44 @@
+{
+  "checkpoint": "IB06",
+  "stage": "E_CONTROLLED_TRANSPORT",
+  "gate": "G-REQUEST",
+  "probe": "IB06 Request Gate 1.0.0",
+  "runtime_cell": {
+    "manager": "Tampermonkey 5.5.0",
+    "browser": "Chrome 153",
+    "platform": "Windows 10 / Win32"
+  },
+  "corrected_artifacts": {
+    "userscript_path": "tests/browser/ib06/IB06_Request_Gate.user.js",
+    "userscript_blob": "245bbb4d07dadcee7520f52d8741c82618979113",
+    "server_path": "tests/browser/ib06/server.cjs",
+    "server_blob": "4f3175ea7203329a74497859a5201654e898d4c7"
+  },
+  "result": {
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_cases": [
+    "B01 actual manager transport dedupes equivalent reads",
+    "B02 releasing one running consumer does not abort while another remains",
+    "B03 last running release issues a real transport abort observed by server after server acceptance",
+    "B04 transient failure uses at most two actual attempts",
+    "B05 one transient failure then success shares the same finite budget",
+    "B06 401 and 404 are typed terminal outcomes with no retry",
+    "B07 HTTP 200 login/auth body is auth-required and is not retried",
+    "B08 HTTP 200 malformed expected JSON is structural and is not retried",
+    "B09 429 cooldown is local to key A while key B remains usable",
+    "B10 foreground join promotes a queued hover read without preempting active work",
+    "B11 different endpoint keys can have one active request each"
+  ],
+  "boundaries": {
+    "real_manager_transport": true,
+    "localhost_only": true,
+    "live_site": false,
+    "production_integration": false,
+    "numeric_policy": "test-only; no production host budget inferred"
+  },
+  "conclusion": "IB06 E-stage G-REQUEST PASS for the active TC path. Production request-gate integration is eligible; production conformance remains required."
+}
