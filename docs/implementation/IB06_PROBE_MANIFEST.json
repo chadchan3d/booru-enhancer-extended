@@ -1,6 +1,6 @@
 {
   "checkpoint": "IB06",
-  "status": "E_PASS_P_INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "status": "PASS_TC_IMPLEMENTATION_PATH",
   "production_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
   "production_source_changed": true,
   "model_evidence": {
@@ -60,12 +60,12 @@
     "result_summary": "tests/browser/ib06/TC_REQUEST_GATE_RESULT_SUMMARY.json"
   },
   "gate_status": {
-    "G_REQUEST": "PASS_E_STAGE_TC_PRODUCTION_CONFORMANCE_PENDING",
+    "G_REQUEST": "PASS_PRODUCTION_TC",
     "G_RUNTIME_TC_REQUEST": "PASS_FROM_IB03",
     "G_SETTINGS_TC": "PASS_FROM_IB05",
     "G_OWN_TC": "PASS_FROM_IB04"
   },
-  "production_activation": "INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "production_activation": "PASS_TC_IMPLEMENTATION_PATH",
   "production_integration": {
     "commits": [
       "eb96a1b9f3c1b23df7dba1ee6cc445fbcde099b5",
@@ -88,7 +88,8 @@
     ],
     "static_conformance": "PASS_15_OF_15",
     "mock_conformance": "PASS_11_OF_11",
-    "production_browser_conformance": "OPEN_NOT_RUN"
+    "production_browser_conformance": "OPEN_NOT_RUN",
+    "production_conformance": "PASS_12_OF_12_TC"
   },
   "production_conformance_artifact": {
     "path": "tests/browser/ib06/IB06_Production_Conformance.user.js",
@@ -101,6 +102,15 @@
     "separate_userscript_identity": true,
     "production_preferences_accessed": false,
     "live_site": false,
-    "status": "OPEN_NOT_RUN"
-  }
+    "status": "PASS_12_OF_12_TC",
+    "result_summary": "tests/browser/ib06/TC_PRODUCTION_RESULT_SUMMARY.json"
+  },
+  "boundaries": [
+    "IB06 complete for the active TC implementation path only.",
+    "VC / TF / VF remain untested for IB06 and are not claimed.",
+    "No live-site HTTP behavior is certified by this checkpoint.",
+    "No real-host concurrency/spacing budget is assigned by this checkpoint.",
+    "No IB07 resolver/host-policy behavior is included or claimed."
+  ],
+  "next_checkpoint": "IB07 — per-host resolver / request-policy layer"
 }
