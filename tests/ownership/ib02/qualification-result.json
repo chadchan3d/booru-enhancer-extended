@@ -1,0 +1,39 @@
+{
+  "suite": "IB02 V6-L ownership probe",
+  "cases": 21,
+  "passed": 21,
+  "failed": 0,
+  "results": [
+    {"id":"O01-static-restoration","pass":true},
+    {"id":"O02-native-identity-listener","pass":true},
+    {"id":"O03-repeat-dispose","pass":true},
+    {"id":"O04-later-native-edits-survive","pass":true},
+    {"id":"O05-same-value-native-write-preserved","pass":true},
+    {"id":"O06-late-work-guard","pass":true},
+    {"id":"O07-sync-takeover-failure","pass":true},
+    {"id":"O08-later-media-fallback","pass":true},
+    {"id":"O09-protected-clicks","pass":true},
+    {"id":"O10-append-failure-retains-readable-content","pass":true},
+    {"id":"O11-full-disposal-removes-owned-only","pass":true},
+    {"id":"O12-nested-native-control","pass":true},
+    {"id":"O13-focused-owned-control-returns-origin","pass":true},
+    {"id":"O13-mutant-missing-focus-return-detected","pass":true},
+    {"id":"O14-do-not-steal-later-user-focus","pass":true},
+    {"id":"O15-missing-origin-uses-declared-fallback","pass":true},
+    {"id":"O16-no-surviving-target-discloses-reload-recovery","pass":true},
+    {"id":"O17-native-card-replacement-not-restored-over-new-card","pass":true},
+    {"id":"O18-moved-source-node-keeps-identity","pass":true},
+    {"id":"O19-repeated-native-edits-latest-survives","pass":true},
+    {"id":"O20-disabled-labels-and-equivalent-replacement","pass":true}
+  ],
+  "execution": {
+    "node": "v22.16.0",
+    "syntax_checks": ["mini_dom.cjs","owner_probe.cjs","run.cjs"],
+    "external_dependencies": []
+  },
+  "boundaries": {
+    "browser_evidence": false,
+    "g_own_closed": false,
+    "production_source_modified": false
+  }
+}
