@@ -1,0 +1,19 @@
+{
+  "source": "EC0_EC1_Evidence_Ledger.md",
+  "scope": "Historical EC1 sensitivity record; not a re-execution of the missing original EC1 packet",
+  "cases": [
+    {"id":"O01","requirement":"Static restoration preserves DOM structure, child order, text and attribute values","sensitivityEvidence":"Suppressing attribute restoration was rejected","historicalDisposition":"PASS H"},
+    {"id":"O02","requirement":"Native source/picture/image/link node identity and native listener survive","sensitivityEvidence":"Cloning the source was rejected","historicalDisposition":"PASS H"},
+    {"id":"O03","requirement":"Five mount/dispose cycles and repeated dispose leave no surviving listener","sensitivityEvidence":"Leaked-listener variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O04","requirement":"Later native title/style/source-srcset edits survive disposal","sensitivityEvidence":"Overwriting later native state was rejected","historicalDisposition":"PASS H"},
+    {"id":"O05","requirement":"A same-value native write prevents stale restoration","sensitivityEvidence":"Equality-insensitive overwrite variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O06","requirement":"Late callbacks/timers cannot mutate after disposal and cleanup executes once","sensitivityEvidence":"Unguarded late callback was rejected","historicalDisposition":"PASS H"},
+    {"id":"O07","requirement":"Synchronous viewer takeover failure leaves original click uncancelled","sensitivityEvidence":"Cancel-before-open variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O08","requirement":"Later media failure exposes the original native destination","sensitivityEvidence":"Missing-fallback variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O09","requirement":"Ctrl/Meta/Shift/Alt/middle/native controls avoid takeover","sensitivityEvidence":"Capture-every-click variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O10","requirement":"Append failure keeps existing appended content readable and reveals paginator","sensitivityEvidence":"Remove-content-on-failure variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O11","requirement":"Full disposal removes owned append additions while retaining original navigation","sensitivityEvidence":"Retaining-owned-addition variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O12","requirement":"Nested native control does not open viewer","sensitivityEvidence":"Capture-every-click variant was rejected","historicalDisposition":"PASS H"},
+    {"id":"O13","requirement":"Removing a focused owned control returns focus to retained native origin","sensitivityEvidence":"Missing-return defect detected; explicit-focus oracle control reached native link","historicalDisposition":"FAIL H — STOP"}
+  ]
+}

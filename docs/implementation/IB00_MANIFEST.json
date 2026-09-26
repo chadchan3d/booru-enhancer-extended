@@ -1,0 +1,67 @@
+{
+  "checkpoint": "IB00",
+  "status": "PASS",
+  "repository": "chadchan3d/booru-enhancer-extended",
+  "implementation_branch": "implementation/ib00-baseline",
+  "production_baseline": {
+    "commit": "6f06dfd19fe916be784fd6bafe6dce6ed76503fe",
+    "version": "1.2.7.3",
+    "userscript_path": "Booru_Enhancer.user.js",
+    "git_blob_sha": "945fb1442a4608359aeae4cb83f92a5ea93906a5",
+    "sha256_from_evidence_ledger": "9c432eee32b16f144f4553ae439b7097bf4b48cf6858d601f4d16b0d4e602af0"
+  },
+  "repository_state_at_ib00": {
+    "main_head": "07a38dc26cd35bb67ce6b696dc5718768b43b430",
+    "commits_ahead_of_baseline": 1,
+    "production_userscript_blob_matches_baseline": true,
+    "main_only_changes_since_baseline": [
+      "docs/research/README.md",
+      "docs/research/RESEARCH_SNAPSHOT.md",
+      "docs/research/SOURCE_CORPUS.md"
+    ]
+  },
+  "controlling_artifacts": [
+    {
+      "name": "Architecture_Reconciliation_Report.md",
+      "sha256": "4679545d9b5dcf6bbc1cb7152e4675f61575cdc87a98d9f0b21b1658904d1df5"
+    },
+    {
+      "name": "Pre_Implementation_Validation_Gate_Plan.md",
+      "sha256": "531c6d40f1d6669eb5f3bf15ba771cc7e982545f36c7e7e445f11fdb79852b24"
+    },
+    {
+      "name": "EC0_EC1_Evidence_Ledger.md",
+      "sha256": "740ac43c8d9455bf39ebb3f2fb4a42af2807186e8c8353e63265a806d903c425"
+    },
+    {
+      "name": "Claude harness ZIP",
+      "sha256": "56df21123dfd92bfabf80f0adab9855f92e5c7227b4f5b8172afa9f805aa9a45"
+    }
+  ],
+  "settings_schema": {
+    "count": 30,
+    "source": "Booru_Enhancer.user.js at production_baseline.commit"
+  },
+  "initial_host_priority": [
+    "rule34.xxx",
+    "e621.net",
+    "e926.net",
+    "gelbooru.com"
+  ],
+  "deferred_or_removed_from_current_scope": [
+    "rule34.us",
+    "chan.sankakucomplex.com",
+    "idol.sankakucomplex.com",
+    "beta.sankakucomplex.com"
+  ],
+  "runtime_target_cells": [
+    "Tampermonkey × Chromium",
+    "Violentmonkey × Chromium",
+    "Tampermonkey × Firefox",
+    "Violentmonkey × Firefox"
+  ],
+  "runtime_cells_passed": [],
+  "production_source_changed": false,
+  "evidence_gates_promoted": [],
+  "next_checkpoint": "IB01"
+}
