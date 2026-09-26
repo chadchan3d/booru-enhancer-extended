@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_E621_LISTING_NATIVE_INTEGRATED_POST_V1N_NEXT",
-  "production_source_blob": "e4f169f6c3514c1555612142c32216b88f83aaec",
+  "status": "ACTIVE_E621_CATEGORY_DOM_CAPTURE_NEXT",
+  "production_source_blob": "1f7c9669f6fcca4e128e51672788675ed7f0b291",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -24,7 +24,7 @@
     "rule34.xxx/listing": "PASS_NATIVE_ONLY",
     "rule34.xxx/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_OPEN",
     "e621.net/listing": "PASS_NATIVE_ONLY_METADATA_PAGINATION_CONTINUATION_OPEN",
-    "e621.net/post": "OPEN_V1N",
+    "e621.net/post": "PASS_NATIVE_ONLY_IMAGE_CORE_CATEGORY_STRUCTURE_OPEN",
     "e926.net/listing": "OPEN_V1N",
     "e926.net/post": "OPEN_V1N",
     "gelbooru.com/listing": "OPEN_V1N",
@@ -92,10 +92,31 @@
       "native_source": false,
       "native_next_link_observed": false,
       "resolver_request_needed_for_observed_listing_facts": false
+    },
+    "e621_post_image": {
+      "status": "PASS_NATIVE_CORE_METADATA",
+      "evidence_doc": "docs/implementation/IB07_E621_V1N.md",
+      "post_id": "6736194",
+      "native_container": "#image-container[data-id]",
+      "native_preview_sample_original": true,
+      "native_original_dimensions": true,
+      "native_original_bytes": true,
+      "native_md5": true,
+      "native_rating_score_faves": true,
+      "native_all_tags": true,
+      "native_source_visible": true,
+      "categorized_tag_groups_visible": true,
+      "categorized_tag_dom_structure": "OPEN",
+      "resolver_request_needed_for_core_facts": false,
+      "excluded_contexts": [
+        "video",
+        "gif/animated",
+        "favorite/action"
+      ]
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "e621.net V1-N passive native post capture",
+  "next_evidence": "e621.net #tag-list category DOM structure",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
@@ -127,6 +148,14 @@
     "e926_inherited": false,
     "synthetic_pagination": false,
     "favorite_action": false,
+    "live_production_conformance": "OPEN_NOT_RUN"
+  },
+  "e621_native_post_integration": {
+    "commit": "3e44cbfebcb2b7331060c4680de7a59caf0f61e5",
+    "source_blob": "1f7c9669f6fcca4e128e51672788675ed7f0b291",
+    "remote_resolver": false,
+    "category_selectors_guessed": false,
+    "e926_inherited": false,
     "live_production_conformance": "OPEN_NOT_RUN"
   }
 }
