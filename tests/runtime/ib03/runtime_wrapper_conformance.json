@@ -1,0 +1,34 @@
+{
+  "checkpoint":"IB03",
+  "source_blob":"aad0742b0e82c6f03f19f02c50f35cafa34545c4",
+  "suite":"production runtime wrapper conformance",
+  "tests":11,
+  "passed":11,
+  "failed":0,
+  "results":[
+    "full-source-syntax",
+    "legacy-storage-roundtrip",
+    "legacy-storage-mode",
+    "legacy-request-mode",
+    "legacy-request-single-settlement",
+    "legacy-progress-forwarded",
+    "legacy-menu-register",
+    "modern-mode-detected",
+    "modern-callback-promise-deduped",
+    "modern-error-callback-beats-promise-resolve",
+    "logical-cancel-precedes-sync-abort"
+  ],
+  "evidence_boundary":"The production runtime section itself was extracted from the current branch and exercised against deterministic mocks shaped by the real TC observations. This does not substitute for running the production userscript under every target manager/browser cell.",
+  "g_runtime_scope":{
+    "TC_legacy_storage":"PASS_FOR_IMPLEMENTATION",
+    "TC_legacy_privileged_request":"PASS_FOR_IMPLEMENTATION",
+    "TC_legacy_menu":"PASS_FOR_IMPLEMENTATION",
+    "TC_native_fetch":"PASS_FOR_IMPLEMENTATION",
+    "TC_modern_storage_request_menu":"MEASURED_IN_PROBE_NOT_PRODUCTION_GRANT_PATH",
+    "VC":"OPEN_NOT_RUN",
+    "TF":"OPEN_NOT_RUN",
+    "VF":"OPEN_NOT_RUN",
+    "route":"OPEN",
+    "download":"OPEN"
+  }
+}
