@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IB04 Browser Ownership Fixture</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.45}
+  #native-card{padding:16px;border:1px solid #888;border-radius:8px;margin:18px 0}
+  #native-card img{width:180px;height:120px;object-fit:cover;display:block;margin:8px 0}
+  #native-controls button{margin:4px}
+  #native-paginator{display:inline-block;margin-top:16px}
+  #native-move-target{min-height:20px;border:1px dashed #aaa;padding:6px;margin-top:8px}
+  .note{opacity:.75}
+</style>
+</head>
+<body>
+<h1>IB04 Browser Ownership Fixture</h1>
+<p class="note">Keep this page open while the Tampermonkey probe runs. It performs local DOM/focus/navigation tests only.</p>
+<div id="native-controls">
+  <button id="native-change-title">Native: change title</button>
+  <button id="native-same-style">Native: same-value style write</button>
+  <button id="native-title-twice">Native: change title twice</button>
+  <button id="native-move-source">Native: move source node</button>
+  <button id="native-replace-card">Native: replace card</button>
+  <button id="native-focus-other">Native: focus other input</button>
+</div>
+<input id="native-other-focus" value="native focus target">
+<div id="fixture-root">
+  <article id="native-card" data-native-generation="1">
+    <a id="native-link" href="#native-destination" title="native title">
+      Native post link
+      <picture id="native-picture">
+        <source id="native-source" srcset="native-1x.jpg 1x, native-2x.jpg 2x">
+        <img id="native-img" src="native.jpg" srcset="native.jpg 1x" style="object-fit:cover" alt="native alt">
+      </picture>
+    </a>
+    <button id="native-nested-control">Native nested control</button>
+  </article>
+</div>
+<div id="native-move-target"></div>
+<div id="native-appended-host"></div>
+<a id="native-paginator" href="#page-2">Native paginator</a>
+<div id="native-destination" tabindex="-1">Native destination</div>
+<script>
+(() => {
+  'use strict';
+  let generation = 1;
+  const byId = (id) => document.getElementById(id);
+  function cardParts() {
+    return {
+      card: byId('native-card'), link: byId('native-link'), picture: byId('native-picture'),
+      source: byId('native-source'), img: byId('native-img'), nested: byId('native-nested-control')
+    };
+  }
+  function attachNativeListeners(parts) {
+    if (!parts?.link) return;
+    parts.link.addEventListener('click', () => {
+      document.documentElement.dataset.nativeLinkClicks = String(Number(document.documentElement.dataset.nativeLinkClicks || '0') + 1);
+    });
+    parts.nested?.addEventListener('click', () => {
+      document.documentElement.dataset.nativeNestedClicks = String(Number(document.documentElement.dataset.nativeNestedClicks || '0') + 1);
+    });
+  }
+  attachNativeListeners(cardParts());
+
+  byId('native-change-title').addEventListener('click', () => {
+    const { link } = cardParts();
+    if (link) link.setAttribute('title', 'native title newer');
+  });
+  byId('native-same-style').addEventListener('click', () => {
+    const { img } = cardParts();
+    if (img) img.setAttribute('style', 'object-fit:contain');
+  });
+  byId('native-title-twice').addEventListener('click', () => {
+    const { link } = cardParts();
+    if (!link) return;
+    link.setAttribute('title','native title one');
+    link.setAttribute('title','native title two');
+  });
+  byId('native-move-source').addEventListener('click', () => {
+    const { source } = cardParts();
+    if (source) byId('native-move-target').appendChild(source);
+  });
+  byId('native-replace-card').addEventListener('click', () => {
+    const old = byId('native-card');
+    if (!old) return;
+    generation += 1;
+    const replacement = document.createElement('article');
+    replacement.id = 'native-card';
+    replacement.dataset.nativeGeneration = String(generation);
+    replacement.innerHTML = `
+      <a id="native-link" href="#native-destination" title="replacement native title">
+        Replacement native post link
+        <picture id="native-picture">
+          <source id="native-source" srcset="replacement-1x.jpg 1x, replacement-2x.jpg 2x">
+          <img id="native-img" src="replacement.jpg" srcset="replacement.jpg 1x" style="object-fit:cover" alt="replacement native alt">
+        </picture>
+      </a>
+      <button id="native-nested-control">Replacement native nested control</button>`;
+    old.replaceWith(replacement);
+    attachNativeListeners(cardParts());
+  });
+  byId('native-focus-other').addEventListener('click', () => byId('native-other-focus').focus());
+})();
+</script>
+</body>
+</html>
