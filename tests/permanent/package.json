@@ -1,0 +1,17 @@
+{
+  "name": "booru-enhancer-extended-permanent-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Checkpoint-qualified synthetic regression suite for Booru Enhancer Extended",
+  "scripts": {
+    "test": "node runner.cjs --profile baseline",
+    "test:baseline": "node runner.cjs --profile baseline",
+    "test:corrected": "node runner.cjs --profile corrected"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  }
+}
