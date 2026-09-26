@@ -1,0 +1,415 @@
+{
+  "checkpoint": "IB05",
+  "stage": "E_MODEL",
+  "gateStatus": "OPEN_V5_O_BROWSER_PENDING",
+  "productionSourceChanged": false,
+  "model": {
+    "productVersion": "1.2.7.3",
+    "schemaVersion": 1,
+    "settingsCount": 30
+  },
+  "summary": {
+    "tests": 23,
+    "passed": 23,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "tests": [
+    {
+      "id": "E01",
+      "name": "M01 explicit legacy nondefaults survive",
+      "status": "PASS",
+      "detail": {
+        "preserved": 7
+      }
+    },
+    {
+      "id": "E02",
+      "name": "M02 missing keys use legacy defaults without persistence",
+      "status": "PASS",
+      "detail": {
+        "legacyDefaultsPreserved": true
+      }
+    },
+    {
+      "id": "E03",
+      "name": "M03 known import choices validate and survive",
+      "status": "PASS",
+      "detail": {
+        "unknownRoundTrip": true
+      }
+    },
+    {
+      "id": "E04",
+      "name": "M04 invalid known values quarantine; unknown raw key remains inert",
+      "status": "PASS",
+      "detail": {
+        "invalidKnown": [
+          "media.thumbQuality",
+          "viewer.autoplayVideo",
+          "gallery.gridGap"
+        ],
+        "unknownPreserved": true
+      }
+    },
+    {
+      "id": "E05",
+      "name": "M05 empty storage remains ambiguous and uses legacy defaults",
+      "status": "PASS",
+      "detail": {
+        "provenance": "AMBIGUOUS_EMPTY"
+      }
+    },
+    {
+      "id": "E06",
+      "name": "M06 indistinguishable empty legacy state resolves identically to M05",
+      "status": "PASS",
+      "detail": {
+        "byteEquivalentInput": true
+      }
+    },
+    {
+      "id": "E07",
+      "name": "migration is idempotent",
+      "status": "PASS",
+      "detail": {
+        "secondWrites": 0
+      }
+    },
+    {
+      "id": "E08",
+      "name": "typed storage form preserves explicit choices",
+      "status": "PASS",
+      "detail": {
+        "encoding": "typed"
+      }
+    },
+    {
+      "id": "E09",
+      "name": "JSON-string storage form preserves explicit choices",
+      "status": "PASS",
+      "detail": {
+        "encoding": "json-string"
+      }
+    },
+    {
+      "id": "E10",
+      "name": "mount occurs only after delayed migration resolution",
+      "status": "PASS",
+      "detail": {
+        "migrationResolvedAt": 38,
+        "firstMountAt": 39
+      }
+    },
+    {
+      "id": "E11",
+      "name": "denied schema write blocks mount and leaves preferences unchanged",
+      "status": "PASS",
+      "detail": {
+        "mounted": false,
+        "preferencesUnchanged": true
+      }
+    },
+    {
+      "id": "E12",
+      "name": "write failure cannot partially overwrite production preferences",
+      "status": "PASS",
+      "detail": {
+        "onlySchemaMarkerWasAttempted": true
+      }
+    },
+    {
+      "id": "E13",
+      "name": "unknown raw keys survive migration and export",
+      "status": "PASS",
+      "detail": {
+        "unknownKeys": [
+          "legacy:opaque",
+          "setting:future.foo"
+        ]
+      }
+    },
+    {
+      "id": "E14",
+      "name": "invalid boolean is isolated and resolves legacy-safe default",
+      "status": "PASS",
+      "detail": {
+        "raw": "not-a-bool",
+        "reason": "malformed-storage-value"
+      }
+    },
+    {
+      "id": "E15",
+      "name": "invalid numeric is isolated and resolves legacy-safe default",
+      "status": "PASS",
+      "detail": {
+        "raw": "huge",
+        "reason": "malformed-storage-value"
+      }
+    },
+    {
+      "id": "E16",
+      "name": "invalid select is isolated and resolves legacy-safe default",
+      "status": "PASS",
+      "detail": {
+        "raw": "stretch",
+        "decoded": "stretch",
+        "reason": "invalid-choice"
+      }
+    },
+    {
+      "id": "E17",
+      "name": "malformed import is rejected before any write",
+      "status": "PASS",
+      "detail": {
+        "reason": "invalid-known-value:gallery.gridGap",
+        "writes": 0
+      }
+    },
+    {
+      "id": "E18",
+      "name": "unsupported newer schema remains untouched and blocks mount",
+      "status": "PASS",
+      "detail": {
+        "blockedVersion": 2
+      }
+    },
+    {
+      "id": "E19",
+      "name": "unknown imported values round-trip inertly",
+      "status": "PASS",
+      "detail": {
+        "roundTrip": true
+      }
+    },
+    {
+      "id": "E20",
+      "name": "partial import write rolls back to exact prior snapshot",
+      "status": "PASS",
+      "detail": {
+        "rolledBack": true
+      }
+    },
+    {
+      "id": "E21",
+      "name": "schema version is distinct from product version",
+      "status": "PASS",
+      "detail": {
+        "productVersion": "1.2.7.3",
+        "schemaVersion": 1
+      }
+    },
+    {
+      "id": "E22",
+      "name": "upgrade-written marker does not convert empty provenance into fresh-install proof",
+      "status": "PASS",
+      "detail": {
+        "provenance": "AMBIGUOUS_EMPTY"
+      }
+    },
+    {
+      "id": "E23",
+      "name": "recovery export preserves invalid raw data and absent-key state",
+      "status": "PASS",
+      "detail": {
+        "invalidRecovered": true,
+        "absentCount": 29
+      }
+    }
+  ],
+  "keyTable": [
+    {
+      "key": "general.enabled",
+      "legacyDefault": true,
+      "m01Stored": null,
+      "m01Effective": true
+    },
+    {
+      "key": "general.theme",
+      "legacyDefault": "dark",
+      "m01Stored": null,
+      "m01Effective": "dark"
+    },
+    {
+      "key": "general.accentColor",
+      "legacyDefault": "#ff8ac6",
+      "m01Stored": null,
+      "m01Effective": "#ff8ac6"
+    },
+    {
+      "key": "general.toolbarPosition",
+      "legacyDefault": "bottom-right",
+      "m01Stored": "top-left",
+      "m01Effective": "top-left"
+    },
+    {
+      "key": "media.hoverPreview",
+      "legacyDefault": true,
+      "m01Stored": null,
+      "m01Effective": true
+    },
+    {
+      "key": "media.thumbQuality",
+      "legacyDefault": "sample",
+      "m01Stored": "original",
+      "m01Effective": "original"
+    },
+    {
+      "key": "download.filenameTemplate",
+      "legacyDefault": "{character} - {artist} ({id})",
+      "m01Stored": null,
+      "m01Effective": "{character} - {artist} ({id})"
+    },
+    {
+      "key": "download.maxCharacters",
+      "legacyDefault": 3,
+      "m01Stored": null,
+      "m01Effective": 3
+    },
+    {
+      "key": "download.tagDelimiter",
+      "legacyDefault": ", ",
+      "m01Stored": null,
+      "m01Effective": ", "
+    },
+    {
+      "key": "download.retries",
+      "legacyDefault": 3,
+      "m01Stored": null,
+      "m01Effective": 3
+    },
+    {
+      "key": "download.openMode",
+      "legacyDefault": "new-tab",
+      "m01Stored": null,
+      "m01Effective": "new-tab"
+    },
+    {
+      "key": "viewer.enabled",
+      "legacyDefault": true,
+      "m01Stored": null,
+      "m01Effective": true
+    },
+    {
+      "key": "viewer.autoplayVideo",
+      "legacyDefault": true,
+      "m01Stored": false,
+      "m01Effective": false
+    },
+    {
+      "key": "viewer.loopVideo",
+      "legacyDefault": true,
+      "m01Stored": null,
+      "m01Effective": true
+    },
+    {
+      "key": "viewer.muteVideo",
+      "legacyDefault": true,
+      "m01Stored": false,
+      "m01Effective": false
+    },
+    {
+      "key": "viewer.rememberVolume",
+      "legacyDefault": true,
+      "m01Stored": null,
+      "m01Effective": true
+    },
+    {
+      "key": "viewer.fitMode",
+      "legacyDefault": "fit-both",
+      "m01Stored": null,
+      "m01Effective": "fit-both"
+    },
+    {
+      "key": "gallery.infiniteScroll",
+      "legacyDefault": true,
+      "m01Stored": false,
+      "m01Effective": false
+    },
+    {
+      "key": "gallery.gridDensity",
+      "legacyDefault": 0,
+      "m01Stored": 5,
+      "m01Effective": 5
+    },
+    {
+      "key": "gallery.thumbnailSize",
+      "legacyDefault": 220,
+      "m01Stored": null,
+      "m01Effective": 220
+    },
+    {
+      "key": "gallery.gridGap",
+      "legacyDefault": 8,
+      "m01Stored": 12,
+      "m01Effective": 12
+    },
+    {
+      "key": "gallery.compactMode",
+      "legacyDefault": false,
+      "m01Stored": null,
+      "m01Effective": false
+    },
+    {
+      "key": "keys.download",
+      "legacyDefault": "d",
+      "m01Stored": null,
+      "m01Effective": "d"
+    },
+    {
+      "key": "keys.favorite",
+      "legacyDefault": "f",
+      "m01Stored": null,
+      "m01Effective": "f"
+    },
+    {
+      "key": "keys.openOriginal",
+      "legacyDefault": "o",
+      "m01Stored": null,
+      "m01Effective": "o"
+    },
+    {
+      "key": "keys.next",
+      "legacyDefault": "ArrowRight",
+      "m01Stored": null,
+      "m01Effective": "ArrowRight"
+    },
+    {
+      "key": "keys.prev",
+      "legacyDefault": "ArrowLeft",
+      "m01Stored": null,
+      "m01Effective": "ArrowLeft"
+    },
+    {
+      "key": "keys.close",
+      "legacyDefault": "Escape",
+      "m01Stored": null,
+      "m01Effective": "Escape"
+    },
+    {
+      "key": "keys.playPause",
+      "legacyDefault": " ",
+      "m01Stored": null,
+      "m01Effective": " "
+    },
+    {
+      "key": "debug.verboseLogging",
+      "legacyDefault": false,
+      "m01Stored": null,
+      "m01Effective": false
+    }
+  ],
+  "policy": {
+    "emptyStore": "AMBIGUOUS_EMPTY; never fresh-install proof",
+    "legacyDefaults": {
+      "thumbQuality": "sample",
+      "infiniteScroll": true
+    },
+    "unknown": "preserve inertly and round-trip",
+    "malformed": "preserve for recovery; effective legacy-safe default",
+    "newerSchema": "leave untouched; block dependent mount",
+    "mountBarrier": "dependent mount only after successful migration resolution",
+    "migrationWrites": "schema marker only; no preference rewrite in schema 0 -> 1",
+    "import": "validate fully before writes; rollback exact prior snapshot on write failure"
+  }
+}
