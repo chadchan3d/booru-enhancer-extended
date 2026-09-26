@@ -1,0 +1,41 @@
+name: IB01 harness
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    strategy:
+      matrix:
+        node: [22, 24]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tests/permanent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Generate exact lock for first qualification if absent
+        run: |
+          if [ ! -f package-lock.json ]; then
+            npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          fi
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Qualify baseline regression oracles
+        run: npm test
+      - name: Upload qualification result and generated lock
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ib01-node-${{ matrix.node }}
+          path: |
+            tests/permanent/package-lock.json
+            tests/permanent/results/ib01-baseline.json
+          if-no-files-found: warn
