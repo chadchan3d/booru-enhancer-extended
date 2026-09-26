@@ -1,0 +1,48 @@
+{
+  "checkpoint": "IB05",
+  "stage": "E_V5_O",
+  "gate": "G-SETTINGS",
+  "probe": "IB05 Settings Mount Gate 1.0.0",
+  "production_version": "1.2.7.3",
+  "settings_schema_version": 1,
+  "runtime_cell": {
+    "manager": "Tampermonkey 5.5.0",
+    "browser": "Chrome 153",
+    "platform": "Windows 10 / Win32"
+  },
+  "artifact": {
+    "path": "tests/browser/ib05/IB05_Settings_Mount_Gate.user.js",
+    "git_blob": "4b53bf0704a3d0380ce0949dab3914500210db33"
+  },
+  "isolation": {
+    "separate_userscript_identity": true,
+    "production_namespace_accessed": false,
+    "external_network": false
+  },
+  "result": {
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_cases": [
+    "B01 actual GM typed-value round trip",
+    "B02 actual GM JSON-string form decodes production-like values",
+    "B03 actual M01-style migration preserves explicit nondefaults",
+    "B04 actual empty store remains ambiguous after schema marker",
+    "B05 actual malformed known values are preserved while effective values fall back",
+    "B06 actual newer schema stays untouched and blocks dependent mount",
+    "B07 delayed migration blocks dependent mount until release",
+    "B08 rejected migration causes zero dependent mount and preserves preference",
+    "B09 first dependent mount timestamp follows resolved settings and sees explicit choice",
+    "B10 isolated test storage cleans up completely"
+  ],
+  "boundaries": {
+    "real_manager_storage": true,
+    "production_preferences": false,
+    "live_site": false,
+    "network": false,
+    "production_integration": false
+  },
+  "conclusion": "IB05 E-stage G-SETTINGS PASS for the active TC path. Production IB05 integration is eligible; production conformance remains required after integration."
+}
