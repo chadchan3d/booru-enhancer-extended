@@ -1,0 +1,44 @@
+{
+  "checkpoint": "IB06",
+  "status": "E_MODEL_PASS_CONTROLLED_TRANSPORT_PENDING",
+  "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
+  "production_source_changed": false,
+  "model_evidence": {
+    "path": "tests/request/ib06/model-result.json",
+    "tests": 21,
+    "passed": 21,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "test_policy": {
+    "lanes": [
+      "foreground",
+      "background"
+    ],
+    "endpoint_keys": [
+      "A",
+      "B"
+    ],
+    "max_read_attempts": 2,
+    "max_consumers_per_required_case": 2,
+    "numeric_values_are_test_parameters_only": true
+  },
+  "browser_evidence": {
+    "path": "tests/browser/ib06/IB06_Request_Gate.user.js",
+    "git_blob": "2742d2691d4416e06627420e088c4012343c721b",
+    "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
+    "localhost_origins": [
+      "http://127.0.0.1:8778",
+      "http://127.0.0.1:8779"
+    ],
+    "live_site": false,
+    "status": "OPEN_NOT_RUN"
+  },
+  "gate_status": {
+    "G_REQUEST": "OPEN_CONTROLLED_TRANSPORT_PENDING",
+    "G_RUNTIME_TC_REQUEST": "PASS_FROM_IB03",
+    "G_SETTINGS_TC": "PASS_FROM_IB05",
+    "G_OWN_TC": "PASS_FROM_IB04"
+  },
+  "production_activation": "BLOCKED_UNTIL_G_REQUEST_E_STAGE_PASS"
+}
