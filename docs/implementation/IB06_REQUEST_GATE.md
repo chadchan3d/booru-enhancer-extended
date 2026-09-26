@@ -81,10 +81,25 @@ Artifacts:
 - `tests/browser/ib06/IB06_Request_Gate.user.js`
 - `tests/browser/ib06/server.cjs`
 
-Probe Git blob:
+Initial browser run:
 
-- `2742d2691d4416e06627420e088c4012343c721b`
+- 11 tests;
+- 9 passed;
+- 2 failed;
+- both failures traced to probe timing, not production or model logic.
 
-**G-REQUEST remains OPEN until the browser result is reviewed.**
+B03 released after a fixed delay without first proving the server had accepted the delayed request. The corrected probe waits for server acceptance before releasing the last consumer and then waits for server-observed close evidence.
+
+B09 used a one-second Retry-After window. Key-B completion pumps the queue; if that short window elapsed first, key A was correctly eligible to start. The corrected fixture uses a longer declared Retry-After window and asserts while safely inside it before later verifying expiry admission.
+
+Corrected artifacts:
+
+- userscript blob `245bbb4d07dadcee7520f52d8741c82618979113`;
+- server blob `4f3175ea7203329a74497859a5201654e898d4c7`;
+- harness commits `aba1af137814e2a1e6008fb7aaaacfd39baeed9b` and `0d18f6817ab774ce02f62d84a34de9904b4db9de`.
+
+Production source remains unchanged.
+
+**G-REQUEST remains OPEN pending the corrected browser rerun.**
 
 No production `BE.net`, adapter call site, host retry policy or endpoint budget may change before that pass.
