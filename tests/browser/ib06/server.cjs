@@ -51,7 +51,8 @@ function handler(origin,port){
       hit(origin,key,u.pathname);return text(res,200,'not-json');
     }
     if(u.pathname==='/rate'){
-      hit(origin,key,u.pathname);return json(res,429,{ok:false,rate:true},{'Retry-After':'1'});
+      const seconds=Math.max(1,Math.min(10,Number(u.searchParams.get('seconds')||1)));
+      hit(origin,key,u.pathname);return json(res,429,{ok:false,rate:true,seconds},{'Retry-After':String(seconds)});
     }
     if(u.pathname==='/retry'){
       const n=hit(origin,key,u.pathname);
