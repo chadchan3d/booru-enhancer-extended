@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `1f7c9669f6fcca4e128e51672788675ed7f0b291`  
+**Production source blob:** `2b929fdb0fc6363e25ecbdd452e3b2c61a50d9ca`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -164,3 +164,14 @@ The e621 adapter now resolves the observed image-post core metadata natively fro
 Category-specific tag arrays remain intentionally empty until the exact `#tag-list` DOM grouping is observed. The visible text proves categories exist, but that is not enough to justify guessed selectors.
 
 e926 remains separate and unresolved.
+
+
+## e621 native tag-category mapping
+
+The post-page tag DOM was observed directly. Production now maps artist, character, copyright, general and meta tags from native `li[data-category][data-name]` rows. Species is a separate native e621 category; because the current Post model has no species slot, species remains represented only in `allTags` rather than being misclassified.
+
+Commit:
+
+- `c065308a0780d71d48b33dd5efad925190852fdf`
+
+The speculative Source-element parser was removed. Source remains unknown until its exact native DOM structure is captured.
