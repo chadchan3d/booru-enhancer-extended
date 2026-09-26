@@ -27,7 +27,7 @@
 <input id="native-other-focus" value="native focus target">
 <div id="fixture-root" class="content">
   <article id="native-card" class="thumbnail" data-native-generation="1">
-    <a id="native-link" href="#native-destination" title="native title">
+    <a id="native-link" class="thm-link" href="#native-destination" title="native title">
       Native post link
       <picture id="native-picture">
         <source id="native-source" srcset="native-1x.jpg 1x, native-2x.jpg 2x">
@@ -90,7 +90,7 @@
     replacement.className = 'thumbnail';
     replacement.dataset.nativeGeneration = String(generation);
     replacement.innerHTML = `
-      <a id="native-link" href="#native-destination" title="replacement native title">
+      <a id="native-link" class="thm-link" href="#native-destination" title="replacement native title">
         Replacement native post link
         <picture id="native-picture">
           <source id="native-source" srcset="replacement-1x.jpg 1x, replacement-2x.jpg 2x">
