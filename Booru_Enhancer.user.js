@@ -938,7 +938,7 @@
 			},
 
 			'debug.verboseLogging': { cat: 'Debug', type: 'bool', def: false, label: 'Verbose console logging' },
-		};;
+		};
 
 		const values = new Map();
 		const invalidKnown = new Map();
