@@ -1,0 +1,7 @@
+{
+  "name":"booru-enhancer-ib03-runtime-contract",
+  "private":true,
+  "version":"1.0.0",
+  "scripts":{"test":"node runtime_wrapper_contract.cjs"},
+  "license":"MIT"
+}
