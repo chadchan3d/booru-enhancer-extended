@@ -1,14 +1,14 @@
 # IB06 — Small Enhancer HTTP Request Gate
 
-**Checkpoint state:** E-stage in progress — finite model PASS; controlled real-manager transport OPEN  
-**Production source changed during IB06:** NO  
-**Production source blob:** `02105f262eb3c128642b5296f4fa4502bc8cfa7b`
+**Checkpoint state:** E-stage PASS in TC; production integration implemented; production conformance OPEN  
+**Production source changed during IB06:** YES — bounded IB06 integration only  
+**Production source blob:** `74adf9e192d2c00c1d493588cc9202388326402d`
 
 ## Controlling invariant
 
 All enhancer HTTP must eventually enter one bounded logical-operation policy. Equivalent reads may share work; mutations do not join read dedupe. One finite attempt budget owns the whole logical read. Each consumer settles once. Releasing the last consumer cancels queued work and requests physical abort where available, but unresolved non-abortable or ignored-abort transport continues to occupy its endpoint slot until the wire actually terminates.
 
-IB06 production integration remains blocked until E-stage G-REQUEST passes.
+The E-stage G-REQUEST premise has passed in the active TC cell. Production integration is therefore permitted, but IB06 remains open until the integrated production artifact passes real-browser conformance.
 
 ## E-model result
 
@@ -103,3 +103,65 @@ Production source remains unchanged.
 **G-REQUEST remains OPEN pending the corrected browser rerun.**
 
 No production `BE.net`, adapter call site, host retry policy or endpoint budget may change before that pass.
+
+
+## Corrected controlled-transport result
+
+The corrected TC browser probe ran in Tampermonkey 5.5.0 × Chrome 153 × Windows 10 / Win32.
+
+Result:
+
+- 11 tests;
+- 11 passed;
+- 0 failed;
+- real manager privileged transport;
+- localhost only;
+- server-observed physical abort;
+- no production preferences;
+- no live-site requests.
+
+Sanitized evidence:
+
+- `tests/browser/ib06/TC_REQUEST_GATE_RESULT_SUMMARY.json`
+
+This closes the IB06 E-stage G-REQUEST premise for the active TC path.
+
+## Production integration
+
+Commits:
+
+- `eb96a1b9f3c1b23df7dba1ee6cc445fbcde099b5` — integrate bounded request gate;
+- `1f16ec8646bf539f3cc44937007e4f6f02fff0cd` — remove stale pagination retry bookkeeping.
+
+Production source blob:
+
+- `74adf9e192d2c00c1d493588cc9202388326402d`
+
+Integrated scope:
+
+- all existing `BE.net` HTTP enters one logical-operation gate;
+- equivalent reads may join a shared in-flight operation;
+- mutations never join read dedupe and are limited to one attempt;
+- consumer release is logical cancellation; last release requests physical abort where available;
+- an unresolved abandoned transport remains endpoint-active until its transport promise terminates;
+- transient reads have one finite attempt budget;
+- 401/403 → auth-required, 404 → not-found, 429 → rate-limited, 5xx/transport faults → transient, validation failures → structural;
+- Retry-After may create a temporary endpoint-local cooldown;
+- endpoint concurrency and spacing are policy inputs, but no real-host numeric budgets are assigned here; defaults are unthrottled;
+- Gelbooru's existing native-fetch → privileged fallback is now one two-attempt transport plan rather than nested retry allowances;
+- the favorite remote action is explicitly a mutation, so it cannot dedupe or automatically retry;
+- infinite-scroll terminal failure restores native pagination and no longer starts a fresh delayed request with a replenished budget.
+
+No IB07 resolver/host policy, route strategy, new host activation, content normalization or release-version bump entered this change.
+
+Production-code evidence before browser conformance:
+
+- static checks: 15/15 PASS;
+- integrated `BE.net` deterministic mock conformance: 11/11 PASS.
+
+Artifacts:
+
+- `tests/request/ib06/production_static_result.json`
+- `tests/request/ib06/production_gate_mock_result.json`
+
+**IB06 remains OPEN pending real-browser conformance of source blob `74adf9e192d2c00c1d493588cc9202388326402d`.**
