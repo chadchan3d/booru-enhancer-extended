@@ -1,0 +1,24 @@
+{
+  "checkpoint":"IB04",
+  "stage":"production source static conformance",
+  "source_blob":"4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
+  "syntax":"PASS",
+  "checks":{
+    "bounded_ownership_helper_present":true,
+    "viewer_lifecycle_owned":true,
+    "viewer_dispose_exported":true,
+    "viewer_native_failure_fallback_present":true,
+    "gallery_delegated_listeners_owned":true,
+    "gallery_dispose_exported":true,
+    "destructive_source_remove_absent":true,
+    "responsive_source_mutation_owned":true,
+    "hover_suppression_requires_hover_enabled":true,
+    "hover_accessible_replacement_present":true,
+    "nested_native_control_guard_present":true,
+    "viewer_takeover_occurs_before_preventDefault":true,
+    "native_focus_context_passed_to_viewer":true,
+    "settings_listener_cleanup_owned":true
+  },
+  "status":"PASS",
+  "boundary":"Static/source conformance does not replace the required real-browser production integration run."
+}
