@@ -1,8 +1,8 @@
 {
   "checkpoint": "IB05",
-  "status": "E_MODEL_PASS_V5_O_BROWSER_PENDING",
-  "production_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
-  "production_source_changed": false,
+  "status": "E_PASS_P_INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
+  "production_source_blob": "4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1",
+  "production_source_changed": true,
   "schema_model": {
     "version": 1,
     "product_version": "1.2.7.3",
@@ -19,15 +19,32 @@
     "path": "tests/browser/ib05/IB05_Settings_Mount_Gate.user.js",
     "git_blob": "4b53bf0704a3d0380ce0949dab3914500210db33",
     "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
-    "status": "OPEN_NOT_RUN",
+    "status": "PASS_10_OF_10",
     "isolated_userscript_identity": true,
     "production_preferences_accessed": false,
-    "external_network": false
+    "external_network": false,
+    "result_summary": "tests/browser/ib05/TC_SETTINGS_MOUNT_RESULT_SUMMARY.json"
   },
   "gate_status": {
-    "G_SETTINGS": "OPEN_V5_O_BROWSER_PENDING",
+    "G_SETTINGS": "PASS_E_STAGE_TC",
     "G_RUNTIME_TC_STORAGE": "PASS_FROM_IB03",
     "G_OWN_TC_MOUNT_LIFECYCLE": "PASS_FROM_IB04"
   },
-  "production_activation": "BLOCKED_UNTIL_BROWSER_GATE_PASS"
+  "production_activation": "INTEGRATED_CONFORMANCE_PENDING",
+  "production_integration": {
+    "commit": "d69877431fe6839cb375e0aa9128ba47a7447912",
+    "source_blob": "4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1",
+    "public_version": "1.2.7.3",
+    "scope": [
+      "schema version 1 distinct from product version",
+      "raw/parsed store recovery state",
+      "validated setting types and legacy-safe fallback for malformed known values",
+      "schema marker-only migration",
+      "awaited settings initialization before dependent mount",
+      "unknown raw-key preservation in settings export/import",
+      "recoverable validated import with rollback attempt",
+      "unsupported newer-schema mount block"
+    ],
+    "production_conformance": "OPEN_NOT_RUN"
+  }
 }
