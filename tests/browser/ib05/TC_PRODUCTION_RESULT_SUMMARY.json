@@ -1,0 +1,55 @@
+{
+  "checkpoint": "IB05",
+  "probe": "IB05 Production Conformance 1.0.0",
+  "production_version": "1.2.7.3",
+  "settings_schema_version": 1,
+  "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
+  "conformance_artifact": {
+    "path": "tests/browser/ib05/IB05_Production_Conformance.user.js",
+    "git_blob": "ededd3b910dec484f9be11627187cedebd8b574c"
+  },
+  "runtime_cell": {
+    "manager": "Tampermonkey 5.5.0",
+    "browser": "Chrome 153",
+    "platform": "Windows 10 / Win32"
+  },
+  "source_contract": {
+    "production_body_retained": true,
+    "local_only_match": true,
+    "separate_userscript_identity": true,
+    "production_preferences_accessed": false,
+    "external_network": false
+  },
+  "result": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_cases": [
+    "P01 integrated schema/product versions remain distinct",
+    "P02 clean production boot writes only schema marker, not absent defaults",
+    "P03 ambiguous empty store keeps legacy Sample and append-on defaults",
+    "P04 preference-dependent UI is mounted only with resolved settings",
+    "P05 invalid direct setting value is rejected without persistence",
+    "P06 legacy import preserves valid known values and inert unknown values",
+    "P07 production export preserves absence and inert unknown raw values",
+    "P08 malformed new-format import is rejected before writes",
+    "P09 invalid known raw value stays recoverable while effective value is safe",
+    "P10 new-format export/import round-trips valid, invalid and unknown state",
+    "P11 explicit stored choices govern first production mount",
+    "P12 unsupported newer schema blocks production enhancer mount without down-conversion"
+  ],
+  "boundaries": {
+    "real_browser": true,
+    "real_manager_storage": true,
+    "production_preferences": false,
+    "live_site": false,
+    "external_network": false,
+    "ib06": false,
+    "vc": false,
+    "tf": false,
+    "vf": false
+  },
+  "conclusion": "IB05 production conformance PASS for the active TC implementation path. G-SETTINGS closes for this scoped path; IB06 is eligible. Broader runtime cells and live-site claims remain unmade."
+}
