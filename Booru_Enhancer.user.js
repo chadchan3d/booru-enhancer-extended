@@ -207,25 +207,218 @@
 	})();
 
 	/* ============================================================ *
-	 *  GM SHIM
+	 *  RUNTIME COMPATIBILITY
 	 * ============================================================ */
+	BE.runtime = (() => {
+		const modernRoot = (typeof GM !== 'undefined' && GM) ? GM : null;
+		const legacy = {
+			getValue: typeof GM_getValue === 'function' ? GM_getValue : null,
+			setValue: typeof GM_setValue === 'function' ? GM_setValue : null,
+			deleteValue: typeof GM_deleteValue === 'function' ? GM_deleteValue : null,
+			listValues: typeof GM_listValues === 'function' ? GM_listValues : null,
+			request: typeof GM_xmlhttpRequest === 'function' ? GM_xmlhttpRequest : null,
+			registerMenu: typeof GM_registerMenuCommand === 'function' ? GM_registerMenuCommand : null,
+			unregisterMenu: typeof GM_unregisterMenuCommand === 'function' ? GM_unregisterMenuCommand : null,
+		};
+		const modern = {
+			getValue: typeof modernRoot?.getValue === 'function' ? modernRoot.getValue.bind(modernRoot) : null,
+			setValue: typeof modernRoot?.setValue === 'function' ? modernRoot.setValue.bind(modernRoot) : null,
+			deleteValue: typeof modernRoot?.deleteValue === 'function' ? modernRoot.deleteValue.bind(modernRoot) : null,
+			listValues: typeof modernRoot?.listValues === 'function' ? modernRoot.listValues.bind(modernRoot) : null,
+			request: typeof modernRoot?.xmlHttpRequest === 'function' ? modernRoot.xmlHttpRequest.bind(modernRoot) : null,
+			registerMenu: typeof modernRoot?.registerMenuCommand === 'function' ? modernRoot.registerMenuCommand.bind(modernRoot) : null,
+			unregisterMenu: typeof modernRoot?.unregisterMenuCommand === 'function' ? modernRoot.unregisterMenuCommand.bind(modernRoot) : null,
+		};
+
+		function groupMode(names) {
+			if (names.every((name) => typeof legacy[name] === 'function')) return 'legacy';
+			if (names.every((name) => typeof modern[name] === 'function')) return 'modern';
+			return 'unavailable';
+		}
+		const storageMode = groupMode(['getValue', 'setValue', 'deleteValue', 'listValues']);
+		const requestMode = typeof legacy.request === 'function' ? 'legacy' : (typeof modern.request === 'function' ? 'modern' : 'unavailable');
+		const menuMode = typeof legacy.registerMenu === 'function' ? 'legacy' : (typeof modern.registerMenu === 'function' ? 'modern' : 'unavailable');
+
+		function callAsync(fn, args, capability) {
+			if (typeof fn !== 'function') return Promise.reject(new Error(`Runtime capability unavailable: ${capability}`));
+			try { return Promise.resolve(fn(...args)); }
+			catch (err) { return Promise.reject(err); }
+		}
+
+		function storageFn(name) {
+			if (storageMode === 'legacy') return legacy[name];
+			if (storageMode === 'modern') return modern[name];
+			return null;
+		}
+
+		class RuntimeRequestError extends Error {
+			constructor(kind, detail) {
+				super(`Runtime request ${kind}`);
+				this.name = 'RuntimeRequestError';
+				this.kind = kind;
+				this.detail = detail;
+			}
+		}
+
+		function request(options = {}) {
+			const transport = requestMode === 'legacy' ? legacy.request : (requestMode === 'modern' ? modern.request : null);
+			let rawHandle = null;
+			let settled = false;
+			let logicalCancelled = false;
+			let terminalKind = 'pending';
+			let resolvePromise;
+			let rejectPromise;
+			const promise = new Promise((resolve, reject) => { resolvePromise = resolve; rejectPromise = reject; });
+
+			const user = {
+				onload: options.onload,
+				onerror: options.onerror,
+				ontimeout: options.ontimeout,
+				onabort: options.onabort,
+				onprogress: options.onprogress,
+			};
+			const transportOptions = { ...options };
+			for (const key of Object.keys(user)) delete transportOptions[key];
+
+			function callUser(name, value) {
+				if (logicalCancelled) return;
+				const fn = user[name];
+				if (typeof fn !== 'function') return;
+				try { fn(value); } catch (err) { console.error('[Booru Enhancer] runtime callback failed', err); }
+			}
+			function settleSuccess(value, source) {
+				if (settled) return false;
+				settled = true;
+				terminalKind = source || 'load';
+				callUser('onload', value);
+				resolvePromise(value);
+				return true;
+			}
+			function settleFailure(kind, value) {
+				if (settled) return false;
+				settled = true;
+				terminalKind = kind;
+				const cb = kind === 'timeout' ? 'ontimeout' : (kind === 'abort' ? 'onabort' : 'onerror');
+				callUser(cb, value);
+				rejectPromise(new RuntimeRequestError(kind, value));
+				return true;
+			}
+			function settleCancelled() {
+				if (settled) return false;
+				settled = true;
+				logicalCancelled = true;
+				terminalKind = 'cancelled';
+				rejectPromise(new RuntimeRequestError('cancelled', null));
+				return true;
+			}
+
+			if (typeof transport !== 'function') {
+				settleFailure('unavailable', null);
+			} else {
+				try {
+					rawHandle = transport({
+						...transportOptions,
+						onprogress: (event) => {
+							if (!settled && !logicalCancelled) callUser('onprogress', event);
+						},
+						onload: (res) => settleSuccess(res, 'load'),
+						onerror: (err) => settleFailure('error', err),
+						ontimeout: (err) => settleFailure('timeout', err),
+						onabort: (err) => settleFailure('abort', err),
+					});
+					if (rawHandle && typeof rawHandle.then === 'function') {
+						Promise.resolve(rawHandle).then(
+							(res) => settleSuccess(res, 'promise'),
+							(err) => settleFailure('error', err),
+						);
+					}
+				} catch (err) {
+					settleFailure('error', err);
+				}
+			}
+
+			return {
+				promise,
+				get mode() { return requestMode; },
+				get rawHandle() { return rawHandle; },
+				get settled() { return settled; },
+				get logicalCancelled() { return logicalCancelled; },
+				get terminalKind() { return terminalKind; },
+				get transportAbortAvailable() { return !!rawHandle && typeof rawHandle.abort === 'function'; },
+				abortTransport() {
+					if (!rawHandle || typeof rawHandle.abort !== 'function') return false;
+					try { rawHandle.abort(); return true; } catch { return false; }
+				},
+				cancel({ abortTransport = true } = {}) {
+					if (settled) return { logicalCancelled: false, transportAbortIssued: false };
+					const transportAbortIssued = abortTransport && rawHandle && typeof rawHandle.abort === 'function'
+						? (() => { try { rawHandle.abort(); return true; } catch { return false; } })()
+						: false;
+					settleCancelled();
+					return { logicalCancelled: true, transportAbortIssued };
+				},
+			};
+		}
+
+		function registerMenuCommand(label, callback, options) {
+			const register = menuMode === 'legacy' ? legacy.registerMenu : (menuMode === 'modern' ? modern.registerMenu : null);
+			if (typeof register !== 'function') return null;
+			const id = register(label, callback, options);
+			return {
+				id,
+				unregister() {
+					const remove = menuMode === 'legacy' ? legacy.unregisterMenu : modern.unregisterMenu;
+					if (typeof remove !== 'function' || id === undefined || id === null) return false;
+					try { remove(id); return true; } catch { return false; }
+				},
+			};
+		}
+
+		return {
+			capabilities: {
+				storageMode,
+				requestMode,
+				menuMode,
+				requestProgress: requestMode === 'unavailable' ? 'unavailable' : 'optional',
+				requestAbort: requestMode === 'unavailable' ? 'unavailable' : 'per-handle',
+				download: 'unvalidated',
+				routeObservation: 'unvalidated',
+			},
+			storage: {
+				getValue: (key, fallback) => callAsync(storageFn('getValue'), [key, fallback], 'storage.getValue'),
+				setValue: (key, value) => callAsync(storageFn('setValue'), [key, value], 'storage.setValue'),
+				deleteValue: (key) => callAsync(storageFn('deleteValue'), [key], 'storage.deleteValue'),
+				listValues: () => callAsync(storageFn('listValues'), [], 'storage.listValues'),
+			},
+			request,
+			nativeFetch: (...args) => (typeof fetch === 'function'
+				? fetch(...args)
+				: Promise.reject(new Error('Runtime capability unavailable: fetch'))),
+			menu: { registerMenuCommand },
+			RuntimeRequestError,
+		};
+	})();
+
+	/* Compatibility facade for existing modules. Runtime-specific behavior stays
+	 * centralized above; download/style/notification remain on their existing
+	 * paths until their own checkpoints admit changes. */
 	const _GM = {
-		getValue: (typeof GM_getValue === 'function') ? GM_getValue : (k, d) => GM.getValue(k, d),
- setValue: (typeof GM_setValue === 'function') ? GM_setValue : (k, v) => GM.setValue(k, v),
- deleteValue: (typeof GM_deleteValue === 'function') ? GM_deleteValue : (k) => GM.deleteValue(k),
- listValues: (typeof GM_listValues === 'function') ? GM_listValues : () => GM.listValues(),
- xhr: (typeof GM_xmlhttpRequest === 'function') ? GM_xmlhttpRequest : (opts) => GM.xmlHttpRequest(opts),
- download: (typeof GM_download === 'function') ? GM_download : (opts) => GM.download(opts),
- addStyle: (typeof GM_addStyle === 'function') ? GM_addStyle : (css) => {
-	 const s = document.createElement('style');
-	 s.textContent = css;
-	 document.head.appendChild(s);
-	 return s;
- },
- notification: (typeof GM_notification === 'function') ? GM_notification : (opts) => {
-	 try { new Notification(opts.title || 'Booru Enhancer', { body: opts.text }); } catch { /* noop */ }
- },
- registerMenuCommand: (typeof GM_registerMenuCommand === 'function') ? GM_registerMenuCommand : () => {},
+		getValue: (k, d) => BE.runtime.storage.getValue(k, d),
+		setValue: (k, v) => BE.runtime.storage.setValue(k, v),
+		deleteValue: (k) => BE.runtime.storage.deleteValue(k),
+		listValues: () => BE.runtime.storage.listValues(),
+		xhr: (opts) => BE.runtime.request(opts),
+		download: (typeof GM_download === 'function') ? GM_download : (opts) => modernRoot?.download?.(opts),
+		addStyle: (typeof GM_addStyle === 'function') ? GM_addStyle : (css) => {
+			const style = document.createElement('style');
+			style.textContent = css;
+			document.head.appendChild(style);
+			return style;
+		},
+		notification: (typeof GM_notification === 'function') ? GM_notification : (opts) => {
+			try { new Notification(opts.title || 'Booru Enhancer', { body: opts.text }); } catch { /* noop */ }
+		},
+		registerMenuCommand: (label, callback, options) => BE.runtime.menu.registerMenuCommand(label, callback, options)?.id,
 	};
 	BE.gm = _GM;
 
@@ -531,37 +724,35 @@
 		request(opts, retries = 0) {
 			return new Promise((resolve, reject) => {
 				const attempt = (n) => {
-					_GM.xhr({
-						method: 'GET',
-						...opts,
-						onload: (res) => {
-							if (res.status >= 200 && res.status < 300) {
-								resolve(res);
-							} else if (res.status === 429) {
-								const delay = Math.pow(2, (retries - n + 1)) * 1000;
-								BE.log.warn(`[Gallery] 429 Rate limit. Retrying in ${delay/1000}s...`);
-								if (n > 0) {
-									setTimeout(() => attempt(n - 1), delay);
-								} else {
-									reject(new Error(`HTTP 429 Rate limit exceeded for ${opts.url}`));
-								}
-							} else if (n > 0) {
-								setTimeout(() => attempt(n - 1), 400 * (retries - n + 1));
+					const operation = BE.runtime.request({ method: 'GET', ...opts });
+					operation.promise.then((res) => {
+						if (res.status >= 200 && res.status < 300) {
+							resolve(res);
+						} else if (res.status === 429) {
+							const delay = Math.pow(2, (retries - n + 1)) * 1000;
+							BE.log.warn(`[Gallery] 429 Rate limit. Retrying in ${delay/1000}s...`);
+							if (n > 0) {
+								setTimeout(() => attempt(n - 1), delay);
 							} else {
-								reject(new Error(`HTTP ${res.status} for ${opts.url}`));
+								reject(new Error(`HTTP 429 Rate limit exceeded for ${opts.url}`));
 							}
-						},
-						onerror: (err) => (n > 0 ? setTimeout(() => attempt(n - 1), 400 * (retries - n + 1)) : reject(err)),
-							ontimeout: (err) => (n > 0 ? setTimeout(() => attempt(n - 1), 400 * (retries - n + 1)) : reject(err))
+						} else if (n > 0) {
+							setTimeout(() => attempt(n - 1), 400 * (retries - n + 1));
+						} else {
+							reject(new Error(`HTTP ${res.status} for ${opts.url}`));
+						}
+					}, (err) => {
+						if (n > 0) setTimeout(() => attempt(n - 1), 400 * (retries - n + 1));
+						else reject(err);
 					});
 				};
 				attempt(retries);
 			});
 		},
- async json(url, opts = {}) {
-	 const res = await this.request({ url, headers: { Accept: 'application/json', ...(opts.headers || {}) }, ...opts }, opts.retries ?? 2);
-	 return JSON.parse(res.responseText);
- }
+		async json(url, opts = {}) {
+			const res = await this.request({ url, headers: { Accept: 'application/json', ...(opts.headers || {}) }, ...opts }, opts.retries ?? 2);
+			return JSON.parse(res.responseText);
+		}
 	};
 
 	/* ============================================================ *
