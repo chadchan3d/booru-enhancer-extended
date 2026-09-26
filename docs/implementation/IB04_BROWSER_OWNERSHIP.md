@@ -1,105 +1,117 @@
 # IB04 — Browser Ownership and Bounded Production Disposal
 
-**Checkpoint state:** E-STAGE PREPARED — BLOCKED ON REAL TC BROWSER RUN  
-**Production ownership integration:** Not started  
-**G-OWN promoted:** None
+**Checkpoint state:** E PASS; production integration implemented; real-browser production conformance still OPEN  
+**Development cell:** Tampermonkey 5.5.0 × Chrome 153  
+**Production source blob:** `4f43d0dc57cbbbe70726e36263fc6854d0bd0cad`
 
-## Purpose
+## E-stage browser result
 
-IB04 first validates the minimal ownership/disposal contract in a real browser fixture, then—only if that named browser gate passes—integrates the same bounded ownership rules into existing production lifecycle boundaries.
+The controlled browser ownership probe ran in the measured TC cell and passed **18/18 cases**.
 
-The final implementation blueprint requires browser evidence before production ownership activation. Local IB02 evidence alone is insufficient.
+The passing scope includes:
 
-## Prepared browser probe
+- static restoration and native node identity;
+- five mount/dispose cycles;
+- later native writes and same-value native writes;
+- repeated native edits;
+- moved responsive-source identity/location;
+- native card replacement;
+- late callback suppression;
+- O13 focus return;
+- later-focus preservation;
+- declared fallback and reload recovery;
+- real native navigation after synchronous viewer-open failure;
+- usable native fallback after later media failure;
+- modifier/middle/native-control click preservation;
+- accessible hover replacement/restoration;
+- append failure versus explicit full disposal;
+- preservation of native listeners.
 
-One local-only Tampermonkey fixture has been prepared for the already measured TC development cell.
+This closes the **E-stage G-OWN premise for those named effects in TC only**. It does not certify live sites, route worlds, VC/TF/VF, or production integration by itself.
+
+## Production integration
+
+After the E-stage pass, the production userscript was changed only within IB04's admitted scope.
+
+The integrated production ownership model now:
+
+- records bounded owned attribute/class/style mutations;
+- drains pending attribute mutations before deciding restoration;
+- preserves later native changes instead of forcing stale restoration;
+- owns gallery delegated listeners and settings/resize cleanup;
+- owns thumbnail action UI and card/image classes;
+- keeps e621 `<picture>/<source>` nodes intact instead of deleting them;
+- temporarily redirects responsive source/srcset values through owned mutations;
+- suppresses native hover text only while enhanced hover is enabled;
+- supplies an accessible replacement label where appropriate;
+- restores hover labels when enhanced hover is disabled;
+- owns viewer shell listeners and exposes viewer disposal;
+- passes native focus origin/fallback into the viewer;
+- returns focus on close only when focus is still inside the viewer;
+- exposes an “Open native post” link on media failure;
+- leaves modifier/middle/native-control clicks alone;
+- calls the viewer synchronously before cancelling ordinary native navigation;
+- exposes bounded gallery disposal.
+
+The implementation does **not** introduce a generalized reactive owner, cloned native subtrees, a universal DOM snapshot, new adapters, media policy changes, route ownership, or a new request scheduler.
+
+## Production static conformance
+
+The integrated source was parsed and checked against the IB04 contract.
+
+Static/source checks currently pass for:
+
+- bounded ownership helper;
+- viewer ownership/disposal;
+- viewer native failure fallback;
+- gallery owned listeners/disposal;
+- absence of destructive `source.remove()`;
+- owned responsive-source mutation;
+- hover-setting gate;
+- accessible hover replacement;
+- nested native-control guard;
+- viewer-open-before-`preventDefault()` ordering;
+- native focus context;
+- settings-listener cleanup.
+
+Static conformance is not being substituted for the required browser run.
+
+## Production browser conformance artifact
+
+A local-only build was generated directly from production source blob:
+
+`4f43d0dc57cbbbe70726e36263fc6854d0bd0cad`
 
 Artifact:
 
-- `IB04_Browser_Ownership_Probe.user.js`
-- version `1.0.0`
-- SHA-256 `ff6921b9efc491ac4279a9fd35b378e64cf7db1ed70b23ab0b4e25a53c78e17c`
+`tests/browser/ib04/IB04_Production_Conformance.user.js`
 
-Fixture:
+Git blob:
 
-- `fixture.html`
-- SHA-256 `b588ec5265cc7a5a4ab2120ba22081964ad381ea58a0fcc21ad423d0b68a3b24`
+`5d4dff0c2943764e41babf07c9608e80917359ba`
 
-Server:
+Only its metadata differs from production to make it safe for the local fixture:
 
-- `server.cjs`
-- SHA-256 `ce5abe85c31c9f508e5758fcd017dbfb76c222b1e94890c35b933370d493d406`
-- loopback only: `127.0.0.1:8775`
+- all public `@match` entries are replaced with `http://127.0.0.1:8775/*`;
+- public `@connect` entries are removed;
+- update/download URLs are removed;
+- a local conformance postamble is appended.
 
-Review packet:
+The production code body is otherwise the current IB04 candidate.
 
-- `IB04_Browser_Ownership_Packet.zip`
-- SHA-256 `5bce5ebb5386936e7b220a5bfc22686736e3b3505918bc43a636163d42a85db0`
-- ZIP integrity: PASS
+The current fixture revision is Git blob:
 
-The public repository contains the probe source, fixture, server, hashes and static qualification. The ZIP itself is a review convenience and is not required as a committed binary.
+`ee7d4ac0ddecdcfd3e9b3712ec6c533d48e5e5b1`
 
-## Static qualification
+The browser conformance run checks the actual integrated gallery/viewer call sites, including responsive node ownership, hover restore, synchronous takeover ordering, native controls, viewer focus return, media-failure fallback, full gallery disposal, repeated re-init/dispose and native-listener survival.
 
-The probe and fixture were syntax/static checked before browser execution.
+## Gate state
 
-Checks passed:
+- **G-OWN E-stage / named TC fixture effects:** PASS
+- **G-OWN production TC:** OPEN—NOT RUN
+- VC / TF / VF: OPEN—NOT RUN
+- live-site ownership: not claimed
 
-- local-only match;
-- no `@connect`;
-- no Rule34/e621/e926/Gelbooru/Pixiv/Sankaku logic;
-- no external runtime request API;
-- explicit run/export commands;
-- O13 focus case present;
-- real same-document native-navigation case present;
-- same-value native mutation case present;
-- native card replacement case present;
-- moved responsive-source case present.
+IB04 is therefore **not complete yet**. The remaining requirement is one real-browser run of the derived production conformance build in TC.
 
-## Browser cases
-
-The browser run contains 18 named cases:
-
-1. static restoration and native node identity;
-2. five mount/dispose cycles and listener cleanup;
-3. later native title change survives;
-4. same-value native write invalidates stale restoration;
-5. repeated native edits preserve latest;
-6. moved responsive source preserves identity/location;
-7. native card replacement survives stale-owner disposal;
-8. late callback cannot resurrect disposed source;
-9. O13 focus returns to surviving native origin;
-10. later user/native focus is not stolen;
-11. missing origin uses declared surviving fallback;
-12. missing origin+fallback declares reload recovery;
-13. synchronous viewer-shell failure preserves actual native hash navigation;
-14. later viewer-media failure exposes a usable native fallback;
-15. modifier/middle/native nested controls avoid takeover;
-16. disabled hover retains native title; accessible replacement restores cleanly;
-17. append failure retains readable content while explicit disposal removes only owned addition;
-18. native page listener remains after enhancer disposal.
-
-The owner drains pending MutationObserver records before disposal so an immediate same-value native write is not discarded as stale enhancer state.
-
-## Evidence boundary
-
-A PASS here would be real-browser evidence for the named fixture effects in **TC** only.
-
-It would not certify:
-
-- live-site selectors or framework lifecycle;
-- route-world observation;
-- network/media cancellation;
-- every future DOM mutation;
-- VC/TF/VF;
-- production ownership call sites.
-
-Those remain separate evidence/conformance work.
-
-## Production gate
-
-Production IB04 integration remains forbidden until the exact browser probe is run in the measured TC cell and its JSON result is reviewed.
-
-If any named browser case fails, the affected mutation is reduced/withheld rather than masked by a larger ownership framework.
-
-**Next required action:** run the browser probe in Tampermonkey × Chrome using the supplied loopback fixture and return the complete JSON result.
+If that run passes, production G-OWN for the named integrated effects in TC can close and IB05 becomes eligible. If it fails, the smallest affected production call site is reverted or reduced rather than masked by broader machinery.
