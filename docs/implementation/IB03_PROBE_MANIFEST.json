@@ -1,0 +1,69 @@
+{
+  "checkpoint": "IB03",
+  "status": "BLOCKED_ON_REAL_RUNTIME_CELL",
+  "stage": "E_PREPARED_LOCAL_SERVER_QUALIFIED",
+  "probe": {
+    "name": "IB03_Common_Runtime_Probe.user.js",
+    "version": "2.0.0",
+    "sha256": "cc66d516826f0c37816d825b0e5ea304b41d209e13ba0c46599591548040d698",
+    "automatic_execution": false,
+    "matches": [
+      "http://127.0.0.1:8765/*",
+      "http://localhost:8765/*"
+    ],
+    "one_artifact_for_all_cells": true
+  },
+  "controlled_transport": {
+    "server": {
+      "name": "server.cjs",
+      "sha256": "b347a875ff43dc35fcfffbf76b58e2912dbbd8c1ee6553532f4767dc9764a892",
+      "origins": [
+        "http://127.0.0.1:8765",
+        "http://127.0.0.1:8766"
+      ]
+    },
+    "server_self_test": {
+      "name": "server_self_test.cjs",
+      "sha256": "110934d8b28af2f94fe12bcde0bbd0f2cbce86eafe6393da004af471594eaf40",
+      "result": "PASS"
+    },
+    "probe_static_test": {
+      "name": "probe_static_test.cjs",
+      "sha256": "460737af8bf762e64c0fe7ff3d40217348aab3987a7a61f23d94807522b6d943",
+      "result": "PASS"
+    }
+  },
+  "packet": {
+    "name": "IB03_Runtime_Probe_Packet.zip",
+    "sha256": "e27facf153c4ca060ab9806eb57ec482891abc56c60dd64150c9ec1336244434",
+    "zip_test": "PASS"
+  },
+  "prepared_coverage": [
+    "legacy and modern storage API inventory",
+    "typed storage round trip",
+    "absent/delete behavior",
+    "malformed legacy string preservation observation",
+    "serialized legacy boolean string observation",
+    "same-origin native fetch",
+    "privileged cross-origin requests",
+    "redirect/final URL/response headers",
+    "empty, malformed, auth-body, 401, 500 responses",
+    "known and unknown length progress",
+    "early stream error",
+    "deliberate timeout",
+    "returned request handle before await",
+    "active abort and server close evidence",
+    "logical cancellation with late terminal event",
+    "menu registration, operator callback, temporary removal"
+  ],
+  "runtime_cells": {
+    "TC": "OPEN_NOT_RUN",
+    "VC": "OPEN_NOT_RUN",
+    "TF": "OPEN_NOT_RUN",
+    "VF": "OPEN_NOT_RUN"
+  },
+  "production_runtime_wrapper_integrated": false,
+  "production_userscript_modified": false,
+  "g_runtime_promoted": [],
+  "next_required_evidence": "Run exact probe artifact in one named real browser/userscript-manager cell and return raw JSON plus browser/manager versions."
+}
