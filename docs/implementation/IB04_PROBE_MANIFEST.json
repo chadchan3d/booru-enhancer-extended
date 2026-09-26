@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB04",
-  "status": "P_INTEGRATED_PRODUCTION_BROWSER_CONFORMANCE_PENDING",
-  "stage": "E_PASS_P_IMPLEMENTED",
+  "status": "PASS_TC_IMPLEMENTATION_PATH",
+  "stage": "E_PASS_P_PASS",
   "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
   "e_stage": {
     "probe": "IB04 Browser Ownership Probe 1.0.0",
@@ -25,7 +25,7 @@
       "01fd0f96555745e390ea16fc7ce6a84e50360b8b"
     ],
     "static_conformance": "PASS",
-    "browser_conformance": "OPEN_NOT_RUN"
+    "browser_conformance": "PASS_10_OF_10_TC"
   },
   "integrated_effects": [
     "bounded attribute/class/style ownership with later-native-write invalidation",
@@ -41,17 +41,19 @@
   ],
   "production_conformance_artifact": {
     "path": "tests/browser/ib04/IB04_Production_Conformance.user.js",
-    "git_blob": "d282a13c745b5bfcfd95fddd9d516166c4881532",
+    "git_blob": "618cb0c89990d4e8fc82144d2e1847b6c13b2098",
     "derived_from_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
     "local_only_match": "http://127.0.0.1:8775/*",
     "public_connects_removed": true,
     "update_urls_removed": true,
     "appended_test_postamble": true,
-    "current_fixture_git_blob": "ee7d4ac0ddecdcfd3e9b3712ec6c533d48e5e5b1"
+    "current_fixture_git_blob": "ee7d4ac0ddecdcfd3e9b3712ec6c533d48e5e5b1",
+    "harness_fix_commit": "c6c8280d5f40254805612d00025edd11bd72f2d0",
+    "result_summary": "tests/browser/ib04/TC_PRODUCTION_RESULT_SUMMARY.json"
   },
   "gate_status": {
     "G_OWN_E_TC": "PASS",
-    "G_OWN_PRODUCTION_TC": "OPEN_NOT_RUN",
+    "G_OWN_PRODUCTION_TC": "PASS",
     "VC": "OPEN_NOT_RUN",
     "TF": "OPEN_NOT_RUN",
     "VF": "OPEN_NOT_RUN"
@@ -60,7 +62,17 @@
     "No live-site ownership certification.",
     "No route-world certification.",
     "No blanket permission for future mutation classes.",
-    "Production checkpoint remains open until the derived production conformance build passes in TC."
+    "VC / TF / VF remain open and unclaimed.",
+    "IB04 is complete only for the active TC implementation path and named integrated effects."
   ],
-  "next_required_evidence": "Run IB04_Production_Conformance.user.js on the local fixture in TC and return the JSON result."
+  "next_required_evidence": "IB04 complete for active TC path. IB05 is eligible; broader runtime/live-site ownership remains separately gated.",
+  "production_browser_result": {
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "PASS",
+    "environment": "Tampermonkey 5.5.0 × Chrome 153 × Windows 10 / Win32",
+    "initial_harness_run": "9/10; P03 false negative due fixture adapter wrapper mismatch",
+    "production_changed_for_harness_fix": false
+  }
 }
