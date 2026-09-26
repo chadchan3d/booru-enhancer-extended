@@ -351,11 +351,11 @@
 				},
 				cancel({ abortTransport = true } = {}) {
 					if (settled) return { logicalCancelled: false, transportAbortIssued: false };
+					const logical = settleCancelled();
 					const transportAbortIssued = abortTransport && rawHandle && typeof rawHandle.abort === 'function'
 						? (() => { try { rawHandle.abort(); return true; } catch { return false; } })()
 						: false;
-					settleCancelled();
-					return { logicalCancelled: true, transportAbortIssued };
+					return { logicalCancelled: logical, transportAbortIssued };
 				},
 			};
 		}
@@ -408,7 +408,8 @@
 		deleteValue: (k) => BE.runtime.storage.deleteValue(k),
 		listValues: () => BE.runtime.storage.listValues(),
 		xhr: (opts) => BE.runtime.request(opts),
-		download: (typeof GM_download === 'function') ? GM_download : (opts) => modernRoot?.download?.(opts),
+		download: (typeof GM_download === 'function') ? GM_download
+			: ((typeof GM !== 'undefined' && typeof GM.download === 'function') ? (opts) => GM.download(opts) : () => undefined),
 		addStyle: (typeof GM_addStyle === 'function') ? GM_addStyle : (css) => {
 			const style = document.createElement('style');
 			style.textContent = css;
