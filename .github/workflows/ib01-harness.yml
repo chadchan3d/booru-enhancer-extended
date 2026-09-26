@@ -5,10 +5,34 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  bootstrap-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Create and commit exact dependency lock if absent
+        working-directory: tests/permanent
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "package-lock.json already committed"
+            exit 0
+          fi
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Lock IB01 harness dependencies"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+
   qualify:
+    needs: bootstrap-lock
     strategy:
       matrix:
         node: [22, 24]
@@ -18,24 +42,19 @@ jobs:
         working-directory: tests/permanent
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: Generate exact lock for first qualification if absent
-        run: |
-          if [ ! -f package-lock.json ]; then
-            npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          fi
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Qualify baseline regression oracles
         run: npm test
-      - name: Upload qualification result and generated lock
+      - name: Upload qualification result
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ib01-node-${{ matrix.node }}
-          path: |
-            tests/permanent/package-lock.json
-            tests/permanent/results/ib01-baseline.json
+          path: tests/permanent/results/ib01-baseline.json
           if-no-files-found: warn
