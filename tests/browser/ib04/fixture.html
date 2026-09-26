@@ -25,13 +25,13 @@
   <button id="native-focus-other">Native: focus other input</button>
 </div>
 <input id="native-other-focus" value="native focus target">
-<div id="fixture-root">
-  <article id="native-card" data-native-generation="1">
+<div id="fixture-root" class="content">
+  <article id="native-card" class="thumbnail" data-native-generation="1">
     <a id="native-link" href="#native-destination" title="native title">
       Native post link
       <picture id="native-picture">
         <source id="native-source" srcset="native-1x.jpg 1x, native-2x.jpg 2x">
-        <img id="native-img" src="native.jpg" srcset="native.jpg 1x" style="object-fit:cover" alt="native alt">
+        <img id="native-img" class="preview" src="native.jpg" srcset="native.jpg 1x" style="object-fit:cover" alt="native alt">
       </picture>
     </a>
     <button id="native-nested-control">Native nested control</button>
@@ -87,13 +87,14 @@
     generation += 1;
     const replacement = document.createElement('article');
     replacement.id = 'native-card';
+    replacement.className = 'thumbnail';
     replacement.dataset.nativeGeneration = String(generation);
     replacement.innerHTML = `
       <a id="native-link" href="#native-destination" title="replacement native title">
         Replacement native post link
         <picture id="native-picture">
           <source id="native-source" srcset="replacement-1x.jpg 1x, replacement-2x.jpg 2x">
-          <img id="native-img" src="replacement.jpg" srcset="replacement.jpg 1x" style="object-fit:cover" alt="replacement native alt">
+          <img id="native-img" class="preview" src="replacement.jpg" srcset="replacement.jpg 1x" style="object-fit:cover" alt="replacement native alt">
         </picture>
       </a>
       <button id="native-nested-control">Replacement native nested control</button>`;
