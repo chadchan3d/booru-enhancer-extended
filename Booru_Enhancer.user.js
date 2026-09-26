@@ -7,12 +7,10 @@
 // @contributor  ChadChan3D
 // @license      MIT
 // @match        *://danbooru.donmai.us/*
-// @match        *://*.donmai.us/*
 // @match        *://atfbooru.ninja/*
 // @match        *://gelbooru.com/*
 // @match        *://safebooru.org/*
 // @match        *://rule34.xxx/*
-// @match        *://rule34.us/*
 // @match        *://realbooru.com/*
 // @match        *://tbib.org/*
 // @match        *://xbooru.com/*
@@ -23,9 +21,6 @@
 // @match        *://lolibooru.moe/*
 // @match        *://e621.net/*
 // @match        *://e926.net/*
-// @match        *://chan.sankakucomplex.com/*
-// @match        *://idol.sankakucomplex.com/*
-// @match        *://beta.sankakucomplex.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
@@ -2366,7 +2361,6 @@
 								});
 							},
 							async fetchThumbBatch() { return []; },
-							favoriteSelector: 'a[href*="favorite" i], button[class*="favorite" i]',
 							pagination: {
 								containerSelectors: ['.pagination', '#paginator', '.pagination-controls', 'nav.paginator'],
 						 getPageIdentity(url) {
