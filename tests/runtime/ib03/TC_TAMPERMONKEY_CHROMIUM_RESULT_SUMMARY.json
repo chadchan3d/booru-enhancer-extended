@@ -1,0 +1,44 @@
+{
+  "cell":"TC",
+  "browser":"Chromium-family Chrome 153.0.0.0",
+  "userscript_manager":"Tampermonkey 5.5.0",
+  "platform":"Windows 10 / Win32",
+  "probe_version":"2.0.0",
+  "probe_result_attachment_sha256":"663cf8d09e9869de18146db7a5433f153bc0b06a97abef0d74158f8a556a3b2f",
+  "menu_invocation_count_before_run":1,
+  "menu_invocation_count_after_run":1,
+  "legacy":{
+    "storage":"PASS",
+    "request":"PASS",
+    "menu":"PASS",
+    "request_return":"non-thenable abortable object",
+    "abort_server_close":"observed",
+    "progress_known_total":"observed",
+    "progress_unknown_total":"observed",
+    "timeout_event":"observed"
+  },
+  "modern":{
+    "storage":"PASS",
+    "request":"PASS",
+    "menu":"PASS",
+    "request_return":"thenable abortable object",
+    "callback_and_promise_terminal_signals":"observed; wrapper must deduplicate",
+    "abort_server_close":"observed",
+    "progress_known_total":"observed",
+    "progress_unknown_total":"observed",
+    "timeout_event":"observed"
+  },
+  "storage_assertions":{
+    "typed_round_trip":true,
+    "malformed_string_remained_string":true,
+    "legacy_boolean_string_remained_string":true,
+    "delete_missing_fallback":true
+  },
+  "important_limits":[
+    "Probe granted both legacy and modern API forms; production metadata still uses its existing legacy grants.",
+    "Requested timeout duration was not precise; the runtime contract is terminal timeout signaling, not millisecond accuracy.",
+    "Logical cancellation alone did not stop transport and late progress/load still arrived at the probe.",
+    "Physical abort produced manager onabort plus controlled-server request-aborted/response-close; this does not prove every network-stack byte ceased.",
+    "Route observation and downloads were not part of this gate."
+  ]
+}
