@@ -14,6 +14,7 @@ class FakeClock {
     this.now = 0;
     this.nextId = 1;
     this.tasks = new Map();
+    this.cancelled = new Set();
   }
 
   setTimeout(fn, delay = 0, ...args) {
@@ -25,6 +26,7 @@ class FakeClock {
 
   clearTimeout(id) {
     this.tasks.delete(id);
+    this.cancelled.add(id);
   }
 
   setInterval(fn, delay = 0, ...args) {
@@ -36,6 +38,7 @@ class FakeClock {
 
   clearInterval(id) {
     this.tasks.delete(id);
+    this.cancelled.add(id);
   }
 
   _nextDue(target) {
@@ -61,7 +64,7 @@ class FakeClock {
       this.tasks.delete(task.id);
       this.now = task.at;
       task.fn(...task.args);
-      if (task.interval !== null && !this.tasks.has(task.id)) {
+      if (task.interval !== null && !this.cancelled.has(task.id)) {
         task.at = this.now + task.interval;
         this.tasks.set(task.id, task);
       }
@@ -73,6 +76,7 @@ class FakeClock {
 
   clearAll() {
     this.tasks.clear();
+    this.cancelled.clear();
   }
 }
 
