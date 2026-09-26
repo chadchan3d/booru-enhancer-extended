@@ -2316,8 +2316,12 @@
 		let manualZoom = false;
 		let mediaGeneration = 0;
 		let mediaStateTimer = null;
+		let viewerOwner = null;
+		let returnFocusOrigin = null;
+		let returnFocusFallback = null;
 
 		function init() {
+			viewerOwner = BE.ownership.create();
 			overlay = BE.dom.create('div', { id: 'be-viewer-overlay' });
 			overlay.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,0.92);z-index:999998;display:none;align-items:center;justify-content:center;flex-direction:column;user-select:none;';
 
@@ -2333,7 +2337,7 @@
 				b.title = title;
 				b.className = 'be-viewer-btn';
 				b.style.cssText = 'background:var(--be-accent,#ff8ac6);color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:13px;';
-				b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+				viewerOwner.on(b, 'click', (e) => { e.stopPropagation(); fn(); });
 				bar.appendChild(b);
 				return b;
 			};
@@ -2357,19 +2361,19 @@
 			statusEl.style.cssText = 'position:absolute;top:8px;left:12px;color:#fff;font:12px/1.4 sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:2;';
 			overlay.appendChild(statusEl);
 
-			overlay.addEventListener('click', (e) => { if (e.target === overlay || e.target === stage) close(); });
-			overlay.addEventListener('wheel', (e) => {
+			viewerOwner.on(overlay, 'click', (e) => { if (e.target === overlay || e.target === stage) close(); });
+			viewerOwner.on(overlay, 'wheel', (e) => {
 				if (overlay.style.display !== 'flex') return;
 				e.preventDefault();
 				applyZoom(e.deltaY < 0 ? 0.15 : -0.15);
 			}, { passive: false });
 
-			window.addEventListener('resize', BE.dom.debounce(() => {
+			viewerOwner.on(window, 'resize', BE.dom.debounce(viewerOwner.guard(() => {
 				if (isOpen() && mediaEl && !manualZoom) applyConfiguredFit();
-			}, 100));
+			}), 100));
 
-			document.addEventListener('keydown', onKeydown);
-			document.body.appendChild(overlay);
+			viewerOwner.on(document, 'keydown', onKeydown);
+			viewerOwner.add(overlay, document.body);
 		}
 
 		function openOriginalInNewTab(post) {
@@ -2526,6 +2530,17 @@
 				const label = document.createElement('span');
 				label.textContent = text;
 				state.appendChild(label);
+				if (error) {
+					const nativeUrl = currentPost?.postUrl;
+					if (nativeUrl) {
+						const fallback = document.createElement('a');
+						fallback.href = nativeUrl;
+						fallback.textContent = 'Open native post';
+						fallback.className = 'be-viewer-native-fallback';
+						fallback.style.cssText = 'margin-left:8px;color:inherit;text-decoration:underline;';
+						state.appendChild(fallback);
+					}
+				}
 				stage.appendChild(state);
 			};
 			if (delay > 0) mediaStateTimer = setTimeout(renderState, delay);
@@ -2593,6 +2608,9 @@
 				el.decoding = 'async';
 				el.fetchPriority = 'high';
 				el.addEventListener('load', () => onMediaReady(el, generation));
+				el.addEventListener('error', () => {
+					if (el === mediaEl && generation === mediaGeneration) showMediaState('Media failed to load', generation, 0, true);
+				});
 			}
 
 			setupDrag(el);
@@ -2630,8 +2648,11 @@
 			statusEl.textContent = `#${post.id || '?'}${post.width && post.height ? ` · ${post.width}×${post.height}` : ''}`;
 		}
 
-		function open(post, navigation = {}) {
+		function open(post, navigation = {}, context = {}) {
 			if (!overlay) init();
+			returnFocusOrigin = context.origin?.isConnected ? context.origin : null;
+			returnFocusFallback = context.fallback?.isConnected ? context.fallback : null;
+			viewerOwner?.setFocusTargets(returnFocusOrigin, returnFocusFallback);
 			currentPost = post;
 			onNext = navigation.next || null;
 			onPrev = navigation.prev || null;
@@ -2648,6 +2669,7 @@
 			replaceMedia(post);
 			updateStatus(post);
 			BE.bus.emit('viewer:open', post);
+			return true;
 		}
 
 		function updatePost(post) {
@@ -2693,6 +2715,8 @@
 		}
 
 		function close() {
+			const active = document.activeElement;
+			const shouldReturnFocus = !!overlay && !!active && overlay.contains(active);
 			if (overlay) overlay.style.display = 'none';
 			clearMediaState();
 			stopMedia(mediaEl);
@@ -2702,11 +2726,26 @@
 			onNext = null;
 			onPrev = null;
 			dragging = false;
+			if (shouldReturnFocus) {
+				if (returnFocusOrigin?.isConnected) returnFocusOrigin.focus();
+				else if (returnFocusFallback?.isConnected) returnFocusFallback.focus();
+			}
+			returnFocusOrigin = null;
+			returnFocusFallback = null;
+		}
+
+		function dispose() {
+			close();
+			viewerOwner?.dispose();
+			viewerOwner = null;
+			overlay = null;
+			stage = null;
+			statusEl = null;
 		}
 
 		function isOpen() { return !!overlay && overlay.style.display === 'flex'; }
 
-		return { open, updatePost, close, isOpen, get currentPost() { return currentPost; } };
+		return { open, updatePost, close, dispose, isOpen, get currentPost() { return currentPost; } };
 	})();
 
 	/* ============================================================ *
