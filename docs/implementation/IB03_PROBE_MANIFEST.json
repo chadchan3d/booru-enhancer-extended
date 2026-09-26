@@ -1,69 +1,58 @@
 {
   "checkpoint": "IB03",
-  "status": "BLOCKED_ON_REAL_RUNTIME_CELL",
-  "stage": "E_PREPARED_LOCAL_SERVER_QUALIFIED",
+  "status": "PASS_SCOPED",
+  "development_cell": {
+    "id": "TC",
+    "browser": "Chrome 153.0.0.0 (Chromium family)",
+    "manager": "Tampermonkey 5.5.0",
+    "platform": "Windows 10 / Win32",
+    "probe_result_attachment_sha256": "663cf8d09e9869de18146db7a5433f153bc0b06a97abef0d74158f8a556a3b2f"
+  },
   "probe": {
     "name": "IB03_Common_Runtime_Probe.user.js",
     "version": "2.0.0",
     "sha256": "cc66d516826f0c37816d825b0e5ea304b41d209e13ba0c46599591548040d698",
-    "automatic_execution": false,
-    "matches": [
-      "http://127.0.0.1:8765/*",
-      "http://localhost:8765/*"
-    ],
     "one_artifact_for_all_cells": true
   },
-  "controlled_transport": {
-    "server": {
-      "name": "server.cjs",
-      "sha256": "b347a875ff43dc35fcfffbf76b58e2912dbbd8c1ee6553532f4767dc9764a892",
-      "origins": [
-        "http://127.0.0.1:8765",
-        "http://127.0.0.1:8766"
-      ]
-    },
-    "server_self_test": {
-      "name": "server_self_test.cjs",
-      "sha256": "110934d8b28af2f94fe12bcde0bbd0f2cbce86eafe6393da004af471594eaf40",
-      "result": "PASS"
-    },
-    "probe_static_test": {
-      "name": "probe_static_test.cjs",
-      "sha256": "460737af8bf762e64c0fe7ff3d40217348aab3987a7a61f23d94807522b6d943",
-      "result": "PASS"
-    }
+  "measured_TC": {
+    "storage_legacy": "PASS",
+    "storage_modern": "PASS",
+    "native_fetch_same_origin": "PASS",
+    "privileged_request_legacy": "PASS",
+    "privileged_request_modern": "PASS",
+    "progress_known_unknown_error": "OBSERVED",
+    "timeout_terminal": "OBSERVED_NOT_PRECISE_DURATION",
+    "physical_abort_server_close": "OBSERVED",
+    "logical_cancel_late_events": "OBSERVED",
+    "menu_registration_callback_removal": "PASS"
   },
-  "packet": {
-    "name": "IB03_Runtime_Probe_Packet.zip",
-    "sha256": "e27facf153c4ca060ab9806eb57ec482891abc56c60dd64150c9ec1336244434",
-    "zip_test": "PASS"
+  "production_integration": {
+    "userscript_blob": "aad0742b0e82c6f03f19f02c50f35cafa34545c4",
+    "commit_runtime_boundary": "245c392e8d6bdf95e1806774dc1506aad884dc64",
+    "commit_cancel_hardening": "3c36824e26d199f9be6b832c82e14d36aadbfd9b",
+    "conformance_tests": 11,
+    "conformance_passed": 11,
+    "conformance_failed": 0
   },
-  "prepared_coverage": [
-    "legacy and modern storage API inventory",
-    "typed storage round trip",
-    "absent/delete behavior",
-    "malformed legacy string preservation observation",
-    "serialized legacy boolean string observation",
-    "same-origin native fetch",
-    "privileged cross-origin requests",
-    "redirect/final URL/response headers",
-    "empty, malformed, auth-body, 401, 500 responses",
-    "known and unknown length progress",
-    "early stream error",
-    "deliberate timeout",
-    "returned request handle before await",
-    "active abort and server close evidence",
-    "logical cancellation with late terminal event",
-    "menu registration, operator callback, temporary removal"
-  ],
-  "runtime_cells": {
-    "TC": "OPEN_NOT_RUN",
+  "scoped_g_runtime": {
+    "TC_legacy_storage": "PASS_FOR_IMPLEMENTATION",
+    "TC_legacy_privileged_request": "PASS_FOR_IMPLEMENTATION",
+    "TC_legacy_menu": "PASS_FOR_IMPLEMENTATION",
+    "TC_native_fetch": "PASS_FOR_IMPLEMENTATION",
+    "TC_modern_forms": "MEASURED_PROBE_PATH_ONLY",
     "VC": "OPEN_NOT_RUN",
     "TF": "OPEN_NOT_RUN",
-    "VF": "OPEN_NOT_RUN"
+    "VF": "OPEN_NOT_RUN",
+    "route": "OPEN",
+    "download": "OPEN"
   },
-  "production_runtime_wrapper_integrated": false,
-  "production_userscript_modified": false,
-  "g_runtime_promoted": [],
-  "next_required_evidence": "Run exact probe artifact in one named real browser/userscript-manager cell and return raw JSON plus browser/manager versions."
+  "important_boundaries": [
+    "The probe granted both legacy and modern API forms; production metadata retains its existing legacy grants.",
+    "The wrapper prefers legacy APIs when both forms exist.",
+    "Modern request callbacks and the returned Promise can both signal terminal state; production wrapper deduplicates settlement.",
+    "Logical cancellation settles UI-facing work immediately but physical abort is tracked separately.",
+    "Requested timeout duration is not treated as millisecond-precise.",
+    "No site-specific logic, endpoint budgets, downloads, or route bridge were added in IB03."
+  ],
+  "next_checkpoint": "IB04"
 }
