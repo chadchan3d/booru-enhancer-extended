@@ -3208,9 +3208,9 @@
 
 			if (!BE.settings.get('viewer.enabled')) return;
 
-			// Never hijack modifier-key clicks or middle-clicks — let the
-			// browser/site handle "open in new tab", "open in background", etc.
+			// Never hijack modifier/middle clicks or nested native controls.
 			if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+			if (e.target.closest('button, input, select, textarea, label, [role="button"], [contenteditable="true"]')) return;
 
 			// Requirement 3/29: only ever recognize an element we've
 			// explicitly marked as a thumbnail wrapper. The old fallback
@@ -3224,10 +3224,13 @@
 			const img = thumb.matches('img') ? thumb : (thumb.querySelector('.be-thumb-img') || thumb.querySelector('img'));
 			if (!img) return;
 
+			BE.log.debug(`[Gallery] Viewer opening post #${img.dataset.bePostId || BE.adapters.active.getThumbPostId(img)}`);
+			let opened = false;
+			try { opened = openViewerForThumb(img, thumb) === true; }
+			catch (err) { BE.log.error('[Gallery] viewer takeover failed before open', err); }
+			if (!opened) return;
 			e.preventDefault();
 			e.stopPropagation();
-			BE.log.debug(`[Gallery] Viewer opening post #${img.dataset.bePostId || BE.adapters.active.getThumbPostId(img)}`);
-			openViewerForThumb(img, thumb);
 		}
 
 		function onGalleryHover(e) {
