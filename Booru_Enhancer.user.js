@@ -3024,9 +3024,13 @@
 				if (nextImg) openViewerForThumb(nextImg, nextImg.closest('.be-thumb-wrap') || nextImg);
 			};
 
-			BE.modules.viewer.open(initialPost, {
+			const nativeOrigin = nativeOriginFor(img, thumb);
+			const opened = BE.modules.viewer.open(initialPost, {
 				next: () => navigateBy(1),
 				prev: () => navigateBy(-1),
+			}, {
+				origin: nativeOrigin,
+				fallback: paginatorEl,
 			});
 
 			if (!cachedPost) {
@@ -3034,6 +3038,7 @@
 					if (fullPost) BE.modules.viewer.updatePost(fullPost);
 				}).catch((err) => BE.log.error('enrichment failed', err));
 			}
+			return opened === true;
 		}
 
 		function buildThumbActions(wrap, img, owner) {
