@@ -1,0 +1,30 @@
+{
+  "checkpoint": "IB06",
+  "stage": "P_GATE_MOCK",
+  "production_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+  "environment": "Code-mode V8 with minimal URL shim and deterministic deferred transports",
+  "summary": {
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "cases": [
+    "C01 production gate dedupes equivalent reads",
+    "C02 foreground join promotes queued shared read",
+    "C03 one consumer release does not abort shared running transport",
+    "C04 ignored physical abort retains configured endpoint occupancy until terminal",
+    "C05 finite transient budget does not replenish",
+    "C06 401 is terminal auth-required with no retry",
+    "C07 429 cooldown blocks same key but not another key",
+    "C08 mutations do not dedupe and force one attempt",
+    "C09 native-first plan consumes same finite attempt budget before privileged fallback",
+    "C10 structural validation is terminal without retry",
+    "C11 request identity separates differing headers"
+  ],
+  "boundaries": {
+    "mockTransport": true,
+    "realManager": false,
+    "liveSite": false
+  }
+}
