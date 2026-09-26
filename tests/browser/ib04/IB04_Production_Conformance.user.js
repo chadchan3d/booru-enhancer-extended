@@ -4453,6 +4453,13 @@
     try { BE.modules.gallery.dispose?.(); } catch {}
     try { BE.modules.viewer.dispose?.(); } catch {}
 
+    // Normalize either the original E-stage fixture or the later production-
+    // conformance fixture revision. This changes only local test markup.
+    q('#fixture-root')?.classList.add('content');
+    q('#native-card')?.classList.add('thumbnail');
+    q('#native-img')?.classList.add('preview');
+    q('#native-link')?.classList.add('thm-link');
+
     const generic=BE.adapters.registry.find((a)=>a.id==='generic');
     assert(generic,'generic fixture adapter missing');
     const testAdapter={...generic,id:'e621'};
