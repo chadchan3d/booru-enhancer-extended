@@ -1,8 +1,8 @@
 # IB05 — Settings Schema, Migration and Mount Barrier
 
-**Checkpoint state:** E-stage PASS in TC; production integration implemented; production conformance OPEN  
+**Checkpoint state:** PASS for active TC implementation path  
 **Production source changed during IB05:** YES — bounded IB05 integration only  
-**Production source blob:** `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`
+**Production source blob:** `02105f262eb3c128642b5296f4fa4502bc8cfa7b`
 
 ## Controlling invariant
 
@@ -83,7 +83,7 @@ Commit:
 
 Production source blob:
 
-- `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`
+- `02105f262eb3c128642b5296f4fa4502bc8cfa7b`
 
 Integrated scope is intentionally narrow:
 
@@ -100,12 +100,46 @@ Integrated scope is intentionally narrow:
 
 No IB06 request-gate work, host policy, new default policy, route work, or release-version bump entered this change.
 
-## Remaining checkpoint requirement
+## Production conformance result
 
-The E-stage browser gate is complete. The remaining requirement is conformance of the actual integrated production artifact:
+The integrated production body was tested in Tampermonkey 5.5.0 × Chrome 153 × Windows 10 / Win32 using a separate userscript identity and isolated GM storage.
 
-- source/static conformance against blob `4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1`;
-- a local-only derived production browser run using a separate userscript identity;
-- direct checks that the integrated store/settings/init path preserves legacy choices, does not persist absent defaults, validates imports, retains inert unknown values, and reaches preference-dependent UI only after settings are loaded.
+Result:
 
-**IB05 remains OPEN until production conformance passes.**
+- 12 tests;
+- 12 passed;
+- 0 failed;
+- production source blob `02105f262eb3c128642b5296f4fa4502bc8cfa7b`;
+- derived conformance blob `ededd3b910dec484f9be11627187cedebd8b574c`.
+
+Sanitized evidence:
+
+- `tests/browser/ib05/TC_PRODUCTION_RESULT_SUMMARY.json`
+
+The production run directly demonstrated:
+
+- product version and settings schema version remain distinct;
+- empty storage writes only the schema marker;
+- empty storage remains `AMBIGUOUS_EMPTY` and keeps Sample + append-on legacy defaults;
+- preference-dependent UI mounts only after settings are resolved;
+- invalid direct values do not persist;
+- legacy imports preserve valid known values and retain inert unknown values;
+- new export preserves absent keys and unknown raw values;
+- malformed new-format import is rejected before writes;
+- malformed stored known values remain recoverable while effective behavior uses the safe legacy default;
+- export/import round-trips valid, invalid and unknown state;
+- explicit legacy preferences govern the first actual production mount;
+- unsupported newer schema remains untouched and prevents enhancer mount.
+
+## Gate state
+
+- **G-SETTINGS E-stage TC:** PASS
+- **G-SETTINGS production TC:** PASS
+- **G-RUNTIME TC storage primitive:** PASS from IB03
+- **G-OWN TC mount lifecycle:** PASS from IB04
+- VC / TF / VF: not claimed
+- live-site settings behavior: not claimed
+
+**IB05 is complete for the active TC implementation path. IB06 is now eligible.**
+
+This checkpoint does not authorize or claim request scheduling, host transport behavior, live-site metadata, downloads, route observation or other later capabilities.
