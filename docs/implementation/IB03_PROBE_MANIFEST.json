@@ -54,5 +54,32 @@
     "Requested timeout duration is not treated as millisecond-precise.",
     "No site-specific logic, endpoint budgets, downloads, or route bridge were added in IB03."
   ],
-  "next_checkpoint": "IB04"
+  "next_checkpoint": "IB04",
+  "sanitation": {
+    "status": "PASS",
+    "scope": "All files changed from pinned production baseline through IB03 on implementation/ib00-baseline",
+    "files_scanned": 23,
+    "checks": [
+      "local Windows user paths",
+      "Unix/home and container paths",
+      "private personal names",
+      "estimated location names",
+      "Downloads/local workspace paths",
+      "email addresses",
+      "GitHub/OpenAI token patterns",
+      "private key blocks",
+      "Bearer credentials",
+      "password/secret/API-key assignments"
+    ],
+    "findings": [],
+    "retained_public_or_nonsensitive_context": [
+      "ChadChan3D public project identity",
+      "public repository/project URLs",
+      "Windows/Chrome/Tampermonkey version-level runtime facts",
+      "127.0.0.1/localhost loopback test origins",
+      "artifact and commit hashes"
+    ],
+    "raw_runtime_probe_committed": false,
+    "note": "Only the sanitized runtime-result summary is committed; the raw operator probe output is not added to the public repository."
+  }
 }
