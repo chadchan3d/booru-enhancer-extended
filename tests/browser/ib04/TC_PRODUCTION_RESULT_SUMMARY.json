@@ -1,0 +1,50 @@
+{
+  "checkpoint": "IB04",
+  "probe": "IB04 Production Conformance 1.0.0",
+  "production_version": "1.2.7.3",
+  "runtime_cell": {
+    "manager": "Tampermonkey 5.5.0",
+    "browser": "Chrome 153",
+    "platform": "Windows 10 / Win32"
+  },
+  "production_source_blob": "4f43d0dc57cbbbe70726e36263fc6854d0bd0cad",
+  "conformance_artifact": {
+    "path": "tests/browser/ib04/IB04_Production_Conformance.user.js",
+    "git_blob": "618cb0c89990d4e8fc82144d2e1847b6c13b2098",
+    "harness_fix_commit": "c6c8280d5f40254805612d00025edd11bd72f2d0"
+  },
+  "result": {
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_cases": [
+    "P01 integrated card ownership preserves native node identity",
+    "P02 integrated responsive treatment retains source node",
+    "P03 hover suppression has accessible replacement and restores on disable",
+    "P04 synchronous viewer-open failure preserves native navigation",
+    "P05 modifier and nested native-control clicks are not hijacked",
+    "P06 viewer close returns focus to native origin",
+    "P07 viewer media failure exposes native fallback",
+    "P08 gallery disposal restores owned mutations and removes owned UI",
+    "P09 five production reinit/dispose cycles stay bounded",
+    "P10 native listener survives production disposal"
+  ],
+  "harness_history": {
+    "initial_run": "9/10; P03 failed because the fixture test adapter renamed generic to e621 while retaining generic wrapper resolution",
+    "disposition": "test-harness mismatch, not production change",
+    "correction": "fixture-safe generic extraction retained while real e621 getThumbWrapper contract is used",
+    "production_source_changed": false
+  },
+  "boundaries": {
+    "real_browser": true,
+    "live_site": false,
+    "route_world": false,
+    "external_network": false,
+    "vc": false,
+    "tf": false,
+    "vf": false
+  },
+  "conclusion": "G-OWN production TC PASS for the named integrated effects. IB04 implementation checkpoint complete for the active TC path; broader cells/live-site claims remain unmade."
+}
