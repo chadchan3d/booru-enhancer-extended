@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `7cff91aba24b3cb5cb96e4c23015ffad1d68ace2`  
+**Production source blob:** `207d79063e283f9918e4fc86225f9cedf45f4211`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -186,3 +186,30 @@ Commit:
 - `8d3927e72b9b51ebd9b9b1b495e11a5c1cc938e3`
 
 The observed e621 image-post native strategy is now complete for core Post-model facts. It remains deliberately scoped away from video/GIF post structures, pagination continuation and favorite/action behavior.
+
+
+## e926 listing native-metadata integration
+
+Passive V1-N on `https://e926.net/posts` observed three current native cards carrying the same relevant native data-attribute classes of facts as measured directly on that host: identity, tags, rating, extension, original dimensions/bytes, MD5, preview/sample/original URLs, score/favorite count and flags.
+
+Evidence:
+
+- `docs/implementation/IB07_E926_V1N.md`
+
+Commit:
+
+- `5df9891e1f9e051aef0f9dc46f4f526541c6c021`
+
+Production source blob:
+
+- `207d79063e283f9918e4fc86225f9cedf45f4211`
+
+Production behavior now:
+
+- e926 listing enrichment consumes native card metadata with no endpoint request;
+- e926 remains a distinct site ID;
+- e926 post-page parsing remains blocked until separately observed;
+- synthetic pagination remains disabled;
+- favorite/action behavior remains unavailable pending evidence.
+
+This admission is based on direct e926 observation, not inheritance from e621.
