@@ -4461,8 +4461,14 @@
     q('#native-link')?.classList.add('thm-link');
 
     const generic=BE.adapters.registry.find((a)=>a.id==='generic');
+    const e621=BE.adapters.registry.find((a)=>a.id==='e621');
     assert(generic,'generic fixture adapter missing');
-    const testAdapter={...generic,id:'e621'};
+    assert(e621,'e621 production adapter missing');
+    // Keep fixture-friendly generic extraction, but preserve the real e621
+    // wrapper contract. Generic closest('.thumbnail, .post-thumbnail, a')
+    // resolves this fixture to the nearer <a>; production e621 deliberately
+    // resolves the enclosing <article> first.
+    const testAdapter={...generic,id:'e621',getThumbWrapper:e621.getThumbWrapper};
     BE.adapters.active=testAdapter;
 
     const p0=parts();
