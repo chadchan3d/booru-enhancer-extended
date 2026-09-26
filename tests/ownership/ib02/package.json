@@ -1,0 +1,7 @@
+{
+  "name":"booru-enhancer-ib02-ownership-probe",
+  "private":true,
+  "version":"1.0.0",
+  "scripts":{"test":"node run.cjs"},
+  "license":"MIT"
+}
