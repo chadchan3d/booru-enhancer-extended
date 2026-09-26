@@ -2278,7 +2278,9 @@
 	 *  E621 / E926 ADAPTER
 	 * ============================================================ */
 	function normalizeE621NativeElement(element, { postPage = false } = {}) {
-		if (!element || location.hostname !== 'e621.net') return null;
+		const observedListingHost = location.hostname === 'e621.net' || location.hostname === 'e926.net';
+		if (!element || !observedListingHost) return null;
+		if (postPage && location.hostname !== 'e621.net') return null;
 		const d = element.dataset || {};
 		const id = String(d.id || '');
 		if (!id) return null;
@@ -2340,12 +2342,12 @@
 				: '',
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
-			siteId: 'e621',
+			siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',
 		});
 	}
 
 	function e621NativeListingPost(id) {
-		if (location.hostname !== 'e621.net') return null;
+		if (location.hostname !== 'e621.net' && location.hostname !== 'e926.net') return null;
 		const wanted = String(id || '');
 		if (!wanted) return null;
 		const article = [...document.querySelectorAll('article.thumbnail, article.post-preview, article[data-id]')]
@@ -2385,7 +2387,7 @@
 			return e621NativePostPage(id) || e621NativeListingPost(id);
 		},
 		async fetchThumbBatch(ids) {
-			if (!ids.length || location.hostname !== 'e621.net') return [];
+			if (!ids.length || (location.hostname !== 'e621.net' && location.hostname !== 'e926.net')) return [];
 			return ids.map((id) => e621NativeListingPost(id)).filter(Boolean);
 		},
 		pagination: {
