@@ -89,5 +89,18 @@
     "static_conformance": "PASS_15_OF_15",
     "mock_conformance": "PASS_11_OF_11",
     "production_browser_conformance": "OPEN_NOT_RUN"
+  },
+  "production_conformance_artifact": {
+    "path": "tests/browser/ib06/IB06_Production_Conformance.user.js",
+    "git_blob": "410730444919fc3fc823210685030a999372a3c8",
+    "derived_from_source_blob": "74adf9e192d2c00c1d493588cc9202388326402d",
+    "localhost_origins": [
+      "http://127.0.0.1:8780",
+      "http://127.0.0.1:8781"
+    ],
+    "separate_userscript_identity": true,
+    "production_preferences_accessed": false,
+    "live_site": false,
+    "status": "OPEN_NOT_RUN"
   }
 }
