@@ -1,0 +1,10 @@
+{
+  "name": "booru-enhancer-ib01-assertions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dependency-free qualification of permanent Booru Enhancer regression oracles.",
+  "scripts": {
+    "test": "node qualify_oracles.cjs"
+  },
+  "license": "MIT"
+}
