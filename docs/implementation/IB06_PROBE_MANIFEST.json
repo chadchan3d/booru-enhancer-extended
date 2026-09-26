@@ -25,17 +25,41 @@
   },
   "browser_evidence": {
     "path": "tests/browser/ib06/IB06_Request_Gate.user.js",
-    "git_blob": "2742d2691d4416e06627420e088c4012343c721b",
+    "git_blob": "245bbb4d07dadcee7520f52d8741c82618979113",
     "runtime_cell": "TC — Tampermonkey 5.5.0 × Chrome 153",
     "localhost_origins": [
       "http://127.0.0.1:8778",
       "http://127.0.0.1:8779"
     ],
     "live_site": false,
-    "status": "OPEN_NOT_RUN"
+    "status": "OPEN_RERUN_REQUIRED",
+    "initial_run": {
+      "tests": 11,
+      "passed": 9,
+      "failed": 2,
+      "status": "FAIL",
+      "failures": [
+        {
+          "id": "B03",
+          "disposition": "probe timing defect",
+          "reason": "release occurred after a fixed delay without proving the server had accepted the request, so server-side close evidence was not guaranteed to be observable"
+        },
+        {
+          "id": "B09",
+          "disposition": "probe timing defect",
+          "reason": "Retry-After was only one second; key-B completion legitimately pumped the queue after that short window could expire before the assertion"
+        }
+      ],
+      "production_failure_claimed": false
+    },
+    "server_blob": "4f3175ea7203329a74497859a5201654e898d4c7",
+    "harness_fix_commits": [
+      "aba1af137814e2a1e6008fb7aaaacfd39baeed9b",
+      "0d18f6817ab774ce02f62d84a34de9904b4db9de"
+    ]
   },
   "gate_status": {
-    "G_REQUEST": "OPEN_CONTROLLED_TRANSPORT_PENDING",
+    "G_REQUEST": "OPEN_CONTROLLED_TRANSPORT_RERUN_REQUIRED",
     "G_RUNTIME_TC_REQUEST": "PASS_FROM_IB03",
     "G_SETTINGS_TC": "PASS_FROM_IB05",
     "G_OWN_TC": "PASS_FROM_IB04"
