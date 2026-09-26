@@ -1,0 +1,34 @@
+{
+  "checkpoint": "IB01",
+  "suite": "oracle qualification",
+  "environment": {
+    "node": "v22.16.0",
+    "external_dependencies": []
+  },
+  "historical_harness_zip_sha256": "56df21123dfd92bfabf80f0adab9855f92e5c7227b4f5b8172afa9f805aa9a45",
+  "cases": 14,
+  "sensitive_cases": 14,
+  "failures": 0,
+  "qualified_oracles": [
+    "startup-fanout",
+    "hover-dwell",
+    "viewer-takeover",
+    "native-tooltip",
+    "picture-restoration",
+    "download-single-flight",
+    "favorite-validation",
+    "append-liveness",
+    "video-disposal",
+    "generic-mutation-scope"
+  ],
+  "production_userscript_fixed": false,
+  "evidence_gates_promoted": [],
+  "notes": [
+    "Each historical observation was rejected by its oracle.",
+    "Each corrected control was accepted by the same oracle.",
+    "The original historical harness was not modified.",
+    "The idol Sankaku case is a new source-risk negative fixture, not a claim of historical harness execution.",
+    "This qualification does not certify browser/media/network/live-site behavior."
+  ],
+  "next_checkpoint": "IB02"
+}
