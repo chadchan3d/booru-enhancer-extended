@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_V1N_PENDING",
-  "production_source_blob": "069c412e4a813d90587649b74a7e40727cd85818",
+  "status": "ACTIVE_RULE34_NATIVE_INTEGRATED_E621_V1N_NEXT",
+  "production_source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -77,5 +77,22 @@
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "V1-N passive native listing/post captures"
+  "next_evidence": "e621.net V1-N passive native listing/post capture",
+  "rule34_native_integration": {
+    "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
+    "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
+    "context": "rule34.xxx native image post",
+    "remote_resolver": false,
+    "sample_from_native_image": true,
+    "original_from_native_link": true,
+    "original_dimensions_from_native_stats": true,
+    "byte_size": "UNKNOWN",
+    "live_production_conformance": "OPEN_NOT_RUN"
+  },
+  "family_safeguard": {
+    "remote_dapi_html_dispatch": "DISABLED_PENDING_SCOPED_G_HOST",
+    "family_thumbnail_batch_resolver": "DISABLED_PENDING_SCOPED_G_HOST",
+    "family_favorite_action": "DISABLED_PENDING_ACTION_EVIDENCE",
+    "candidate_helpers_retained": true
+  }
 }
