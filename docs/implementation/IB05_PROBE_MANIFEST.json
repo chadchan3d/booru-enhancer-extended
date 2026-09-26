@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB05",
   "status": "E_PASS_P_INTEGRATED_PRODUCTION_CONFORMANCE_PENDING",
-  "production_source_blob": "4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1",
+  "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
   "production_source_changed": true,
   "schema_model": {
     "version": 1,
@@ -33,7 +33,7 @@
   "production_activation": "INTEGRATED_CONFORMANCE_PENDING",
   "production_integration": {
     "commit": "d69877431fe6839cb375e0aa9128ba47a7447912",
-    "source_blob": "4f9cb6c1722fc0136266f770c9cfe0cd1784eaf1",
+    "source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
     "public_version": "1.2.7.3",
     "scope": [
       "schema version 1 distinct from product version",
@@ -45,6 +45,8 @@
       "recoverable validated import with rollback attempt",
       "unsupported newer-schema mount block"
     ],
-    "production_conformance": "OPEN_NOT_RUN"
+    "production_conformance": "OPEN_NOT_RUN",
+    "cleanup_commit": "38275808fb78b54cb444868110aa015aa376a83a",
+    "static_conformance": "PASS"
   }
 }
