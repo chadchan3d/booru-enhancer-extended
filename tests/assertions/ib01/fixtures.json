@@ -1,0 +1,88 @@
+{
+  "cases": [
+    {
+      "id": "T1-startup-fanout",
+      "oracle": "startupFanout",
+      "historical": { "apiRequests": 6, "postPageRequests": 42 },
+      "correctedControl": { "apiRequests": 0, "postPageRequests": 0 }
+    },
+    {
+      "id": "T2-hover-sweep",
+      "oracle": "hoverDwell",
+      "historical": { "apiRequests": 24, "postPageRequests": 12 },
+      "correctedControl": { "apiRequests": 0, "postPageRequests": 0 }
+    },
+    {
+      "id": "T3-viewer-takeover",
+      "oracle": "viewerTakeover",
+      "historical": { "defaultPrevented": true },
+      "correctedControl": { "defaultPrevented": false }
+    },
+    {
+      "id": "T4-native-tooltip",
+      "oracle": "nativeTooltip",
+      "historical": { "nativeTitlesRemaining": 0, "expectedNativeTitles": 5 },
+      "correctedControl": { "nativeTitlesRemaining": 5, "expectedNativeTitles": 5 }
+    },
+    {
+      "id": "T5-picture-restoration",
+      "oracle": "pictureRestoration",
+      "historical": { "sourceElementsLeft": 0, "expectedSourceElements": 2, "imgSrcsetLeft": 0, "expectedImgSrcset": 2, "nativePictureIdentityPreserved": false },
+      "correctedControl": { "sourceElementsLeft": 2, "expectedSourceElements": 2, "imgSrcsetLeft": 2, "expectedImgSrcset": 2, "nativePictureIdentityPreserved": true }
+    },
+    {
+      "id": "T6-download-overlap",
+      "oracle": "downloadSingleFlight",
+      "historical": { "downloadAttemptsStarted": 2 },
+      "correctedControl": { "downloadAttemptsStarted": 1 }
+    },
+    {
+      "id": "T7-favorite-false-success",
+      "oracle": "favoriteValidation",
+      "historical": { "responseWasLoginPage": true, "returned": true },
+      "correctedControl": { "responseWasLoginPage": true, "returned": null }
+    },
+    {
+      "id": "T8-append-403-liveness",
+      "oracle": "appendLiveness",
+      "historical": { "requestsForSameNextPage": 23, "finiteAttemptCeiling": 3 },
+      "correctedControl": { "requestsForSameNextPage": 2, "finiteAttemptCeiling": 3 }
+    },
+    {
+      "id": "T8-append-429-liveness",
+      "oracle": "appendLiveness",
+      "historical": { "requestsForSameNextPage": 9, "finiteAttemptCeiling": 3 },
+      "correctedControl": { "requestsForSameNextPage": 2, "finiteAttemptCeiling": 3 }
+    },
+    {
+      "id": "T9-video-ready-leave",
+      "oracle": "videoDisposal",
+      "historical": { "srcAfterLeave": "https://static1.e621.net/data/aa/bb/7.webm", "elementStillConnected": true },
+      "correctedControl": { "srcAfterLeave": "", "elementStillConnected": false }
+    },
+    {
+      "id": "T10-rule34-us-generic-mutation",
+      "oracle": "genericMutationScope",
+      "historical": { "enhancerActivated": true, "favoriteControls": 1 },
+      "correctedControl": { "enhancerActivated": false, "favoriteControls": 0 }
+    },
+    {
+      "id": "T10-sankaku-chan-generic-mutation",
+      "oracle": "genericMutationScope",
+      "historical": { "enhancerActivated": true, "favoriteControls": 1 },
+      "correctedControl": { "enhancerActivated": false, "favoriteControls": 0 }
+    },
+    {
+      "id": "T10-sankaku-beta-generic-mutation",
+      "oracle": "genericMutationScope",
+      "historical": { "enhancerActivated": true, "favoriteControls": 1 },
+      "correctedControl": { "enhancerActivated": false, "favoriteControls": 0 }
+    },
+    {
+      "id": "T10-sankaku-idol-negative-fixture",
+      "oracle": "genericMutationScope",
+      "historical": { "enhancerActivated": true, "favoriteControls": 1 },
+      "correctedControl": { "enhancerActivated": false, "favoriteControls": 0 }
+    }
+  ]
+}
