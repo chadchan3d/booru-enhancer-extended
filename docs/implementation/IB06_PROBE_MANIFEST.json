@@ -1,6 +1,6 @@
 {
   "checkpoint": "IB06",
-  "status": "E_MODEL_PASS_CONTROLLED_TRANSPORT_PENDING",
+  "status": "E_PASS_PRODUCTION_INTEGRATION_ELIGIBLE",
   "production_source_blob": "02105f262eb3c128642b5296f4fa4502bc8cfa7b",
   "production_source_changed": false,
   "model_evidence": {
@@ -32,7 +32,7 @@
       "http://127.0.0.1:8779"
     ],
     "live_site": false,
-    "status": "OPEN_RERUN_REQUIRED",
+    "status": "PASS_11_OF_11",
     "initial_run": {
       "tests": 11,
       "passed": 9,
@@ -56,13 +56,14 @@
     "harness_fix_commits": [
       "aba1af137814e2a1e6008fb7aaaacfd39baeed9b",
       "0d18f6817ab774ce02f62d84a34de9904b4db9de"
-    ]
+    ],
+    "result_summary": "tests/browser/ib06/TC_REQUEST_GATE_RESULT_SUMMARY.json"
   },
   "gate_status": {
-    "G_REQUEST": "OPEN_CONTROLLED_TRANSPORT_RERUN_REQUIRED",
+    "G_REQUEST": "PASS_E_STAGE_TC",
     "G_RUNTIME_TC_REQUEST": "PASS_FROM_IB03",
     "G_SETTINGS_TC": "PASS_FROM_IB05",
     "G_OWN_TC": "PASS_FROM_IB04"
   },
-  "production_activation": "BLOCKED_UNTIL_G_REQUEST_E_STAGE_PASS"
+  "production_activation": "ELIGIBLE_CONFORMANCE_REQUIRED"
 }
