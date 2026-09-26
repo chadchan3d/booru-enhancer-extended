@@ -57,6 +57,7 @@ class FakeClock {
   async tick(ms, maxTasks = 20000) {
     const target = this.now + Math.max(0, Number(ms) || 0);
     let executed = 0;
+    await this.flushMicrotasks();
     while (true) {
       const task = this._nextDue(target);
       if (!task) break;
