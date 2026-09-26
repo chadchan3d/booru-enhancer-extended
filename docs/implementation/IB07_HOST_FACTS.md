@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `bd85dd1fcb515ecb5cfa6c62510528d43d9243b2`  
+**Production source blob:** `e4f169f6c3514c1555612142c32216b88f83aaec`  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -117,3 +117,31 @@ The family adapter now:
 Existing DAPI/HTML helper code remains in source as an evidence-gated candidate and was not deleted merely for cleanup.
 
 This is a safeguard shutdown plus one scoped native extraction. It does not admit Rule34 video/GIF strategies or any Gelbooru/Safebooru/other family endpoint.
+
+
+## e621 listing native-metadata integration
+
+Passive V1-N on `https://e621.net/posts` observed three current native cards. Each card exposes identity, tags, rating, original extension, original dimensions, byte size, score/favorite count, MD5, preview/sample/original URLs and preview dimensions directly in `article.thumbnail` data attributes.
+
+Evidence:
+
+- `docs/implementation/IB07_E621_V1N.md`
+
+Commit:
+
+- `4918893ca5a7c626652e97068a9069a4f212955c`
+
+Production source blob:
+
+- `e4f169f6c3514c1555612142c32216b88f83aaec`
+
+Production behavior now:
+
+- e621 listing enrichment reads the observed native article attributes and performs no `/posts.json` request;
+- e621 listing full-media slots and core metadata are cached from DOM facts;
+- e926 receives no inherited native listing resolver until separately observed;
+- e621/e926 favorite mutation remains unavailable pending action evidence;
+- synthetic numeric pagination reconstruction is disabled; no `page=2` is invented from bare `/posts`;
+- existing native next-link detection is retained, but no continuation was observed in V1-N and no synthetic fallback is admitted.
+
+The current e621 post-page strategy remains OPEN until passive post markup is observed.
