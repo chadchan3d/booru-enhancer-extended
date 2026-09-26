@@ -2280,7 +2280,6 @@
 	function normalizeE621NativeElement(element, { postPage = false } = {}) {
 		const observedListingHost = location.hostname === 'e621.net' || location.hostname === 'e926.net';
 		if (!element || !observedListingHost) return null;
-		if (postPage && location.hostname !== 'e621.net') return null;
 		const d = element.dataset || {};
 		const id = String(d.id || '');
 		if (!id) return null;
@@ -2355,8 +2354,8 @@
 		return normalizeE621NativeElement(article);
 	}
 
-	function e621NativePostPage(id) {
-		if (location.hostname !== 'e621.net') return null;
+	function e6NativePostPage(id) {
+		if (location.hostname !== 'e621.net' && location.hostname !== 'e926.net') return null;
 		const wanted = String(id || '');
 		if (!wanted) return null;
 		const container = document.querySelector('#image-container[data-id]');
@@ -2382,9 +2381,9 @@
 		getThumbWrapper: (img) => img.closest('article.thumbnail, article.post-preview, article[id^="post_"]') || img.closest('a') || img.parentElement,
 		getGalleryContainer: (root = document) => root.querySelector('#posts-container, .posts-container'),
 		async fetchPost(id) {
-			// IB07: use only observed native e621 facts. Post pages use
+			// IB07: use only directly observed native e621/e926 facts. Post pages use
 			// #image-container; listings use article.thumbnail data attributes.
-			return e621NativePostPage(id) || e621NativeListingPost(id);
+			return e6NativePostPage(id) || e621NativeListingPost(id);
 		},
 		async fetchThumbBatch(ids) {
 			if (!ids.length || (location.hostname !== 'e621.net' && location.hostname !== 'e926.net')) return [];
