@@ -1261,41 +1261,475 @@
 	/* ============================================================ *
 	 *  NETWORK
 	 * ============================================================ */
-	BE.net = {
-		request(opts, retries = 0) {
-			return new Promise((resolve, reject) => {
-				const attempt = (n) => {
-					const operation = BE.runtime.request({ method: 'GET', ...opts });
-					operation.promise.then((res) => {
-						if (res.status >= 200 && res.status < 300) {
-							resolve(res);
-						} else if (res.status === 429) {
-							const delay = Math.pow(2, (retries - n + 1)) * 1000;
-							BE.log.warn(`[Gallery] 429 Rate limit. Retrying in ${delay/1000}s...`);
-							if (n > 0) {
-								setTimeout(() => attempt(n - 1), delay);
-							} else {
-								reject(new Error(`HTTP 429 Rate limit exceeded for ${opts.url}`));
-							}
-						} else if (n > 0) {
-							setTimeout(() => attempt(n - 1), 400 * (retries - n + 1));
-						} else {
-							reject(new Error(`HTTP ${res.status} for ${opts.url}`));
-						}
-					}, (err) => {
-						if (n > 0) setTimeout(() => attempt(n - 1), 400 * (retries - n + 1));
-						else reject(err);
-					});
-				};
-				attempt(retries);
-			});
-		},
-		async json(url, opts = {}) {
-			const res = await this.request({ url, headers: { Accept: 'application/json', ...(opts.headers || {}) }, ...opts }, opts.retries ?? 2);
-			return JSON.parse(res.responseText);
-		}
-	};
+	BE.net = (() => {
+		const OUTCOME = Object.freeze({
+			SUCCESS: 'success',
+			AUTH_REQUIRED: 'auth-required',
+			NOT_FOUND: 'not-found',
+			RATE_LIMITED: 'rate-limited',
+			TRANSIENT: 'transient',
+			STRUCTURAL: 'structural',
+			CANCELLED: 'cancelled',
+		});
+		const MAX_COMPAT_ATTEMPTS = 4;
+		const endpointPolicies = new Map();
+		const inFlightReads = new Map();
+		const activeByEndpoint = new Map();
+		const cooldownUntil = new Map();
+		const wakeTimers = new Map();
+		const lastStartAt = new Map();
+		const queue = [];
+		let sequence = 0;
+		let consumerSequence = 0;
 
+		class NetRequestError extends Error {
+			constructor(outcome, message, detail = {}) {
+				super(message || outcome);
+				this.name = 'NetRequestError';
+				this.outcome = outcome;
+				Object.assign(this, detail);
+			}
+		}
+
+		function stable(value) {
+			if (value === null || typeof value !== 'object') return JSON.stringify(value);
+			if (Array.isArray(value)) return '[' + value.map(stable).join(',') + ']';
+			return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + stable(value[key])).join(',') + '}';
+		}
+
+		function responseHeadersToString(headers) {
+			try { return [...headers.entries()].map(([k, v]) => k + ': ' + v).join('\r\n'); }
+			catch { return ''; }
+		}
+
+		function headerValue(raw, name) {
+			const wanted = String(name).toLowerCase();
+			for (const line of String(raw || '').split(/\r?\n/)) {
+				const idx = line.indexOf(':');
+				if (idx < 0) continue;
+				if (line.slice(0, idx).trim().toLowerCase() === wanted) return line.slice(idx + 1).trim();
+			}
+			return null;
+		}
+
+		function retryAfterDelayMs(res) {
+			const raw = headerValue(res?.responseHeaders, 'retry-after');
+			if (!raw) return 0;
+			const seconds = Number(raw);
+			if (Number.isFinite(seconds) && seconds >= 0) return Math.round(seconds * 1000);
+			const when = Date.parse(raw);
+			return Number.isFinite(when) ? Math.max(0, when - Date.now()) : 0;
+		}
+
+		function policyFor(endpointKey, override = null) {
+			const configured = endpointPolicies.get(endpointKey) || {};
+			const merged = { maxActive: Infinity, spacingMs: 0, ...configured, ...(override || {}) };
+			if (!(merged.maxActive > 0)) merged.maxActive = Infinity;
+			if (!(merged.spacingMs >= 0)) merged.spacingMs = 0;
+			return merged;
+		}
+
+		function endpointActiveCount(key) {
+			return activeByEndpoint.get(key)?.size || 0;
+		}
+
+		function scheduleWake(endpointKey, when) {
+			if (!(when > Date.now())) return;
+			const existing = wakeTimers.get(endpointKey);
+			if (existing?.when <= when) return;
+			if (existing) clearTimeout(existing.id);
+			const id = setTimeout(() => {
+				wakeTimers.delete(endpointKey);
+				pump();
+			}, Math.max(0, when - Date.now()) + 5);
+			wakeTimers.set(endpointKey, { id, when });
+		}
+
+		function sortQueue() {
+			queue.sort((a, b) => {
+				const aLane = a.lane === 'foreground' ? 0 : 1;
+				const bLane = b.lane === 'foreground' ? 0 : 1;
+				return aLane - bLane || a.queuedAt - b.queuedAt;
+			});
+		}
+
+		function normalizeOptions(opts = {}, retries = 0) {
+			const {
+				lane = 'background',
+				kind: requestedKind,
+				accountKey = 'default',
+				operation = 'http',
+				identityParams,
+				endpointKey: requestedEndpointKey,
+				endpointPolicy,
+				maxAttempts: requestedMaxAttempts,
+				retryDelayMs,
+				transportPlan,
+				fetchOptions,
+				detectAuth,
+				validateResponse,
+				...transportOptions
+			} = opts;
+			delete transportOptions.retries;
+
+			const url = new URL(transportOptions.url, location.href).toString();
+			const method = String(transportOptions.method || 'GET').toUpperCase();
+			const kind = requestedKind || ((method === 'GET' || method === 'HEAD') ? 'read' : 'mutation');
+			const endpointKey = requestedEndpointKey || new URL(url).origin;
+			const compatibilityAttempts = Math.max(1, Math.min(MAX_COMPAT_ATTEMPTS, Math.floor(Number(retries) || 0) + 1));
+			const maxAttempts = kind === 'mutation'
+				? 1
+				: Math.max(1, Math.min(MAX_COMPAT_ATTEMPTS, Math.floor(Number(requestedMaxAttempts) || compatibilityAttempts)));
+			const normalizedHeaders = transportOptions.headers || {};
+			const params = identityParams || {
+				method,
+				url,
+				headers: normalizedHeaders,
+				data: transportOptions.data ?? transportOptions.body ?? null,
+			};
+			const identity = stable({
+				site: new URL(url).origin,
+				account: accountKey,
+				operation,
+				params,
+			});
+
+			return {
+				lane: lane === 'foreground' ? 'foreground' : 'background',
+				kind,
+				accountKey,
+				operation,
+				identity,
+				endpointKey,
+				endpointPolicy: policyFor(endpointKey, endpointPolicy),
+				maxAttempts,
+				retryDelayMs: typeof retryDelayMs === 'function'
+					? retryDelayMs
+					: ((attempt) => Math.max(0, Number(retryDelayMs ?? (400 * attempt)) || 0)),
+				transportPlan: Array.isArray(transportPlan) && transportPlan.length
+					? transportPlan.slice()
+					: ['privileged'],
+				fetchOptions: fetchOptions || {},
+				detectAuth: typeof detectAuth === 'function' ? detectAuth : null,
+				validateResponse: typeof validateResponse === 'function' ? validateResponse : null,
+				transportOptions: { method, ...transportOptions, url },
+			};
+		}
+
+		function classifyResponse(op, res) {
+			try {
+				if (op.detectAuth?.(res) === true) return OUTCOME.AUTH_REQUIRED;
+				if (op.validateResponse && op.validateResponse(res) === false) return OUTCOME.STRUCTURAL;
+			} catch {
+				return OUTCOME.STRUCTURAL;
+			}
+			const status = Number(res?.status || 0);
+			if (status === 401 || status === 403) return OUTCOME.AUTH_REQUIRED;
+			if (status === 404) return OUTCOME.NOT_FOUND;
+			if (status === 429) return OUTCOME.RATE_LIMITED;
+			if (status >= 500 || status === 0) return OUTCOME.TRANSIENT;
+			if (status >= 200 && status < 300) return OUTCOME.SUCCESS;
+			return OUTCOME.STRUCTURAL;
+		}
+
+		function startTransport(op) {
+			const index = Math.min(op.attemptsUsed - 1, op.transportPlan.length - 1);
+			const mode = op.transportPlan[index] || 'privileged';
+			if (mode === 'native') {
+				const controller = typeof AbortController === 'function' ? new AbortController() : null;
+				const fetchOpts = {
+					method: op.transportOptions.method,
+					headers: op.transportOptions.headers,
+					body: op.transportOptions.data ?? op.transportOptions.body,
+					...op.fetchOptions,
+					...(controller ? { signal: controller.signal } : {}),
+				};
+				const promise = BE.runtime.nativeFetch(op.transportOptions.url, fetchOpts).then(async (res) => ({
+					status: res.status,
+					responseText: await res.text(),
+					responseHeaders: responseHeadersToString(res.headers),
+					finalUrl: res.url || op.transportOptions.url,
+					transport: 'native',
+				}));
+				return {
+					promise,
+					abortTransport: () => {
+						if (!controller) return false;
+						try { controller.abort(); return true; } catch { return false; }
+					},
+					mode,
+				};
+			}
+
+			const runtimeOperation = BE.runtime.request(op.transportOptions);
+			return {
+				promise: runtimeOperation.promise,
+				abortTransport: () => runtimeOperation.abortTransport(),
+				mode: 'privileged',
+			};
+		}
+
+		function releaseActive(op) {
+			const set = activeByEndpoint.get(op.endpointKey);
+			if (!set) return;
+			set.delete(op);
+			if (!set.size) activeByEndpoint.delete(op.endpointKey);
+		}
+
+		function settleConsumer(consumer, outcome, value, errorDetail = {}) {
+			if (!consumer || consumer.settled) return false;
+			consumer.settled = true;
+			consumer.outcome = outcome;
+			if (outcome === OUTCOME.SUCCESS) consumer.resolve(value);
+			else consumer.reject(new NetRequestError(outcome, errorDetail.message || outcome, errorDetail));
+			return true;
+		}
+
+		function removeReadIdentity(op) {
+			if (op.kind === 'read' && inFlightReads.get(op.identity) === op) inFlightReads.delete(op.identity);
+		}
+
+		function finish(op, outcome, value = null, detail = {}) {
+			if (op.state === 'terminal') return;
+			op.state = 'terminal';
+			op.outcome = outcome;
+			clearTimeout(op.retryTimer);
+			op.retryTimer = null;
+			removeReadIdentity(op);
+			for (const consumer of op.consumers.values()) settleConsumer(consumer, outcome, value, {
+				...detail,
+				identity: op.identity,
+				attempts: op.attemptsUsed,
+				response: value,
+			});
+			op.consumers.clear();
+		}
+
+		function queueRetry(op) {
+			if (!op.consumers.size || op.attemptsUsed >= op.maxAttempts) {
+				finish(op, OUTCOME.TRANSIENT, null, { message: 'Transient request failed after finite attempt budget.' });
+				return;
+			}
+			const delay = op.retryDelayMs(op.attemptsUsed);
+			op.state = 'retry-wait';
+			op.retryTimer = setTimeout(() => {
+				op.retryTimer = null;
+				if (!op.consumers.size) {
+					finish(op, OUTCOME.CANCELLED, null, { message: 'Request cancelled before retry.' });
+					return;
+				}
+				op.state = 'queued';
+				op.queuedAt = ++sequence;
+				queue.push(op);
+				pump();
+			}, delay);
+		}
+
+		function transportTerminal(op, terminal) {
+			releaseActive(op);
+			if (op.abandoned) {
+				op.state = 'terminal';
+				clearTimeout(op.retryTimer);
+				op.retryTimer = null;
+				pump();
+				return;
+			}
+
+			if (terminal.error) {
+				const kind = terminal.error?.kind || terminal.error?.name || 'error';
+				if (kind === 'abort' || kind === 'AbortError') {
+					finish(op, OUTCOME.CANCELLED, null, { cause: terminal.error, message: 'Transport aborted.' });
+				} else if (op.kind === 'read' && op.attemptsUsed < op.maxAttempts) {
+					queueRetry(op);
+				} else {
+					finish(op, OUTCOME.TRANSIENT, null, { cause: terminal.error, message: 'Transport failed.' });
+				}
+				pump();
+				return;
+			}
+
+			const outcome = classifyResponse(op, terminal.response);
+			if (outcome === OUTCOME.SUCCESS) {
+				finish(op, outcome, terminal.response);
+			} else if (outcome === OUTCOME.RATE_LIMITED) {
+				const delay = retryAfterDelayMs(terminal.response);
+				if (delay > 0) {
+					const until = Date.now() + delay;
+					cooldownUntil.set(op.endpointKey, Math.max(cooldownUntil.get(op.endpointKey) || 0, until));
+					scheduleWake(op.endpointKey, until);
+				}
+				finish(op, outcome, terminal.response, { message: 'Endpoint rate limited.' });
+			} else if (outcome === OUTCOME.TRANSIENT && op.kind === 'read' && op.attemptsUsed < op.maxAttempts) {
+				queueRetry(op);
+			} else {
+				finish(op, outcome, terminal.response, { message: 'HTTP request ended with ' + outcome + '.' });
+			}
+			pump();
+		}
+
+		function start(op) {
+			op.state = 'running';
+			op.attemptsUsed++;
+			lastStartAt.set(op.endpointKey, Date.now());
+			let active = activeByEndpoint.get(op.endpointKey);
+			if (!active) { active = new Set(); activeByEndpoint.set(op.endpointKey, active); }
+			active.add(op);
+			op.transport = startTransport(op);
+			op.transport.promise.then(
+				(response) => transportTerminal(op, { response }),
+				(error) => transportTerminal(op, { error }),
+			);
+		}
+
+		function pump() {
+			sortQueue();
+			for (const op of [...queue]) {
+				if (op.state !== 'queued') continue;
+				if (!op.consumers.size) {
+					queue.splice(queue.indexOf(op), 1);
+					finish(op, OUTCOME.CANCELLED, null, { message: 'Request cancelled before start.' });
+					continue;
+				}
+				const cooldown = cooldownUntil.get(op.endpointKey) || 0;
+				if (cooldown > Date.now()) {
+					scheduleWake(op.endpointKey, cooldown);
+					continue;
+				}
+				const policy = op.endpointPolicy;
+				if (endpointActiveCount(op.endpointKey) >= policy.maxActive) continue;
+				const earliest = (lastStartAt.get(op.endpointKey) || 0) + policy.spacingMs;
+				if (earliest > Date.now()) {
+					scheduleWake(op.endpointKey, earliest);
+					continue;
+				}
+				queue.splice(queue.indexOf(op), 1);
+				start(op);
+			}
+		}
+
+		function addConsumer(op, lane) {
+			const id = 'c' + (++consumerSequence);
+			let resolve;
+			let reject;
+			const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+			const consumer = { id, resolve, reject, settled: false, outcome: null };
+			op.consumers.set(id, consumer);
+
+			if (lane === 'foreground' && op.lane === 'background' && op.state === 'queued') {
+				op.lane = 'foreground';
+				sortQueue();
+			}
+
+			const release = () => {
+				const current = op.consumers.get(id);
+				if (!current) return false;
+				op.consumers.delete(id);
+				settleConsumer(current, OUTCOME.CANCELLED, null, {
+					identity: op.identity,
+					attempts: op.attemptsUsed,
+					message: 'Consumer released request.',
+				});
+				if (op.consumers.size) return true;
+				if (op.state === 'queued') {
+					const idx = queue.indexOf(op);
+					if (idx >= 0) queue.splice(idx, 1);
+					finish(op, OUTCOME.CANCELLED, null, { message: 'Last consumer released queued request.' });
+				} else if (op.state === 'retry-wait') {
+					clearTimeout(op.retryTimer);
+					op.retryTimer = null;
+					finish(op, OUTCOME.CANCELLED, null, { message: 'Last consumer released pending retry.' });
+				} else if (op.state === 'running') {
+					op.abandoned = true;
+					removeReadIdentity(op);
+					try { op.transport?.abortTransport?.(); } catch { }
+				}
+				return true;
+			};
+
+			promise.release = release;
+			promise.cancel = release;
+			promise.identity = op.identity;
+			promise.outcome = () => consumer.outcome;
+			return promise;
+		}
+
+		function acquire(opts = {}, retries = 0) {
+			const normalized = normalizeOptions(opts, retries);
+			let op = normalized.kind === 'read' ? inFlightReads.get(normalized.identity) : null;
+			if (op && op.state !== 'terminal' && !op.abandoned) {
+				const promise = addConsumer(op, normalized.lane);
+				pump();
+				return promise;
+			}
+			op = {
+				...normalized,
+				consumers: new Map(),
+				attemptsUsed: 0,
+				state: 'queued',
+				queuedAt: ++sequence,
+				retryTimer: null,
+				transport: null,
+				abandoned: false,
+				outcome: null,
+			};
+			if (op.kind === 'read') inFlightReads.set(op.identity, op);
+			queue.push(op);
+			const promise = addConsumer(op, op.lane);
+			pump();
+			return promise;
+		}
+
+		function request(opts, retries = 0) {
+			return acquire(opts, retries);
+		}
+
+		function json(url, opts = {}) {
+			const retries = opts.retries ?? 2;
+			const requestPromise = acquire({
+				...opts,
+				url,
+				headers: { Accept: 'application/json', ...(opts.headers || {}) },
+				operation: opts.operation || 'json',
+			}, retries);
+			const parsed = requestPromise.then((res) => {
+				try { return JSON.parse(res.responseText); }
+				catch (cause) {
+					throw new NetRequestError(OUTCOME.STRUCTURAL, 'Malformed JSON response.', {
+						cause,
+						response: res,
+						identity: requestPromise.identity,
+					});
+				}
+			});
+			parsed.release = requestPromise.release;
+			parsed.cancel = requestPromise.cancel;
+			parsed.identity = requestPromise.identity;
+			return parsed;
+		}
+
+		function configureEndpoint(endpointKey, policy) {
+			if (!endpointKey) return false;
+			if (policy === null) endpointPolicies.delete(endpointKey);
+			else endpointPolicies.set(endpointKey, { ...(policy || {}) });
+			pump();
+			return true;
+		}
+
+		return {
+			OUTCOME,
+			NetRequestError,
+			request,
+			json,
+			acquire,
+			configureEndpoint,
+			_debug: {
+				get queueLength() { return queue.length; },
+				get inFlightReadCount() { return inFlightReads.size; },
+				activeCount: endpointActiveCount,
+				cooldownUntil: (key) => cooldownUntil.get(key) || 0,
+			},
+		};
+	})();
 	/* ============================================================ *
 	 *  POST MODEL
 	 * ============================================================ */
@@ -1609,23 +2043,19 @@
 	let _gelbooruApiHealthy = true;
 
 	async function gelbooruApiFetch(ids) {
-		const url = `${location.origin}/index.php?page=dapi&s=post&q=index&json=1&tags=${encodeURIComponent('id:' + ids.join(','))}&limit=${ids.length}`;
-		let data;
-		try {
-			const res = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			data = await res.json();
-			_gelbooruApiHealthy = true;
-		} catch (fetchErr) {
-			BE.log.debug('gelbooru: same-origin fetch failed, trying GM.xhr', fetchErr);
-			data = await BE.net.json(url, { retries: 1 });
-			_gelbooruApiHealthy = true;
-		}
+		const url = location.origin + '/index.php?page=dapi&s=post&q=index&json=1&tags=' + encodeURIComponent('id:' + ids.join(',')) + '&limit=' + ids.length;
+		const data = await BE.net.json(url, {
+			retries: 1,
+			operation: 'gelbooru-dapi',
+			identityParams: { ids: ids.map(String) },
+			transportPlan: ['native', 'privileged'],
+			fetchOptions: { credentials: 'same-origin' },
+		});
+		_gelbooruApiHealthy = true;
 		const list = Array.isArray(data) ? data : (data?.post || []);
 		if (!Array.isArray(list) || !list.length) return [];
 		return list.map(normalizeGelbooru);
 	}
-
 	async function gelbooruFetchPostHTML(id) {
 		try {
 			const url = `${location.origin}/index.php?page=post&s=view&id=${id}`;
@@ -2232,12 +2662,12 @@
 			// page, which we may not be on. Fetch it in the background.
 			if (!control && post?.postUrl && post.postUrl !== location.href) {
 				try {
-					const res = await BE.net.request({ url: post.postUrl }, 1);
+					const res = await BE.net.request({ url: post.postUrl, lane: 'foreground', operation: 'favorite-control-page' }, 1);
 					const doc = new DOMParser().parseFromString(res.responseText, 'text/html');
 					const remoteControl = findFavoriteControl(doc);
 					if (remoteControl?.href) {
 						// Re-request the actual favorite link so the session cookie applies.
-						await BE.net.request({ url: remoteControl.href }, 1);
+						await BE.net.request({ url: remoteControl.href, lane: 'foreground', kind: 'mutation', operation: 'favorite-action', maxAttempts: 1 }, 0);
 						BE.modules.toast.show('Favorited', 'success');
 						return true;
 					}
@@ -3110,7 +3540,6 @@
 		const postCache = new Map();
 		const postInflight = new Map();
 		let state = 'IDLE';
-		let retryTimer = null;
 		let paginatorEl = null;
 		let paginatorHiddenByUs = false;
 		let visitedPageIdentities = new Set();
@@ -3185,7 +3614,6 @@
 			visitedPageIdentities = new Set();
 			nextPageUrl = null;
 			state = 'IDLE';
-			clearTimeout(retryTimer);
 			paginatorHiddenByUs = false;
 		}
 
@@ -3738,7 +4166,6 @@
 		async function loadNextPage() {
 			if (state !== 'IDLE') return;
 			state = 'LOADING';
-			clearTimeout(retryTimer);
 
 			// Requirement 1 fix: use a mutable local so a successfully
 			// calculated fallback URL is actually used for the request below.
@@ -3768,16 +4195,19 @@
 			BE.log.debug('[Gallery] request started');
 
 			try {
-				const res = await BE.net.request({ url: nextUrl, headers: { 'Accept': 'text/html' } }, 3);
-				BE.log.debug(`[Gallery] HTTP status: ${res.status}`);
-				BE.log.debug(`[Gallery] response length: ${res.responseText.length}`);
-
-				if (res.responseText.includes('login') && res.responseText.includes('password')) {
-					throw new Error('Login page returned instead of gallery.');
-				}
-				if (res.status === 403 || res.status === 404 || res.status === 500) {
-					throw new Error(`HTTP ${res.status} error page returned.`);
-				}
+				const res = await BE.net.request({
+					url: nextUrl,
+					headers: { 'Accept': 'text/html' },
+					lane: 'background',
+					operation: 'gallery-pagination',
+					identityParams: { url: nextUrl },
+					detectAuth: (response) => {
+						const body = String(response?.responseText || '').toLowerCase();
+						return body.includes('login') && body.includes('password');
+					},
+				}, 3);
+				BE.log.debug('[Gallery] HTTP status: ' + res.status);
+				BE.log.debug('[Gallery] response length: ' + res.responseText.length);
 
 				visitedPageIdentities.add(nextIdentity);
 
@@ -3888,10 +4318,7 @@
 				// Requirement 5: on failure, make sure the user isn't stranded —
 				// restore the native paginator rather than leaving it hidden.
 				restorePaginatorVisibility();
-				retryTimer = setTimeout(() => {
-					state = 'IDLE';
-					loadNextPage();
-				}, 5000);
+				// Terminal failure remains terminal for this page context; native pagination stays available.
 			}
 		}
 
@@ -3899,7 +4326,6 @@
 			BE.modules.hover.hide();
 			if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
 			if (sentinel) { sentinel.remove(); sentinel = null; }
-			clearTimeout(retryTimer);
 			retryTimer = null;
 			restorePaginatorVisibility();
 			disposeCardOwners();
