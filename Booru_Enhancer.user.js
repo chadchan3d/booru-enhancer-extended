@@ -2767,6 +2767,48 @@
 		let visitedPageIdentities = new Set();
 		let settingsListenerAttached = false;
 		let resizeListenerAttached = false;
+		let galleryOwner = null;
+		const cardOwners = new Set();
+		const cardOwnerByWrap = new WeakMap();
+		const hoverOwners = new Set();
+		const hoverOwnerByWrap = new WeakMap();
+
+		function nativeOriginFor(img, wrap) {
+			return img?.closest?.('a[href]') || wrap?.closest?.('a[href]') || wrap?.querySelector?.('a[href]') || null;
+		}
+
+		function getCardOwner(wrap, img) {
+			if (!wrap) return null;
+			let owner = cardOwnerByWrap.get(wrap);
+			if (owner && !owner.disposed) return owner;
+			owner = BE.ownership.create({ origin: nativeOriginFor(img, wrap), fallback: paginatorEl });
+			cardOwnerByWrap.set(wrap, owner);
+			cardOwners.add(owner);
+			owner.cleanup(() => cardOwners.delete(owner));
+			return owner;
+		}
+
+		function getHoverOwner(wrap, img) {
+			if (!wrap) return null;
+			let owner = hoverOwnerByWrap.get(wrap);
+			if (owner && !owner.disposed) return owner;
+			owner = BE.ownership.create({ origin: nativeOriginFor(img, wrap), fallback: paginatorEl });
+			hoverOwnerByWrap.set(wrap, owner);
+			hoverOwners.add(owner);
+			owner.cleanup(() => hoverOwners.delete(owner));
+			return owner;
+		}
+
+		function disposeHoverOwners() {
+			for (const owner of [...hoverOwners]) owner.dispose();
+			hoverOwners.clear();
+		}
+
+		function disposeCardOwners() {
+			disposeHoverOwners();
+			for (const owner of [...cardOwners]) owner.dispose();
+			cardOwners.clear();
+		}
 
 		function seedLoadedPostIds(root) {
 			// Requirement 2: loadedPostIds must represent every post already
@@ -2806,13 +2848,19 @@
 				// before adopting the new one.
 				if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
 				if (sentinel) { sentinel.remove(); sentinel = null; }
-				resetPageScopedState();
 				restorePaginatorVisibility();
+				disposeCardOwners();
+				galleryOwner?.dispose();
+				galleryOwner = null;
+				settingsListenerAttached = false;
+				resizeListenerAttached = false;
+				resetPageScopedState();
 				paginatorEl = null;
 			}
 
 			galleryContainer = container;
-			galleryContainer.dataset.beAdapter = BE.adapters.active?.id || '';
+			if (!galleryOwner) galleryOwner = BE.ownership.create({ origin: galleryContainer.querySelector('a[href]') });
+			galleryOwner.ownAttribute(galleryContainer, 'data-be-adapter', BE.adapters.active?.id || '');
 
 			// Requirement 7: gallery init() must be idempotent — a marker on
 			// the container prevents re-adding delegated listeners or redoing
@@ -2826,8 +2874,8 @@
 				applyGridSettings();
 				return;
 			}
-			galleryContainer.dataset.beGalleryInit = '1';
-			galleryContainer.classList.add('be-gallery-grid');
+			galleryOwner.ownAttribute(galleryContainer, 'data-be-gallery-init', '1');
+			galleryOwner.ownClass(galleryContainer, 'be-gallery-grid', true);
 
 			// Event Delegation (attached exactly once per container).
 			// Requirement 4 / follow-up review: bubble phase, not capture.
@@ -2839,30 +2887,31 @@
 			// only commits the default action after the whole dispatch,
 			// capture + target + bubble, completes) — we just no longer
 			// jump the queue ahead of the site's own handlers.
-			galleryContainer.addEventListener('click', onGalleryClick);
-			galleryContainer.addEventListener('pointerover', onGalleryHover);
-			galleryContainer.addEventListener('pointerout', onGalleryHoverEnd);
+			galleryOwner.on(galleryContainer, 'click', onGalleryClick);
+			galleryOwner.on(galleryContainer, 'pointerover', onGalleryHover);
+			galleryOwner.on(galleryContainer, 'pointerout', onGalleryHoverEnd);
 
 			applyGridSettings();
 
 			if (!settingsListenerAttached) {
 				settingsListenerAttached = true;
-				BE.bus.on('settings:changed', ({ key }) => {
-					if (key.startsWith('gallery.') || key === 'general.theme' || key === 'general.accentColor') {
-						applyGridSettings();
+				const offSettings = BE.bus.on('settings:changed', galleryOwner.guard(({ key }) => {
+					if (key.startsWith('gallery.') || key === 'general.theme' || key === 'general.accentColor') applyGridSettings();
+					if (key === 'gallery.infiniteScroll') onInfiniteScrollSettingChanged(BE.settings.get('gallery.infiniteScroll'));
+					if (key === 'media.thumbQuality') enhanceThumbnails(galleryContainer);
+					if (key === 'media.hoverPreview') {
+						if (BE.settings.get('media.hoverPreview')) enhanceThumbnails(galleryContainer);
+						else disposeHoverOwners();
 					}
-					if (key === 'gallery.infiniteScroll') {
-						onInfiniteScrollSettingChanged(BE.settings.get('gallery.infiniteScroll'));
-					}
-					if (key === 'media.thumbQuality') {
-						enhanceThumbnails(galleryContainer);
-					}
-				});
+				}));
+				galleryOwner.cleanup(() => { offSettings(); settingsListenerAttached = false; });
 			}
 
 			if (!resizeListenerAttached) {
 				resizeListenerAttached = true;
-				window.addEventListener('resize', BE.dom.debounce(() => applyGridSettings(), 120));
+				const onResize = BE.dom.debounce(galleryOwner.guard(() => applyGridSettings()), 120);
+				galleryOwner.on(window, 'resize', onResize);
+				galleryOwner.cleanup(() => { resizeListenerAttached = false; });
 			}
 
 			enhanceThumbnails(galleryContainer);
@@ -2910,20 +2959,14 @@
 				const maxFitPx = Math.max(1, Math.floor(usableWidth / colsNum));
 				effectiveThumbSizePx = Math.min(thumbSizePx, maxFitPx);
 
-				galleryContainer.style.setProperty(
-					'--be-grid-template',
-					`repeat(${colsNum}, minmax(0, ${effectiveThumbSizePx}px))`
-				);
+				galleryOwner?.ownStyle(galleryContainer, '--be-grid-template', `repeat(${colsNum}, minmax(0, ${effectiveThumbSizePx}px))`);
 			} else {
-				galleryContainer.style.setProperty(
-					'--be-grid-template',
-					`repeat(auto-fill, var(--be-thumbnail-size))`
-				);
+				galleryOwner?.ownStyle(galleryContainer, '--be-grid-template', `repeat(auto-fill, var(--be-thumbnail-size))`);
 			}
 
-			galleryContainer.style.setProperty('--be-thumbnail-size', `${effectiveThumbSizePx}px`);
-			galleryContainer.style.setProperty('--be-grid-gap', `${gapPx}px`);
-			galleryContainer.classList.toggle('be-compact-mode', compact);
+			galleryOwner?.ownStyle(galleryContainer, '--be-thumbnail-size', `${effectiveThumbSizePx}px`);
+			galleryOwner?.ownStyle(galleryContainer, '--be-grid-gap', `${gapPx}px`);
+			galleryOwner?.ownClass(galleryContainer, 'be-compact-mode', compact);
 
 			BE.log.debug(
 				`[Gallery] Grid: ${colsNum > 0 ? colsNum + ' columns' : 'auto'}, ` +
