@@ -21,8 +21,8 @@
     "gelbooru.com"
   ],
   "g_host": {
-    "rule34.xxx/listing": "V1N_NATIVE_FACTS_PASS_G_HOST_STILL_OPEN",
-    "rule34.xxx/post": "V1N_IMAGE_POST_MEDIA_PASS_METADATA_COMPLETENESS_OPEN",
+    "rule34.xxx/listing": "PASS_NATIVE_ONLY",
+    "rule34.xxx/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_OPEN",
     "e621.net/listing": "OPEN_V1N",
     "e621.net/post": "OPEN_V1N",
     "e926.net/listing": "OPEN_V1N",
@@ -48,7 +48,7 @@
       "network_used": false
     },
     "rule34_post_image": {
-      "status": "PASS_NATIVE_MEDIA_DISCOVERY",
+      "status": "PASS_NATIVE_ONLY_G_HOST",
       "evidence_doc": "docs/implementation/IB07_RULE34_V1N.md",
       "post_id": "18867124",
       "native_sample_url": true,
@@ -58,9 +58,22 @@
         850,
         478
       ],
-      "original_dimensions": "UNKNOWN",
+      "original_dimensions": [
+        1920,
+        1080
+      ],
       "byte_size": "UNKNOWN",
-      "broad_video_selector_false_positives": true
+      "broad_video_selector_false_positives": true,
+      "native_source": true,
+      "native_rating": true,
+      "native_score": true,
+      "resolver_request_needed": false,
+      "scoped_context": "native image post only",
+      "excluded_contexts": [
+        "video",
+        "gif/animated",
+        "favorite/action"
+      ]
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
