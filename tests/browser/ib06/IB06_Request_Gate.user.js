@@ -201,6 +201,16 @@
   async function stats(){
     return JSON.parse((await direct(A+'/stats',true)).text);
   }
+  async function waitFor(predicate,{timeoutMs=1500,intervalMs=25,label='condition'}={}){
+    const deadline=Date.now()+timeoutMs;
+    let last=null;
+    while(Date.now()<deadline){
+      last=await stats();
+      if(predicate(last)) return last;
+      await sleep(intervalMs);
+    }
+    throw new Error('timed out waiting for '+label+'; last stats='+JSON.stringify(last));
+  }
   function rq(base,key,operation,extra=''){
     return {
       site:'fixture',account:'anon',operation,params:{key},
@@ -252,15 +262,14 @@
       return {aborted:0,requests:1};
     });
 
-    await test('B03','last running release issues a real transport abort observed by server',async()=>{
+    await test('B03','last running release issues a real transport abort observed by server after server acceptance',async()=>{
       await reset();const g=new Gate();
-      const req=rq(A,'abort','meta','/delay?key=abort&ms=900');
+      const req=rq(A,'abort','meta','/delay?key=abort&ms=3000');
       const a=g.acquire(req,{consumerId:'A'});
-      await sleep(70);a.release();
-      await sleep(150);
-      const s=await stats();
-      assert((s.aborted['A:abort']||0)>=1,'server did not observe abort');
-      return {serverObservedAbort:s.aborted['A:abort']};
+      await waitFor(s=>s.counts['A:abort']===1,{timeoutMs:1500,label:'server acceptance of abort fixture'});
+      a.release();
+      const s=await waitFor(s=>(s.aborted['A:abort']||0)>=1,{timeoutMs:1500,label:'server-observed abort'});
+      return {serverAcceptedBeforeRelease:true,serverObservedAbort:s.aborted['A:abort']};
     });
 
     await test('B04','transient failure uses at most two actual attempts',async()=>{
@@ -317,22 +326,29 @@
 
     await test('B09','429 cooldown is local to key A while key B remains usable',async()=>{
       await reset();const g=new Gate();
-      const rate=g.acquire(rq(A,'rate','meta','/rate?key=rate'),{consumerId:'rate'});
+      const cooldownSeconds=4;
+      const rate=g.acquire(rq(A,'rate','meta','/rate?key=rate&seconds='+cooldownSeconds),{consumerId:'rate'});
       const rateOutcome=await rate.promise;
       assert(rateOutcome==='rate-limited','429 misclassified');
+
+      const cooldownUntil=g.cooldown.get('A')||0;
+      assert(cooldownUntil-Date.now()>2500,'Retry-After header did not establish the expected cooldown window');
 
       const afterA=g.acquire(rq(A,'after-rate','meta','/ok?key=after-rate'),{consumerId:'A'});
       const onB=g.acquire(rq(B,'b-ok','meta','/ok?key=b-ok'),{consumerId:'B'});
       const bOutcome=await onB.promise;
       assert(bOutcome==='success','key B blocked by key A cooldown');
       let s=await stats();
+      assert(Date.now()<cooldownUntil,'test observation escaped the cooldown window');
       assert(!s.counts['A:after-rate'],'key A request started during cooldown');
       assert(s.counts['B:b-ok']===1,'key B request missing');
-      await sleep(1050);g.pump();
+
+      await sleep(Math.max(0,cooldownUntil-Date.now()+100));
+      g.pump();
       const aOutcome=await afterA.promise;
       s=await stats();
       assert(aOutcome==='success'&&s.counts['A:after-rate']===1,'key A did not resume after cooldown');
-      return {rateOutcome,bUsableDuringCooldown:true,aResumed:true};
+      return {rateOutcome,retryAfterSeconds:cooldownSeconds,bUsableDuringCooldown:true,aResumed:true};
     });
 
     await test('B10','foreground join promotes a queued hover read without preempting active work',async()=>{
