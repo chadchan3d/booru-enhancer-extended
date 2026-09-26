@@ -1,0 +1,44 @@
+{
+  "checkpoint": "IB07",
+  "status": "ACTIVE_V1N_PENDING",
+  "production_source_blob": "069c412e4a813d90587649b74a7e40727cd85818",
+  "source_scope_correction": {
+    "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
+    "removed_matches": [
+      "*://*.donmai.us/*",
+      "*://rule34.us/*",
+      "*://chan.sankakucomplex.com/*",
+      "*://idol.sankakucomplex.com/*",
+      "*://beta.sankakucomplex.com/*"
+    ],
+    "generic_favorite_selector_removed": true,
+    "host_resolver_behavior_changed": false
+  },
+  "host_priority": [
+    "rule34.xxx",
+    "e621.net",
+    "e926.net",
+    "gelbooru.com"
+  ],
+  "g_host": {
+    "rule34.xxx/listing": "OPEN_V1N",
+    "rule34.xxx/post": "OPEN_V1N",
+    "e621.net/listing": "OPEN_V1N",
+    "e621.net/post": "OPEN_V1N",
+    "e926.net/listing": "OPEN_V1N",
+    "e926.net/post": "OPEN_V1N",
+    "gelbooru.com/listing": "OPEN_V1N",
+    "gelbooru.com/post": "OPEN_V1N"
+  },
+  "v1n": {
+    "passive_only": true,
+    "enhancer_disabled": true,
+    "endpoint_requests": 0,
+    "mutations": 0,
+    "live_media_discovery_downloads": 0,
+    "account_context_must_be_labeled": true,
+    "signed_query_tokens_must_not_be_committed": true
+  },
+  "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
+  "next_evidence": "V1-N passive native listing/post captures"
+}
