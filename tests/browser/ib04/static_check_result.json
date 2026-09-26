@@ -1,0 +1,16 @@
+{
+  "checks": {
+    "localOnly": true,
+    "noConnect": true,
+    "noProductionSites": true,
+    "noExternalRuntimeUrl": true,
+    "hasRunMenu": true,
+    "hasExportMenu": true,
+    "hasO13": true,
+    "hasRealNav": true,
+    "hasSameValue": true,
+    "hasReplacement": true,
+    "hasMovedSource": true
+  },
+  "failed": []
+}
