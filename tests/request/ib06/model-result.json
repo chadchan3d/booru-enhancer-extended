@@ -1,0 +1,222 @@
+{
+  "checkpoint": "IB06",
+  "stage": "E_MODEL",
+  "gate": "G-REQUEST",
+  "productionSourceChanged": false,
+  "model": {
+    "lanes": [
+      "foreground",
+      "background"
+    ],
+    "endpointKeys": [
+      "A",
+      "B"
+    ],
+    "maxReadAttempts": 2,
+    "maxConsumersPerCase": 2,
+    "numericPolicy": "test parameters only; not production host budgets"
+  },
+  "outcomeTypes": [
+    "success",
+    "auth-required",
+    "not-found",
+    "rate-limited",
+    "transient",
+    "structural",
+    "cancelled"
+  ],
+  "summary": {
+    "tests": 21,
+    "passed": 21,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "tests": [
+    {
+      "id": "E01",
+      "name": "equivalent reads dedupe to one transport and both consumers settle once",
+      "status": "PASS",
+      "detail": {
+        "transportStarts": 1,
+        "settlements": 2
+      }
+    },
+    {
+      "id": "E02",
+      "name": "different parameters are different read identities",
+      "status": "PASS",
+      "detail": {
+        "starts": 2
+      }
+    },
+    {
+      "id": "E03",
+      "name": "mutations never join read dedupe",
+      "status": "PASS",
+      "detail": {
+        "active": 1,
+        "queued": 1
+      }
+    },
+    {
+      "id": "E04",
+      "name": "foreground queued work precedes queued background without preempting active work",
+      "status": "PASS",
+      "detail": {
+        "secondStarted": "foreground"
+      }
+    },
+    {
+      "id": "E05",
+      "name": "viewer joining queued hover read promotes it",
+      "status": "PASS",
+      "detail": {
+        "promoted": true
+      }
+    },
+    {
+      "id": "E06",
+      "name": "queued release A then B cancels before transport start",
+      "status": "PASS",
+      "detail": {
+        "sharedStarts": 0
+      }
+    },
+    {
+      "id": "E07",
+      "name": "queued release B then A has same cancellation result",
+      "status": "PASS",
+      "detail": {
+        "sharedStarts": 0
+      }
+    },
+    {
+      "id": "E08",
+      "name": "running release A while B remains does not abort",
+      "status": "PASS",
+      "detail": {
+        "aborts": 0
+      }
+    },
+    {
+      "id": "E09",
+      "name": "running release B then A aborts only on last release",
+      "status": "PASS",
+      "detail": {
+        "aborts": 1
+      }
+    },
+    {
+      "id": "E10",
+      "name": "ignored abort keeps endpoint occupancy until wire terminal",
+      "status": "PASS",
+      "detail": {
+        "startsBeforeWireTerminal": 1,
+        "startsAfterWireTerminal": 2
+      }
+    },
+    {
+      "id": "E11",
+      "name": "non-abortable transport also keeps occupancy until terminal",
+      "status": "PASS",
+      "detail": {
+        "abortAvailable": false
+      }
+    },
+    {
+      "id": "E12",
+      "name": "transient read shares one finite attempt budget",
+      "status": "PASS",
+      "detail": {
+        "attempts": 2
+      }
+    },
+    {
+      "id": "E13",
+      "name": "401/403/404/auth-body/structural outcomes do not automatically retry",
+      "status": "PASS",
+      "detail": {
+        "outcomes": [
+          "auth-required",
+          "auth-required",
+          "not-found",
+          "auth-required",
+          "structural"
+        ]
+      }
+    },
+    {
+      "id": "E14",
+      "name": "429 establishes key-local cooldown and does not retry immediately",
+      "status": "PASS",
+      "detail": {
+        "aBlocked": true,
+        "bUsable": true
+      }
+    },
+    {
+      "id": "E15",
+      "name": "cooldown expiry admits queued key A work",
+      "status": "PASS",
+      "detail": {
+        "startedAfterExpiry": true
+      }
+    },
+    {
+      "id": "E16",
+      "name": "new consumer can join an existing queued read during cooldown",
+      "status": "PASS",
+      "detail": {
+        "sharedStarts": 1
+      }
+    },
+    {
+      "id": "E17",
+      "name": "late success after logical cancellation does not settle a released consumer",
+      "status": "PASS",
+      "detail": {
+        "lateSuppressed": true
+      }
+    },
+    {
+      "id": "E18",
+      "name": "timeout race yields one retry path and one final settlement",
+      "status": "PASS",
+      "detail": {
+        "attempts": 2,
+        "settlements": 1
+      }
+    },
+    {
+      "id": "E19",
+      "name": "error race after success is ignored by transport and cannot duplicate settlement",
+      "status": "PASS",
+      "detail": {
+        "settlements": 1
+      }
+    },
+    {
+      "id": "E20",
+      "name": "terminal job cannot be restarted by pump/sentinel activity",
+      "status": "PASS",
+      "detail": {
+        "starts": 1
+      }
+    },
+    {
+      "id": "E21",
+      "name": "read identity includes site account operation and parameters",
+      "status": "PASS",
+      "detail": {
+        "uniqueIdentities": 5
+      }
+    }
+  ],
+  "boundaries": {
+    "syntheticModel": true,
+    "realManagerTransport": false,
+    "liveSite": false,
+    "productionIntegration": false,
+    "universalScheduler": false
+  }
+}
