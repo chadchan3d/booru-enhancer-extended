@@ -1,0 +1,48 @@
+{
+  "checkpoint": "IB04",
+  "status": "BLOCKED_ON_REAL_TC_BROWSER_RUN",
+  "stage": "E_PREPARED",
+  "runtime_cell": "TC — Tampermonkey × Chrome/Chromium",
+  "probe": {
+    "path": "tests/browser/ib04/IB04_Browser_Ownership_Probe.user.js",
+    "version": "1.0.0",
+    "sha256": "ff6921b9efc491ac4279a9fd35b378e64cf7db1ed70b23ab0b4e25a53c78e17c"
+  },
+  "fixture": {
+    "path": "tests/browser/ib04/fixture.html",
+    "sha256": "b588ec5265cc7a5a4ab2120ba22081964ad381ea58a0fcc21ad423d0b68a3b24"
+  },
+  "server": {
+    "path": "tests/browser/ib04/server.cjs",
+    "sha256": "ce5abe85c31c9f508e5758fcd017dbfb76c222b1e94890c35b933370d493d406",
+    "origin": "http://127.0.0.1:8775"
+  },
+  "packet": {
+    "name": "IB04_Browser_Ownership_Packet.zip",
+    "sha256": "5bce5ebb5386936e7b220a5bfc22686736e3b3505918bc43a636163d42a85db0",
+    "zip_test": "PASS",
+    "committed_binary": false
+  },
+  "local_static_qualification": {
+    "syntax": "PASS",
+    "static_checks": "PASS",
+    "external_runtime_requests": false,
+    "production_site_logic": false
+  },
+  "browser_cases": 18,
+  "production_ownership_integrated": false,
+  "g_own_promoted": [],
+  "sanitation": {
+    "status": "PASS",
+    "files_scanned": 8,
+    "findings": [],
+    "checked": [
+      "local user/workspace paths",
+      "private personal names",
+      "location names",
+      "email addresses",
+      "token/key/credential patterns"
+    ]
+  },
+  "next_required_evidence": "Run exact probe in TC and return complete JSON result before any production ownership integration."
+}
