@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Sanitation gate: blocks commits whose staged additions contain
+# filesystem paths, non-ChadChan email addresses or social links.
+added=$(git diff --cached --no-color -U0 --diff-filter=ACMR -- . ':(exclude).githooks/' | grep -E '^\+' | grep -vE '^\+\+\+ ' | sed 's/^+//')
+[ -z "$added" ] && exit 0
+
+fail=0
+report() { echo "SANITATION BLOCK: $1"; echo "$2" | head -20; echo; fail=1; }
+
+paths=$(echo "$added" | grep -nE '(^|[^A-Za-z0-9_])[A-Za-z]:\\[A-Za-z0-9 _.$-]|\\Users\\|/Users/|/home/[A-Za-z]|AppData|OneDrive')
+[ -n "$paths" ] && report "filesystem path" "$paths"
+
+emails=$(echo "$added" | grep -noE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' | grep -viE ':(chadchan[a-z0-9._+-]*@[a-z0-9.-]+|[0-9]+\+chadchan3d@users\.noreply\.github\.com)$')
+[ -n "$emails" ] && report "email address" "$emails"
+
+social=$(echo "$added" | grep -niE '(^|[^a-z0-9])(x\.com|twitter\.com|pixiv\.net/users|instagram\.com|patreon\.com|fanbox\.cc)/')
+[ -n "$social" ] && report "social/profile link" "$social"
+
+if [ $fail -ne 0 ]; then
+  echo "Commit blocked. Remove the matches above, or ask the operator."
+  exit 1
+fi
+exit 0
