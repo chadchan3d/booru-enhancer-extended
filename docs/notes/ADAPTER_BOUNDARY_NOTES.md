@@ -1,4 +1,10 @@
-# IB08 Adapter Boundary
+# Adapter Boundary Notes
+
+> **Non-checkpoint note. This is not IB08.**
+>
+> The blueprint's IB08 is "Reversible native rendition integration" (`docs/implementation/Final_Implementation_Blueprint.md` §2, §3). This note was committed as `docs/implementation/IB08_ADAPTER_BOUNDARY.md` (`41cd6e5`) and defined an "adapter boundary" checkpoint that does not exist in the blueprint. It was moved here per `docs/implementation/AUDIT_BLUEPRINT_RECONCILIATION.md` §"Work outside blueprint scope".
+>
+> It establishes no gate, records no evidence and is not a basis for work. Its "IB08 invariant" and "Exit criteria" sections are retained as written and are not checkpoint criteria. Its host-evidence summary duplicates the IB07 records; the per-host V1-N records and `docs/implementation/IB07_HOST_FACTS.md` are authoritative.
 
 ## Purpose
 

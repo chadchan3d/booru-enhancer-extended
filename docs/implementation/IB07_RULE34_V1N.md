@@ -24,9 +24,9 @@ All three observed cards had the same structural contract:
 
 Observed public post IDs:
 
-- 18867124
-- 18867123
-- 18867122
+- `<id>` (card 1; opened as the observed post below)
+- `<id>` (card 2)
+- `<id>` (card 3)
 
 Observed intrinsic thumbnail dimensions:
 
@@ -77,8 +77,8 @@ No API/DAPI/HTML resolver is admitted by this observation. Rule34 post-page V1-N
 
 Observed native post:
 
-- public post ID: `18867124`;
-- native post route: `/index.php?page=post&s=view&id=18867124`.
+- public post ID: `<id>` (card 1 of the listing observation);
+- native post route: `/index.php?page=post&s=view&id=<id>`.
 
 ### Main post media
 
@@ -107,7 +107,7 @@ This is evidence that future extraction must prefer the host's exact native post
 
 A second passive inspection of the same native post exposed the following visible metadata text:
 
-- post ID: `18867124`;
+- post ID: `<id>` (same post);
 - original dimensions: **1920 × 1080**;
 - source: native source field present;
 - rating: Explicit;

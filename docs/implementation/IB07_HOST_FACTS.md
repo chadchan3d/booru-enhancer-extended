@@ -57,10 +57,23 @@ No endpoint probe is part of V1-N. No download for byte discovery. No favorite/a
 - G-RUNTIME active TC request/storage subset: PASS
 - G-SETTINGS active TC path: PASS
 - G-REQUEST active TC path: PASS
-- G-HOST Rule34 listing/post: OPEN
-- G-HOST e621 listing/post: OPEN
-- G-HOST e926 listing/post: OPEN
-- G-HOST Gelbooru listing/post: OPEN
+
+G-HOST rows are scoped per host/route/context. The per-host V1-N record is authoritative for each row; this table only indexes them. All passes below are native-only: no endpoint is admitted.
+
+| Host | Row | State | Record |
+| --- | --- | --- | --- |
+| Rule34.xxx | listing cards | PASS(scope: native-only) | `IB07_RULE34_V1N.md` (`bf836fe`) |
+| Rule34.xxx | image post, logged-out/native context | PASS(scope: native-only) | `IB07_RULE34_V1N.md` (`dff90a9`) |
+| Rule34.xxx | video post; GIF/animated post; favorite/action | OPEN | `IB07_RULE34_V1N.md` |
+| e621.net | listing cards | PASS(scope: native-only) | `IB07_E621_V1N.md` (`5e9b1fb`) |
+| e621.net | image post: core file/rendition facts, tag categories, source | PASS(scope: native-only) | `IB07_E621_V1N.md` (`47cccd3`; §"Category DOM observation" recorded in `c43378a`); production `c065308`, `8d3927e` |
+| e621.net | video/GIF post; pagination continuation; favorite/action | OPEN | `IB07_E621_V1N.md` |
+| e926.net | listing cards | PASS(scope: native-only) | `IB07_E926_V1N.md` (`26e5cc8`) |
+| e926.net | image post: core Post facts | PASS(scope: native-only) | `IB07_E926_V1N.md` (`192b995`); production `b9ebaf3` |
+| e926.net | video/GIF post; pagination continuation; favorite/action | OPEN | `IB07_E926_V1N.md` |
+| Gelbooru.com | listing/post | OPEN — no dedicated V1-N record; post-level image/video observation is summarized only | `IB07_HOST_CAPABILITY_MATRIX.md` (`bb0c797`) |
+
+No row is inferred from another host. e926 is not inherited from e621; Safebooru and other Gelbooru-family hosts are not inferred from Gelbooru.
 
 ## Production integration blocked
 
@@ -149,7 +162,7 @@ The current e621 post-page strategy remains OPEN until passive post markup is ob
 
 ## e621 native image-post integration
 
-Passive V1-N on `/posts/6736194` observed `#image-container[data-id]` carrying the same core file/rendition dataset as the listing card.
+Passive V1-N on `/posts/<id>` observed `#image-container[data-id]` carrying the same core file/rendition dataset as the listing card.
 
 Commit:
 
@@ -217,7 +230,7 @@ This admission is based on direct e926 observation, not inheritance from e621.
 
 ## e926 native image-post integration
 
-Passive V1-N on `/posts/6736232` independently established the e926 native image-post contract.
+Passive V1-N on `/posts/<id>` independently established the e926 native image-post contract.
 
 Commit:
 
