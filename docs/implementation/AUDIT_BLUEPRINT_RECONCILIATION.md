@@ -38,7 +38,7 @@ It does **not** re-execute tests, re-run browser conformance or re-observe live 
 | Host | Passed (native-only, no endpoint admitted) | Still open | Record |
 | --- | --- | --- | --- |
 | Rule34.xxx | Listing cards; image-post (logged-out/native context) | Video posts; GIF/animated; favorite/action | `IB07_RULE34_V1N.md` (`dff90a9`) |
-| e621.net | Listing cards; image-post core media/file facts | Category-tag DOM structure; video/GIF posts; pagination continuation; favorite/action | `IB07_E621_V1N.md` (`47cccd3`) |
+| e621.net | Listing cards; image-post core media/file facts; category-tag DOM structure | Video/GIF posts; pagination continuation; favorite/action | `IB07_E621_V1N.md` (`47cccd3`, `c43378a`) |
 | e926.net | Listing cards; image-post core Post facts (source blob `dc55026e`) | Video/GIF posts; pagination continuation; favorite/action | `IB07_E926_V1N.md` (`192b995`) |
 | Gelbooru.com | Post-level image and video observation summarized only | Dedicated V1-N record (listing route, cards, raw post facts); structured metadata; pagination; actions | `IB07_HOST_CAPABILITY_MATRIX.md` (`bb0c797`) summary only |
 
@@ -46,9 +46,9 @@ It does **not** re-execute tests, re-run browser conformance or re-observe live 
 
 Host-specific resolver policies; auth/body classification; bounded cache and negative results; minimal Post/four-slot normalization; account invalidation; per-host acceptance criteria that depend on these (Rule34 DAPI/API origin distinction, Gelbooru key-required path handling, signed-URL lifetime).
 
-### Record inconsistency
+### Audit correction
 
-`IB07_HOST_FACTS.md` §"Current gate state" still lists every G-HOST row as OPEN. It predates, and now contradicts, the scoped passes in the three per-host records. Update it to reference the per-host records.
+This table was corrected against the per-host record bodies (commit `c2e69ba`): e621's category-tag DOM structure moved from open to passed (record body, `c43378a`/`c065308`), and e926's post observation moved from open to passed (`192b995`). `IB07_HOST_FACTS.md` §"Current gate state" was updated to index the scoped per-host rows (commit `c2e69ba`); it no longer lists every G-HOST row as OPEN.
 
 ## Work outside blueprint scope
 

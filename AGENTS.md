@@ -21,6 +21,7 @@ Standing instructions for any coding agent working in this repository. Read this
 - Report outcomes only as PASS(scope), PARTIAL—NOT COMPLETE, BLOCKED/FAIL or EXCLUDED(scope), using the §11 completion record.
 - Code presence, a committed document or an unexecuted test is never a PASS.
 - Do not invent checkpoints, sub-checkpoints or architecture phases that are not in the blueprint.
+- End every task with a status block: checkpoint, commit SHA, tests run and results, open items, next eligible blueprint step.
 
 ## Evidence rules
 
