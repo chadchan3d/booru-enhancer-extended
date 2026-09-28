@@ -1,6 +1,7 @@
 # IB07 V1-N — Gelbooru.com native observation
 
-**State:** listing/native identity and thumbnail facts PASS; observed image-post native facts PASS; rating UNKNOWN; video/GIF contexts not observed  
+**State:** listing/native identity and thumbnail facts PASS; observed image-post native facts PASS; rating, tag names and Source value UNKNOWN; video/GIF contexts not observed  
+**Production:** image-post native path in `9cade1a`; live production conformance PASS(scope: logged-out native image post, production body `9cade1a`)  
 **Account context:** logged out; enhancer and userscripts disabled; passive native page  
 **Probe:** `tests/browser/ib07/IB07_Gelbooru_V1N_Probe.js` revision 2 (package commit `984e89f`), read-only, sanitized in the browser before output  
 **Evidence:** two sanitized probe JSON blocks (listing, image post) returned by the operator. Revision 1 output is superseded and not used: it failed sanitation.
@@ -61,7 +62,7 @@ The sample (850 × 1202, JPG) and the original (1448 × 2048, PNG) are distinct 
 - Category classes observed on those rows: `tag-type-artist`, `tag-type-character`, `tag-type-copyright`, `tag-type-general`, `tag-type-metadata`.
 - None of the numeric `category-N` class patterns tested by the probe were observed.
 
-The observed category classes map to the Post model's artist, character, copyright, general and meta fields.
+These are category **classes** only. The evidence does not show which element inside a tag row carries the tag name: the probe deliberately never read tag text or row structure. Categorized tag **names** are therefore not qualified by this record. The classes correspond to the Post model's artist, character, copyright, general and meta categories, but they cannot populate those fields without an observed name element.
 
 ### Statistics text
 
@@ -99,7 +100,9 @@ For the exact observed logged-out native Gelbooru contexts:
 a **native-only strategy passes G-HOST** for the facts observed here:
 
 - listing: card identity from the native link and the native thumbnail URL;
-- image post: identity, sample URL, original URL, sample and original dimensions, original extension, categorized tags, score and Source presence.
+- image post: identity, sample URL, original URL, sample and original dimensions, original extension, score, and the presence of tag rows with category classes and of a Source field.
+
+Tag names and the Source value are **not** qualified: their elements were not observed.
 
 No DAPI, API or HTML resolver is admitted or needed for those facts. No endpoint was probed, so the key-required API path was not touched.
 
@@ -109,6 +112,8 @@ This PASS is deliberately scoped:
 - Gelbooru image-post native facts: PASS;
 - rating: UNKNOWN (not detected);
 - byte size: UNKNOWN (not probed);
+- tag names (all categories): UNKNOWN (name element not observed);
+- Source value: UNKNOWN (presence observed; element not observed);
 - video and GIF/animated post facts: not observed; they remain open for the host-fact record, and hover-video qualification belongs to G-VIDEO / IB10;
 - pagination continuation: observed only; qualification belongs to G-PLACE-T / IB12;
 - favorite/action: not observed; belongs to G-ACTION / IB14.
@@ -117,9 +122,8 @@ This record does not infer Safebooru or any other Gelbooru-family host behavior.
 
 ## Production status
 
-This is an evidence record. Production does not yet consume these facts:
+When this record was first written, production did not consume these facts. The family adapter's `fetchPost` returned native facts only through the Rule34 parser, so a Gelbooru post resolved to no Post.
 
-- `Booru_Enhancer.user.js:2009-2016`: the family adapter's `fetchPost` returns native facts only through the Rule34-specific parser, so a Gelbooru post currently resolves to no Post.
-- `Booru_Enhancer.user.js:2007`: the family `getGalleryContainer` uses the three container selectors that did not match on the observed listing.
+Production commit `9cade1a` added `gelbooruNativeImagePost()`, which the gelbooru-family `fetchPost` calls after the Rule34 path. It reads only facts qualified above: page id identity, the `img#image` sample, the `li a[href*="/images/"]` original link, and Size and Score from the statistics text. Rating, byte size, MD5, Source, date, preview and all tag arrays stay unknown. The integration is recorded in `IB07_HOST_FACTS.md` and its live production conformance in `tests/browser/ib07/TC_PRODUCTION_RESULT_SUMMARY.json`.
 
-Wiring a Gelbooru native-only image-post strategy is remaining IB07 P-stage work. It is not established by this record.
+Still unchanged: the family `getGalleryContainer` uses the three container selectors that did not match on the observed listing. The listing is outside this record's production integration.

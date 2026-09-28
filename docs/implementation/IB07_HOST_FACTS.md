@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `dc55026e11a14bd264b024d9727bb167c3873c1a`  
+**Production source blob:** `0715587162f65324fc1f85adf40e7f490b4220b3` (commit `9cade1a`)  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -72,7 +72,7 @@ G-HOST rows are scoped per host/route/context. The per-host V1-N record is autho
 | e926.net | image post: core Post facts | PASS(scope: native-only) | `IB07_E926_V1N.md` (`192b995`); production `b9ebaf3` |
 | e926.net | video/GIF post; pagination continuation; favorite/action | OPEN | `IB07_E926_V1N.md` |
 | Gelbooru.com | listing cards | PASS(scope: native-only) | `IB07_GELBOORU_V1N.md`; probe package `984e89f` |
-| Gelbooru.com | image post, logged-out/native context: identity, sample/original URLs and dimensions, categorized tags, score, Source presence | PASS(scope: native-only; rating UNKNOWN, byte size UNKNOWN) | `IB07_GELBOORU_V1N.md`; probe package `984e89f` |
+| Gelbooru.com | image post, logged-out/native context: identity, sample/original URLs and dimensions, score; tag-row category classes and Source presence observed | PASS(scope: native-only; rating, byte size, tag names and Source value UNKNOWN) | `IB07_GELBOORU_V1N.md`; probe package `984e89f`; production `9cade1a`; live production conformance PASS(scope) |
 | Gelbooru.com | video post; GIF/animated post | OPEN — not observed | `IB07_GELBOORU_V1N.md` |
 
 No row is inferred from another host. e926 is not inherited from e621; Safebooru and other Gelbooru-family hosts are not inferred from Gelbooru.
@@ -245,3 +245,41 @@ Production source blob:
 Production now admits the observed e926 image-post native parser using `#image-container[data-id]`, native tag rows and native source links with no endpoint request.
 
 e926 additionally exposed a contributor category and multiple source links. Contributor and species are retained only through `allTags` because the current Post model has no dedicated slots. The scalar `source` field retains the first native source link; IB07 does not expand the model to a source array.
+
+
+## Gelbooru native image-post integration
+
+Passive V1-N (`IB07_GELBOORU_V1N.md`) established the logged-out Gelbooru native image-post facts.
+
+Commit:
+
+- `9cade1a`
+
+Production source blob:
+
+- `0715587162f65324fc1f85adf40e7f490b4220b3`
+
+Production now resolves a Gelbooru image post from the native page only, through `gelbooruNativeImagePost()` in the gelbooru-family `fetchPost`, after the Rule34 path:
+
+- identity from the page's `id` parameter, which must match the requested id;
+- site `gelbooru`, media kind `image`;
+- sample from `img#image`;
+- original from `li a[href*="/images/"]`; empty when that link is absent, never filled from the sample;
+- original width, height and score from the native statistics text.
+
+These stay unknown: rating, byte size, MD5, Source, date, preview and all tag arrays. Tag names are unknown because the tag-name element was not observed; Source is unknown because only its presence was observed.
+
+The path returns nothing, leaving the page native, on any other host, on the listing route, on an id mismatch, when `img#image` is missing, when any `<video>` element is present, or when the media is not an image. It makes no request. The candidate DAPI/HTML helpers are retained unchanged and uncalled. The family `fetchThumbBatch` still returns nothing, and `getGalleryContainer` is unchanged.
+
+Implementation test: `tests/host/ib07/gelbooru_native_post.cjs` (14 cases).
+
+### Live production conformance
+
+**PASS(scope: logged-out native Gelbooru image post, production body `9cade1a`)**, in Tampermonkey × Chrome. Package `tests/browser/ib07/` (commit `2e83c33`); result `tests/browser/ib07/TC_PRODUCTION_RESULT_SUMMARY.json`.
+
+- C00: the browser executed the exact `9cade1a` production body (`MATCH_9CADE1A`), established in-browser by hashing the executed production wrapper's source text.
+- C01–C14: all PASS. The route qualified, the adapter activated, and the Gelbooru minimal Post was produced with correct identity, site, kind, sample, original, dimensions and score. Sample and original stayed distinct, and no original was fabricated. Unobserved fields stayed unknown. No video element was present, so the video guard did not disable the path. No enhancer request was counted while producing the Post or during the observation window.
+
+Request-observation limitation: a request issued synchronously during production startup, before the postamble loaded, would not itself be counted. Queue and in-flight counts were zero at postamble load, which shows that nothing was still pending then; it does not prove that no such request occurred.
+
+Not tested: video/GIF, pagination, hover, favorite/action, download, rendition policy, other Gelbooru-family hosts. Manager and browser versions were not relayed.

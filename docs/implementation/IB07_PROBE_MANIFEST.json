@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_GELBOORU_V1N_NATIVE_OBSERVED_GELBOORU_PRODUCTION_INTEGRATION_OPEN",
-  "production_source_blob": "dc55026e11a14bd264b024d9727bb167c3873c1a",
+  "status": "ACTIVE_GELBOORU_IMAGE_POST_PRODUCTION_CONFORMANCE_PASS_ITEM9_AND_ITEM10_OPEN",
+  "production_source_blob": "0715587162f65324fc1f85adf40e7f490b4220b3",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -244,11 +244,14 @@
         "video",
         "gif/animated",
         "favorite/action"
-      ]
+      ],
+      "tag_name_element": "NOT_OBSERVED",
+      "categorized_tag_names": "NOT_QUALIFIED",
+      "source_value": "NOT_QUALIFIED_PRESENCE_ONLY"
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "none for the four priority hosts; Gelbooru native-only production integration is P-stage work",
+  "next_evidence": "none required unless §3 item 10 naming facts are held to need Gelbooru category tag names; that would need the tag-name element observed (G-HOST)",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
@@ -314,5 +317,50 @@
     "remote_resolver": false,
     "e621_inheritance": false,
     "live_production_conformance": "OPEN_NOT_RUN"
+  },
+  "gelbooru_native_post_integration": {
+    "commit": "9cade1a",
+    "source_blob": "0715587162f65324fc1f85adf40e7f490b4220b3",
+    "context": "gelbooru.com logged-out native image post",
+    "remote_resolver": false,
+    "family_inference": false,
+    "identity": "page id query parameter, must match requested id",
+    "sample_from": "img#image",
+    "original_from": "li a[href*=\"/images/\"]",
+    "original_filled_from_sample": false,
+    "dimensions_and_score_from": "native statistics text",
+    "unknown_fields": [
+      "rating",
+      "fileSize",
+      "md5",
+      "source",
+      "createdAt",
+      "previewUrl",
+      "tag arrays"
+    ],
+    "fail_closed": [
+      "other host",
+      "listing route",
+      "id mismatch",
+      "no img#image",
+      "any video element",
+      "non-image media"
+    ],
+    "implementation_test": "tests/host/ib07/gelbooru_native_post.cjs (14 cases)",
+    "live_production_conformance": "PASS_SCOPED_LOGGED_OUT_NATIVE_IMAGE_POST_BODY_9CADE1A",
+    "conformance_package_commit": "2e83c33",
+    "conformance_result": "tests/browser/ib07/TC_PRODUCTION_RESULT_SUMMARY.json",
+    "production_body_identity": "MATCH_9CADE1A",
+    "runtime_cell": "Tampermonkey x Chrome (versions not relayed)",
+    "request_observation_limitation": "a request issued synchronously during startup before the postamble loaded would not be counted; zero queue and in-flight counts at postamble load show none was pending then",
+    "not_tested": [
+      "video/GIF",
+      "pagination",
+      "hover",
+      "favorite/action",
+      "download",
+      "rendition policy",
+      "other Gelbooru-family hosts"
+    ]
   }
 }

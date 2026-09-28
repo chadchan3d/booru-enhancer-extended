@@ -1,0 +1,67 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "probe": "IB07 Gelbooru Production Conformance 1.0.0 (package revision 2)",
+  "production_version": "1.2.7.3",
+  "production_commit": "9cade1a",
+  "production_source_blob": "0715587162f65324fc1f85adf40e7f490b4220b3",
+  "production_body_sha256": "91cbdea552bacf134e1249effb560cdf88979248915ced97e6bed7714ead0ca0",
+  "conformance_artifact": {
+    "path": "tests/browser/ib07/IB07_Gelbooru_Production_Conformance.user.js",
+    "git_blob": "a9ee93327d0ee182b2122c1b459398bc4702da67",
+    "package_commit": "2e83c33"
+  },
+  "runtime_cell": {
+    "manager": "Tampermonkey (version not relayed)",
+    "browser": "Chrome (version not relayed)"
+  },
+  "context": {
+    "host": "gelbooru.com",
+    "route": "native image-post view with id",
+    "account": "logged out (operator-reported)",
+    "media": "image post",
+    "normal_enhancer_and_other_gelbooru_userscripts": "disabled"
+  },
+  "evidence_form": "Operator-relayed summary of the sanitized result: check statuses, C00 identity outcome and method, request counts and queue snapshots. The full result JSON was not provided to the repository.",
+  "source_contract": {
+    "production_body_retained": true,
+    "separate_userscript_identity": true,
+    "production_preferences_accessed": false,
+    "live_site": true,
+    "production_body_identity": "MATCH_9CADE1A",
+    "identity_method": "SHA-256 of Function.prototype.toString of the executed production wrapper, compared in-browser with the 9cade1a body"
+  },
+  "result": {
+    "checks": 15,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "passed_checks": [
+    "C00 browser runs the production body of commit 9cade1a (MATCH_9CADE1A)",
+    "C01 qualified route: gelbooru.com image-post view with id",
+    "C02 production activates the gelbooru-family adapter on the post page",
+    "C03 production produces the Gelbooru minimal Post (GELBOORU_MINIMAL_POST)",
+    "C04 identity resolves from the native page id and agrees with the route",
+    "C05 site is gelbooru and media kind is image",
+    "C06 sample comes from the native img#image",
+    "C07 original comes from the native original link",
+    "C08 sample and original stay distinct when the page exposes distinct resources",
+    "C09 original is not fabricated from the sample",
+    "C10 original dimensions and score reach the Post from native statistics",
+    "C11 unobserved fields stay unknown: rating, byte size, md5, source, date, preview, tag arrays",
+    "C12 fail-closed video check does not disable the image path (no video element present)",
+    "C13 no enhancer request while producing the Post",
+    "C14 no enhancer request from postamble load through the observation window"
+  ],
+  "request_observation": {
+    "instrumented_transports": ["BE.runtime.request", "BE.runtime.nativeFetch"],
+    "requests_during_fetch_post": 0,
+    "requests_since_postamble_load": 0,
+    "queue_length_and_in_flight_at_postamble_load": 0,
+    "queue_length_and_in_flight_at_end": 0,
+    "limitation": "A request issued synchronously during production startup, before the postamble loaded, would not itself be counted. The zero queue and in-flight counts at postamble load show none was still pending then; they do not prove that no such request occurred."
+  },
+  "not_tested": ["video/GIF", "pagination", "hover", "favorite/action", "download", "rendition policy", "other Gelbooru-family hosts"],
+  "prior_run": "Package revision 1: C01-C14 PASS, C00 FAIL UNAVAILABLE (GM_info exposes no script source under Tampermonkey). Superseded by this run for C00; not used as the conformance result.",
+  "conclusion": "Gelbooru live production conformance PASS(scope: logged-out native image post, production body 9cade1a). IB07 remains PARTIAL—NOT COMPLETE: §3 item 9 acceptance assertions are unresolved and the §3 item 10 naming-facts question is open."
+}
