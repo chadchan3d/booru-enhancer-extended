@@ -1,0 +1,59 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "stage": "production conformance package (§11 step 6), revision 2; not yet executed",
+  "production_commit": "9cade1a",
+  "production_body_sha256": "91cbdea552bacf134e1249effb560cdf88979248915ced97e6bed7714ead0ca0",
+  "derived_script": "IB07_Gelbooru_Production_Conformance.user.js",
+  "derived_script_sha256": "66108b197a3fa39fc7248a5dc6b20ed3491c6a8b529884c40066ebb6c0cca0be",
+  "derived_script_bytes": 217454,
+  "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
+  "convention": "IB06 production conformance: production body retained, test identity, narrowed @match/@connect, update targets removed, postamble appended",
+  "metadata_change": "unique test userscript identity; @match and @connect narrowed to gelbooru.com; public update targets removed; production body run inside a named wrapper function; test postamble appended",
+  "revision_2": {
+    "reason": "Operator run 1 (logged out, image post) reported C01-C14 PASS and C00 FAIL UNAVAILABLE. C00 read GM_info.scriptSource, which Tampermonkey's documented GM_info does not provide (it exposes scriptMetaStr and script.header only). The revision 1 stub verifier supplied scriptSource and so did not exercise that path.",
+    "change": "Harness only. The production body, still byte-identical, runs inside const IB07P_PRODUCTION_BODY = function () { ... }; called once. C00 hashes Function.prototype.toString of that executed function (CRLF normalized) and compares it in-browser with the 9cade1a body hash. C01-C14 are unchanged.",
+    "wrapper_safety": "The 9cade1a body is a comment block plus one strict-mode IIFE: it parses as a single expression, and a control with an extra statement does not. The IIFE ignores the outer this and has no top-level bindings, so the wrapper does not change its behavior.",
+    "production_code_changed": false
+  },
+  "build_check": {
+    "command": "node build_production_conformance.cjs --check",
+    "source": "git blob of Booru_Enhancer.user.js at 9cade1a, not the working copy",
+    "result": "DERIVED_SCRIPT_UP_TO_DATE"
+  },
+  "verification": {
+    "command": "node verify_production_conformance.cjs",
+    "node_version": "v24.19.0",
+    "result": "28 of 28 PASS",
+    "static": [
+      "derived script matches a fresh build from 9cade1a; LF-only; parses",
+      "production body byte-identical to 9cade1a inside the wrapper; appears exactly once",
+      "wrapper invoked exactly once, before the postamble",
+      "engine toString of the wrapper reproduces its source exactly",
+      "metadata adds/removes only name, namespace, match, connect and update lines",
+      "only gelbooru.com matched and connected; no update target",
+      "postamble uses no request, click, cookie or page-storage API"
+    ],
+    "c00_fault_sensitivity": [
+      "intended executed body, GM_info without scriptSource: PASS, MATCH_9CADE1A",
+      "one production line altered: FAIL, MISMATCH",
+      "statement appended to the body: FAIL, MISMATCH",
+      "harness-manufactured stand-in function: FAIL, MISMATCH",
+      "wrapper absent: FAIL, UNAVAILABLE",
+      "same body stored with CRLF: PASS, MATCH_9CADE1A"
+    ],
+    "stub_scenarios": [
+      "happy path: all 15 checks PASS; no raw value in output",
+      "video-only disable: C12 and C03 FAIL; no raw value in output",
+      "original fabricated from sample: C09 FAIL",
+      "request during Post production: C13 and C14 FAIL; no raw value in output",
+      "guessed rating: C11 FAIL",
+      "other Post path: C03 FAIL",
+      "identity disagreement: C04 FAIL"
+    ]
+  },
+  "identity_scope": "C00 proves the text of the function that ran production equals the 9cade1a body. It does not cover the manager's own wrapper code or the metadata block; those are not production code.",
+  "known_limitation": "Requests issued synchronously during production startup, before the postamble loads, are not counted; the result reports queue and in-flight counts at postamble load.",
+  "not_in_scope": ["video/GIF", "pagination (G-PLACE-T)", "hover (G-VIDEO/G-HOVER)", "favorite/action (G-ACTION)", "download", "rendition policy (G-RENDITION)", "other Gelbooru-family hosts"],
+  "live_evidence": "Run 1 (revision 1): C01-C14 PASS, C00 FAIL UNAVAILABLE. Revision 2: NONE yet — requires operator rerun."
+}
