@@ -1,0 +1,52 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "host": "gelbooru.com",
+  "stage": "V1-N passive probe package, revision 2; not yet executed",
+  "probe_file": "IB07_Gelbooru_V1N_Probe.js",
+  "probe_sha256": "11cfb993895aac23f2b87399767349091698e3ed133bd1a243b5f7d5b444b0d5",
+  "probe_bytes": 9163,
+  "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
+  "supersedes": {
+    "probe_sha256": "544acbcf6a63740bd4be6c612a36e0b8e5dec101241fa245f2126451aca3d0c6",
+    "reason": "Live run 1 output failed AGENTS.md sanitation. (1) Source values displayed without a scheme resolved relative to the page, so the real host became the first path segment and a third-party handle survived in the second. (2) Two-hex-char bucket directories, derived from the content hash, were printed literally. Live run 1 output is not used as evidence."
+  },
+  "changes": [
+    "shapeExternal: scheme-less Source text is given a scheme before parsing; path segments are shaped by allowlist, so any non-structural segment becomes <handle> (first) or <segment> (later); reports schemeShown",
+    "shapeSameOrigin: 2-hex-char directory segments become <bucket>"
+  ],
+  "syntax_check": {
+    "command": "node --check IB07_Gelbooru_V1N_Probe.js",
+    "node_version": "v24.19.0",
+    "result": "PASS"
+  },
+  "stub_runtime_checks": {
+    "run_against": "the delivered probe file (this package)",
+    "result": "9 of 9 PASS",
+    "cases": [
+      "scheme-less Source text: path shape /<handle>/status/<id>, schemeShown false",
+      "no handle, host, post ID, bucket or hash text in post output",
+      "sample and original media paths: buckets become <bucket>",
+      "schemed Source with handle-plus-digits: /<handle>/status/<id>",
+      "handle in second position plus title slug: /users/<segment>/art/<segment>",
+      "listing thumbnails: buckets become <bucket>; no post ID",
+      "pagination: parameter names only, no cursor value",
+      "login-shaped link: boolean only",
+      "non-gelbooru host: console.error only; DOM never read"
+    ]
+  },
+  "fault_sensitivity": "The scheme-less Source and bucket cases FAIL against the superseded probe, reproducing the live run 1 leak shape.",
+  "static_audit": {
+    "network_apis": "none (no fetch, XMLHttpRequest)",
+    "dynamic_code": "none (no eval, atob)",
+    "dom_mutation_or_clicks": "none",
+    "storage_or_cookie_reads": "none",
+    "output_calls": "one console.log of the sanitized result; one console.error on wrong host"
+  },
+  "not_in_scope": [
+    "G-ACTION (IB14)",
+    "G-PLACE-T (IB12)",
+    "G-VIDEO (IB09/IB10)"
+  ],
+  "live_evidence": "NONE for this revision — requires operator re-run"
+}
