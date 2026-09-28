@@ -1977,6 +1977,47 @@
 		});
 	}
 
+	// IB07: Gelbooru native image-post facts, limited to the logged-out V1-N
+	// observation (docs/implementation/IB07_GELBOORU_V1N.md). Tag names, the
+	// Source value, rating, byte size and dates were not observed in a usable
+	// form and stay unknown. Video/GIF posts are outside the observed scope.
+	function gelbooruNativeImagePost(id) {
+		if (!/(^|\.)gelbooru\.com$/.test(location.hostname)) return null;
+		const params = new URLSearchParams(location.search);
+		if (params.get('page') !== 'post' || params.get('s') !== 'view') return null;
+		const currentId = params.get('id');
+		if (!id || !currentId || String(id) !== String(currentId)) return null;
+
+		const img = document.querySelector('img#image');
+		if (!img || document.querySelector('video')) return null;
+
+		const sampleUrl = img.currentSrc || img.getAttribute('src') || '';
+		if (guessMediaType(sampleUrl) !== 'image') return null;
+		// The original stays empty when its native link is absent; the sample
+		// is a distinct rendition and never fills the original slot.
+		const originalUrl = document.querySelector('li a[href*="/images/"]')?.href || '';
+		if (originalUrl && guessMediaType(originalUrl) !== 'image') return null;
+
+		const statsText = [...document.querySelectorAll('li, dd, dt, #stats, .stats, #tag-sidebar')]
+			.map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+			.filter(Boolean)
+			.join(' | ');
+		const sizeMatch = statsText.match(/\bSize:\s*(\d+)\s*x\s*(\d+)\b/i);
+		const scoreMatch = statsText.match(/\bScore:\s*(-?\d+)/i);
+
+		return emptyPost({
+			id: String(currentId),
+			originalUrl,
+			sampleUrl,
+			mediaType: 'image',
+			width: sizeMatch ? Number(sizeMatch[1]) : 0,
+			height: sizeMatch ? Number(sizeMatch[2]) : 0,
+			score: scoreMatch ? Number(scoreMatch[1]) : 0,
+			postUrl: `${location.origin}/index.php?page=post&s=view&id=${currentId}`,
+			siteId: 'gelbooru',
+		});
+	}
+
 	BE.core.registerAdapter({
 		id: 'gelbooru-family',
 		hostPattern: /gelbooru\.com$|safebooru\.org$|rule34\.xxx$|realbooru\.com$|tbib\.org$|xbooru\.com$|hypnohub\.net$/,
@@ -2008,10 +2049,12 @@
                             },
 							async fetchPost(id) {
 								// IB07 safeguard: no family-wide DAPI/HTML resolver is admitted.
-								// Rule34 image posts may use only the exact native DOM facts
-								// observed under the scoped G-HOST PASS.
+								// Rule34 and Gelbooru image posts may use only the exact native
+								// DOM facts observed under their scoped G-HOST PASS.
 								const rule34Native = rule34NativeImagePost(id);
 								if (rule34Native) return rule34Native;
+								const gelbooruNative = gelbooruNativeImagePost(id);
+								if (gelbooruNative) return gelbooruNative;
 								return null;
 							},
 							async fetchThumbBatch(ids) {
