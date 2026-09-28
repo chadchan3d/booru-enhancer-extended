@@ -1,6 +1,6 @@
 {
   "checkpoint": "IB07",
-  "status": "ACTIVE_E926_IMAGE_POST_NATIVE_COMPLETE_GELBOORU_V1N_NEXT",
+  "status": "ACTIVE_GELBOORU_V1N_NATIVE_OBSERVED_GELBOORU_PRODUCTION_INTEGRATION_OPEN",
   "production_source_blob": "dc55026e11a14bd264b024d9727bb167c3873c1a",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
@@ -27,8 +27,8 @@
     "e621.net/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_PAGINATION_ACTION_OPEN",
     "e926.net/listing": "PASS_NATIVE_ONLY_METADATA_PAGINATION_CONTINUATION_OPEN",
     "e926.net/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_VIDEO_GIF_PAGINATION_ACTION_OPEN",
-    "gelbooru.com/listing": "OPEN_V1N",
-    "gelbooru.com/post": "OPEN_V1N"
+    "gelbooru.com/listing": "PASS_NATIVE_ONLY",
+    "gelbooru.com/post": "PASS_NATIVE_ONLY_IMAGE_CONTEXT_RATING_UNKNOWN_VIDEO_GIF_OPEN"
   },
   "v1n": {
     "passive_only": true,
@@ -179,10 +179,76 @@
         "gif/animated",
         "favorite/action"
       ]
+    },
+    "gelbooru_listing": {
+      "status": "PASS",
+      "evidence_doc": "docs/implementation/IB07_GELBOORU_V1N.md",
+      "probe_package_commit": "984e89f",
+      "account_context": "logged out",
+      "observed_cards": 3,
+      "candidate_thumbnails_matched": 42,
+      "native_identity": "href id query parameter",
+      "native_thumbnail": true,
+      "thumbnail_origin": "cross-origin; host not recorded",
+      "gallery_container_candidate_selectors_matched": false,
+      "native_next_link_observed": true,
+      "native_next_link_param_names": [
+        "page",
+        "s",
+        "tags",
+        "pid"
+      ],
+      "pagination_qualification_owner": "G-PLACE-T / IB12",
+      "network_used": false
+    },
+    "gelbooru_post_image": {
+      "status": "PASS_NATIVE_ONLY_G_HOST",
+      "evidence_doc": "docs/implementation/IB07_GELBOORU_V1N.md",
+      "probe_package_commit": "984e89f",
+      "account_context": "logged out",
+      "native_identity": "page id query parameter",
+      "native_image_selector": "#image",
+      "native_sample_url": true,
+      "observed_sample_dimensions": [
+        850,
+        1202
+      ],
+      "sample_extension": "jpg",
+      "native_original_url": true,
+      "original_link_selector": "li a[href*=\"/images/\"]",
+      "original_dimensions": [
+        1448,
+        2048
+      ],
+      "original_extension": "png",
+      "media_origin": "cross-origin; host not recorded",
+      "native_tags": true,
+      "tag_rows_matched": 93,
+      "observed_category_classes": [
+        "tag-type-artist",
+        "tag-type-character",
+        "tag-type-copyright",
+        "tag-type-general",
+        "tag-type-metadata"
+      ],
+      "native_score": true,
+      "native_date_present": true,
+      "native_source": true,
+      "source_scheme_displayed": false,
+      "rating": "UNKNOWN_NOT_DETECTED",
+      "byte_size": "UNKNOWN_NOT_PROBED",
+      "resolver_request_needed": false,
+      "endpoint_probed": false,
+      "scoped_context": "logged-out native image post only",
+      "excluded_contexts": [
+        "video",
+        "gif/animated",
+        "favorite/action"
+      ]
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "gelbooru.com V1-N passive native listing/post capture",
+  "next_evidence": "none for the four priority hosts; Gelbooru native-only production integration is P-stage work",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",

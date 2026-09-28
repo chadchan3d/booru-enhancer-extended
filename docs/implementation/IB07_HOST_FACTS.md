@@ -71,7 +71,9 @@ G-HOST rows are scoped per host/route/context. The per-host V1-N record is autho
 | e926.net | listing cards | PASS(scope: native-only) | `IB07_E926_V1N.md` (`26e5cc8`) |
 | e926.net | image post: core Post facts | PASS(scope: native-only) | `IB07_E926_V1N.md` (`192b995`); production `b9ebaf3` |
 | e926.net | video/GIF post; pagination continuation; favorite/action | OPEN | `IB07_E926_V1N.md` |
-| Gelbooru.com | listing/post | OPEN — no dedicated V1-N record; post-level image/video observation is summarized only | `IB07_HOST_CAPABILITY_MATRIX.md` (`bb0c797`) |
+| Gelbooru.com | listing cards | PASS(scope: native-only) | `IB07_GELBOORU_V1N.md`; probe package `984e89f` |
+| Gelbooru.com | image post, logged-out/native context: identity, sample/original URLs and dimensions, categorized tags, score, Source presence | PASS(scope: native-only; rating UNKNOWN, byte size UNKNOWN) | `IB07_GELBOORU_V1N.md`; probe package `984e89f` |
+| Gelbooru.com | video post; GIF/animated post | OPEN — not observed | `IB07_GELBOORU_V1N.md` |
 
 No row is inferred from another host. e926 is not inherited from e621; Safebooru and other Gelbooru-family hosts are not inferred from Gelbooru.
 
