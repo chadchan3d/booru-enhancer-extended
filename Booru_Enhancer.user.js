@@ -1943,7 +1943,7 @@
 		}) || null;
 
 		const sampleUrl = img.currentSrc || img.getAttribute('src') || '';
-		const originalUrl = originalLink?.href || sampleUrl;
+		const originalUrl = originalLink?.href || '';
 		const tags = String(img.getAttribute('alt') || '')
 			.split(/\s+/)
 			.map((tag) => tag.trim())
@@ -2329,7 +2329,7 @@
 
 		const fileExt = String(d.fileExt || '').toLowerCase();
 		const fileUrl = d.fileUrl || '';
-		const sampleUrl = d.sampleUrl || fileUrl;
+		const sampleUrl = d.sampleUrl || '';
 		const img = postPage
 			? document.querySelector('#image-container img#image, img#image')
 			: element.querySelector('picture img, img');

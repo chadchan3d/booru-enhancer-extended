@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `0715587162f65324fc1f85adf40e7f490b4220b3` (commit `9cade1a`)  
+**Production source blob:** `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b` (`9cade1a` plus the IB07 slot-inference restriction)  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -283,3 +283,14 @@ Implementation test: `tests/host/ib07/gelbooru_native_post.cjs` (14 cases).
 Request-observation limitation: a request issued synchronously during production startup, before the postamble loaded, would not itself be counted. Queue and in-flight counts were zero at postamble load, which shows that nothing was still pending then; it does not prove that no such request occurred.
 
 Not tested: video/GIF, pagination, hover, favorite/action, download, rendition policy, other Gelbooru-family hosts. Manager and browser versions were not relayed.
+
+## Slot-inference restriction
+
+Production blob: `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b`.
+
+- Rule34 native image post: without a native original link, the original slot stays empty (it was the sample URL).
+- e621/e926 native cards and post containers: without `data-sample-url`, the sample slot stays empty (it was the file URL).
+
+The shapes are NOT OBSERVED LIVE (`IB07_SLOT_PROVENANCE_EVIDENCE.md`). No request, selector or other slot changed.
+
+Gelbooru live production conformance is reused on the diff basis recorded there: neither changed line is reachable on gelbooru.com, and a harness check old vs new shows an identical Post and 0 requests. Rule34, e621 and e926 production conformance remains OPEN_NOT_RUN.

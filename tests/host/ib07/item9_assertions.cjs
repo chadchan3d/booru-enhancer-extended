@@ -17,7 +17,7 @@ const { loadAndStart, pointerSweep, sleep, productionSource, gitBlobId } = requi
 const fx = require('./item9_fixtures.cjs');
 const { oracles } = require(path.resolve(__dirname, '../../assertions/ib01/oracles.cjs'));
 
-const PRODUCTION_BLOB = '0715587162f65324fc1f85adf40e7f490b4220b3'; // Booru_Enhancer.user.js at 9cade1a
+const PRODUCTION_BLOB = '30cadd68ebc6ca357a029ebdf1cfb028f081ee7b'; // Booru_Enhancer.user.js with the IB07 slot-inference restriction (9cade1a + two lines)
 const SOURCE = productionSource();
 
 // ---- source mutation helpers ----------------------------------------------
@@ -60,13 +60,13 @@ const M = {
   e6ListingNoIdentity: (s) => mutateIn(s, 'e621NativeListingPost', ".find((el) => String(el.dataset?.id || '') === wanted);", '.find(() => true);'),
   // Group 3 mutants.
   r34OriginalIntoSample: (s) => mutateIn(s, 'rule34NativeImagePost', "const sampleUrl = img.currentSrc || img.getAttribute('src') || '';", "const sampleUrl = originalLink?.href || img.currentSrc || '';"),
-  r34OriginalCorrected: (s) => mutateIn(s, 'rule34NativeImagePost', 'const originalUrl = originalLink?.href || sampleUrl;', "const originalUrl = originalLink?.href || '';"),
+  r34OriginalFromSample: (s) => mutateIn(s, 'rule34NativeImagePost', "const originalUrl = originalLink?.href || '';", 'const originalUrl = originalLink?.href || sampleUrl;'),
   r34SampleFabricated: (s) => mutateIn(s, 'rule34NativeImagePost', 'if (!img) return null;',
     "if (!img) { const o = [...document.querySelectorAll('a[href]')].find((a) => /\\/images\\//.test(a.getAttribute('href') || ''))?.href || ''; return emptyPost({ id: String(id), sampleUrl: o, originalUrl: o, siteId: 'gelbooru-family' }); }"),
-  e6OriginalIntoSample: (s) => mutateIn(s, 'normalizeE621NativeElement', 'const sampleUrl = d.sampleUrl || fileUrl;', 'const sampleUrl = fileUrl || d.sampleUrl;'),
+  e6OriginalIntoSample: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = fileUrl || d.sampleUrl;'),
   e6OriginalFabricated: (s) => mutateIn(s, 'normalizeE621NativeElement', "const fileUrl = d.fileUrl || '';", "const fileUrl = d.fileUrl || d.sampleUrl || '';"),
-  e6EqualSampleDropped: (s) => mutateIn(s, 'normalizeE621NativeElement', 'const sampleUrl = d.sampleUrl || fileUrl;', "const sampleUrl = (d.sampleUrl && d.sampleUrl !== d.fileUrl) ? d.sampleUrl : '';"),
-  e6MissingSampleLeftEmpty: (s) => mutateIn(s, 'normalizeE621NativeElement', 'const sampleUrl = d.sampleUrl || fileUrl;', "const sampleUrl = d.sampleUrl || '';"),
+  e6EqualSampleDropped: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", "const sampleUrl = (d.sampleUrl && d.sampleUrl !== d.fileUrl) ? d.sampleUrl : '';"),
+  e6SampleFromFile: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = d.sampleUrl || fileUrl;'),
 };
 
 // ---- measurements ----------------------------------------------------------
@@ -174,16 +174,17 @@ add('G3-3a-rule34.xxx', 3, 'rule34.xxx', 'distinct native sample and original st
   async (src) => ({ post: (await fetchPosts(r34Distinct, src, ['1001']))[0] }),
   (o) => o.post?.sampleUrl === r34Distinct.sampleUrl && o.post?.originalUrl === r34Distinct.originalUrl,
   [{ name: 'original placed into sample slot', mutate: M.r34OriginalIntoSample, expect: false }]);
-// Reclassified from FAIL: absence of an "Original image" link was treated as
-// proof that no native original exists, but that host semantic is unobserved
-// (IB07_RULE34_V1N.md recorded only a post with the link). Leaving the slot
-// empty would also change preserved download behavior (§6; IB13 scope).
+// Production fail-closed assertion (IB07 invariant: unknown remains unknown).
+// With no native original link the original slot must stay empty; the sample
+// stays in its own slot. What such a page means on the host is a separate
+// G-HOST fact, NOT OBSERVED LIVE (IB07_SLOT_PROVENANCE_EVIDENCE.md); this row
+// does not claim it, and reports it in hostSemantic.
 const r34NoOriginal = fx.rule34Post({ id: 1001, original: false });
-add('G3-3c-rule34.xxx', 3, 'rule34.xxx', 'no native Original link: is the original slot correct?',
+add('G3-3c-rule34.xxx', 3, 'rule34.xxx', 'no native Original link: original slot stays unknown, sample unchanged (fail closed)',
   async (src) => ({ post: (await fetchPosts(r34NoOriginal, src, ['1001']))[0] }),
-  (o) => (o.post ? (o.post.originalUrl === r34NoOriginal.sampleUrl ? 'original-filled-from-sample' : o.post.originalUrl === '' ? 'original-left-empty' : 'other') : 'no-post'),
-  [{ name: 'observation distinguishes behaviors: original left empty', mutate: M.r34OriginalCorrected, expect: 'original-left-empty' }],
-  { finding: 1, inconclusive: 'Needs G-HOST fact: whether a Rule34 post page with img#image but no native Original link displays the native original itself, or whether a distinct original exists but is not linked. Not observed in IB07_RULE34_V1N.md.' });
+  (o) => !!o.post && o.post.originalUrl === '' && o.post.sampleUrl === r34NoOriginal.sampleUrl,
+  [{ name: 'original inferred from the sample again', mutate: M.r34OriginalFromSample, expect: false }],
+  { finding: 1, hostSemantic: 'NOT OBSERVED LIVE: Rule34 post page with img#image and no native original link' });
 add('G3-3d-rule34.xxx', 3, 'rule34.xxx', 'missing native sample is not fabricated (no img#image gives no sample)',
   async (src) => ({ post: (await fetchPosts(fx.rule34Post({ id: 1001, sample: false }), src, ['1001']))[0] }),
   (o) => o.post === null || o.post.sampleUrl === '',
@@ -209,22 +210,19 @@ for (const host of ['e621.net', 'e926.net']) {
     async (src) => ({ post: (await fetchPosts(equal, src, ['3001']))[0] }),
     (o) => o.post?.sampleUrl === equal.sampleUrl && o.post?.originalUrl === equal.fileUrl,
     [{ name: 'native equal sample dropped', mutate: M.e6EqualSampleDropped, expect: false }]);
+  // Production fail-closed assertion; host semantic reported separately.
   const noSample = fx.e6Post(host, { id: 3001, sample: 'absent' });
-  add(`G3-3d-${host}`, 3, host, 'no data-sample-url: is the sample slot correct?',
+  add(`G3-3d-${host}`, 3, host, 'no data-sample-url: sample slot stays unknown, file stays original (fail closed)',
     async (src) => ({ post: (await fetchPosts(noSample, src, ['3001']))[0] }),
-    (o) => (o.post ? (o.post.sampleUrl === noSample.fileUrl ? 'sample-filled-from-original' : o.post.sampleUrl === '' ? 'sample-left-empty' : 'other') : 'no-post'),
-    [{ name: 'observation distinguishes behaviors: sample left empty', mutate: M.e6MissingSampleLeftEmpty, expect: 'sample-left-empty' }],
-    { finding: 2, inconclusive: 'Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.' });
+    (o) => !!o.post && o.post.sampleUrl === '' && o.post.originalUrl === noSample.fileUrl,
+    [{ name: 'sample inferred from the file again', mutate: M.e6SampleFromFile, expect: false }],
+    { finding: 2, hostSemantic: `NOT OBSERVED LIVE: ${host} card or container without data-sample-url` });
 }
 
-// Verdicts at production blob 0715587 (commit 9cade1a). INCONCLUSIVE rows
-// record the observed behavior pending the named G-HOST fact (findings 1, 2);
-// none is a demonstrated production defect until that fact is observed.
-const EXPECTED = {
-  'G3-3c-rule34.xxx': 'INCONCLUSIVE(original-filled-from-sample)',
-  'G3-3d-e621.net': 'INCONCLUSIVE(sample-filled-from-original)',
-  'G3-3d-e926.net': 'INCONCLUSIVE(sample-filled-from-original)',
-};
+// Verdicts at production blob 30cadd6 (slot-inference restriction). Every
+// assertion is expected to PASS. Rows with hostSemantic assert production's
+// fail-closed behavior only; their host shape stays NOT OBSERVED LIVE.
+const EXPECTED = {};
 
 (async () => {
   const blob = gitBlobId(SOURCE);
@@ -246,19 +244,21 @@ const EXPECTED = {
     }
     const expected = EXPECTED[c.id] || (c.informational ? 'RECORDED(zero requests; path not reached)' : 'PASS');
     results.push({ id: c.id, group: c.group, host: c.host, name: c.name, verdict, expected, matchesExpected: verdict === expected,
-      pathRan, controls, finding: c.finding || null, inconclusiveNeeds: c.inconclusive || null, informational: c.informational || null, observation: obs });
+      pathRan, controls, finding: c.finding || null, hostSemantic: c.hostSemantic || null, inconclusiveNeeds: c.inconclusive || null, informational: c.informational || null, observation: obs });
   }
   const controlFailures = results.flatMap((r) => r.controls.filter((x) => !x.ok).map((x) => `${r.id}: ${x.name}`));
   const mismatches = results.filter((r) => !r.matchesExpected).map((r) => `${r.id}: ${r.verdict} (expected ${r.expected})`);
   const summary = {
     suite: 'IB07 §3 item 9 assertions',
     productionBlob: blob,
-    productionBlobIsCommitted9cade1a: blob === PRODUCTION_BLOB,
+    productionBlobExpected: PRODUCTION_BLOB,
+    productionBlobIsExpected: blob === PRODUCTION_BLOB,
     assertions: results.filter((r) => !r.informational).length,
     pass: results.filter((r) => r.verdict === 'PASS').length,
     recorded: results.filter((r) => r.verdict.startsWith('RECORDED')).map((r) => r.id),
     fail: results.filter((r) => r.verdict === 'FAIL').map((r) => r.id),
     inconclusive: results.filter((r) => r.verdict.startsWith('INCONCLUSIVE')).map((r) => r.id),
+    hostSemanticNotObservedLive: results.filter((r) => r.hostSemantic).map((r) => r.id),
     vacuous: results.filter((r) => r.verdict === 'VACUOUS').map((r) => r.id),
     controls: results.reduce((n, r) => n + r.controls.length, 0),
     controlFailures,
@@ -271,5 +271,5 @@ const EXPECTED = {
     return /Url$/.test(k) && typeof v === 'string' ? (v ? '<url>' : '') : v;
   }));
   console.log(JSON.stringify(clean, null, 2));
-  if (!summary.productionBlobIsCommitted9cade1a || controlFailures.length || mismatches.length || summary.vacuous.length) process.exitCode = 1;
+  if (!summary.productionBlobIsExpected || controlFailures.length || mismatches.length || summary.vacuous.length) process.exitCode = 1;
 })().catch((e) => { console.error(e.stack); process.exitCode = 1; });

@@ -4,29 +4,29 @@
 IB07 — Current-host metadata, Post facts and scope corrections: close per blueprint §11. Done means the invariant is demonstrated, §3 item 9 acceptance tests pass, prohibited later work did not enter, required master behavior is intact, and the completion record exists.
 
 ## Current state
-- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` is unchanged since commit `9cade1a` (blob `0715587162f65324fc1f85adf40e7f490b4220b3`).
+- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b`: `9cade1a` plus the approved two-line slot-inference restriction.
 - IB07 overall: PARTIAL—NOT COMPLETE.
 - G-HOST native-only strategies are admitted for Rule34, e621, e926 and Gelbooru.
-- Gelbooru has production integration (`9cade1a`) and live production conformance PASS(scope: logged-out native image post).
+- Gelbooru live production conformance PASS(scope: logged-out native image post) is reused for `30cadd6` on an explicit diff basis (`IB07_SLOT_PROVENANCE_EVIDENCE.md` §"Disposition").
 - §3 item 10 decision A is recorded.
-- §3 item 9 is in `tests/host/ib07/`: 26 PASS, 0 FAIL, 3 INCONCLUSIVE.
-- Slot-provenance probe package, live observations and closure assessment are recorded: `tests/browser/ib07/SLOT_*`, `docs/implementation/IB07_SLOT_PROVENANCE_EVIDENCE.md`, and pointers in the Rule34, e621 and e926 V1-N records and in the applicability record.
+- §3 item 9: 29 PASS, 0 FAIL, 0 INCONCLUSIVE (`tests/host/ib07/item9-result.json`). Three rows assert production fail-closed behavior; their host shapes stay NOT OBSERVED LIVE.
 
 ## Verified
-- Live slot-provenance runs, sanitized (`SLOT_RESULT_SUMMARY.json`). Every run was NOT_QUALIFIED.
-  - Rule34: multiple image posts, each with a native original link; the control shape keeps sample and original distinct.
-  - e621: 140 cards with `data-sample-url` present (10 explicitly equal to the file, 130 distinct) plus a post page with both attributes.
-  - e926: 75 cards present (3 equal, 72 distinct) plus a post page with both attributes.
-  - Target shapes: **NOT OBSERVED LIVE**.
-- Both slot fallbacks were introduced inside IB07 (Rule34 `8aaefea`, e621/e926 `4918893`) and are reachable in enabled production (lines 1946, 2332).
-- Consumer effects of disabling the fallbacks were read from the source. In the unobserved shapes only: Rule34 download reports failure; the e621/e926 grid thumbnail and reverse search use the preview. Viewer and open actions are unchanged.
-- Test and verification results for this state are in the latest status block.
+- The production diff is exactly two lines: Rule34 `originalUrl = originalLink?.href || ''`; e621/e926 `sampleUrl = d.sampleUrl || ''`. `git diff --check` is clean and `node --check` passes.
+- Item 9 at `30cadd6`: 29/29 PASS, 29/29 controls correct. The three fail-closed rows FAIL under a mutant that restores the old inference. The observed-shape rows are unchanged: Rule34 distinct sample and original, e621/e926 distinct sample and file, and explicit sample=file equivalence.
+- Downstream, measured old vs new in the harness with no downstream edits:
+  - 0 metadata requests everywhere; the Rule34 native page is untouched.
+  - Rule34 download on the unobserved shape now truthfully reports no original (0 transfers, was 1 guessed transfer).
+  - The e621/e926 grid never used the fabricated sample, so there is no grid change.
+  - e621/e926 hover and viewer are unchanged (their own downstream fallbacks).
+  - e621/e926 reverse search on a post page submits the preview instead of the full file.
+- Gelbooru reuse basis: both changed lines return first on gelbooru.com (lines 1931, 2325). Old vs new on a Gelbooru post page gives an identical Post and 0 requests, with and without an original link.
 
 ## Unresolved
-- **Closure assessment B:** `G3-3c-rule34.xxx`, `G3-3d-e621.net` and `G3-3d-e926.net` block IB07 closure while the enabled parsers fill those slots by unvalidated inference. The smallest follow-up is a bounded production task disabling only the two inferences (Rule34 `originalUrl = originalLink?.href || ''`; e621/e926 `sampleUrl = d.sampleUrl || ''`). It needs explicit approval of its consequences, including the Rule34 download change in the unobserved shape, which the earlier option B deferral avoided.
 - §11 step 6 production conformance is not run for the Rule34, e621 and e926 integrations.
+- Host semantics of the three restricted shapes stay NOT OBSERVED LIVE. Production fails closed on them; nothing claims their meaning.
 - Gelbooru T1/T2 on the observed markup do not reach the gallery path; the proof rests on case B.
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Operator decision on the bounded restriction. If approved: one IB07 production task disabling the two slot inferences, then updating the item 9 expectations. After that, prepare the Rule34, e621 and e926 §11 production-conformance runs.
+Prepare the Rule34, e621 and e926 §11 production-conformance runs against production blob `30cadd6`. Gelbooru is not reopened.

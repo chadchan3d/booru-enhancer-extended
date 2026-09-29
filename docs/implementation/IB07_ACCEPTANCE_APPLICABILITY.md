@@ -83,3 +83,7 @@ Three bounded groups. All are REQUIRED/OPEN; nothing else in item 9 is open.
 ## Update: slot-provenance evidence and closure assessment
 
 Item 9 is implemented (`tests/host/ib07/item9_assertions.cjs`): 26 PASS, 0 FAIL, 3 INCONCLUSIVE. Findings 1 and 2 correspond to `G3-3c-rule34.xxx` and `G3-3d-e621.net`/`G3-3d-e926.net`. The live slot-provenance runs left the target shapes **NOT OBSERVED LIVE**, so all three remain INCONCLUSIVE. The closure assessment in `IB07_SLOT_PROVENANCE_EVIDENCE.md` concludes that these branches block IB07 closure while the enabled parsers still fill the slot by inference (Rule34 line 1946; e621/e926 line 2332). The smallest follow-up is to disable only those two inferences.
+
+## Update: restriction applied
+
+The bounded restriction is in production blob `30cadd6`. Item 9 now reads 29 PASS, 0 FAIL, 0 INCONCLUSIVE. The three former INCONCLUSIVE rows assert production's fail-closed behavior; their host shapes stay NOT OBSERVED LIVE (`IB07_SLOT_PROVENANCE_EVIDENCE.md` §"Disposition").

@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
   "status": "ACTIVE_GELBOORU_IMAGE_POST_PRODUCTION_CONFORMANCE_PASS_ITEM9_AND_ITEM10_OPEN",
-  "production_source_blob": "0715587162f65324fc1f85adf40e7f490b4220b3",
+  "production_source_blob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -361,6 +361,16 @@
       "download",
       "rendition policy",
       "other Gelbooru-family hosts"
-    ]
+    ],
+    "live_production_conformance_reuse": "REUSED_ON_DIFF_BASIS_FOR_30CADD6: changed lines unreachable on gelbooru.com; harness old vs new identical Post, 0 requests"
+  },
+  "slot_inference_restriction": {
+    "source_blob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
+    "base_commit": "9cade1a",
+    "rule34_original_without_native_link": "UNKNOWN (was sample URL)",
+    "e6_sample_without_data_sample_url": "UNKNOWN (was file URL)",
+    "host_shapes": "NOT_OBSERVED_LIVE",
+    "evidence_doc": "docs/implementation/IB07_SLOT_PROVENANCE_EVIDENCE.md",
+    "item9": "29 PASS, 0 FAIL, 0 INCONCLUSIVE"
   }
 }

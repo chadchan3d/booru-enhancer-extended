@@ -1,15 +1,17 @@
 {
   "summary": {
     "suite": "IB07 §3 item 9 assertions",
-    "productionBlob": "0715587162f65324fc1f85adf40e7f490b4220b3",
-    "productionBlobIsCommitted9cade1a": true,
+    "productionBlob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
+    "productionBlobExpected": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
+    "productionBlobIsExpected": true,
     "assertions": 29,
-    "pass": 26,
+    "pass": 29,
     "recorded": [
       "G1-T1T2-gelbooru-caseA"
     ],
     "fail": [],
-    "inconclusive": [
+    "inconclusive": [],
+    "hostSemanticNotObservedLive": [
       "G3-3c-rule34.xxx",
       "G3-3d-e621.net",
       "G3-3d-e926.net"
@@ -38,6 +40,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -69,6 +72,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -97,6 +101,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -128,6 +133,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -156,6 +162,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -187,6 +194,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -215,6 +223,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -246,6 +255,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -267,6 +277,7 @@
       "pathRan": null,
       "controls": [],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": "path not reached on observed markup (0 enhanced cards); case B carries the proof",
       "observation": {
@@ -307,6 +318,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -335,6 +347,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -363,6 +376,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -391,6 +405,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": [
@@ -421,6 +436,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -455,6 +471,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -500,6 +517,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -534,6 +552,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -579,6 +598,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -593,27 +613,28 @@
       "id": "G3-3c-rule34.xxx",
       "group": 3,
       "host": "rule34.xxx",
-      "name": "no native Original link: is the original slot correct?",
-      "verdict": "INCONCLUSIVE(original-filled-from-sample)",
-      "expected": "INCONCLUSIVE(original-filled-from-sample)",
+      "name": "no native Original link: original slot stays unknown, sample unchanged (fail closed)",
+      "verdict": "PASS",
+      "expected": "PASS",
       "matchesExpected": true,
       "pathRan": null,
       "controls": [
         {
-          "name": "observation distinguishes behaviors: original left empty",
-          "expected": "original-left-empty",
-          "observed": "original-left-empty",
+          "name": "original inferred from the sample again",
+          "expected": false,
+          "observed": false,
           "ok": true
         }
       ],
       "finding": 1,
-      "inconclusiveNeeds": "Needs G-HOST fact: whether a Rule34 post page with img#image but no native Original link displays the native original itself, or whether a distinct original exists but is not linked. Not observed in IB07_RULE34_V1N.md.",
+      "hostSemantic": "NOT OBSERVED LIVE: Rule34 post page with img#image and no native original link",
+      "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
         "post": {
           "id": "1001",
           "sampleUrl": "<url>",
-          "originalUrl": "<url>"
+          "originalUrl": ""
         }
       }
     },
@@ -635,6 +656,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -659,6 +681,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -687,6 +710,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -729,6 +753,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -757,6 +782,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -771,26 +797,27 @@
       "id": "G3-3d-e621.net",
       "group": 3,
       "host": "e621.net",
-      "name": "no data-sample-url: is the sample slot correct?",
-      "verdict": "INCONCLUSIVE(sample-filled-from-original)",
-      "expected": "INCONCLUSIVE(sample-filled-from-original)",
+      "name": "no data-sample-url: sample slot stays unknown, file stays original (fail closed)",
+      "verdict": "PASS",
+      "expected": "PASS",
       "matchesExpected": true,
       "pathRan": null,
       "controls": [
         {
-          "name": "observation distinguishes behaviors: sample left empty",
-          "expected": "sample-left-empty",
-          "observed": "sample-left-empty",
+          "name": "sample inferred from the file again",
+          "expected": false,
+          "observed": false,
           "ok": true
         }
       ],
       "finding": 2,
-      "inconclusiveNeeds": "Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.",
+      "hostSemantic": "NOT OBSERVED LIVE: e621.net card or container without data-sample-url",
+      "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
         "post": {
           "id": "3001",
-          "sampleUrl": "<url>",
+          "sampleUrl": "",
           "originalUrl": "<url>"
         }
       }
@@ -813,6 +840,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -841,6 +869,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -883,6 +912,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -911,6 +941,7 @@
         }
       ],
       "finding": null,
+      "hostSemantic": null,
       "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
@@ -925,26 +956,27 @@
       "id": "G3-3d-e926.net",
       "group": 3,
       "host": "e926.net",
-      "name": "no data-sample-url: is the sample slot correct?",
-      "verdict": "INCONCLUSIVE(sample-filled-from-original)",
-      "expected": "INCONCLUSIVE(sample-filled-from-original)",
+      "name": "no data-sample-url: sample slot stays unknown, file stays original (fail closed)",
+      "verdict": "PASS",
+      "expected": "PASS",
       "matchesExpected": true,
       "pathRan": null,
       "controls": [
         {
-          "name": "observation distinguishes behaviors: sample left empty",
-          "expected": "sample-left-empty",
-          "observed": "sample-left-empty",
+          "name": "sample inferred from the file again",
+          "expected": false,
+          "observed": false,
           "ok": true
         }
       ],
       "finding": 2,
-      "inconclusiveNeeds": "Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.",
+      "hostSemantic": "NOT OBSERVED LIVE: e926.net card or container without data-sample-url",
+      "inconclusiveNeeds": null,
       "informational": null,
       "observation": {
         "post": {
           "id": "3001",
-          "sampleUrl": "<url>",
+          "sampleUrl": "",
           "originalUrl": "<url>"
         }
       }

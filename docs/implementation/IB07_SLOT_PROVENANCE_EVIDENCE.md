@@ -61,3 +61,30 @@ This conflicts with the earlier option B deferral, which avoided the Rule34 down
 ## Still open regardless
 
 §11 step 6 production conformance is not run for the Rule34, e621 and e926 integrations. IB07 stays PARTIAL—NOT COMPLETE.
+
+## Disposition: bounded restriction applied
+
+Approved and applied in production (blob `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b`). Exactly two lines changed:
+
+- Rule34 `rule34NativeImagePost`: `originalUrl = originalLink?.href || ''` (was `|| sampleUrl`);
+- e621/e926 `normalizeE621NativeElement`: `sampleUrl = d.sampleUrl || ''` (was `|| fileUrl`).
+
+Production now fails closed on the unobserved shapes: the slot stays unknown. The host shapes themselves stay **NOT OBSERVED LIVE**. This restriction does not turn them into evidence.
+
+**Item 9:** `G3-3c-rule34.xxx` and `G3-3d-e621.net`/`G3-3d-e926.net` now assert production's fail-closed behavior (slot empty, the other slot unchanged). All three PASS, and a mutant that restores each inference FAILs. They previously asked a host-semantic question that no evidence decided. The same rows now carry `hostSemantic: NOT OBSERVED LIVE`, so the unanswered host fact stays visible. The suite reads 29/29 PASS with 29 correct controls.
+
+**Downstream result**, measured in the harness against old and new production, with no downstream code edited:
+
+| Consumer (unobserved shape only) | Old | New |
+| --- | --- | --- |
+| Metadata requests (startup, hover, on-demand, download) | 0 | 0 |
+| Rule34 native page (`img#image`, links) | untouched | untouched |
+| Rule34 `downloadPost` | saved the displayed image as "original" (1 transfer) | reports "could not find original media URL" (0 transfers) |
+| e621/e926 grid thumbnail | preview | preview (the Post sample never reached the grid: `applySiteThumbMedia` returns without an owner at line 4254) |
+| e621/e926 hover | full file via its own `sample || original` fallback from native `data-file-url` | same (downstream fallback, untouched) |
+| e621/e926 reverse search on a post page (line 4972) | full file | preview |
+| Viewer and open actions | slot fallback | same |
+
+This corrects the earlier assessment's prediction of a grid change: there is none.
+
+**Gelbooru production conformance: reused, on an explicit diff basis.** Both changed lines sit behind host gates that return first on gelbooru.com: `rule34NativeImagePost` at line 1931, and `normalizeE621NativeElement` at line 2325, which is called only from the e621 adapter. Harness check, old vs new production, on a Gelbooru post page with and without a native original link: identical Post and 0 requests in both cases. The live PASS attested the `9cade1a` body (C00); the Gelbooru-reachable code is unchanged in `30cadd6`. Release-artifact qualification remains a later-checkpoint concern.
