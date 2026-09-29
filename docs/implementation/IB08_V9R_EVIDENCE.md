@@ -241,10 +241,20 @@ This is an E-stage gate transition only. It does not claim production conformanc
 
 **B1 — logged-out marker.** No native logged-in/logged-out marker for the e621/e926 listing is recorded (IB07 V1-N records contain none). Without one, activation cannot be limited to the proven logged-out state. This needs a sanitized V1-N observation of a native marker on both hosts, in both states, recorded as presence/absence only. If no reliable marker exists, logged-in activation needs its own evidence or stays native.
 
-*B1 status:*
-- The observation probe `tests/browser/ib08/IB08_B1_Login_State_Probe.user.js` is locally qualified: 46/46 with 9/9 fault controls (`B1_LOGIN_STATE_VERIFICATION.json`); the fixtures are synthetic.
-- It reports candidate markers as names and value classes only, and the operator declares the state.
-- The four live observations are pending: e621 and e926, each logged out and logged in.
+*B1 status:* **OPEN.**
+
+*Probe 1.0.0 (`8b07a65`) — live failure:* all four live runs (e621 and e926, each logged out and logged in) returned `sanitationGuard: BLOCKED`. This is a probe failure, not evidence about markers.
+- **Root cause:** the guard matched page values against the whole output, including the probe's own fixed labels.
+  - Digit-bearing page values of 3 or more characters were matched as substrings.
+  - A page value containing the site's short name (for example `e621`) is therefore a substring of the probe's own `site` label (`e621.net`), and blocks every run on that host, in either login state.
+- **What is not confirmed:** the blocked output had no diagnostics, so the exact live element holding that value was not recorded. The class is reproduced locally: the committed 1.0.0 probe blocks on a fixture carrying the site's short name, on both hosts and in both states.
+
+*Probe 1.1.0 — repair:*
+- **Guard scope:** the guard now checks every page-derived output section (all the facts), with the same matching rule. The fixed labels (probe, version, `site` from a two-host allowlist, declared state, route enum, enhancer-marker boolean) are built only from literals, which a static check enforces. The URL-scheme check still covers the full output.
+- **Coarser output:** only login-relevant names are emitted (user/login/session/account/auth/csrf/level/current/signed). All other names are counted only.
+- **Diagnostics:** a blocked result carries value-free `blockDiagnostics` (source, section and mode counts).
+- **Local qualification:** 59/59 with 12/12 fault controls, including a regression reproducing the live failure with the 1.0.0 probe and a fault control that reintroduces the failure class.
+- **Live:** all four observations must be rerun with 1.1.0.
 
 *Acceptance rule, fixed before the live runs:* a marker is reliable only if all of these hold:
 1. it is present and readable, without cookies or requests, in all four observations;

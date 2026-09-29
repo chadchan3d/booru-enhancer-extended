@@ -138,32 +138,42 @@ Disable the experiment script in Tampermonkey. Return the two sanitized JSON res
 
 ---
 
-# IB08 B1 native login-state marker probe
+# IB08 B1 native login-state marker probe (version 1.1.0)
 
-**IB08 bounding input B1 only.** `IB08_B1_Login_State_Probe.user.js` is a read-only Tampermonkey script for e621.net and e926.net. It lists the page's candidate login-state markers so the four observations can be compared:
-- `meta` tag names;
-- `<html>` and `<body>` attribute names and class names;
-- counts of account-related link types (sign in, sign up, log out, account home, profile, settings, messages).
+**IB08 bounding input B1 only.** `IB08_B1_Login_State_Probe.user.js` is a read-only Tampermonkey script for e621.net and e926.net. It lists candidate login-state markers so the four observations can be compared.
 
-For each attribute or meta tag, it reports only a **value class**:
-- `EMPTY`;
-- `ANONYMOUS_WORD`;
-- `ZERO`;
-- `NUMERIC_NONZERO`;
-- `BOOLEAN_TRUE`/`BOOLEAN_FALSE`;
-- `OTHER_TEXT`.
+**What it reports:**
+- **Login-relevant names only:** `meta` tag names, `<html>`/`<body>` attribute names and class names, where the name relates to user, login, session, account, auth, csrf or level.
+- **A value class for each name, never the value:**
+  - `EMPTY`;
+  - `ANONYMOUS_WORD`;
+  - `ZERO`;
+  - `NUMERIC_NONZERO`;
+  - `BOOLEAN_TRUE`/`BOOLEAN_FALSE`;
+  - `OTHER_TEXT`.
+- **Counts only for everything else:**
+  - all other names (`otherNameCounts`);
+  - account-related link types (sign in, sign up, log out, account home, profile, settings, messages).
 
-It never reports the value itself. So no username, user ID, token, URL or path appears. Names containing long digit runs are withheld and counted.
+No username, user ID, token, URL or path appears. Names containing long digit runs are withheld and counted.
 
 The probe never reads cookies or storage, never requests or clicks anything, and never changes the page (apart from its own result box). You tell it the state through the menu command; it decides nothing about login itself.
 
-Local verification: `node tests/browser/ib08/verify_b1_login_state_probe.cjs` (fixtures are synthetic).
+**Version 1.1.0 fixes the 1.0.0 failure:** every live run returned `sanitationGuard: BLOCKED`.
+- **Cause:** the leak guard also scanned the probe's own fixed labels. An ordinary page value containing the site's short name matched the probe's own `site` label.
+- **Fix:** the guard now checks all page-derived output at the same strictness. The fixed labels come only from built-in literals.
+- **If a result is still blocked,** it now carries `blockDiagnostics`: which page source and which output section caused it, as counts only.
 
-## Operator steps: four observations
+Local verification: `node tests/browser/ib08/verify_b1_login_state_probe.cjs`. The fixtures are synthetic, and the check includes a regression run of the 1.0.0 probe.
+
+## Operator steps: four observations (rerun all four with 1.1.0)
 
 Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, URLs, usernames or IDs.
 
-**Setup:** in Tampermonkey, keep the normal Booru Enhancer and all IB08 scripts **disabled**, then install this probe (Create a new script → paste the whole file → Save → enable).
+**Setup:**
+1. In Tampermonkey, keep the normal Booru Enhancer and all other IB08 scripts **disabled**.
+2. Open the existing **IB08 B1 Native Login-State Marker Probe** script, replace its whole contents with the current `tests/browser/ib08/IB08_B1_Login_State_Probe.user.js`, and save.
+3. Confirm Tampermonkey shows version **1.1.0**, and that the script is enabled.
 
 For each of the four observations below:
 1. Open the stated page in a fresh tab and wait for it to finish loading.
@@ -179,4 +189,4 @@ For each of the four observations below:
 | 3 | e926 | logged out | `https://e926.net/posts` |
 | 4 | e926 | logged in to your own account on e926 | `https://e926.net/posts` |
 
-Check that each result shows the right `site` and `declaredState`, and that `route` is `posts-listing`. Log in and out only through the site's normal controls; the probe does nothing to your account. Afterwards, disable the probe and return the four sanitized JSON results. If a result says `sanitationGuard: BLOCKED`, return it as it is.
+Check that each result shows `"version": "1.1.0"`, the right `site` and `declaredState`, and `route` = `posts-listing`. Log in and out only through the site's normal controls; the probe does nothing to your account. Afterwards, disable the probe and return the four sanitized JSON results. If any result still says `sanitationGuard: BLOCKED`, return it as it is: its `blockDiagnostics` holds only counts and is safe to send.

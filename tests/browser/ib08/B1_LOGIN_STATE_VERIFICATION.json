@@ -3,11 +3,25 @@
   "bounding_input": "B1 native login-state marker",
   "status": "LOCAL QUALIFICATION (fixtures are synthetic, not live markup)",
   "probe": "IB08_B1_Login_State_Probe.user.js",
-  "probe_sha256_lf": "20d549cbfec716420ed1c3671368ce34767fdd98048768bb3d606fb008bd4e62",
-  "checks": 46,
-  "passed": 46,
+  "probe_version": "1.1.0",
+  "probe_sha256_lf": "11ccde1f78eb8b9a8695ccbc64dc532327b9af60fd2791ad16f805c456995848",
+  "regression_reference": "probe 1.0.0 at 8b07a65",
+  "checks": 59,
+  "passed": 59,
   "failed": 0,
   "fault_controls": [
+    {
+      "name": "fault guard scans probe constants again (live failure class): caught by blocked-output+value-class",
+      "pass": true
+    },
+    {
+      "name": "fault guard scans probe constants again, e926: caught by blocked-output",
+      "pass": true
+    },
+    {
+      "name": "fault coarsening disabled (all names emitted): caught by coarsening",
+      "pass": true
+    },
     {
       "name": "fault leaked username (value instead of class): caught by leak-scan",
       "pass": true
