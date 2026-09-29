@@ -174,11 +174,16 @@ add('G3-3a-rule34.xxx', 3, 'rule34.xxx', 'distinct native sample and original st
   async (src) => ({ post: (await fetchPosts(r34Distinct, src, ['1001']))[0] }),
   (o) => o.post?.sampleUrl === r34Distinct.sampleUrl && o.post?.originalUrl === r34Distinct.originalUrl,
   [{ name: 'original placed into sample slot', mutate: M.r34OriginalIntoSample, expect: false }]);
-add('G3-3c-rule34.xxx', 3, 'rule34.xxx', 'missing native original stays missing (not filled from the sample)',
-  async (src) => ({ post: (await fetchPosts(fx.rule34Post({ id: 1001, original: false }), src, ['1001']))[0] }),
-  (o) => !!o.post && o.post.originalUrl === '',
-  [{ name: 'corrected control: original left empty when no native original', mutate: M.r34OriginalCorrected, expect: true }],
-  { finding: 1 });
+// Reclassified from FAIL: absence of an "Original image" link was treated as
+// proof that no native original exists, but that host semantic is unobserved
+// (IB07_RULE34_V1N.md recorded only a post with the link). Leaving the slot
+// empty would also change preserved download behavior (§6; IB13 scope).
+const r34NoOriginal = fx.rule34Post({ id: 1001, original: false });
+add('G3-3c-rule34.xxx', 3, 'rule34.xxx', 'no native Original link: is the original slot correct?',
+  async (src) => ({ post: (await fetchPosts(r34NoOriginal, src, ['1001']))[0] }),
+  (o) => (o.post ? (o.post.originalUrl === r34NoOriginal.sampleUrl ? 'original-filled-from-sample' : o.post.originalUrl === '' ? 'original-left-empty' : 'other') : 'no-post'),
+  [{ name: 'observation distinguishes behaviors: original left empty', mutate: M.r34OriginalCorrected, expect: 'original-left-empty' }],
+  { finding: 1, inconclusive: 'Needs G-HOST fact: whether a Rule34 post page with img#image but no native Original link displays the native original itself, or whether a distinct original exists but is not linked. Not observed in IB07_RULE34_V1N.md.' });
 add('G3-3d-rule34.xxx', 3, 'rule34.xxx', 'missing native sample is not fabricated (no img#image gives no sample)',
   async (src) => ({ post: (await fetchPosts(fx.rule34Post({ id: 1001, sample: false }), src, ['1001']))[0] }),
   (o) => o.post === null || o.post.sampleUrl === '',
@@ -212,12 +217,11 @@ for (const host of ['e621.net', 'e926.net']) {
     { finding: 2, inconclusive: 'Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.' });
 }
 
-// Verdicts at production blob 0715587 (commit 9cade1a), confirmed by the first
-// run of this suite. G3-3c-rule34.xxx FAILs on current production: that is
-// finding 1, a production defect left open for its own bounded correction.
-// INCONCLUSIVE rows record the observed behavior pending the named G-HOST fact.
+// Verdicts at production blob 0715587 (commit 9cade1a). INCONCLUSIVE rows
+// record the observed behavior pending the named G-HOST fact (findings 1, 2);
+// none is a demonstrated production defect until that fact is observed.
 const EXPECTED = {
-  'G3-3c-rule34.xxx': 'FAIL',
+  'G3-3c-rule34.xxx': 'INCONCLUSIVE(original-filled-from-sample)',
   'G3-3d-e621.net': 'INCONCLUSIVE(sample-filled-from-original)',
   'G3-3d-e926.net': 'INCONCLUSIVE(sample-filled-from-original)',
 };

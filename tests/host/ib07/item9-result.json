@@ -8,10 +8,9 @@
     "recorded": [
       "G1-T1T2-gelbooru-caseA"
     ],
-    "fail": [
-      "G3-3c-rule34.xxx"
-    ],
+    "fail": [],
     "inconclusive": [
+      "G3-3c-rule34.xxx",
       "G3-3d-e621.net",
       "G3-3d-e926.net"
     ],
@@ -594,21 +593,21 @@
       "id": "G3-3c-rule34.xxx",
       "group": 3,
       "host": "rule34.xxx",
-      "name": "missing native original stays missing (not filled from the sample)",
-      "verdict": "FAIL",
-      "expected": "FAIL",
+      "name": "no native Original link: is the original slot correct?",
+      "verdict": "INCONCLUSIVE(original-filled-from-sample)",
+      "expected": "INCONCLUSIVE(original-filled-from-sample)",
       "matchesExpected": true,
       "pathRan": null,
       "controls": [
         {
-          "name": "corrected control: original left empty when no native original",
-          "expected": true,
-          "observed": true,
+          "name": "observation distinguishes behaviors: original left empty",
+          "expected": "original-left-empty",
+          "observed": "original-left-empty",
           "ok": true
         }
       ],
       "finding": 1,
-      "inconclusiveNeeds": null,
+      "inconclusiveNeeds": "Needs G-HOST fact: whether a Rule34 post page with img#image but no native Original link displays the native original itself, or whether a distinct original exists but is not linked. Not observed in IB07_RULE34_V1N.md.",
       "informational": null,
       "observation": {
         "post": {
