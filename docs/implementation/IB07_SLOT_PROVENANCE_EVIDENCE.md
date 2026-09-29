@@ -88,3 +88,16 @@ Production now fails closed on the unobserved shapes: the slot stays unknown. Th
 This corrects the earlier assessment's prediction of a grid change: there is none.
 
 **Gelbooru production conformance: reused, on an explicit diff basis.** Both changed lines sit behind host gates that return first on gelbooru.com: `rule34NativeImagePost` at line 1931, and `normalizeE621NativeElement` at line 2325, which is called only from the e621 adapter. Harness check, old vs new production, on a Gelbooru post page with and without a native original link: identical Post and 0 requests in both cases. The live PASS attested the `9cade1a` body (C00); the Gelbooru-reachable code is unchanged in `30cadd6`. Release-artifact qualification remains a later-checkpoint concern.
+
+## Qualification: earlier live runs potentially contaminated (superseded for live-host claims)
+
+The operator later reported that another Tampermonkey/userscript may have been enabled during the DevTools slot-provenance runs recorded above.
+
+Those runs therefore cannot count as pristine native-only evidence. Their live-host observations are **POTENTIALLY CONTAMINATED / SUPERSEDED FOR LIVE-HOST CLAIMS**. This covers the Rule34 control shape, the e621 aggregate of 140 cards and the e926 aggregate of 75 cards. The records are preserved unchanged, but their aggregate counts are no longer used as independent clean live evidence.
+
+The current clean live basis, where it overlaps, is the Rule34/e621/e926 production-conformance runs (`tests/browser/ib07/TC_R34E6_PRODUCTION_RESULT_SUMMARY.json`: logged out, normal enhancer and other userscripts disabled):
+- Rule34 image post: native original link present; sample and original distinct and correctly slotted.
+- e621 listing: 75 cards; data-sample-url absent 0, empty 0; explicit sample=file on 12, distinct on 63.
+- e926 listing: 75 cards; absent 0, empty 0; explicit sample=file on 7, distinct on 68 (independent of e621).
+
+The unusual shapes stay **NOT OBSERVED LIVE**, with no claim that they are impossible. Production fails closed on them, which the local item 9 assertions prove. The Blueprint does not require observing these shapes, so the old live hunts are not repeated.

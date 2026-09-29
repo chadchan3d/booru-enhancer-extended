@@ -31,7 +31,7 @@ function classify(url) {
   return 'other';
 }
 
-function load({ url, html, source = productionSource(), settings = {} }) {
+function load({ url, html, source = productionSource(), settings = {}, setup = null }) {
   const errors = [];
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', (e) => errors.push(String(e?.message || e)));
@@ -72,6 +72,9 @@ function load({ url, html, source = productionSource(), settings = {} }) {
   w.HTMLMediaElement.prototype.play = function play() { return Promise.resolve(); };
   w.HTMLMediaElement.prototype.pause = function pause() {};
   w.HTMLMediaElement.prototype.load = function mediaLoad() {};
+
+  // Optional caller hook (e.g. extra globals for a conformance postamble).
+  if (typeof setup === 'function') setup(w);
 
   w.eval(source);
 

@@ -4,29 +4,30 @@
 IB07 — Current-host metadata, Post facts and scope corrections: close per blueprint §11. Done means the invariant is demonstrated, §3 item 9 acceptance tests pass, prohibited later work did not enter, required master behavior is intact, and the completion record exists.
 
 ## Current state
-- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b`: `9cade1a` plus the approved two-line slot-inference restriction.
-- IB07 overall: PARTIAL—NOT COMPLETE.
-- G-HOST native-only strategies are admitted for Rule34, e621, e926 and Gelbooru.
-- Gelbooru live production conformance PASS(scope: logged-out native image post) is reused for `30cadd6` on an explicit diff basis (`IB07_SLOT_PROVENANCE_EVIDENCE.md` §"Disposition").
-- §3 item 10 decision A is recorded.
-- §3 item 9: 29 PASS, 0 FAIL, 0 INCONCLUSIVE (`tests/host/ib07/item9-result.json`). Three rows assert production fail-closed behavior; their host shapes stay NOT OBSERVED LIVE.
+- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `664bfe6366f03a6b1a27611087bcd6a91f2618f0` (commit `5064dfd`), unchanged in this task.
+- **IB07 overall: PARTIAL—NOT COMPLETE.** One blocker remains (see Unresolved).
+- §3 item 9: 31 PASS, 0 FAIL, 0 INCONCLUSIVE.
+- Live production conformance:
+  - Rule34, e621 and e926: PASS(scope: logged-out native listing and ordinary image post), 6/6 runs (`TC_R34E6_PRODUCTION_RESULT_SUMMARY.json`).
+  - Gelbooru: PASS(scope) reused on the recorded diff basis.
+- The Rule34/e621/e926 conformance package, its results and the harness `setup` hook are committed with this update.
 
 ## Verified
-- The production diff is exactly two lines: Rule34 `originalUrl = originalLink?.href || ''`; e621/e926 `sampleUrl = d.sampleUrl || ''`. `git diff --check` is clean and `node --check` passes.
-- Item 9 at `30cadd6`: 29/29 PASS, 29/29 controls correct. The three fail-closed rows FAIL under a mutant that restores the old inference. The observed-shape rows are unchanged: Rule34 distinct sample and original, e621/e926 distinct sample and file, and explicit sample=file equivalence.
-- Downstream, measured old vs new in the harness with no downstream edits:
-  - 0 metadata requests everywhere; the Rule34 native page is untouched.
-  - Rule34 download on the unobserved shape now truthfully reports no original (0 transfers, was 1 guessed transfer).
-  - The e621/e926 grid never used the fabricated sample, so there is no grid change.
-  - e621/e926 hover and viewer are unchanged (their own downstream fallbacks).
-  - e621/e926 reverse search on a post page submits the preview instead of the full file.
-- Gelbooru reuse basis: both changed lines return first on gelbooru.com (lines 1931, 2325). Old vs new on a Gelbooru post page gives an identical Post and 0 requests, with and without an original link.
+- Six live runs: failed=0 each; C00 `MATCH_EXPECTED_ARTIFACT` each; rows 1–6 match their route and context; host/context and adapter PASS; no enhancer request during Post production or the postamble window. The pre-postamble startup limitation is preserved.
+- The package corresponds to the committed artifact (`--check` up to date against `5064dfd`); verifier 57/57.
+- Earlier DevTools slot-provenance live runs are qualified as POTENTIALLY CONTAMINATED / SUPERSEDED FOR LIVE-HOST CLAIMS. They are preserved; the clean conformance runs are the current live basis. The unusual shapes stay NOT OBSERVED LIVE and fail closed.
+- **Gelbooru container caveat: disposition A.** The gallery starts only on a matched container; none matched live. If one ever matched, the G-HOST paths still build no Post and make no request (item 9 case B).
+- Acceptance checks from source:
+  - no Post or URL is persisted (storage writes are settings and viewer volume only), so signed URLs stay in memory;
+  - the Gelbooru API and HTML helpers are unreachable;
+  - the Gelbooru and Rule34 native parsers are host-gated.
 
 ## Unresolved
-- §11 step 6 production conformance is not run for the Rule34, e621 and e926 integrations.
-- Host semantics of the three restricted shapes stay NOT OBSERVED LIVE. Production fails closed on them; nothing claims their meaning.
-- Gelbooru T1/T2 on the observed markup do not reach the gallery path; the proof rests on case B.
+- **Single IB07 blocker, the §6 row for rule34.us and three Sankaku matches** (§3 item 8: "Excluded hosts receive an explicit release/migration notice"; validation "Exclusion fixtures including idol; release note"). The matches were removed in `47423ce`, but:
+  - no release/migration notice exists in `CHANGELOG.md`/`README.md`;
+  - no exclusion assertion runs against the IB07 candidate (the only idol fixture is IB01's historical T10 oracle).
+- Note for the completion record: §3 item 10 "count" is read as a multi-page work count (G-PAGES/IB17). Booru posts here are single-media, so the Post model has no count field. This reading is to be stated explicitly in the completion record.
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Prepare the Rule34, e621 and e926 §11 production-conformance runs against production blob `30cadd6`. Gelbooru is not reopened.
+One bounded IB07 task: add a candidate exclusion assertion (production `@match` excludes rule34.us and the three Sankaku hosts, including idol; stored preferences untouched) and an explicit release/migration note. Then write the IB07 §11 completion record. IB08 is not eligible until then.

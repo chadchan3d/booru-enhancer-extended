@@ -320,3 +320,34 @@ Since the Gelbooru-conformed body, production has changed only in host-gated cod
 - one Rule34 preview line and one Rule34 `siteId` line in `rule34NativeImagePost`, after its rule34.xxx hostname gate.
 
 None of these is reachable on gelbooru.com. In the harness, old vs new on a Gelbooru post gives an identical Post. The live Gelbooru PASS(scope) remains reusable on this diff basis.
+
+## Rule34 / e621 / e926 live production conformance
+
+**PASS(scope: logged-out native listing and ordinary image post; production commit `5064dfd`, blob `664bfe6366f03a6b1a27611087bcd6a91f2618f0`)**, 6 of 6 runs, 0 failed checks.
+
+- Package: `tests/browser/ib07/IB07_R34E6_Production_Conformance.user.js` (builder `build_r34e6_conformance.cjs`, verifier 57/57).
+- Result: `tests/browser/ib07/TC_R34E6_PRODUCTION_RESULT_SUMMARY.json`.
+- Every run: C00 `MATCH_EXPECTED_ARTIFACT`; host/context and adapter PASS; no enhancer request during Post production or during the postamble window.
+
+Per host:
+- **Rule34:** listing, 42 cards, 0 identity mismatches, no Post guessed. Image post: sample = native `img#image`; original = native link target; Statistics dimensions; preview and other unobserved fields unknown; `siteId` `rule34`; native page untouched.
+- **e621:** listing, 75/75 Posts, 0 mismatches, sample absent/empty 0. Image post: all checks PASS.
+- **e926:** independently, listing 75/75 Posts, 0 mismatches, absent/empty 0. Image post: all checks PASS.
+
+Request limitation: a request issued synchronously during startup before the postamble loaded is not counted live. Fully instrumented startup and hover evidence is the local item 9 T1/T2 suite.
+
+## Gelbooru gallery-container caveat: disposition A (does not block)
+
+Production starts the gallery module (card enhancement, startup enrichment, hover) only when `getGalleryContainer()` finds a container, both at init and on mutation re-init. On the observed live Gelbooru listing none of `#post-list-posts`, `#post-list`, `.content` matched (`IB07_GELBOORU_V1N.md`), so no gallery behavior is enabled there. The qualified live Gelbooru scope is the native image post (production conformance PASS) plus the listing's native facts, which production does not act on.
+
+If a page ever did match a candidate container, the enabled G-HOST paths still build no Post and make no metadata request: the family `fetchThumbBatch` returns nothing, and `fetchPost` returns null on the listing route. Item 9 case B proves this locally with zero requests. Grid layout and hover beyond metadata belong to later gates. The fixture therefore covers fail-closed behavior only, not an unqualified enabled capability.
+
+## IB07 completion blocker (open)
+
+§3 item 8 requires "Excluded hosts receive an explicit release/migration notice". The §6 row "rule34.us and three Sankaku matches" assigns explicit removal to IB07, with validation "Exclusion fixtures including idol; release note".
+
+The matches were removed (`47423ce`), but:
+- no release/migration notice exists in `CHANGELOG.md` or `README.md`;
+- no exclusion assertion runs against the IB07 candidate. The only `idol` fixture is IB01's historical T10 known-failure oracle.
+
+This is the remaining IB07 blocker.

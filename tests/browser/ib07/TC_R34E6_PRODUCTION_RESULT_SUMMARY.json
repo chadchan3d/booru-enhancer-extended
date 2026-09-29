@@ -1,0 +1,76 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "probe": "IB07 Rule34/e621/e926 Production Conformance 1.0.0",
+  "production_version": "1.2.7.3",
+  "production_commit": "5064dfd",
+  "production_source_blob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
+  "conformance_artifact": {
+    "path": "tests/browser/ib07/IB07_R34E6_Production_Conformance.user.js",
+    "builder_check": "DERIVED_SCRIPT_UP_TO_DATE against the committed production artifact at result recording"
+  },
+  "runtime_cell": {
+    "manager": "Tampermonkey (version not relayed)",
+    "browser": "Chrome (version not relayed)"
+  },
+  "context": {
+    "account": "logged out on all three hosts (operator-reported)",
+    "normal_enhancer_and_other_userscripts": "disabled for these runs",
+    "navigation": "each page loaded directly on its native route. Post pages were opened from native listing links via Open link in new tab, because the production viewer intercepts ordinary left-click on thumbnails. This is procedural context only: viewer behavior was not tested and this is not IB11 evidence."
+  },
+  "evidence_form": "Operator-relayed summary of the six sanitized result blocks: statuses, identity outcome, counts and structural relations. No URL, post id, tag, request log or screenshot is recorded.",
+  "runs": [
+    {
+      "row": 1, "site": "rule34.xxx", "context": "listing", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": { "cards_recognized": 42, "identity_mismatches": 0, "posts_guessed_from_listing_cards": 0 }
+    },
+    {
+      "row": 2, "site": "rule34.xxx", "context": "post-view", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": {
+        "post_produced": true, "identity": "PASS", "sample_equals_native_img_image": true,
+        "native_original_link_present": true, "original_equals_native_link_target": true,
+        "dimensions_equal_native_statistics": true, "unobserved_fields_unknown_including_preview": true,
+        "site_id": "rule34", "native_page_untouched": true, "R07": "NOT_APPLICABLE on this page"
+      }
+    },
+    {
+      "row": 3, "site": "e621.net", "context": "listing", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": { "cards": 75, "posts": 75, "mismatches_identity_original_sample_relation_facts_site_tags": 0,
+        "sample_distinct_from_file": 63, "sample_equals_file_explicit": 12, "sample_attribute_absent": 0, "sample_attribute_empty": 0 }
+    },
+    {
+      "row": 4, "site": "e621.net", "context": "post-view", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": { "post_produced": true, "identity": "PASS", "original_and_sample_native": "PASS", "sample_state": "distinct",
+        "sample_original_relation": "PASS", "native_file_facts_site_tags": "PASS", "preview_tag_categories_source": "PASS" }
+    },
+    {
+      "row": 5, "site": "e926.net", "context": "listing", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": { "cards": 75, "posts": 75, "mismatches_identity_original_sample_relation_facts_site_tags": 0,
+        "sample_distinct_from_file": 68, "sample_equals_file_explicit": 7, "sample_attribute_absent": 0, "sample_attribute_empty": 0,
+        "independently_tested": true }
+    },
+    {
+      "row": 6, "site": "e926.net", "context": "post-view", "status": "PASS", "failed_checks": 0,
+      "production_body_identity": "MATCH_EXPECTED_ARTIFACT", "host_context": "PASS", "adapter": "PASS",
+      "observations": { "post_produced": true, "identity": "PASS", "original_and_sample_native": "PASS", "sample_state": "distinct",
+        "sample_original_relation": "PASS", "native_file_facts_site_tags": "PASS", "preview_tag_categories_source": "PASS",
+        "independently_tested": true }
+    }
+  ],
+  "request_observation": {
+    "during_post_production": "no enhancer request in all six runs",
+    "postamble_observation_window": "no enhancer request in all six runs",
+    "limitation": "A request issued synchronously during production startup, before the postamble loaded, would not be counted by this live window. This is not a live claim of zero startup requests. Fully instrumented startup and hover assertions are the separate local item 9 T1/T2 evidence (tests/host/ib07/item9-result.json)."
+  },
+  "not_observed_live": [
+    "Rule34 post page with img#image and no native original link",
+    "e621/e926 card or container without data-sample-url"
+  ],
+  "not_tested": ["video/GIF", "pagination", "hover", "viewer", "favorite/action", "download", "rendition policy", "other Gelbooru-family hosts"],
+  "conclusion": "Rule34, e621 and e926 live production conformance PASS(scope: logged-out native listing and ordinary image post; production commit 5064dfd), 6 of 6 runs, 0 failed checks."
+}

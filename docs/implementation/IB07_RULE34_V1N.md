@@ -148,3 +148,5 @@ This PASS is deliberately scoped:
 ## Slot-provenance observation
 
 Passive runs of the slot-provenance probe (`IB07_SLOT_PROVENANCE_EVIDENCE.md`) on multiple ordinary image posts were each NOT_QUALIFIED: a native original link was present. The observed control shape keeps sample and original distinct: the displayed resource is structurally a sample, its natural dimensions are smaller than the Statistics size, and it differs from the original-link target. A post page with `img#image` and no native original link is **NOT OBSERVED LIVE**; its meaning remains unknown (item 9 `G3-3c-rule34.xxx` INCONCLUSIVE).
+
+**Qualification:** the slot-provenance runs above may have had another userscript enabled. They are POTENTIALLY CONTAMINATED / SUPERSEDED FOR LIVE-HOST CLAIMS; the current clean live basis is `TC_R34E6_PRODUCTION_RESULT_SUMMARY.json` (`IB07_SLOT_PROVENANCE_EVIDENCE.md` §"Qualification").

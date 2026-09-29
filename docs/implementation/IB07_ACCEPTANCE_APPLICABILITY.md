@@ -87,3 +87,7 @@ Item 9 is implemented (`tests/host/ib07/item9_assertions.cjs`): 26 PASS, 0 FAIL,
 ## Update: restriction applied
 
 The bounded restriction is in production blob `30cadd6`. Item 9 now reads 29 PASS, 0 FAIL, 0 INCONCLUSIVE. The three former INCONCLUSIVE rows assert production's fail-closed behavior; their host shapes stay NOT OBSERVED LIVE (`IB07_SLOT_PROVENANCE_EVIDENCE.md` §"Disposition").
+
+## Update: production conformance complete; closure blocked by the §6 exclusion row
+
+Rule34, e621 and e926 live production conformance PASS(scope) (6/6), with Gelbooru reused on the diff basis. Item 9 is 31/31. The remaining IB07 blocker is outside item 9: the §6 row for rule34.us and the three Sankaku matches, which needs an exclusion assertion including idol and a release/migration note (`IB07_HOST_FACTS.md` §"IB07 completion blocker").

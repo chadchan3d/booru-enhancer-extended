@@ -1,0 +1,132 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "stage": "Rule34/e621/e926 production conformance package (§11 step 6); not yet executed",
+  "production_commit": "5064dfd",
+  "production_source_blob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
+  "production_body_sha256": "5f7d213a9bd9d1029490dd7050ed7c1c880604e86cabe76785f8475f2db0759e",
+  "derived_script": "IB07_R34E6_Production_Conformance.user.js",
+  "derived_script_sha256": "a2ec942f07e1d1091ad53005a372f982587907f48c9008ea918e3806b8d8ee25",
+  "derived_script_bytes": 224098,
+  "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
+  "convention": "Gelbooru production conformance (commit 2e83c33): same split and wrapper constants (imported from build_production_conformance.cjs), same C00 method; own postamble ib07p3_postamble.js",
+  "admitted_scope": {
+    "rule34.xxx": [
+      "listing cards (identity; enrichment deferred; no Post from a listing)",
+      "logged-out native image post"
+    ],
+    "e621.net": [
+      "listing cards",
+      "native image post"
+    ],
+    "e926.net": [
+      "listing cards",
+      "native image post (independent of e621)"
+    ],
+    "not_required_live": "NOT OBSERVED LIVE shapes (Rule34 without native original link; e621/e926 without data-sample-url): fail-closed behavior covered by local item 9 and by this verifier"
+  },
+  "checks": {
+    "common": [
+      "C00 executed production body identity",
+      "C01 qualified host/context",
+      "C02 adapter activation and post-page detection",
+      "C13 no request while producing Posts",
+      "C14 no request from postamble load through the window"
+    ],
+    "rule34 post": [
+      "R03 Post produced",
+      "R04 identity with route; other id gives nothing",
+      "R05 sample = native img#image",
+      "R06 original = native link target, empty when absent",
+      "R07 distinct stays distinct",
+      "R08 dimensions from Statistics",
+      "R09 unobserved fields unknown (incl. preview)",
+      "R10 native page untouched",
+      "R11 site identity rule34"
+    ],
+    "rule34 listing": [
+      "L03 cards recognized",
+      "L04 card identity = native link",
+      "L05 no Post from a listing card"
+    ],
+    "e621/e926 post": [
+      "E03 Post produced",
+      "E04 identity = route = container; other id gives nothing",
+      "E05 original = data-file-url",
+      "E06 sample = data-sample-url or empty",
+      "E07 sample/original relation",
+      "E08 file facts, site, tags",
+      "E09 preview, categories, source from native elements"
+    ],
+    "e621/e926 listing": [
+      "EL03 batch Posts for all cards",
+      "EL04 identity; on-demand = batch; unknown id gives nothing",
+      "EL05 original",
+      "EL06 sample or empty",
+      "EL07 relation",
+      "EL08 file facts, site, tags"
+    ]
+  },
+  "expected_on_current_artifact": {
+    "all checks": "PASS when live pages match the qualified evidence; no known failure",
+    "site identity": "R11 asserts siteId rule34 (operator decision a); C01/C02 prove the exact browser host and route independently"
+  },
+  "verification": {
+    "build_check": "node build_r34e6_conformance.cjs --check: DERIVED_SCRIPT_UP_TO_DATE",
+    "command": "node verify_r34e6_conformance.cjs",
+    "requires": "npm install in tests/host/ib07 (pinned jsdom 30.1.1); tests/host/ib07/item9_harness.cjs optional setup hook",
+    "node_version": "v24.19.0",
+    "result": "57 of 57 PASS",
+    "static": [
+      "derived script = fresh build from committed artifact",
+      "committed blob is the expected artifact",
+      "LF-only; parses",
+      "body byte-identical inside wrapper; appears once; wrapper invoked once before postamble",
+      "engine toString reproduces wrapper",
+      "metadata changes limited; only three hosts; no update target",
+      "postamble uses no request, click, navigation, cookie or storage API"
+    ],
+    "scenarios_real_derived_script_in_jsdom": [
+      "rule34 post",
+      "rule34 post without native original link",
+      "rule34 listing",
+      "e621 post",
+      "e621 post without data-sample-url",
+      "e621 listing (distinct, equal, absent sample)",
+      "e926 post",
+      "e926 listing (distinct, equal, absent sample)"
+    ],
+    "per_scenario": [
+      "verdicts equal the expected register (C00 PASS; every check PASS; R07 NOT_APPLICABLE without native original)",
+      "no planted raw value in output",
+      "zero enhancer requests"
+    ],
+    "fault_mutants_each_flips_its_check": [
+      "production body altered -> C00",
+      "wrapper absent -> C00",
+      "Rule34 adapter activation -> C02",
+      "e926 adapter activation -> C02",
+      "Rule34 identity removed -> R04",
+      "e621 post identity removed -> E04",
+      "e926 listing identity removed -> EL04",
+      "Rule34 sample/original swapped -> R06",
+      "e621 swapped -> E06",
+      "Rule34 fail-open restored -> R06",
+      "e621 fail-open (post) -> E06",
+      "e926 fail-open (listing) -> EL06",
+      "request in Rule34 Post production -> C13, C14",
+      "request in e926 Post production -> C13, C14",
+      "Rule34 preview filled from the sample again -> R09 FAIL",
+      "Rule34 family site label restored -> R11 FAIL"
+    ],
+    "leak_mutants_caught": [
+      "raw page URL",
+      "raw sample URL in check detail",
+      "card ids in observations",
+      "post tags in observations"
+    ]
+  },
+  "gelbooru": "not re-run: since the Gelbooru-conformed body, production changed only in host-gated code (slot restriction; Rule34 preview and siteId after the rule34.xxx gate), none reachable on gelbooru.com; harness old vs new identical Post (IB07_HOST_FACTS.md)",
+  "live_evidence": "NONE — requires operator browser runs",
+  "rebuild": "rebuilt after the Rule34 preview correction and the Rule34 site identity; earlier builds were never run live"
+}
