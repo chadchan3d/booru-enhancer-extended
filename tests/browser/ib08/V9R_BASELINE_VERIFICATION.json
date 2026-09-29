@@ -1,0 +1,37 @@
+{
+  "checkpoint": "IB08",
+  "evidence_gate": "G-RENDITION",
+  "status": "EVIDENCE PREPARATION (not a gate result)",
+  "probe": "IB08_V9R_Baseline_Probe.user.js",
+  "probe_sha256_lf": "59f2ade6bf131e3c4d8479f2c7123e3bb6cd8ade77b2e2d3283cf682928a0be4",
+  "checks": 56,
+  "passed": 56,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault leaked URL: caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault leaked post ID: caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault mutated src: caught by mutation-watch",
+      "pass": true
+    },
+    {
+      "name": "fault removed srcset: caught by mutation-watch",
+      "pass": true
+    },
+    {
+      "name": "fault replaced source node: caught by mutation-watch+node-identity",
+      "pass": true
+    },
+    {
+      "name": "fault e926 relabeled as e621: caught by host-identity",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

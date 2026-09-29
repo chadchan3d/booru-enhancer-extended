@@ -1,9 +1,9 @@
 # Ledger
 
 ## Current milestone
-IB07 — Current-host metadata, Post facts and scope corrections: **complete, PASS(scope)** (`docs/implementation/IB07_COMPLETION_RECORD.md`).
+**IB08 — Reversible native rendition integration: PARTIAL / EVIDENCE OPEN.** G-RENDITION is OPEN. Only the first bounded evidence step has been done: a native V9-R baseline probe for e621 and e926, awaiting live results.
 
-The next milestone, IB08 — Reversible native rendition integration, is eligible but not started. It needs its own assignment.
+IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `32d0051fe73505984066a5b69766b5eafc242bb9` (commit `c551bb0`), unchanged by closeout.
@@ -16,8 +16,11 @@ The next milestone, IB08 — Reversible native rendition integration, is eligibl
   - `siteId` is the canonical site identity for qualified hosts;
   - `pageCount` is `null` (unknown) or a positive integer, set to 1 only by the qualified single-item producers.
 - Rebuilt conformance packages and exact-artifact results are committed.
+- IB08 V9-R baseline probe: `tests/browser/ib08/IB08_V9R_Baseline_Probe.user.js`, read-only and self-sanitizing. Its operator steps are in `tests/browser/ib08/README.md`.
+- Existing production behavior, not changed, which IB08 must address later: on e621 and e926 (shared `e621` adapter), `applySiteThumbMedia` overwrites every `source` srcset and the `img` srcset/src with one URL chosen by `media.thumbQuality` (default `sample`). It uses the IB04 owner, so it is restorable on dispose unless the native page touched the attribute or the node was disconnected.
 
 ## Verified
+- IB08 probe local verifier: 56/56, including 6/6 fault controls (leaked URL, leaked post ID, mutated src, removed srcset, replaced source, e926 relabeled as e621).
 - Live exact-artifact conformance on `c551bb0`: 7/7 PASS, 0 failed checks, C00 matched on each.
   - Rule34 listing 42 cards and image post;
   - e621 listing 72/72 and image post;
@@ -30,12 +33,13 @@ The next milestone, IB08 — Reversible native rendition integration, is eligibl
 - No endpoint strategy is reachable: the Gelbooru-family DAPI/HTML helpers and the legacy `normalizeE621` are uncalled, and the native producers contain no network call.
 
 ## Unresolved
+- **G-RENDITION OPEN.** Still needed: live native baselines A/B for e621 and e926, taken independently. Later IB08 tests still to come: dispose then resize/currentSrc; native edit, moved source and replacement; malformed fallback.
 - **Retained limitations (not blockers):**
   - Live request counting starts at the postamble. Synchronous pre-postamble startup requests are not counted live; the local item 9 T1/T2 suite is the startup evidence.
   - The earlier slot-provenance live runs stay POTENTIALLY CONTAMINATED / SUPERSEDED.
   - Tampermonkey and Chrome versions were not relayed.
-- Deferred to later checkpoints: video/GIF, pagination, hover, viewer, favorites/actions, downloads, rendition, other hosts, Pixiv.
+- Deferred to later checkpoints: video/GIF, pagination, hover, viewer, favorites/actions, downloads, other hosts, Pixiv.
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Await an explicit IB08 assignment. Do not start IB08 without it.
+The operator runs the V9-R probe on e621 and on e926 (README steps) and returns two sanitized JSON results. No rendition change, no G-RENDITION PASS and no IB08 completion record until the evidence is reviewed. Do not start IB09.

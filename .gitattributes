@@ -1,2 +1,3 @@
 .githooks/* text eol=lf
 tests/browser/ib07/* text eol=lf
+tests/browser/ib08/* text eol=lf
