@@ -17,7 +17,7 @@ const { loadAndStart, pointerSweep, sleep, productionSource, gitBlobId } = requi
 const fx = require('./item9_fixtures.cjs');
 const { oracles } = require(path.resolve(__dirname, '../../assertions/ib01/oracles.cjs'));
 
-const PRODUCTION_BLOB = '664bfe6366f03a6b1a27611087bcd6a91f2618f0'; // Booru_Enhancer.user.js with the IB07 slot restriction, Rule34 preview correction and Rule34 site identity
+const PRODUCTION_BLOB = '32d0051fe73505984066a5b69766b5eafc242bb9'; // Booru_Enhancer.user.js with the IB07 slot restriction, Rule34 preview/site corrections and Post pageCount
 const SOURCE = productionSource();
 
 // ---- source mutation helpers ----------------------------------------------
@@ -233,7 +233,7 @@ for (const host of ['e621.net', 'e926.net']) {
     { finding: 2, hostSemantic: `NOT OBSERVED LIVE: ${host} card or container without data-sample-url` });
 }
 
-// Verdicts at production blob 664bfe6 (slot restriction, Rule34 preview, Rule34 site). Every
+// Verdicts at production blob 32d0051 (slot restriction, Rule34 preview/site, pageCount). Every
 // assertion is expected to PASS. Rows with hostSemantic assert production's
 // fail-closed behavior only; their host shape stays NOT OBSERVED LIVE.
 const EXPECTED = {};

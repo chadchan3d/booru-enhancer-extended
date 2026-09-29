@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `664bfe6366f03a6b1a27611087bcd6a91f2618f0` (`9cade1a` plus the IB07 slot-inference restriction, the Rule34 preview correction and the Rule34 site identity)  
+**Production source blob:** `32d0051fe73505984066a5b69766b5eafc242bb9` (`9cade1a` plus the IB07 slot-inference restriction, Rule34 preview and site corrections, and the Post `pageCount` fact)  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -356,12 +356,30 @@ Row "rule34.us and three Sankaku matches" (§3 item 8; validation "Exclusion fix
 - **Stored preferences remain:** P1. Startup on rule34.xxx and e621.net deletes or changes none of the seeded preferences, including unknown legacy keys; a startup-deletion mutant is caught. Settings are per-script (`be:setting:*`), not per host, and store deletion happens only inside a user-initiated settings import.
 - **Release note:** `CHANGELOG.md` §"Unreleased — Host scope changes".
 
-## IB07 completion blocker (open): Post count fact
+## Post `pageCount` fact (count blocker resolved in production)
 
-§3 item 10 requires "Post has site/id/native URL/kind/count/naming facts".
+Operator contract decision:
 
-The normalized Post constructor (`emptyPost`) has no count or page-count field. Its fields are: id, originalUrl, sampleUrl, previewUrl, mediaType, width, height, fileSize, md5, rating, score, favCount, the tag arrays, source, postUrl, createdAt and siteId. `favCount` is a favorites tally, not a work or media count, and no contract document defines a count representation.
+    pageCount: null | positive integer
+    null = unknown / not established
+    1    = known single-item Post
+    0 is not the unknown sentinel; unknown never silently becomes 1
 
-Unknown count is not a count of 1, and single-media booru posts do not authorize inventing one. The required count fact therefore has no representation at all (determination C), and IB07 cannot close.
+Production blob `32d0051fe73505984066a5b69766b5eafc242bb9`:
+- `emptyPost` now has `pageCount: null`.
+- `pageCount: 1` is set only by the qualified single-item producers:
+  - `rule34NativeImagePost`;
+  - `gelbooruNativeImagePost`;
+  - `normalizeE621NativeElement`, the single native producer for e621/e926 listing cards and post containers, whose observed contract exposes one `data-file-url` per post.
+- Unqualified or unreachable producers stay `null`: danbooru, the Gelbooru candidate helpers, moebooru, the uncalled legacy `normalizeE621`, and generic.
+- Rule34 and Gelbooru listings still build no Post.
 
-The smallest resolution is a contract decision followed by a bounded production change: give the normalized Post a count field whose default is unknown. No host populates it, because no count fact has been observed; no `count: 1` is written.
+Merge and cache semantics are unchanged:
+- `viewer.updatePost` replaces the placeholder (null) with the producer Post for the same id;
+- `resolveOriginalUrl` spreads the existing Post;
+- the post cache stores producer Posts by replacement;
+- nothing reads or coerces `pageCount`.
+
+Tests: `tests/host/ib07/pagecount_assertions.cjs` (`pagecount-result.json`), 11/11 PASS with 8 controls. Removing the field, defaulting to 1, leaving each producer null, and a cache overwrite are all caught. All other Post facts are identical to the previous artifact, and requests are 0.
+
+**Exact-artifact production conformance is reopened.** The shared Post shape changed on every qualified host, including Gelbooru. The earlier live runs remain historical evidence for their artifacts (Rule34/e621/e926 at `5064dfd`; Gelbooru at `9cade1a`). Final conformance needs reruns against `32d0051`.

@@ -1,8 +1,8 @@
 {
   "summary": {
     "suite": "IB07 §3 item 9 assertions",
-    "productionBlob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
-    "productionBlobExpected": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
+    "productionBlob": "32d0051fe73505984066a5b69766b5eafc242bb9",
+    "productionBlobExpected": "32d0051fe73505984066a5b69766b5eafc242bb9",
     "productionBlobIsExpected": true,
     "assertions": 31,
     "pass": 31,

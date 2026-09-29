@@ -1733,7 +1733,7 @@
 			id: '', originalUrl: '', sampleUrl: '', previewUrl: '', mediaType: 'unknown',
  width: 0, height: 0, fileSize: 0, md5: '', rating: 'unknown', score: 0, favCount: 0,
  artists: [], characters: [], copyrights: [], generalTags: [], metaTags: [], allTags: [],
- source: '', postUrl: location.href, createdAt: '', siteId: '', ...overrides,
+ source: '', postUrl: location.href, createdAt: '', siteId: '', pageCount: null, ...overrides,
 		};
 	}
 
@@ -1973,6 +1973,7 @@
 			source: sourceMatch ? sourceMatch[1].trim() : '',
 			postUrl: location.href,
 			siteId: 'rule34',
+			pageCount: 1,
 		});
 	}
 
@@ -2014,6 +2015,7 @@
 			score: scoreMatch ? Number(scoreMatch[1]) : 0,
 			postUrl: `${location.origin}/index.php?page=post&s=view&id=${currentId}`,
 			siteId: 'gelbooru',
+			pageCount: 1,
 		});
 	}
 
@@ -2384,6 +2386,7 @@
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',
+			pageCount: 1,
 		});
 	}
 

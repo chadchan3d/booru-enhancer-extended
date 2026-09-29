@@ -1,0 +1,150 @@
+{
+  "suite": "IB07 Post pageCount assertions",
+  "contract": "pageCount: null | positive integer; null = unknown; 1 = known single-item Post",
+  "productionBlob": "32d0051fe73505984066a5b69766b5eafc242bb9",
+  "productionBlobIsExpected": true,
+  "assertions": 11,
+  "pass": 11,
+  "failed": [],
+  "controls": 8,
+  "controlFailures": [],
+  "results": [
+    {
+      "id": "PC1",
+      "name": "emptyPost contains pageCount",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "field removed",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC2",
+      "name": "default pageCount is exactly null (unknown)",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "default 1",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC3",
+      "name": "unknown does not become 1 implicitly (placeholder Posts stay null; no null-to-1 coercion in code)",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "default 1",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC4",
+      "name": "Rule34 qualified native image Post: pageCount === 1",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "Rule34 producer left null",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC-e621.net",
+      "name": "e621.net qualified native listing and image Posts: pageCount === 1",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "e621/e926 producer left null",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC-e926.net",
+      "name": "e926.net qualified native listing and image Posts: pageCount === 1",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "e621/e926 producer left null",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC7",
+      "name": "Gelbooru qualified native image Post: pageCount === 1",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "Gelbooru producer left null",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    },
+    {
+      "id": "PC-LISTING",
+      "name": "Rule34 and Gelbooru listings still build no Post",
+      "verdict": "PASS",
+      "controls": [],
+      "detail": null
+    },
+    {
+      "id": "PC8",
+      "name": "all other Post facts identical to the previous artifact",
+      "verdict": "PASS",
+      "controls": [],
+      "detail": {
+        "differing": []
+      }
+    },
+    {
+      "id": "PC9",
+      "name": "no enhancer request while producing Posts",
+      "verdict": "PASS",
+      "controls": [],
+      "detail": {
+        "requests": 0
+      }
+    },
+    {
+      "id": "PC-MERGE",
+      "name": "known pageCount 1 survives re-enrichment and cached lookups",
+      "verdict": "PASS",
+      "controls": [
+        {
+          "name": "cache lookup overwrites with an unknown Post",
+          "expectedVerdict": "FAIL",
+          "observed": "FAIL",
+          "ok": true
+        }
+      ],
+      "detail": null
+    }
+  ]
+}

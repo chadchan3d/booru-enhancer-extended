@@ -3,7 +3,7 @@
   "private": true,
   "description": "IB07 host assertions: Gelbooru native-post implementation test, §3 item 9 assertions, and excluded-host (§6) assertions.",
   "scripts": {
-    "test": "node gelbooru_native_post.cjs && node item9_assertions.cjs && node exclusion_assertions.cjs"
+    "test": "node gelbooru_native_post.cjs && node item9_assertions.cjs && node exclusion_assertions.cjs && node pagecount_assertions.cjs"
   },
   "license": "MIT",
   "devDependencies": {
