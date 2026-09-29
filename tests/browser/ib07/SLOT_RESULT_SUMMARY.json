@@ -1,0 +1,47 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "probe": "IB07 slot-provenance probe 1.0.0",
+  "probe_sha256": "9cdfa30a8db2f03a0a25567377f1b203433d1e00e6cf287f7677d7a6eb14bcf4",
+  "evidence_form": "Operator-relayed sanitized structural facts: statuses, counts and relationships. No page URL, post id, tag, raw text, request URL or screenshot is recorded. Native page noise (blocked ad/tracker requests, Permissions-Policy warnings) was observed and is not probe or enhancer activity; it is not recorded.",
+  "context": "native pages, enhancer and userscripts disabled, operator browser",
+  "rule34.xxx": {
+    "page_type": "post page (page=post&s=view)",
+    "runs": "multiple ordinary image posts (count not relayed)",
+    "status_every_run": "NOT_QUALIFIED",
+    "reason": "a native original link was present",
+    "observed_control_shape": {
+      "img_image_present": true,
+      "displayed_resource_structural_class": "sample",
+      "displayed_natural_dimensions_vs_statistics": "smaller",
+      "displayed_equals_original_link_target": false
+    },
+    "control_shape_meaning": "the normal observed host shape distinguishes sample from original",
+    "target_shape": "img#image present and both native original-link checks absent",
+    "target_shape_status": "NOT OBSERVED LIVE"
+  },
+  "e621.net": {
+    "listing_runs": 2,
+    "listing_status_every_run": "NOT_QUALIFIED",
+    "aggregate": { "cards_total": 140, "sample_absent": 0, "sample_empty": 0, "sample_present": 140, "sample_present_equals_file": 10, "sample_present_differs_from_file": 130 },
+    "post_page_control": { "status": "NOT_QUALIFIED", "sample_attribute": "present", "file_attribute": "present" },
+    "observed": "sample=file equivalence represented explicitly with both attributes present",
+    "target_shape": "card or post container without data-sample-url",
+    "target_shape_status": "NOT OBSERVED LIVE"
+  },
+  "e926.net": {
+    "listing_runs": 1,
+    "listing_status_every_run": "NOT_QUALIFIED",
+    "aggregate": { "cards_total": 75, "sample_absent": 0, "sample_empty": 0, "sample_present": 75, "sample_present_equals_file": 3, "sample_present_differs_from_file": 72 },
+    "post_page_control": { "status": "NOT_QUALIFIED", "sample_attribute": "present", "file_attribute": "present" },
+    "observed": "sample=file equivalence represented explicitly with both attributes present (observed independently of e621)",
+    "target_shape": "card or post container without data-sample-url",
+    "target_shape_status": "NOT OBSERVED LIVE"
+  },
+  "not_concluded": [
+    "that the target shapes cannot occur",
+    "any universal host behavior",
+    "PASS for G3-3c-rule34.xxx, G3-3d-e621.net or G3-3d-e926.net"
+  ],
+  "item9_effect": "G3-3c-rule34.xxx, G3-3d-e621.net and G3-3d-e926.net remain INCONCLUSIVE; item 9 stays 26 PASS, 0 FAIL, 3 INCONCLUSIVE"
+}

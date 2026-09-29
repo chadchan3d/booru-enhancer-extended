@@ -1,0 +1,50 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "stage": "slot-provenance passive probe; not yet executed",
+  "resolves": ["G3-3c-rule34.xxx", "G3-3d-e621.net", "G3-3d-e926.net"],
+  "probe_file": "IB07_Slot_Provenance_Probe.js",
+  "probe_sha256": "9cdfa30a8db2f03a0a25567377f1b203433d1e00e6cf287f7677d7a6eb14bcf4",
+  "probe_bytes": 11051,
+  "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
+  "contexts": {
+    "rule34.xxx post page": "img#image present; Original text link and /images/ link recorded separately (the two ways production recognizes an original); displayed path class; sample_ prefix; loaded dimensions vs Statistics size; resize marker",
+    "e621.net / e926.net listing": "every card scanned; data-sample-url absent/empty/present counts; present-sample equal to or different from file; up to 3 qualifying cards with attribute states, rendered-source equalities, file-extension enum, dimensions, schema attribute names",
+    "e621.net / e926.net post page": "#image-container data-sample-url state; displayed image equal to file or sample; loaded dimensions vs data-width/height; View original link presence"
+  },
+  "syntax_check": { "command": "node --check IB07_Slot_Provenance_Probe.js", "node_version": "v24.19.0", "result": "PASS" },
+  "verification": {
+    "command": "node verify_slot_probe.cjs",
+    "requires": "npm install in tests/host/ib07 (pinned jsdom 30.1.1)",
+    "result": "53 of 53 PASS",
+    "output_branches": [
+      "rule34: qualified, displayed original path, dimensions equal Statistics",
+      "rule34: qualified, displayed sample path with sample_ prefix, dimensions differ",
+      "rule34: not qualified, Original image text link",
+      "rule34: not qualified, /images/ link without the text",
+      "rule34: not qualified, no img#image",
+      "rule34: listing route, not found",
+      "e621 listing: qualified, card without data-sample-url (data-md5 name kept, id-bearing name withheld)",
+      "e621 listing: qualified, empty data-sample-url",
+      "e621 listing: not qualified, samples present (one equal to file)",
+      "e621 listing: no cards, not found",
+      "e621 post page: qualified, container without data-sample-url, file displayed, dimensions equal data",
+      "e621 post page: not qualified, data-sample-url present, sample displayed",
+      "e621 post page: no #image-container, not found",
+      "e926 listing: qualified",
+      "unsupported host: not found"
+    ],
+    "per_branch_checks": ["expected status and facts", "no planted raw value in output (ids, hash, bucket, host, URL scheme, tag, title, handle, timestamp)", "zero requests"],
+    "sanitation_fault_sensitivity": [
+      "raw displayed URL added to Rule34 facts: caught",
+      "raw file URL added to an e621 card: caught",
+      "attribute-name filter removed (id-bearing name): caught",
+      "page URL added to output: caught",
+      "raw displayed URL added on an e621 post page: caught"
+    ],
+    "static": ["probe parses", "no request, click, navigation, cookie or storage API", "LF-only"]
+  },
+  "production_changed": false,
+  "not_in_scope": ["download behavior (G-DOWNLOAD/IB13)", "video/GIF", "hover", "pagination", "favorite/action", "rendition policy", "Gelbooru"],
+  "live_evidence": "NONE — requires operator browser runs"
+}

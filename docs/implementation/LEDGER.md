@@ -8,23 +8,25 @@ IB07 — Current-host metadata, Post facts and scope corrections: close per blue
 - IB07 overall: PARTIAL—NOT COMPLETE.
 - G-HOST native-only strategies are admitted for Rule34, e621, e926 and Gelbooru.
 - Gelbooru has production integration (`9cade1a`) and live production conformance PASS(scope: logged-out native image post).
-- §3 item 10 decision A is recorded (`IB07_ACCEPTANCE_APPLICABILITY.md`).
-- §3 item 9 assertions are in `tests/host/ib07/` (`npm test`), with results in `item9-result.json`.
-- Option B approved: the Rule34 missing-original assertion is reclassified FAIL → INCONCLUSIVE. Rule34 and download production are unchanged.
-- Slot-provenance G-HOST probe package prepared in `tests/browser/ib07/` (`IB07_Slot_Provenance_Probe.js`, `SLOT_README.md`, `SLOT_VERIFICATION.json`, `SLOT_SHA256SUMS.txt`, `verify_slot_probe.cjs`). It is uncommitted and awaits operator runs.
+- §3 item 10 decision A is recorded.
+- §3 item 9 is in `tests/host/ib07/`: 26 PASS, 0 FAIL, 3 INCONCLUSIVE.
+- Slot-provenance probe package, live observations and closure assessment are recorded: `tests/browser/ib07/SLOT_*`, `docs/implementation/IB07_SLOT_PROVENANCE_EVIDENCE.md`, and pointers in the Rule34, e621 and e926 V1-N records and in the applicability record.
 
 ## Verified
-- Item 9 suite at production `0715587…`: 29 assertions, 26 PASS, 0 FAIL, 3 INCONCLUSIVE (`G3-3c-rule34.xxx`, `G3-3d-e621.net`, `G3-3d-e926.net`), plus the informational Gelbooru case A row. All 29 controls are correct; nothing is vacuous; every verdict matches the expected register.
-- Rule34 reclassification basis: `IB07_RULE34_V1N.md` observed only a post with a native Original link. With the original slot cleared, `downloadPost` fails ("could not find original media URL"; 0 transfers) where it now succeeds (1 transfer). Both cases made 0 metadata requests (harness comparison, in memory).
-- Slot probe: `node --check` PASS. `verify_slot_probe.cjs` 53/53: 15 output branches, each checked for expected facts, no planted raw value and zero requests; 5 leaking probe mutants all caught; static checks. Probe SHA-256 `9cdfa30a…`.
-- Existing suites are unchanged (see the latest status block for run results).
+- Live slot-provenance runs, sanitized (`SLOT_RESULT_SUMMARY.json`). Every run was NOT_QUALIFIED.
+  - Rule34: multiple image posts, each with a native original link; the control shape keeps sample and original distinct.
+  - e621: 140 cards with `data-sample-url` present (10 explicitly equal to the file, 130 distinct) plus a post page with both attributes.
+  - e926: 75 cards present (3 equal, 72 distinct) plus a post page with both attributes.
+  - Target shapes: **NOT OBSERVED LIVE**.
+- Both slot fallbacks were introduced inside IB07 (Rule34 `8aaefea`, e621/e926 `4918893`) and are reachable in enabled production (lines 1946, 2332).
+- Consumer effects of disabling the fallbacks were read from the source. In the unobserved shapes only: Rule34 download reports failure; the e621/e926 grid thumbnail and reverse search use the preview. Viewer and open actions are unchanged.
+- Test and verification results for this state are in the latest status block.
 
 ## Unresolved
-- `G3-3c-rule34.xxx`: needs the G-HOST fact of whether a Rule34 post page with `img#image` but no native Original link displays the original itself.
-- `G3-3d-e621.net`, `G3-3d-e926.net`: need the G-HOST fact of how e621/e926 represent a post with no `data-sample-url`, and what the native post page then displays.
+- **Closure assessment B:** `G3-3c-rule34.xxx`, `G3-3d-e621.net` and `G3-3d-e926.net` block IB07 closure while the enabled parsers fill those slots by unvalidated inference. The smallest follow-up is a bounded production task disabling only the two inferences (Rule34 `originalUrl = originalLink?.href || ''`; e621/e926 `sampleUrl = d.sampleUrl || ''`). It needs explicit approval of its consequences, including the Rule34 download change in the unobserved shape, which the earlier option B deferral avoided.
 - §11 step 6 production conformance is not run for the Rule34, e621 and e926 integrations.
 - Gelbooru T1/T2 on the observed markup do not reach the gallery path; the proof rests on case B.
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs `IB07_Slot_Provenance_Probe.js` per `SLOT_README.md` on Rule34, e621 and e926, in any sessions, and returns the sanitized JSON. Then resolve the three INCONCLUSIVE assertions, and only then decide whether any production correction is needed.
+Operator decision on the bounded restriction. If approved: one IB07 production task disabling the two slot inferences, then updating the item 9 expectations. After that, prepare the Rule34, e621 and e926 §11 production-conformance runs.
