@@ -2,7 +2,7 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** PARTIAL — NOT COMPLETE. G-RENDITION is **OPEN**. This file collects E-stage evidence only. It is not a completion record and not a gate result.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3). The P stage is designed (§4) but not implemented. This file is not a completion record.
 
 **Production:** `Booru_Enhancer.user.js` blob `32d0051fe73505984066a5b69766b5eafc242bb9` (commit `c551bb0`). No IB08 step has changed it.
 
@@ -40,7 +40,7 @@
 
 No result is inherited between hosts.
 
-## 2. Reversible ownership experiment (E stage, locally qualified; live run pending)
+## 2. Reversible ownership experiment (E stage)
 
 **Artifact:** `tests/browser/ib08/IB08_V9R_Ownership_Experiment.user.js`. It is isolated and runs with production disabled.
 
@@ -102,8 +102,204 @@ After the mutation, every card must keep the same picture, source and img nodes 
 
 **Local limit:** jsdom has no image selection, so the verifier models `currentSrc`: the first supported-type source before the `img`, otherwise `img src`. Real selection, load timing and resize behavior are what the live run measures.
 
-## Open for G-RENDITION
+### 2a. Live results
 
-- Live ownership-experiment results, e621 and e926 independently.
-- After that, the P-stage design against production's `applySiteThumbMedia`. Its current behavior is recorded in the Ledger: it overwrites all source and img srcset/src with one URL.
-- Danbooru rows are out of scope: its G-HOST is not qualified.
+**Evidence form:** operator-relayed summary of the two sanitized results. The raw JSON is not stored here.
+- Artifact: `IB08_V9R_Ownership_Experiment.user.js` as committed in `ef19ec3`.
+- Tampermonkey × Chrome, versions not relayed.
+- Normal enhancer and other userscripts disabled; logged out; native listing route.
+- Step 1 in a wide window; Step 2 after narrowing the same window.
+- e621.net and e926.net run separately.
+
+**Operator's relayed finding:**
+- live ownership experiment on both hosts with `ALL_EXPECTATIONS_MET`;
+- control restoration, native-edit preservation, moved-source preservation, replaced-source protection, replaced-picture protection and post-resize behavior all observed live.
+
+| Scenario | e621.net | e926.net |
+| --- | --- | --- |
+| After the mutation: same nodes, one owned srcset write per card, `NATIVE_SAMPLE` shown | observed | observed independently |
+| CONTROL: restored, then `NATIVE_PREVIEW_WEBP` after resize | observed | observed independently |
+| NATIVE_EDIT: native edit kept through dispose and resize | observed | observed independently |
+| MOVED_SOURCE: native order kept, owned value restored | observed | observed independently |
+| REPLACED_SOURCE: replacement untouched and native | observed | observed independently |
+| REPLACED_PICTURE: replacement untouched and native | observed | observed independently |
+| Other pattern cards and unsupported cards: rendition unchanged | met (part of `ALL_EXPECTATIONS_MET`); counts not relayed | same |
+| Viewport narrowed between steps | met (part of `ALL_EXPECTATIONS_MET`) | same |
+
+`ALL_EXPECTATIONS_MET` is computed in the browser and requires every item in this table. It is set only if all of these hold:
+- no expectation mismatch on any card in any phase;
+- exactly five owned apply writes;
+- dispose writes equal to the number of restorations;
+- zero changed non-scenario cards;
+- a narrowed viewport.
+
+## 3. Gate disposition — G-RENDITION (E stage)
+
+**Decision: PASS(scope).** The E-stage premise required by blueprint §3 IB08 item 6 ("G-RENDITION(host/pattern), E → PASS before source/size integration") holds within this scope and nowhere else:
+
+| Scope element | Value |
+| --- | --- |
+| Hosts | e621.net and e926.net, each observed independently; neither result is inherited from the other |
+| Route and state | native listing, logged out |
+| Pattern | `picture > source[type=image/webp] + source[type=image/jpeg] + img`, single-candidate source srcsets, no `sizes` or `media`, `img` with `src` only; image media; native preview, WebP preview and sample facts present, with the sample distinct from both previews |
+| Mutation proven reversible | one owned srcset on the WebP source, set to the card's native sample URL |
+| Runtime | Tampermonkey × Chrome as used by the operator, at the operator's device-pixel ratio (versions and DPR value not relayed); two viewport widths |
+| Outside the pattern | stays native. Proven locally on 12 malformed shapes; live, every non-scenario card stayed unchanged |
+
+**How the blueprint §3 IB08 item 9 tests map to the evidence:**
+
+| Item 9 test | Evidence |
+| --- | --- |
+| Same picture/source/img references before and after | baseline and experiment, live |
+| Two viewport conditions | live |
+| Dispose, then resize and `currentSrc` | live |
+| Native edit, moved source, replacement | live, as simulated native changes |
+| Malformed fallback | local, plus live untouched non-scenario cards |
+| No result inherited between e621 and e926 | separate runs |
+| Danbooru native size/query/cookie row | **EXCLUDED(scope)**, because Danbooru's G-HOST is not qualified |
+
+**Not covered, and not inferred:**
+- other routes: post, search variants, pools, favorites, pagination-inserted cards;
+- logged-in state;
+- video, GIF or animated media;
+- other DPRs and runtimes;
+- other hosts and other picture patterns;
+- the `original` rendition, which was never applied live;
+- live behavior of production's own owner (see below).
+
+**Deviations recorded:**
+- Blueprint item 12 lists "viewport/DPR screenshots". They are replaced by in-browser sanitized structural traces, under the repository sanitation policy and the assignment's no-screenshot instruction.
+- The experiment used an IB04-style owner written for the experiment, not production's `BE.ownership`. By inspection, production's owner gives the same outcomes for these scenarios:
+  - `ownAttribute` at `Booru_Enhancer.user.js:542-552` observes only after its own write;
+  - `dispose` at `:642-645` skips natively touched or disconnected records.
+
+  Production conformance (§4.4) must show this live. G-OWN is already PASS for picture/native attributes (`IB04_BROWSER_OWNERSHIP.md`).
+
+This is an E-stage gate transition only. It does not claim production conformance, and it does not pass IB08.
+
+## 4. P-stage design against `applySiteThumbMedia` (not implemented)
+
+### 4.1 Current production behavior (`Booru_Enhancer.user.js:4033-4051`, blob `32d0051`)
+
+- **Shared path:** the `e621` adapter serves both e621 and e926.
+- **Quality setting:** `media.thumbQuality` (`:865-871`; default `sample`; choices `preview`/`sample`/`original`) picks one target URL.
+- **What it writes,** through the card owner:
+  - **every** `source` srcset in the picture;
+  - the `img` srcset, **adding** it when the native `img` has none;
+  - the `img` src.
+
+**Conflicts with the scoped gate:**
+
+| # | Conflict |
+| --- | --- |
+| C1 | The JPEG source is rewritten, so the native WebP/JPEG format-selection structure is collapsed |
+| C2 | An `img` srcset is added and `img src` is rewritten. Neither is part of the proven mutation |
+| C3 | `preview` writes the JPEG preview into the WebP source. That is a mutation where native already shows the preview |
+| C4 | No pattern gate: sources with `sizes`/`media`, multi-candidate srcsets and other shapes are rewritten too |
+| C5 | No route or login-state limit, and no strict host check beyond the adapter's `hostPattern` |
+
+### 4.2 Proposed P-stage mutation contract
+
+**Activation.** A card receives a rendition mutation only if **all** of these hold. Otherwise its rendition stays native and `media.thumbQuality` stays stored but inert (blueprint item 11). Other card enhancements are unaffected.
+1. `BE.adapters.active.id === 'e621'`, and `location.hostname` is exactly `e621.net` or `e926.net`.
+2. The call comes from the gallery listing path with a card owner (`enhanceThumbnail`, `:4088`).
+3. **Logged-out state is positively established** from a native marker. **Bounding input B1 below (UNVERIFIED).**
+4. The card passes the same pattern gate as the qualified experiment:
+   - `wrap` is the native `article` with image `data-file-ext` (`jpg`/`jpeg`/`png`/`webp`), `data-preview-url`, `data-preview-webp` and `data-sample-url`;
+   - exactly one `img`, whose parent is the card's only `picture`;
+   - the picture's children are exactly `source[type=image/webp]`, `source[type=image/jpeg]`, `img`;
+   - both source srcsets are single-candidate with no `sizes` or `media`;
+   - the `img` has `src` and no `srcset`/`sizes`;
+   - the WebP source equals the native WebP preview;
+   - the sample is distinct from both previews and srcset-safe.
+
+**Mutation, per `media.thumbQuality`:**
+
+| Value | Effect on the WebP source srcset (the only rendition attribute ever written) |
+| --- | --- |
+| `preview` | No write; the native preview stays. If this owner changed the attribute earlier (the setting was switched), write back the native value captured before the first write, through `owner.ownAttribute`. That write is refused if the site has touched the attribute. |
+| `sample` | `owner.ownAttribute(webpSource, 'srcset', nativeSampleUrl)`, exactly as proven. |
+| `original` | Same single attribute, set to the native file URL. **Bounding input B2 below.** |
+
+**Invariants:**
+- Never written: the JPEG source, `img src`, `img srcset`, `sizes`, `media`, `type`, or any other node.
+- No node is created, cloned, moved, replaced or removed.
+- No URL is constructed; values are only the card's own native `data-*` facts.
+- No request, storage or cookie use.
+- The CSS contain rules (`:4549-4592`) and the grid settings are unchanged, so whole-image/contain behavior stays.
+
+**Reversibility.** Only the existing IB04 owner is used, with no change to `BE.ownership`:
+- `gallery.dispose` → `disposeCardOwners` (`:4489`) restores the WebP srcset unless the site touched it or the node was disconnected;
+- a native edit is never overwritten, a native move is kept, and replaced nodes are never touched.
+
+**Provenance** (blueprint item 10):
+- `applySiteThumbMedia` returns one enum: `NATIVE_UNSUPPORTED`, `NATIVE_OUT_OF_SCOPE`, `NATIVE_PREVIEW`, `OWNED_SAMPLE`, `OWNED_ORIGINAL`, `REFUSED_NATIVE_TOUCHED`.
+- `enhanceThumbnail` keeps the value in an in-memory `WeakMap` keyed by the card, so the owner and conformance can read which rendition is shown.
+- Nothing is persisted. The grid never claims a sharper image than the one actually selected.
+
+**Bounding inputs still required before implementation:**
+
+**B1 — logged-out marker.** No native logged-in/logged-out marker for the e621/e926 listing is recorded (IB07 V1-N records contain none). Without one, activation cannot be limited to the proven logged-out state. This needs a sanitized V1-N observation of a native marker on both hosts, in both states, recorded as presence/absence only. If no reliable marker exists, logged-in activation needs its own evidence or stays native.
+
+**B2 — `original`.** The mechanism is the one proven, but no `original` URL was applied live. Two options:
+- (a) include `original` in P and require it as a live conformance row;
+- (b) map `original` to `sample` inside scope until observed.
+
+This is an operator decision; the recommendation is (a).
+
+**B3 — release note.** Rendition becomes native, with the setting retained, in these cases that are enhanced today:
+- the `preview` setting;
+- logged-in pages (pending B1);
+- non-pattern cards;
+- sources with `sizes`/`media`.
+
+`CHANGELOG.md` needs an entry.
+
+### 4.3 Files and call sites that would change
+
+| Location | Change |
+| --- | --- |
+| `Booru_Enhancer.user.js:4033-4051` `applySiteThumbMedia` | Rewritten to the contract: pattern gate, one owned attribute, provenance enum. A small pattern-gate helper and a native-value `WeakMap` sit beside it. |
+| `:4078-4090` `enhanceThumbnail` | Keeps the returned enum; no other change. |
+| `:3837` settings listener | Unchanged: re-runs `enhanceThumbnails`, which now handles switching back to `preview`. |
+| `:4257` enrichment and `:4432` pagination clone | Unchanged. They pass no owner, so the new function returns `NATIVE_OUT_OF_SCOPE` as the current one returns immediately. Pagination is IB12 (G-PLACE-T). |
+| `BE.ownership` (`:500-680`), CSS (`:4549-4592`), `media.thumbQuality` schema (`:865-871`) | Unchanged. |
+| B1 marker helper, in or beside the `e621` adapter (`:2426` area) | Only after B1 is observed. |
+| `CHANGELOG.md` | Release note (B3). |
+| New tests | `tests/host/ib08/` (local production assertions); `tests/browser/ib08/` production-conformance package, built by the IB07 convention (derived script, C00 body hash, builder check, verifier, checksums). |
+
+### 4.4 Production-conformance tests required after implementation
+
+**Local, running production source in the jsdom harness with request instrumentation. Each item has fault-control mutants:**
+
+| # | Test |
+| --- | --- |
+| L1 | Pattern card, `sample`: exactly one attribute write (WebP srcset = native sample); JPEG source and `img` untouched; no `img srcset` added; node identity unchanged. |
+| L2 | `preview`: zero rendition writes. Switching sample → preview → sample restores and re-applies through the owner; a natively touched attribute is refused. |
+| L3 | `original`: per B2. Video/GIF/unknown media stays native. |
+| L4 | The 12 non-pattern shapes plus `sizes`/`media` sources: zero rendition writes; other card enhancements still applied. |
+| L5 | `BE.modules.gallery.dispose()` covers control restored, native edit kept, moved source restored in native order, and replaced source/picture untouched. Re-init and dispose cycles stay bounded. |
+| L6 | Logged-in marker (B1): zero rendition writes. |
+| L7 | Rule34/Gelbooru/generic adapters: zero rendition writes. e621 and e926 are asserted separately. |
+| L8 | No request, storage or cookie use from the rendition path. `media.thumbQuality` stays stored unchanged while inert. |
+| L9 | IB01–IB07 regression suites and IB08 verifiers stay green. |
+
+**Live, exact-artifact derived conformance package, run separately on e621 and on e926, logged out, other scripts disabled:**
+- C00 production-body identity.
+- Classification counts.
+- Per sampled card: one owned write, same nodes, `NATIVE_SAMPLE` shown, JPEG source and `img` untouched.
+- Two viewport widths.
+- Postamble-simulated native edit, move and replacements, then `BE.modules.gallery.dispose()` and a resize, with the same expectations as §2.
+- Unsupported cards unchanged.
+- `preview` stays native; `original` per B2.
+- No enhancer request.
+- Sanitized output.
+
+Afterwards, a logged-in check shows no rendition writes (per B1).
+
+## Open for G-RENDITION / IB08
+
+- B1 (logged-out marker observation) and B2 (`original` decision) before implementation.
+- P-stage implementation and production conformance, local and live, on each host.
+- IB08 completion record only after production conformance.
+- Danbooru rows: EXCLUDED(scope).
