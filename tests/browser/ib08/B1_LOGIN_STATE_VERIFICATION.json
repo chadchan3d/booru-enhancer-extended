@@ -1,0 +1,49 @@
+{
+  "checkpoint": "IB08",
+  "bounding_input": "B1 native login-state marker",
+  "status": "LOCAL QUALIFICATION (fixtures are synthetic, not live markup)",
+  "probe": "IB08_B1_Login_State_Probe.user.js",
+  "probe_sha256_lf": "20d549cbfec716420ed1c3671368ce34767fdd98048768bb3d606fb008bd4e62",
+  "checks": 46,
+  "passed": 46,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault leaked username (value instead of class): caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault leaked user ID (link path): caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault withheld-name filter disabled: caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault cookie read: caught by api-counter+static",
+      "pass": true
+    },
+    {
+      "name": "fault script-side request: caught by api-counter+static",
+      "pass": true
+    },
+    {
+      "name": "fault page mutation: caught by page-watch+static",
+      "pass": true
+    },
+    {
+      "name": "fault e926 relabeled as e621: caught by host-identity",
+      "pass": true
+    },
+    {
+      "name": "fault declared state swapped: caught by declared-state",
+      "pass": true
+    },
+    {
+      "name": "fault anonymous misclassified: caught by value-class",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

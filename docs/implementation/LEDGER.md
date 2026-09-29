@@ -1,7 +1,7 @@
 # Ledger
 
 ## Current milestone
-**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). The P-stage design is recorded (§4) and **not implemented**: two bounding inputs are open (B1, B2).
+**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). The P-stage design is recorded (§4) and **not implemented**. B2 is decided (`original` kept as a distinct rendition). B1, the login-state marker, awaits four live observations.
 
 IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
@@ -18,6 +18,7 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - Rebuilt conformance packages and exact-artifact results are committed.
 - IB08 artifacts (`tests/browser/ib08/`, operator steps in its `README.md`):
   - baseline probe `IB08_V9R_Baseline_Probe.user.js`, read-only;
+  - B1 login-state probe `IB08_B1_Login_State_Probe.user.js`, read-only; reports names and value classes only;
   - ownership experiment `IB08_V9R_Ownership_Experiment.user.js`, isolated E stage. It makes one owned WebP-source srcset change per card on five pattern cards; simulates native edit, moved source, replaced source and replaced picture; disposes; then checks after a resize.
 - **G-RENDITION transition (E stage): OPEN → PASS(scope).** Scope:
   - e621.net and e926.net, each independently;
@@ -43,7 +44,8 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - post-resize behavior.
 - IB08 local:
   - baseline probe verifier 56/56, 6/6 fault controls;
-  - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom.
+  - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom;
+  - B1 login-state probe verifier 46/46, 9/9 fault controls, synthetic fixtures.
 - Live exact-artifact conformance on `c551bb0`: 7/7 PASS, 0 failed checks, C00 matched on each.
   - Rule34 listing 42 cards and image post;
   - e621 listing 72/72 and image post;
@@ -57,8 +59,8 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
 ## Unresolved
 - **P stage not bounded yet:**
-  - **B1:** no native logged-out/logged-in marker is recorded for the e621/e926 listing. A sanitized V1-N observation on both hosts, in both states, is needed.
-  - **B2:** the operator must decide `original`: (a) include it and require a live conformance row (recommended), or (b) map it to `sample` until observed.
+  - **B1:** the four live observations are pending: e621 logged out, e621 logged in, e926 logged out, e926 logged in. The acceptance rule is fixed in evidence record §4.2. If no marker qualifies on each host independently, the result is NO RELIABLE NATIVE MARKER and IB08 stops for a decision.
+  - **B2 decided (option a):** `original` stays a distinct rendition using the card's native file URL, never mapped to `sample`. It needs its own live production-conformance row.
   - **B3:** a release note is needed for cases that become native with the setting retained.
 - After implementation: the local L1–L9 and live per-host production conformance in evidence record §4.4, then the IB08 completion record.
 - **Retained limitations (not blockers):**
@@ -69,4 +71,4 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Resolve B1 (logged-out marker observation, e621 and e926) and B2 (`original` decision). Then implement the P-stage contract in `applySiteThumbMedia` only, and run production conformance. Production stays unchanged until then. No IB08 completion record before conformance. Do not start IB09.
+The operator runs the B1 probe for the four observations (`tests/browser/ib08/README.md`, B1 section) and returns four sanitized JSON results. The results are then evaluated against the B1 acceptance rule. Only if a marker qualifies is the P-stage contract implemented in `applySiteThumbMedia`, followed by production conformance. Production stays unchanged until then. No IB08 completion record before conformance. Do not start IB09.

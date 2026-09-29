@@ -135,3 +135,48 @@ Repeat the e621 steps on a fresh load of `https://e926.net/posts`, logged out. C
 ### Afterwards
 
 Disable the experiment script in Tampermonkey. Return the two sanitized JSON results. If a result says `sanitationGuard: BLOCKED`, return it as it is and nothing else from that page.
+
+---
+
+# IB08 B1 native login-state marker probe
+
+**IB08 bounding input B1 only.** `IB08_B1_Login_State_Probe.user.js` is a read-only Tampermonkey script for e621.net and e926.net. It lists the page's candidate login-state markers so the four observations can be compared:
+- `meta` tag names;
+- `<html>` and `<body>` attribute names and class names;
+- counts of account-related link types (sign in, sign up, log out, account home, profile, settings, messages).
+
+For each attribute or meta tag, it reports only a **value class**:
+- `EMPTY`;
+- `ANONYMOUS_WORD`;
+- `ZERO`;
+- `NUMERIC_NONZERO`;
+- `BOOLEAN_TRUE`/`BOOLEAN_FALSE`;
+- `OTHER_TEXT`.
+
+It never reports the value itself. So no username, user ID, token, URL or path appears. Names containing long digit runs are withheld and counted.
+
+The probe never reads cookies or storage, never requests or clicks anything, and never changes the page (apart from its own result box). You tell it the state through the menu command; it decides nothing about login itself.
+
+Local verification: `node tests/browser/ib08/verify_b1_login_state_probe.cjs` (fixtures are synthetic).
+
+## Operator steps: four observations
+
+Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, URLs, usernames or IDs.
+
+**Setup:** in Tampermonkey, keep the normal Booru Enhancer and all IB08 scripts **disabled**, then install this probe (Create a new script → paste the whole file → Save → enable).
+
+For each of the four observations below:
+1. Open the stated page in a fresh tab and wait for it to finish loading.
+2. Tampermonkey icon → choose the command that matches your **actual** state:
+   - **IB08 login-state: observe (I am logged OUT)**, or
+   - **IB08 login-state: observe (I am logged IN)**.
+3. Copy the result (it is already selected) and label it with its observation number.
+
+| # | Host | State | Page |
+| --- | --- | --- | --- |
+| 1 | e621 | logged out (log out first, or use a window where you are not logged in) | `https://e621.net/posts` |
+| 2 | e621 | logged in to your own e621 account | `https://e621.net/posts` |
+| 3 | e926 | logged out | `https://e926.net/posts` |
+| 4 | e926 | logged in to your own account on e926 | `https://e926.net/posts` |
+
+Check that each result shows the right `site` and `declaredState`, and that `route` is `posts-listing`. Log in and out only through the site's normal controls; the probe does nothing to your account. Afterwards, disable the probe and return the four sanitized JSON results. If a result says `sanitationGuard: BLOCKED`, return it as it is.

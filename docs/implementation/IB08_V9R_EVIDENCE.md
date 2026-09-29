@@ -241,11 +241,23 @@ This is an E-stage gate transition only. It does not claim production conformanc
 
 **B1 — logged-out marker.** No native logged-in/logged-out marker for the e621/e926 listing is recorded (IB07 V1-N records contain none). Without one, activation cannot be limited to the proven logged-out state. This needs a sanitized V1-N observation of a native marker on both hosts, in both states, recorded as presence/absence only. If no reliable marker exists, logged-in activation needs its own evidence or stays native.
 
+*B1 status:*
+- The observation probe `tests/browser/ib08/IB08_B1_Login_State_Probe.user.js` is locally qualified: 46/46 with 9/9 fault controls (`B1_LOGIN_STATE_VERIFICATION.json`); the fixtures are synthetic.
+- It reports candidate markers as names and value classes only, and the operator declares the state.
+- The four live observations are pending: e621 and e926, each logged out and logged in.
+
+*Acceptance rule, fixed before the live runs:* a marker is reliable only if all of these hold:
+1. it is present and readable, without cookies or requests, in all four observations;
+2. on **each host independently**, its logged-out value class differs from its logged-in value class;
+3. the same marker and the same class mapping hold on both hosts. Otherwise, each host's marker is recorded separately and neither is inferred from the other.
+
+Logged-out detection must be positive, meaning the logged-out class is required for activation. Absence or an unknown class stays native. If no candidate meets the rule, B1 is reported as **NO RELIABLE NATIVE MARKER**, and IB08 stops at that point for a decision.
+
 **B2 — `original`.** The mechanism is the one proven, but no `original` URL was applied live. Two options:
 - (a) include `original` in P and require it as a live conformance row;
 - (b) map `original` to `sample` inside scope until observed.
 
-This is an operator decision; the recommendation is (a).
+**B2 decided by the operator: option (a).** `media.thumbQuality = original` stays a distinct rendition: the WebP-source srcset is set to the card's own native file URL (`data-file-url`), through the same single owned attribute. It is **not** mapped to `sample`. It needs its own live production-conformance row after implementation. Cards whose file is not a still image (`jpg`/`jpeg`/`png`/`webp`) fail the pattern gate and stay native.
 
 **B3 — release note.** Rendition becomes native, with the setting retained, in these cases that are enhanced today:
 - the `preview` setting;
@@ -299,7 +311,7 @@ Afterwards, a logged-in check shows no rendition writes (per B1).
 
 ## Open for G-RENDITION / IB08
 
-- B1 (logged-out marker observation) and B2 (`original` decision) before implementation.
+- B1: four live login-state observations, evaluated against the acceptance rule in §4.2. B2 is decided (option a).
 - P-stage implementation and production conformance, local and live, on each host.
 - IB08 completion record only after production conformance.
 - Danbooru rows: EXCLUDED(scope).
