@@ -1703,7 +1703,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			id: '', originalUrl: '', sampleUrl: '', previewUrl: '', mediaType: 'unknown',
  width: 0, height: 0, fileSize: 0, md5: '', rating: 'unknown', score: 0, favCount: 0,
  artists: [], characters: [], copyrights: [], generalTags: [], metaTags: [], allTags: [],
- source: '', postUrl: location.href, createdAt: '', siteId: '', ...overrides,
+ source: '', postUrl: location.href, createdAt: '', siteId: '', pageCount: null, ...overrides,
 		};
 	}
 
@@ -1943,6 +1943,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			source: sourceMatch ? sourceMatch[1].trim() : '',
 			postUrl: location.href,
 			siteId: 'rule34',
+			pageCount: 1,
 		});
 	}
 
@@ -1984,6 +1985,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			score: scoreMatch ? Number(scoreMatch[1]) : 0,
 			postUrl: `${location.origin}/index.php?page=post&s=view&id=${currentId}`,
 			siteId: 'gelbooru',
+			pageCount: 1,
 		});
 	}
 
@@ -2354,6 +2356,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',
+			pageCount: 1,
 		});
 	}
 
@@ -5373,7 +5376,7 @@ IB07P_PRODUCTION_BODY();
   'use strict';
 
   const RESULT_KEY = 'ib07p3:last-result:v1';
-  const EXPECTED_BODY_SHA256 = '5f7d213a9bd9d1029490dd7050ed7c1c880604e86cabe76785f8475f2db0759e';
+  const EXPECTED_BODY_SHA256 = '132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a';
   const WRAP_FN_HEAD = 'function () {\n';
   const OBSERVE_MS = 5000;
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -5512,6 +5515,7 @@ IB07P_PRODUCTION_BODY();
       status(!!unknown && Object.values(unknown).every(Boolean)), { unknownKept: unknown });
     check('R10', 'native page untouched by Post production', status(nativeUnchanged));
     check('R11', 'Post carries the canonical site identity rule34', status(!!post && post.siteId === 'rule34'));
+    check('R12', 'Post records the known single-item count (pageCount === 1)', status(!!post && post.pageCount === 1));
     return { requestsDuringPost, observations: { siteId: post ? post.siteId : null, mediaType: post ? post.mediaType : null, nativeOriginalLinkPresent: !!originalLink, statisticsSizePresent: !!size } };
   }
 
@@ -5581,6 +5585,7 @@ IB07P_PRODUCTION_BODY();
     check('E07', 'sample/original relation matches native (explicit equality kept, distinct kept distinct)', status(!!r && !r.m.relation));
     check('E08', 'native file facts (dimensions, size, md5, score, rating), site and tags reach the Post', status(!!r && !r.m.facts && !r.m.site && !r.m.allTags));
     check('E09', 'preview, tag categories and source come from their native elements', status(!!r && !r.m.preview && !r.m.categories && !r.m.source));
+    check('E10', 'Post records the known single-item count (pageCount === 1)', status(!!post && post.pageCount === 1));
     return { requestsDuringPost, observations: { sampleState: r ? r.sampleState : null } };
   }
 
@@ -5594,10 +5599,11 @@ IB07P_PRODUCTION_BODY();
     const requestsDuringPost = requests.total - before;
     const byId = new Map((posts || []).map((p) => [String(p.id), p]));
     const counts = { cards: cards.length, postsReturned: byId.size, identity: 0, original: 0, sample: 0, relation: 0, facts: 0, site: 0, allTags: 0,
-      sampleDistinct: 0, sampleEqualsFile: 0, sampleAbsent: 0, sampleEmpty: 0 };
+      sampleDistinct: 0, sampleEqualsFile: 0, sampleAbsent: 0, sampleEmpty: 0, pageCountNotOne: 0 };
     for (const el of cards) {
       const post = byId.get(String(attr(el, 'data-id')));
       if (!post) { counts.identity++; continue; }
+      if (post.pageCount !== 1) counts.pageCountNotOne++;
       const r = e6Mismatches(el, post, false);
       for (const k of ['identity', 'original', 'sample', 'relation', 'facts', 'site', 'allTags']) if (r.m[k]) counts[k]++;
       counts[{ distinct: 'sampleDistinct', 'equals-file': 'sampleEqualsFile', absent: 'sampleAbsent', empty: 'sampleEmpty' }[r.sampleState]]++;
@@ -5610,6 +5616,7 @@ IB07P_PRODUCTION_BODY();
     check('EL06', 'sample slot equals native data-sample-url when present, empty when absent (fail closed)', status(cards.length > 0 && counts.sample === 0), { mismatches: counts.sample });
     check('EL07', 'sample/original relation matches native on every card', status(cards.length > 0 && counts.relation === 0), { mismatches: counts.relation });
     check('EL08', 'native file facts, site and tags reach every Post', status(cards.length > 0 && counts.facts === 0 && counts.site === 0 && counts.allTags === 0));
+    check('EL09', 'every card Post records the known single-item count (pageCount === 1)', status(cards.length > 0 && counts.pageCountNotOne === 0), { mismatches: counts.pageCountNotOne });
     return { requestsDuringPost, observations: counts };
   }
 

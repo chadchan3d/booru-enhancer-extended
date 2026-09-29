@@ -1,6 +1,6 @@
 # IB07 Rule34 / e621 / e926 production conformance
 
-This is the §11 step 6 production-conformance run for the IB07 native integrations on Rule34, e621 and e926. It runs against the current production artifact, which includes the slot-inference restriction, the Rule34 preview correction and the Rule34 site identity. It covers **IB07 G-HOST only**: each host's admitted native listing and image-post contexts, with production Booru Enhancer running. Gelbooru is covered separately and is not re-run.
+This is the §11 step 6 production-conformance run for the IB07 native integrations on Rule34, e621 and e926. It runs against the current production artifact, which includes the slot-inference restriction, the Rule34 preview and site corrections, and the Post `pageCount` fact. It covers **IB07 G-HOST only**: each host's admitted native listing and image-post contexts, with production Booru Enhancer running. Gelbooru is covered separately and is not re-run.
 
 It does not test video/GIF, pagination, hover, favorite/action, downloads, rendition policy or other hosts.
 
@@ -56,7 +56,7 @@ Nothing else: no screenshots, URLs or post numbers.
 
 No check is a known failure on the current artifact. Every check is expected to PASS if the live pages match the qualified evidence. A FAIL is a real finding; send it as is.
 
-R11 checks that the Rule34 Post carries the canonical site identity `rule34`. `siteId` is a Post fact, not proof of the browser host. C01 and C02 prove the exact host and route from the page itself.
+R11 checks that the Rule34 Post carries the canonical site identity `rule34`. R12 (Rule34 post), E10 (e621/e926 post) and EL09 (every e621/e926 listing card) check `pageCount === 1`, the known single-item count. `siteId` is a Post fact, not proof of the browser host. C01 and C02 prove the exact host and route from the page itself.
 
 ## Known limitation
 

@@ -12,9 +12,9 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const { split, BODY_START, WRAP_OPEN, WRAP_CLOSE } = require('./build_production_conformance.cjs');
 
-// Production with the IB07 slot restriction, Rule34 preview correction and Rule34 site identity.
-const COMMIT = '5064dfd';
-const EXPECTED_PRODUCTION_BLOB = '664bfe6366f03a6b1a27611087bcd6a91f2618f0';
+// Production with the IB07 slot restriction, Rule34 preview/site corrections and the Post pageCount fact.
+const COMMIT = 'c551bb0';
+const EXPECTED_PRODUCTION_BLOB = '32d0051fe73505984066a5b69766b5eafc242bb9';
 const POSTAMBLE_MARKER = '/* IB07P3 RULE34/E621/E926 PRODUCTION CONFORMANCE POSTAMBLE';
 const HOSTS = ['rule34.xxx', 'e621.net', 'e926.net'];
 const OUT = path.join(__dirname, 'IB07_R34E6_Production_Conformance.user.js');

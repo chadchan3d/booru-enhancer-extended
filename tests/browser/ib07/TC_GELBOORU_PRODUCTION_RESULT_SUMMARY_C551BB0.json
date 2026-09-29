@@ -1,0 +1,48 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "probe": "IB07 Gelbooru Production Conformance 1.0.0 (rebuilt for the Post pageCount artifact)",
+  "production_version": "1.2.7.3",
+  "production_commit": "c551bb0",
+  "production_source_blob": "32d0051fe73505984066a5b69766b5eafc242bb9",
+  "production_body_sha256": "132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a",
+  "conformance_artifact": {
+    "path": "tests/browser/ib07/IB07_Gelbooru_Production_Conformance.user.js",
+    "builder_check": "DERIVED_SCRIPT_UP_TO_DATE against commit c551bb0 at result recording"
+  },
+  "runtime_cell": { "manager": "Tampermonkey (version not relayed)", "browser": "Chrome (version not relayed)" },
+  "context": {
+    "host": "gelbooru.com",
+    "route": "native image-post view with id",
+    "account": "logged out (operator-confirmed)",
+    "media": "ordinary image post",
+    "normal_enhancer_and_other_userscripts": "disabled"
+  },
+  "evidence_form": "Operator-relayed summary of the sanitized result: check statuses and identity outcome. No URL, post id, tag, request log or screenshot is recorded.",
+  "supersedes_for_final_conformance": "TC_PRODUCTION_RESULT_SUMMARY.json (commit 9cade1a), which remains historical evidence for that artifact",
+  "result": { "checks": 16, "failed": 0, "status": "PASS" },
+  "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+  "passed_checks": [
+    "C00 exact production body identity",
+    "C01 qualified native image-post route",
+    "C02 gelbooru-family adapter active",
+    "C03 minimal Gelbooru Post produced",
+    "C04 identity agrees with route",
+    "C05 site gelbooru, kind image",
+    "C06 sample from native img#image",
+    "C07 original from native original link",
+    "C08 sample and original distinct",
+    "C09 original not fabricated from sample",
+    "C10 native dimensions and score",
+    "C11 unobserved fields unknown",
+    "C12 video guard did not disable the image path",
+    "C13 no enhancer request during Post production",
+    "C14 no enhancer request in the observation window",
+    "C15 pageCount === 1"
+  ],
+  "request_observation": {
+    "limitation": "The live postamble does not count requests issued synchronously during startup before it loaded. The run shows no queued or in-flight reads at postamble load and end, and no requests during the instrumented production and observation periods. This is not a live claim of zero startup requests; the local item 9 T1/T2 suite is the startup/request-control evidence."
+  },
+  "not_tested": ["video/GIF", "pagination", "hover", "viewer", "favorite/action", "download", "rendition policy", "Gelbooru listing gallery behavior (inactive: no candidate container matched live)", "other Gelbooru-family hosts"],
+  "conclusion": "Exact-artifact live production conformance PASS(scope: logged-out native ordinary image post; commit c551bb0) for Gelbooru: 16 of 16 checks."
+}

@@ -1,5 +1,5 @@
 /* IB07P GELBOORU PRODUCTION CONFORMANCE POSTAMBLE — test code, not production.
- * The production body above is retained verbatim from commit 9cade1a.
+ * The production body above is retained verbatim from the committed production artifact.
  * Scope: IB07 G-HOST production conformance for the logged-out Gelbooru
  * native image-post path only. Read-only: no clicks, no storage reads of
  * production preferences, no requests of its own. Every reported value is a
@@ -60,7 +60,7 @@
     const body = text.slice(WRAP_FN_HEAD.length, -1);
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body));
     const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
-    return hex === EXPECTED_BODY_SHA256 ? 'MATCH_9CADE1A' : 'MISMATCH';
+    return hex === EXPECTED_BODY_SHA256 ? 'MATCH_EXPECTED_ARTIFACT' : 'MISMATCH';
   }
 
   async function waitForAdapter(timeoutMs) {
@@ -176,6 +176,7 @@
         nativeStatisticsHasScore: !!scoreMatch,
         dimensionsMatchNativeStatistics: !!sizeMatch && post.width === Number(sizeMatch[1]) && post.height === Number(sizeMatch[2]),
         scoreMatchesNativeStatistics: !!scoreMatch && post.score === Number(scoreMatch[1]),
+        pageCountIsOne: post.pageCount === 1,
         dimensionsDifferFromRenderedSample: img ? (post.width !== img.naturalWidth || post.height !== img.naturalHeight) : null,
         unknownKept: {
           rating: post.rating === 'unknown',
@@ -192,7 +193,7 @@
     await sleep(OBSERVE_MS);
     const netAtEnd = netSnapshot();
 
-    check('C00', 'browser runs the production body of commit 9cade1a', identity === 'MATCH_9CADE1A' ? 'PASS' : 'FAIL', identity);
+    check('C00', 'browser runs the expected production body', identity === 'MATCH_EXPECTED_ARTIFACT' ? 'PASS' : 'FAIL', identity);
     check('C01', 'qualified route: gelbooru.com image-post view with id', pass(route.hostIsGelbooru && route.isImagePostRoute && route.routeIdPresent));
     check('C02', 'production activates the gelbooru-family adapter on the post page', pass(activation.adapterId === 'gelbooru-family' && activation.isPostPage));
     check('C03', 'production produces the Gelbooru minimal Post (not null/native-only)', pass(outcome === 'GELBOORU_MINIMAL_POST'), outcome);
@@ -216,6 +217,7 @@
       disabledOnlyByVideo ? 'FAIL' : 'PASS', { videoElementsInDocument: videoElements, disabledOnlyByVideo });
     check('C13', 'no enhancer request while producing the Post', pass(transportsWrapped.request && transportsWrapped.nativeFetch && requestsDuringFetchPost === 0));
     check('C14', 'no enhancer request from load through the observation window', pass(requests.total === 0));
+    check('C15', 'Post records the known single-item count (pageCount === 1)', pass(f?.pageCountIsOne));
 
     const failed = checks.filter((c) => c.status === 'FAIL');
     const result = {
@@ -225,9 +227,9 @@
         gmInfo: typeof GM_info !== 'undefined' ? { scriptHandler: GM_info.scriptHandler, version: GM_info.version } : null,
       },
       sourceContract: {
-        productionCommit: '9cade1a',
+        productionCommit: 'c551bb0',
         productionBodyIdentity: identity,
-        identityMethod: 'SHA-256 of Function.prototype.toString of the executed production wrapper, compared in-browser with the 9cade1a body',
+        identityMethod: 'SHA-256 of Function.prototype.toString of the executed production wrapper, compared in-browser with the expected body',
         metadataChange: 'unique test userscript identity; @match and @connect narrowed to gelbooru.com; public update targets removed; production body run inside a named wrapper function; test postamble appended',
       },
       summary: { checks: checks.length, failed: failed.length, status: failed.length ? 'FAIL' : 'PASS' },

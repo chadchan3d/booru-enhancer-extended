@@ -1,7 +1,9 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
-**Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `32d0051fe73505984066a5b69766b5eafc242bb9` (`9cade1a` plus the IB07 slot-inference restriction, Rule34 preview and site corrections, and the Post `pageCount` fact)  
+**Checkpoint state:** PASS(scope), see `IB07_COMPLETION_RECORD.md`
+
+**Production source blob:** `32d0051fe73505984066a5b69766b5eafc242bb9` (`9cade1a` plus the IB07 slot-inference restriction, Rule34 preview and site corrections, and the Post `pageCount` fact)
+
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -383,3 +385,13 @@ Merge and cache semantics are unchanged:
 Tests: `tests/host/ib07/pagecount_assertions.cjs` (`pagecount-result.json`), 11/11 PASS with 8 controls. Removing the field, defaulting to 1, leaving each producer null, and a cache overwrite are all caught. All other Post facts are identical to the previous artifact, and requests are 0.
 
 **Exact-artifact production conformance is reopened.** The shared Post shape changed on every qualified host, including Gelbooru. The earlier live runs remain historical evidence for their artifacts (Rule34/e621/e926 at `5064dfd`; Gelbooru at `9cade1a`). Final conformance needs reruns against `32d0051`.
+
+## Exact-artifact production conformance (final)
+
+Final live conformance on commit `c551bb0` (blob `32d0051fe73505984066a5b69766b5eafc242bb9`), 7/7 PASS with 0 failed checks and C00 matched on each:
+- Rule34 listing (42 cards) and image post (`siteId` `rule34`, `pageCount` 1);
+- e621 listing (72/72 Posts, `pageCount` 1) and image post;
+- e926 listing (74/74 Posts, `pageCount` 1) and image post;
+- Gelbooru image post (16/16 checks, `pageCount` 1).
+
+Results: `tests/browser/ib07/TC_R34E6_PRODUCTION_RESULT_SUMMARY_C551BB0.json`, `TC_GELBOORU_PRODUCTION_RESULT_SUMMARY_C551BB0.json`. The earlier runs on `5064dfd` and `9cade1a` remain historical evidence for those artifacts. The request-observation limitation is retained as recorded there.

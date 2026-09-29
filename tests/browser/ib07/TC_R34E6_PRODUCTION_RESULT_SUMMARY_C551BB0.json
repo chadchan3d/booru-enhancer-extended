@@ -1,0 +1,43 @@
+{
+  "checkpoint": "IB07",
+  "evidence_gate": "G-HOST",
+  "probe": "IB07 Rule34/e621/e926 Production Conformance 1.0.0 (rebuilt for the Post pageCount artifact)",
+  "production_version": "1.2.7.3",
+  "production_commit": "c551bb0",
+  "production_source_blob": "32d0051fe73505984066a5b69766b5eafc242bb9",
+  "production_body_sha256": "132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a",
+  "conformance_artifact": {
+    "path": "tests/browser/ib07/IB07_R34E6_Production_Conformance.user.js",
+    "builder_check": "DERIVED_SCRIPT_UP_TO_DATE against commit c551bb0 at result recording"
+  },
+  "runtime_cell": { "manager": "Tampermonkey (version not relayed)", "browser": "Chrome (version not relayed)" },
+  "context": {
+    "account": "logged out on Rule34, e621 and e926 (operator-confirmed)",
+    "normal_enhancer_and_other_userscripts": "disabled for these runs",
+    "navigation": "native listing and post routes loaded directly; post pages opened from native links in a new tab (procedural only; viewer behavior not tested)"
+  },
+  "evidence_form": "Operator-relayed summary of the sanitized result blocks: statuses, identity outcome, counts. No URL, post id, tag, request log or screenshot is recorded.",
+  "supersedes_for_final_conformance": "TC_R34E6_PRODUCTION_RESULT_SUMMARY.json (commit 5064dfd), which remains historical evidence for that artifact",
+  "runs": [
+    { "row": 1, "site": "rule34.xxx", "context": "listing", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "cards_recognized": 42, "identity_mismatches": 0, "posts_built_from_listing_cards": 0 } },
+    { "row": 2, "site": "rule34.xxx", "context": "post-view", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "identity_route_sample_original_dimensions": "PASS", "site_id_rule34": "PASS", "page_count_is_1": "PASS", "unknown_fields_remain_unknown": true, "native_page_untouched": true } },
+    { "row": 3, "site": "e621.net", "context": "listing", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "cards": 72, "posts": 72, "mismatches_identity_original_sample_relation_facts_site_tags": 0, "page_count_is_1_on_every_post": true } },
+    { "row": 4, "site": "e621.net", "context": "post-view", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "identity_original_sample_relation_file_facts_preview_categories_source": "PASS", "page_count_is_1": "PASS" } },
+    { "row": 5, "site": "e926.net", "context": "listing", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "cards": 74, "posts": 74, "mismatches_identity_original_sample_relation_facts_site_tags": 0, "page_count_is_1_on_every_post": true, "independently_tested": true } },
+    { "row": 6, "site": "e926.net", "context": "post-view", "status": "PASS", "failed_checks": 0, "production_body_identity": "MATCH_EXPECTED_ARTIFACT",
+      "observations": { "identity_original_sample_relation_file_facts_preview_categories_source": "PASS", "page_count_is_1": "PASS", "independently_tested": true } }
+  ],
+  "request_observation": {
+    "during_post_production": "no enhancer request in all six runs",
+    "postamble_observation_window": "no enhancer request in all six runs",
+    "limitation": "The live postamble does not count requests issued synchronously during startup before it loaded. The runs show no queued or in-flight reads at postamble load and end, and no requests during the instrumented production and observation periods. This is not a live claim of zero startup requests; the fully instrumented local item 9 T1/T2 suite is the startup/request-control evidence."
+  },
+  "not_observed_live": ["Rule34 post page with img#image and no native original link", "e621/e926 card or container without data-sample-url"],
+  "not_tested": ["video/GIF", "pagination", "hover", "viewer", "favorite/action", "download", "rendition policy", "other Gelbooru-family hosts"],
+  "conclusion": "Exact-artifact live production conformance PASS(scope: logged-out native listing and ordinary image post; commit c551bb0) for Rule34, e621 and e926: 6 of 6 runs, 0 failed checks."
+}

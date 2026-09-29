@@ -101,6 +101,8 @@ const PM = {
   e6FailOpen: (t) => mut(t, "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = d.sampleUrl || fileUrl;'),
   familyRequest: (t) => mut(t, '// IB07 safeguard: no family-wide DAPI/HTML resolver is admitted.', "// IB07 safeguard: no family-wide DAPI/HTML resolver is admitted.\nBE.net.request({ url: location.origin + '/index.php?page=dapi&s=post&q=index&id=' + id }, 1).catch(() => {});"),
   e6Request: (t) => mut(t, 'return e6NativePostPage(id) || e621NativeListingPost(id);', 'BE.net.json(`${location.origin}/posts/${id}.json`).catch(() => {}); return e6NativePostPage(id) || e621NativeListingPost(id);'),
+  r34PageCountNull: (t) => mut(t, "\t\t\tsiteId: 'rule34',\n\t\t\tpageCount: 1,\n", "\t\t\tsiteId: 'rule34',\n"),
+  e6PageCountNull: (t) => mut(t, "siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',\n\t\t\tpageCount: 1,\n", "siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',\n"),
   r34FamilySite: (t) => mut(t, "siteId: 'rule34',", "siteId: 'gelbooru-family',"),
   r34PreviewFromSample: (t) => mut(t, 'mediaType: guessMediaType(originalUrl || sampleUrl),', 'previewUrl: sampleUrl, mediaType: guessMediaType(originalUrl || sampleUrl),'),
 };
@@ -121,6 +123,9 @@ const FAULTS = [
   ['request while producing an e926 Post', 'e926 post', PM.e6Request, { C13: 'FAIL', C14: 'FAIL' }],
   ['Rule34 preview filled from the sample again', 'rule34 post', PM.r34PreviewFromSample, { R09: 'FAIL' }],
   ['Rule34 family site label restored', 'rule34 post', PM.r34FamilySite, { R11: 'FAIL' }],
+  ['Rule34 pageCount left unknown', 'rule34 post', PM.r34PageCountNull, { R12: 'FAIL' }],
+  ['e621 post pageCount left unknown', 'e621 post', PM.e6PageCountNull, { E10: 'FAIL' }],
+  ['e926 listing pageCount left unknown', 'e926 listing (distinct, equal, absent sample)', PM.e6PageCountNull, { EL09: 'FAIL' }],
 ];
 // Postamble leak mutants (sanitation must catch each).
 const LEAKS = [

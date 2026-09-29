@@ -1,6 +1,6 @@
 'use strict';
 // Builds IB07_Gelbooru_Production_Conformance.user.js from the committed
-// production source at commit 9cade1a (read from git, not the working copy).
+// production source at COMMIT (read from git, not the working copy).
 // The production body is kept byte-for-byte inside a named wrapper function
 // that the script calls once; the metadata block is changed and the IB07P
 // postamble is appended. Usage: node build_production_conformance.cjs [--check]
@@ -9,7 +9,8 @@ const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
-const COMMIT = '9cade1a';
+// Rebuilt for the Post pageCount artifact; the 9cade1a build was run live earlier (historical).
+const COMMIT = 'c551bb0';
 const BODY_START = '// ==/UserScript==\n';
 const POSTAMBLE_MARKER = '/* IB07P GELBOORU PRODUCTION CONFORMANCE POSTAMBLE';
 // The production body (one strict-mode IIFE after a comment block) runs

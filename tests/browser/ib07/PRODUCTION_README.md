@@ -1,6 +1,6 @@
 # IB07 Gelbooru production conformance
 
-This is the §11 step 6 production-conformance run for the Gelbooru native image-post path added in production commit `9cade1a`. It covers **IB07 G-HOST only**: a logged-out Gelbooru image-post page with the production enhancer running.
+This is the §11 step 6 production-conformance run for the Gelbooru native image-post path, rebuilt against production commit `c551bb0` (which adds the Post `pageCount` fact). An earlier build against `9cade1a` was run live and is kept as historical evidence for that artifact. It covers **IB07 G-HOST only**: a logged-out Gelbooru image-post page with the production enhancer running.
 
 It does not test video/GIF, pagination, hover, favorite/action, downloads, rendition policy or other Gelbooru-family hosts.
 
@@ -8,13 +8,13 @@ It does not test video/GIF, pagination, hover, favorite/action, downloads, rendi
 
 `IB07_Gelbooru_Production_Conformance.user.js` follows the IB06 production-conformance convention:
 
-- the production body of commit `9cade1a`, byte-for-byte, run once inside a named wrapper function (the body is a single self-running function, so the wrapper does not change what it does);
+- the production body of commit `c551bb0`, byte-for-byte, run once inside a named wrapper function (the body is a single self-running function, so the wrapper does not change what it does);
 - a separate userscript identity, so it uses its own storage and never reads your normal Booru Enhancer settings;
 - `@match` and `@connect` narrowed to `gelbooru.com`;
 - no update URL, so Tampermonkey can never replace it with the published build;
 - an appended test postamble with two menu commands.
 
-The postamble is read-only. It clicks nothing and makes no request of its own. It checks, inside the browser, that the production body it is running is exactly the `9cade1a` body (check C00). It does this by hashing the source text the browser holds for the wrapper function that actually ran production. Tampermonkey does not expose a script's full source through `GM_info`, which is why the first run reported C00 as `UNAVAILABLE`. Its result contains only booleans, counts, check statuses, dimensions and score. It never contains post IDs, URLs, hosts, hashes, tag text, sources, dates or account data.
+The postamble is read-only. It clicks nothing and makes no request of its own. It checks, inside the browser, that the production body it is running is exactly the expected production body (check C00). It does this by hashing the source text the browser holds for the wrapper function that actually ran production. Tampermonkey does not expose a script's full source through `GM_info`, which is why the first run reported C00 as `UNAVAILABLE`. Its result contains only booleans, counts, check statuses, dimensions and score. It never contains post IDs, URLs, hosts, hashes, tag text, sources, dates or account data.
 
 ## Before you start
 
@@ -28,7 +28,7 @@ The postamble is read-only. It clicks nothing and makes no request of its own. I
 2. Tampermonkey dashboard → **+** (create a new script) → replace everything in the editor with what you copied → **File → Save** (Ctrl+S).
 3. Confirm it's listed as `Booru Enhancer Extended — IB07 Gelbooru Production Conformance` and is enabled.
 
-Check C00 confirms the source. If the pasted copy differs from `9cade1a` in any way, C00 reports `MISMATCH`.
+Check C00 confirms the source. If the pasted copy differs from the expected production body in any way, C00 reports `MISMATCH`.
 
 ## Run
 
@@ -54,7 +54,7 @@ Send nothing else: no screenshots, URLs or post numbers.
 {
   "probe":           { "name", "version", "productionVersion" },
   "environment":     { "userAgent", "gmInfo": { "scriptHandler", "version" } },
-  "sourceContract":  { "productionCommit": "9cade1a", "productionBodyIdentity", "metadataChange" },
+  "sourceContract":  { "productionCommit": "c551bb0", "productionBodyIdentity", "metadataChange" },
   "summary":         { "checks", "failed", "status" },
   "checks":          [ { "id": "C00".."C14", "name", "status", "detail" } ],
   "observations":    { "route", "activation", "outcome", "fetchError", "guards", "postFacts", "requests" },
@@ -66,7 +66,7 @@ The checks:
 
 | Check | Question |
 | --- | --- |
-| C00 | Is the browser running the exact `9cade1a` production body? |
+| C00 | Is the browser running the exact expected production body? |
 | C01 | Is this the qualified route (gelbooru.com image post with an id)? |
 | C02 | Does production activate the gelbooru-family adapter on the post page? |
 | C03 | Does it produce the Gelbooru minimal Post rather than returning nothing? |
@@ -81,6 +81,7 @@ The checks:
 | C12 | Does the fail-closed video check leave the image path working in your browser? |
 | C13 | Is no enhancer request made while the Post is produced? |
 | C14 | Is no enhancer request made from load through the observation window? |
+| C15 | Does the Post record the known single-item count (`pageCount === 1`)? |
 
 A FAIL is evidence, not an error to fix before sending. Send the result as it is.
 
@@ -90,7 +91,7 @@ Production starts up before the postamble loads. A request issued synchronously 
 
 ## Local verification (no live site)
 
-- `node build_production_conformance.cjs --check`: the script is current with commit `9cade1a`.
+- `node build_production_conformance.cjs --check`: the script is current with commit `c551bb0`.
 - `node verify_production_conformance.cjs`: static checks plus stub scenarios.
 
 See `PRODUCTION_VERIFICATION.json`.

@@ -2,12 +2,12 @@
   "checkpoint": "IB07",
   "evidence_gate": "G-HOST",
   "stage": "Rule34/e621/e926 production conformance package (§11 step 6); not yet executed",
-  "production_commit": "5064dfd",
-  "production_source_blob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
-  "production_body_sha256": "5f7d213a9bd9d1029490dd7050ed7c1c880604e86cabe76785f8475f2db0759e",
+  "production_commit": "c551bb0",
+  "production_source_blob": "32d0051fe73505984066a5b69766b5eafc242bb9",
+  "production_body_sha256": "132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a",
   "derived_script": "IB07_R34E6_Production_Conformance.user.js",
-  "derived_script_sha256": "a2ec942f07e1d1091ad53005a372f982587907f48c9008ea918e3806b8d8ee25",
-  "derived_script_bytes": 224098,
+  "derived_script_sha256": "806684c72d331355bde7ba9517c16e893a5a681eb58ac831dfaf691883cf7f7b",
+  "derived_script_bytes": 224674,
   "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
   "convention": "Gelbooru production conformance (commit 2e83c33): same split and wrapper constants (imported from build_production_conformance.cjs), same C00 method; own postamble ib07p3_postamble.js",
   "admitted_scope": {
@@ -42,7 +42,8 @@
       "R08 dimensions from Statistics",
       "R09 unobserved fields unknown (incl. preview)",
       "R10 native page untouched",
-      "R11 site identity rule34"
+      "R11 site identity rule34",
+      "R12 pageCount === 1"
     ],
     "rule34 listing": [
       "L03 cards recognized",
@@ -56,7 +57,8 @@
       "E06 sample = data-sample-url or empty",
       "E07 sample/original relation",
       "E08 file facts, site, tags",
-      "E09 preview, categories, source from native elements"
+      "E09 preview, categories, source from native elements",
+      "E10 pageCount === 1"
     ],
     "e621/e926 listing": [
       "EL03 batch Posts for all cards",
@@ -64,7 +66,8 @@
       "EL05 original",
       "EL06 sample or empty",
       "EL07 relation",
-      "EL08 file facts, site, tags"
+      "EL08 file facts, site, tags",
+      "EL09 every card pageCount === 1"
     ]
   },
   "expected_on_current_artifact": {
@@ -76,7 +79,7 @@
     "command": "node verify_r34e6_conformance.cjs",
     "requires": "npm install in tests/host/ib07 (pinned jsdom 30.1.1); tests/host/ib07/item9_harness.cjs optional setup hook",
     "node_version": "v24.19.0",
-    "result": "57 of 57 PASS",
+    "result": "60 of 60 PASS",
     "static": [
       "derived script = fresh build from committed artifact",
       "committed blob is the expected artifact",
@@ -117,7 +120,10 @@
       "request in Rule34 Post production -> C13, C14",
       "request in e926 Post production -> C13, C14",
       "Rule34 preview filled from the sample again -> R09 FAIL",
-      "Rule34 family site label restored -> R11 FAIL"
+      "Rule34 family site label restored -> R11 FAIL",
+      "Rule34 pageCount left unknown -> R12 FAIL",
+      "e621 post pageCount left unknown -> E10 FAIL",
+      "e926 listing pageCount left unknown -> EL09 FAIL"
     ],
     "leak_mutants_caught": [
       "raw page URL",
@@ -127,6 +133,6 @@
     ]
   },
   "gelbooru": "not re-run: since the Gelbooru-conformed body, production changed only in host-gated code (slot restriction; Rule34 preview and siteId after the rule34.xxx gate), none reachable on gelbooru.com; harness old vs new identical Post (IB07_HOST_FACTS.md)",
-  "live_evidence": "NONE — requires operator browser runs",
-  "rebuild": "rebuilt after the Rule34 preview correction and the Rule34 site identity; earlier builds were never run live"
+  "live_evidence": "NONE for the c551bb0 build — requires operator rerun",
+  "rebuild": "rebuilt against c551bb0 (Post pageCount); the 5064dfd build was run live (6/6 PASS) and is historical for that artifact"
 }

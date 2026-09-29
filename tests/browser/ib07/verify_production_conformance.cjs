@@ -1,27 +1,27 @@
 'use strict';
 // Local verification for the IB07 Gelbooru production-conformance build.
-// Static: derived script is current, body is byte-identical to commit 9cade1a,
+// Static: derived script is current, body is byte-identical to the committed artifact,
 // metadata changes are limited, postamble uses no network/storage/click APIs.
 // Stub: runs the postamble against fake BE/GM/DOM scenarios, confirms each
 // check reacts to its defect, and confirms no raw value reaches the output.
 // This does not exercise live Gelbooru; that evidence belongs to the operator.
 const fs = require('fs');
 const path = require('path');
-const { build, split, POSTAMBLE_MARKER, WRAP_OPEN, WRAP_FN_HEAD, WRAP_CLOSE, OUT } = require('./build_production_conformance.cjs');
+const { build, split, POSTAMBLE_MARKER, WRAP_OPEN, WRAP_FN_HEAD, WRAP_CLOSE, OUT, COMMIT } = require('./build_production_conformance.cjs');
 
 const results = [];
 const check = (name, ok, detail = '') => results.push({ name, pass: !!ok, detail });
 
 const derived = fs.readFileSync(OUT, 'utf8');
 const built = build();
-check('derived script matches a fresh build from 9cade1a', derived === built.text);
+check('derived script matches a fresh build from the committed artifact', derived === built.text);
 check('derived script is LF-only', !derived.includes('\r'));
 try { new Function(derived); check('derived script parses', true); } catch (e) { check('derived script parses', false, e.message); }
 
 const wrapAt = derived.indexOf(WRAP_OPEN);
 const closeAt = derived.indexOf(WRAP_CLOSE);
 const markerAt = derived.indexOf(POSTAMBLE_MARKER);
-check('production body is byte-identical to 9cade1a inside the wrapper',
+check('production body is byte-identical to the committed artifact inside the wrapper',
   wrapAt > 0 && closeAt > wrapAt && derived.slice(wrapAt + WRAP_OPEN.length, closeAt) === built.body);
 check('production body appears exactly once', derived.split(built.body).length === 2);
 check('wrapper is invoked exactly once, before the postamble',
@@ -34,7 +34,7 @@ const intendedFn = (0, eval)(`(${wrapperSource})`);
 check('engine toString of the wrapper reproduces it exactly', Function.prototype.toString.call(intendedFn) === wrapperSource);
 
 const meta = split(derived).meta.split('\n');
-const orig = split(require('child_process').execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', '9cade1a:Booru_Enhancer.user.js'], { encoding: 'utf8', maxBuffer: 64 << 20 })).meta.split('\n');
+const orig = split(require('child_process').execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 << 20 })).meta.split('\n');
 const added = meta.filter((l) => !orig.includes(l));
 const removed = orig.filter((l) => !meta.includes(l));
 check('metadata adds only name/namespace/match/connect lines',
@@ -62,7 +62,7 @@ function goodPost(over = {}) {
     id: ROUTE_ID, siteId: 'gelbooru', mediaType: 'image', sampleUrl: SAMPLE, originalUrl: ORIGINAL, previewUrl: '',
     width: 1448, height: 2048, score: 3, rating: 'unknown', fileSize: 0, md5: '', source: '', createdAt: '',
     allTags: [], artists: [], characters: [], copyrights: [], generalTags: [], metaTags: [],
-    postUrl: `${ORIGIN}/index.php?page=post&s=view&id=${ROUTE_ID}`, ...over,
+    postUrl: `${ORIGIN}/index.php?page=post&s=view&id=${ROUTE_ID}`, pageCount: 1, ...over,
   };
 }
 
@@ -109,7 +109,7 @@ async function scenario({ post = goodPost(), nativeOriginal = ORIGINAL, video = 
   const leaks = (text) => RAW.filter((r) => text.includes(r));
 
   let s = await scenario();
-  check('happy path: all checks PASS and identity matches 9cade1a',
+  check('happy path: all checks PASS and identity matches the expected artifact',
     s.result.summary.status === 'PASS' && s.status.C00 === 'PASS' && s.status.C08 === 'PASS', JSON.stringify(s.status));
   check('happy path: no raw value in output', leaks(s.text).length === 0, leaks(s.text).join());
 
@@ -130,6 +130,9 @@ async function scenario({ post = goodPost(), nativeOriginal = ORIGINAL, video = 
   s = await scenario({ post: goodPost({ siteId: 'gelbooru-family' }) });
   check('other Post path is reported (C03 FAIL)', s.status.C03 === 'FAIL');
 
+  s = await scenario({ post: goodPost({ pageCount: null }) });
+  check('unknown pageCount on the Gelbooru Post is reported (C15 FAIL)', s.status.C15 === 'FAIL', JSON.stringify(s.status));
+
   s = await scenario({ post: goodPost({ id: '999' }) });
   check('identity disagreement is reported (C04 FAIL)', s.status.C04 === 'FAIL');
 
@@ -137,7 +140,7 @@ async function scenario({ post = goodPost(), nativeOriginal = ORIGINAL, video = 
   const c00 = async (fn) => { const r = await scenario({ productionFn: fn }); return [r.status.C00, r.result.sourceContract.productionBodyIdentity]; };
   const evalFn = (src) => (0, eval)(`(${src})`);
   let [st, id] = await c00(intendedFn);
-  check('C00 PASS for the intended body without GM_info.scriptSource', st === 'PASS' && id === 'MATCH_9CADE1A', id);
+  check('C00 PASS for the intended body without GM_info.scriptSource', st === 'PASS' && id === 'MATCH_EXPECTED_ARTIFACT', id);
   [st, id] = await c00(evalFn(wrapperSource.replace('function gelbooruNativeImagePost(id) {', 'function gelbooruNativeImagePost(id) { void 0;')));
   check('C00 FAIL when one production line is altered (MISMATCH)', st === 'FAIL' && id === 'MISMATCH', id);
   [st, id] = await c00(evalFn(wrapperSource.replace(/\}$/, 'void 0;\n}')));
@@ -147,7 +150,7 @@ async function scenario({ post = goodPost(), nativeOriginal = ORIGINAL, video = 
   [st, id] = await c00(null); // null, not undefined: undefined would select the default
   check('C00 FAIL when the wrapper is absent (UNAVAILABLE)', st === 'FAIL' && id === 'UNAVAILABLE', id);
   [st, id] = await c00(evalFn(wrapperSource.replace(/\n/g, '\r\n')));
-  check('C00 PASS when the manager stored the same body with CRLF', st === 'PASS' && id === 'MATCH_9CADE1A', id);
+  check('C00 PASS when the manager stored the same body with CRLF', st === 'PASS' && id === 'MATCH_EXPECTED_ARTIFACT', id);
 
   const failed = results.filter((r) => !r.pass);
   console.log(JSON.stringify({ suite: 'ib07-gelbooru-production-conformance-verify', total: results.length, passed: results.length - failed.length, failed: failed.length, results }, null, 2));

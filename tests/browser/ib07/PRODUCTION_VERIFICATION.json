@@ -1,12 +1,12 @@
 {
   "checkpoint": "IB07",
   "evidence_gate": "G-HOST",
-  "stage": "production conformance package (§11 step 6), revision 2; not yet executed",
-  "production_commit": "9cade1a",
-  "production_body_sha256": "91cbdea552bacf134e1249effb560cdf88979248915ced97e6bed7714ead0ca0",
+  "stage": "production conformance package (§11 step 6), rebuilt for the Post pageCount artifact; not yet executed",
+  "production_commit": "c551bb0",
+  "production_body_sha256": "132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a",
   "derived_script": "IB07_Gelbooru_Production_Conformance.user.js",
-  "derived_script_sha256": "66108b197a3fa39fc7248a5dc6b20ed3491c6a8b529884c40066ebb6c0cca0be",
-  "derived_script_bytes": 217454,
+  "derived_script_sha256": "a480fcc23d5a643ad891e1e9c15f0bd822024b7a20961a8ab967e4b1d75d7aef",
+  "derived_script_bytes": 217657,
   "line_endings": "LF (pinned by .gitattributes: tests/browser/ib07/* text eol=lf)",
   "convention": "IB06 production conformance: production body retained, test identity, narrowed @match/@connect, update targets removed, postamble appended",
   "metadata_change": "unique test userscript identity; @match and @connect narrowed to gelbooru.com; public update targets removed; production body run inside a named wrapper function; test postamble appended",
@@ -24,7 +24,7 @@
   "verification": {
     "command": "node verify_production_conformance.cjs",
     "node_version": "v24.19.0",
-    "result": "28 of 28 PASS",
+    "result": "29 of 29 PASS",
     "static": [
       "derived script matches a fresh build from 9cade1a; LF-only; parses",
       "production body byte-identical to 9cade1a inside the wrapper; appears exactly once",
@@ -49,11 +49,22 @@
       "request during Post production: C13 and C14 FAIL; no raw value in output",
       "guessed rating: C11 FAIL",
       "other Post path: C03 FAIL",
-      "identity disagreement: C04 FAIL"
+      "identity disagreement: C04 FAIL",
+      "unknown pageCount on the Gelbooru Post: C15 FAIL"
     ]
   },
   "identity_scope": "C00 proves the text of the function that ran production equals the 9cade1a body. It does not cover the manager's own wrapper code or the metadata block; those are not production code.",
   "known_limitation": "Requests issued synchronously during production startup, before the postamble loads, are not counted; the result reports queue and in-flight counts at postamble load.",
-  "not_in_scope": ["video/GIF", "pagination (G-PLACE-T)", "hover (G-VIDEO/G-HOVER)", "favorite/action (G-ACTION)", "download", "rendition policy (G-RENDITION)", "other Gelbooru-family hosts"],
-  "live_evidence": "Run 1 (revision 1): C01-C14 PASS, C00 FAIL UNAVAILABLE. Revision 2: NONE yet — requires operator rerun."
+  "not_in_scope": [
+    "video/GIF",
+    "pagination (G-PLACE-T)",
+    "hover (G-VIDEO/G-HOVER)",
+    "favorite/action (G-ACTION)",
+    "download",
+    "rendition policy (G-RENDITION)",
+    "other Gelbooru-family hosts"
+  ],
+  "live_evidence": "NONE for the c551bb0 build — requires operator rerun",
+  "rebuild_pagecount": "rebuilt against c551bb0 (Post pageCount); new check C15 pageCount === 1; C00 label now MATCH_EXPECTED_ARTIFACT; previous 9cade1a live PASS is historical for that artifact",
+  "real_script_jsdom_check": "real rebuilt derived script on a Gelbooru post fixture: 16/16 checks PASS, identity MATCH_EXPECTED_ARTIFACT"
 }

@@ -1699,7 +1699,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			id: '', originalUrl: '', sampleUrl: '', previewUrl: '', mediaType: 'unknown',
  width: 0, height: 0, fileSize: 0, md5: '', rating: 'unknown', score: 0, favCount: 0,
  artists: [], characters: [], copyrights: [], generalTags: [], metaTags: [], allTags: [],
- source: '', postUrl: location.href, createdAt: '', siteId: '', ...overrides,
+ source: '', postUrl: location.href, createdAt: '', siteId: '', pageCount: null, ...overrides,
 		};
 	}
 
@@ -1909,7 +1909,7 @@ const IB07P_PRODUCTION_BODY = function () {
 		}) || null;
 
 		const sampleUrl = img.currentSrc || img.getAttribute('src') || '';
-		const originalUrl = originalLink?.href || sampleUrl;
+		const originalUrl = originalLink?.href || '';
 		const tags = String(img.getAttribute('alt') || '')
 			.split(/\s+/)
 			.map((tag) => tag.trim())
@@ -1929,7 +1929,6 @@ const IB07P_PRODUCTION_BODY = function () {
 			id: String(id),
 			originalUrl,
 			sampleUrl,
-			previewUrl: sampleUrl,
 			mediaType: guessMediaType(originalUrl || sampleUrl),
 			width: sizeMatch ? Number(sizeMatch[1]) : 0,
 			height: sizeMatch ? Number(sizeMatch[2]) : 0,
@@ -1939,7 +1938,8 @@ const IB07P_PRODUCTION_BODY = function () {
 			allTags: tags,
 			source: sourceMatch ? sourceMatch[1].trim() : '',
 			postUrl: location.href,
-			siteId: 'gelbooru-family',
+			siteId: 'rule34',
+			pageCount: 1,
 		});
 	}
 
@@ -1981,6 +1981,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			score: scoreMatch ? Number(scoreMatch[1]) : 0,
 			postUrl: `${location.origin}/index.php?page=post&s=view&id=${currentId}`,
 			siteId: 'gelbooru',
+			pageCount: 1,
 		});
 	}
 
@@ -2295,7 +2296,7 @@ const IB07P_PRODUCTION_BODY = function () {
 
 		const fileExt = String(d.fileExt || '').toLowerCase();
 		const fileUrl = d.fileUrl || '';
-		const sampleUrl = d.sampleUrl || fileUrl;
+		const sampleUrl = d.sampleUrl || '';
 		const img = postPage
 			? document.querySelector('#image-container img#image, img#image')
 			: element.querySelector('picture img, img');
@@ -2351,6 +2352,7 @@ const IB07P_PRODUCTION_BODY = function () {
 			postUrl: location.origin + '/posts/' + id,
 			createdAt,
 			siteId: location.hostname === 'e926.net' ? 'e926' : 'e621',
+			pageCount: 1,
 		});
 	}
 
@@ -5360,7 +5362,7 @@ const IB07P_PRODUCTION_BODY = function () {
 };
 IB07P_PRODUCTION_BODY();
 /* IB07P GELBOORU PRODUCTION CONFORMANCE POSTAMBLE — test code, not production.
- * The production body above is retained verbatim from commit 9cade1a.
+ * The production body above is retained verbatim from the committed production artifact.
  * Scope: IB07 G-HOST production conformance for the logged-out Gelbooru
  * native image-post path only. Read-only: no clicks, no storage reads of
  * production preferences, no requests of its own. Every reported value is a
@@ -5370,7 +5372,7 @@ IB07P_PRODUCTION_BODY();
   'use strict';
 
   const RESULT_KEY = 'ib07p:last-result:v1';
-  const EXPECTED_BODY_SHA256 = '91cbdea552bacf134e1249effb560cdf88979248915ced97e6bed7714ead0ca0';
+  const EXPECTED_BODY_SHA256 = '132263e8ba33110cd795c839a8958529a4532f2504c4367e76ecfbf83567551a';
   const WRAP_FN_HEAD = 'function () {\n';
   const OBSERVE_MS = 5000;
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -5421,7 +5423,7 @@ IB07P_PRODUCTION_BODY();
     const body = text.slice(WRAP_FN_HEAD.length, -1);
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body));
     const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
-    return hex === EXPECTED_BODY_SHA256 ? 'MATCH_9CADE1A' : 'MISMATCH';
+    return hex === EXPECTED_BODY_SHA256 ? 'MATCH_EXPECTED_ARTIFACT' : 'MISMATCH';
   }
 
   async function waitForAdapter(timeoutMs) {
@@ -5537,6 +5539,7 @@ IB07P_PRODUCTION_BODY();
         nativeStatisticsHasScore: !!scoreMatch,
         dimensionsMatchNativeStatistics: !!sizeMatch && post.width === Number(sizeMatch[1]) && post.height === Number(sizeMatch[2]),
         scoreMatchesNativeStatistics: !!scoreMatch && post.score === Number(scoreMatch[1]),
+        pageCountIsOne: post.pageCount === 1,
         dimensionsDifferFromRenderedSample: img ? (post.width !== img.naturalWidth || post.height !== img.naturalHeight) : null,
         unknownKept: {
           rating: post.rating === 'unknown',
@@ -5553,7 +5556,7 @@ IB07P_PRODUCTION_BODY();
     await sleep(OBSERVE_MS);
     const netAtEnd = netSnapshot();
 
-    check('C00', 'browser runs the production body of commit 9cade1a', identity === 'MATCH_9CADE1A' ? 'PASS' : 'FAIL', identity);
+    check('C00', 'browser runs the expected production body', identity === 'MATCH_EXPECTED_ARTIFACT' ? 'PASS' : 'FAIL', identity);
     check('C01', 'qualified route: gelbooru.com image-post view with id', pass(route.hostIsGelbooru && route.isImagePostRoute && route.routeIdPresent));
     check('C02', 'production activates the gelbooru-family adapter on the post page', pass(activation.adapterId === 'gelbooru-family' && activation.isPostPage));
     check('C03', 'production produces the Gelbooru minimal Post (not null/native-only)', pass(outcome === 'GELBOORU_MINIMAL_POST'), outcome);
@@ -5577,6 +5580,7 @@ IB07P_PRODUCTION_BODY();
       disabledOnlyByVideo ? 'FAIL' : 'PASS', { videoElementsInDocument: videoElements, disabledOnlyByVideo });
     check('C13', 'no enhancer request while producing the Post', pass(transportsWrapped.request && transportsWrapped.nativeFetch && requestsDuringFetchPost === 0));
     check('C14', 'no enhancer request from load through the observation window', pass(requests.total === 0));
+    check('C15', 'Post records the known single-item count (pageCount === 1)', pass(f?.pageCountIsOne));
 
     const failed = checks.filter((c) => c.status === 'FAIL');
     const result = {
@@ -5586,9 +5590,9 @@ IB07P_PRODUCTION_BODY();
         gmInfo: typeof GM_info !== 'undefined' ? { scriptHandler: GM_info.scriptHandler, version: GM_info.version } : null,
       },
       sourceContract: {
-        productionCommit: '9cade1a',
+        productionCommit: 'c551bb0',
         productionBodyIdentity: identity,
-        identityMethod: 'SHA-256 of Function.prototype.toString of the executed production wrapper, compared in-browser with the 9cade1a body',
+        identityMethod: 'SHA-256 of Function.prototype.toString of the executed production wrapper, compared in-browser with the expected body',
         metadataChange: 'unique test userscript identity; @match and @connect narrowed to gelbooru.com; public update targets removed; production body run inside a named wrapper function; test postamble appended',
       },
       summary: { checks: checks.length, failed: failed.length, status: failed.length ? 'FAIL' : 'PASS' },
