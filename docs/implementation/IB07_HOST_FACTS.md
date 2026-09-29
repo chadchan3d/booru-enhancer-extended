@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0` (`9cade1a` plus the IB07 slot-inference restriction and the Rule34 preview correction)  
+**Production source blob:** `664bfe6366f03a6b1a27611087bcd6a91f2618f0` (`9cade1a` plus the IB07 slot-inference restriction, the Rule34 preview correction and the Rule34 site identity)  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -305,18 +305,18 @@ No code documents the preview as an alias of the sample. Every consumer uses it 
 
 Item 9 `G3-3f-rule34.xxx` asserts that the preview stays unknown; restoring `previewUrl: sampleUrl` makes it FAIL.
 
-## Open: meaning of the Post `siteId`
+## Post `siteId`: canonical site identity (decided)
 
-No production code reads `siteId`. Its values mix two meanings:
-- the master baseline uses adapter/family identity (`danbooru`, `e621`, `gelbooru-family`, `moebooru`, `generic`);
-- IB07 introduced exact-host values: `e926` (`5df9891`, "e926 remains a distinct site ID") and `gelbooru` (`9cade1a`).
+Operator decision (option a): for IB07-qualified hosts, `siteId` is the canonical site identity, not the adapter/family label. Rule34 Posts now carry `rule34` (was `gelbooru-family`). Production blob: `664bfe6366f03a6b1a27611087bcd6a91f2618f0`.
 
-Rule34 Posts carry `gelbooru-family`, and no canonical exact Rule34 identifier exists in the codebase. No value is invented here: this needs a contract decision. Conformance proves exact host identity through the page host and route (C01/C02), not through `siteId`.
+This matches the existing qualified slugs `e621`, `e926` and `gelbooru`. The adapter id, family routing and policies, and legacy adapters' values are unchanged. No production code reads `siteId`. Exact browser host and route are still proven separately by conformance checks C01/C02.
+
+Item 9 `G2-SITE-rule34.xxx` asserts `rule34`; restoring the family label makes it FAIL. Old vs new in the harness: the Rule34 Post differs only in `siteId`, the e621, e926 and Gelbooru Posts are identical, and requests are 0.
 
 ## Gelbooru conformance reuse (reassessed)
 
 Since the Gelbooru-conformed body, production has changed only in host-gated code:
 - the two slot-restriction lines (Rule34 parser; e621/e926 normalizer);
-- one Rule34 preview line in `rule34NativeImagePost`, after its rule34.xxx hostname gate.
+- one Rule34 preview line and one Rule34 `siteId` line in `rule34NativeImagePost`, after its rule34.xxx hostname gate.
 
 None of these is reachable on gelbooru.com. In the harness, old vs new on a Gelbooru post gives an identical Post. The live Gelbooru PASS(scope) remains reusable on this diff basis.

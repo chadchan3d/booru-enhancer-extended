@@ -17,7 +17,7 @@ const { loadAndStart, pointerSweep, sleep, productionSource, gitBlobId } = requi
 const fx = require('./item9_fixtures.cjs');
 const { oracles } = require(path.resolve(__dirname, '../../assertions/ib01/oracles.cjs'));
 
-const PRODUCTION_BLOB = '2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0'; // Booru_Enhancer.user.js with the IB07 slot-inference restriction and the Rule34 preview correction
+const PRODUCTION_BLOB = '664bfe6366f03a6b1a27611087bcd6a91f2618f0'; // Booru_Enhancer.user.js with the IB07 slot restriction, Rule34 preview correction and Rule34 site identity
 const SOURCE = productionSource();
 
 // ---- source mutation helpers ----------------------------------------------
@@ -66,6 +66,7 @@ const M = {
   e6OriginalIntoSample: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = fileUrl || d.sampleUrl;'),
   e6OriginalFabricated: (s) => mutateIn(s, 'normalizeE621NativeElement', "const fileUrl = d.fileUrl || '';", "const fileUrl = d.fileUrl || d.sampleUrl || '';"),
   e6EqualSampleDropped: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", "const sampleUrl = (d.sampleUrl && d.sampleUrl !== d.fileUrl) ? d.sampleUrl : '';"),
+  r34FamilySite: (s) => mutateIn(s, 'rule34NativeImagePost', "siteId: 'rule34',", "siteId: 'gelbooru-family',"),
   r34PreviewFromSample: (s) => mutateIn(s, 'rule34NativeImagePost', 'mediaType: guessMediaType(originalUrl || sampleUrl),', 'previewUrl: sampleUrl, mediaType: guessMediaType(originalUrl || sampleUrl),'),
   e6SampleFromFile: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = d.sampleUrl || fileUrl;'),
 };
@@ -157,6 +158,11 @@ add('G2-ID-rule34.xxx', 2, 'rule34.xxx', 'post page: Post only for the exact req
   (src) => fetchPosts(fx.rule34Post({ id: 1001 }), src, ['1001', '1002', null]),
   (o) => o[0]?.id === '1001' && o[1] === null && o[2] === null,
   [{ name: 'identity check removed', mutate: M.r34NoIdentity, expect: false }]);
+// Site identity (approved: siteId is the canonical site, not the adapter family).
+add('G2-SITE-rule34.xxx', 2, 'rule34.xxx', 'Rule34 Post carries the canonical site identity rule34 (not the family label)',
+  async (src) => { const c = await loadAndStart({ ...fx.rule34Post({ id: 1001 }), source: src }); const p = await c.adapter.fetchPost('1001'); c.window.close(); return { siteIsRule34: !!p && p.siteId === 'rule34' }; },
+  (o) => o.siteIsRule34,
+  [{ name: 'family label restored', mutate: M.r34FamilySite, expect: false }]);
 for (const host of ['e621.net', 'e926.net']) {
   add(`G2-ID-post-${host}`, 2, host, 'post page: Post only when the native container id equals the requested id',
     async (src) => ({ match: await fetchPosts(fx.e6Post(host, { id: 3001 }), src, ['3001', '3999']),
@@ -227,7 +233,7 @@ for (const host of ['e621.net', 'e926.net']) {
     { finding: 2, hostSemantic: `NOT OBSERVED LIVE: ${host} card or container without data-sample-url` });
 }
 
-// Verdicts at production blob 2011b22 (slot restriction + Rule34 preview). Every
+// Verdicts at production blob 664bfe6 (slot restriction, Rule34 preview, Rule34 site). Every
 // assertion is expected to PASS. Rows with hostSemantic assert production's
 // fail-closed behavior only; their host shape stays NOT OBSERVED LIVE.
 const EXPECTED = {};

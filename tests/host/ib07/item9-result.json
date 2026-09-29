@@ -1,11 +1,11 @@
 {
   "summary": {
     "suite": "IB07 §3 item 9 assertions",
-    "productionBlob": "2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0",
-    "productionBlobExpected": "2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0",
+    "productionBlob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
+    "productionBlobExpected": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
     "productionBlobIsExpected": true,
-    "assertions": 30,
-    "pass": 30,
+    "assertions": 31,
+    "pass": 31,
     "recorded": [
       "G1-T1T2-gelbooru-caseA"
     ],
@@ -17,7 +17,7 @@
       "G3-3d-e926.net"
     ],
     "vacuous": [],
-    "controls": 30,
+    "controls": 31,
     "controlFailures": [],
     "mismatchesAgainstExpected": []
   },
@@ -417,6 +417,31 @@
         null,
         null
       ]
+    },
+    {
+      "id": "G2-SITE-rule34.xxx",
+      "group": 2,
+      "host": "rule34.xxx",
+      "name": "Rule34 Post carries the canonical site identity rule34 (not the family label)",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "family label restored",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "hostSemantic": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "siteIsRule34": true
+      }
     },
     {
       "id": "G2-ID-post-e621.net",

@@ -1972,7 +1972,7 @@
 			allTags: tags,
 			source: sourceMatch ? sourceMatch[1].trim() : '',
 			postUrl: location.href,
-			siteId: 'gelbooru-family',
+			siteId: 'rule34',
 		});
 	}
 
