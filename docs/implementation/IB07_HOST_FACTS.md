@@ -342,12 +342,26 @@ Production starts the gallery module (card enhancement, startup enrichment, hove
 
 If a page ever did match a candidate container, the enabled G-HOST paths still build no Post and make no metadata request: the family `fetchThumbBatch` returns nothing, and `fetchPost` returns null on the listing route. Item 9 case B proves this locally with zero requests. Grid layout and hover beyond metadata belong to later gates. The fixture therefore covers fail-closed behavior only, not an unqualified enabled capability.
 
-## IB07 completion blocker (open)
+## §6 excluded-host row: satisfied
 
-§3 item 8 requires "Excluded hosts receive an explicit release/migration notice". The §6 row "rule34.us and three Sankaku matches" assigns explicit removal to IB07, with validation "Exclusion fixtures including idol; release note".
+Row "rule34.us and three Sankaku matches" (§3 item 8; validation "Exclusion fixtures including idol; release note"):
 
-The matches were removed (`47423ce`), but:
-- no release/migration notice exists in `CHANGELOG.md` or `README.md`;
-- no exclusion assertion runs against the IB07 candidate. The only `idol` fixture is IB01's historical T10 known-failure oracle.
+- **Explicit removal:** `@match` activation was removed in `47423ce`.
+- **Exclusion fixtures including idol:** `tests/host/ib07/exclusion_assertions.cjs`, result `exclusion-result.json`, runs against the committed production userscript. 8/8 PASS, 9/9 controls:
+  - X1: rule34.us, chan, idol and beta are each not admitted by `@match`. Idol is tested independently: adding only chan and beta does not admit it.
+  - X2: there is no `@include`.
+  - X3: all 15 admitted hosts resolve to a dedicated adapter, so the generic adapter is never selected, and it has no action members.
+  - X4: no production code names an excluded host. Only three `@connect` permissions remain, left to the release audit.
+- **No generic actions:** X3.
+- **Stored preferences remain:** P1. Startup on rule34.xxx and e621.net deletes or changes none of the seeded preferences, including unknown legacy keys; a startup-deletion mutant is caught. Settings are per-script (`be:setting:*`), not per host, and store deletion happens only inside a user-initiated settings import.
+- **Release note:** `CHANGELOG.md` §"Unreleased — Host scope changes".
 
-This is the remaining IB07 blocker.
+## IB07 completion blocker (open): Post count fact
+
+§3 item 10 requires "Post has site/id/native URL/kind/count/naming facts".
+
+The normalized Post constructor (`emptyPost`) has no count or page-count field. Its fields are: id, originalUrl, sampleUrl, previewUrl, mediaType, width, height, fileSize, md5, rating, score, favCount, the tag arrays, source, postUrl, createdAt and siteId. `favCount` is a favorites tally, not a work or media count, and no contract document defines a count representation.
+
+Unknown count is not a count of 1, and single-media booru posts do not authorize inventing one. The required count fact therefore has no representation at all (determination C), and IB07 cannot close.
+
+The smallest resolution is a contract decision followed by a bounded production change: give the normalized Post a count field whose default is unknown. No host populates it, because no count fact has been observed; no `count: 1` is written.

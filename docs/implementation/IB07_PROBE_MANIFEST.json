@@ -1,6 +1,6 @@
 {
   "checkpoint": "IB07",
-  "status": "IB07_PARTIAL_BLOCKED_BY_S6_EXCLUSION_ROW_RELEASE_NOTE_AND_IDOL_FIXTURE",
+  "status": "IB07_PARTIAL_BLOCKED_BY_POST_COUNT_FIELD_ABSENT",
   "production_source_blob": "664bfe6366f03a6b1a27611087bcd6a91f2618f0",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
@@ -251,7 +251,7 @@
     }
   },
   "production_activation": "HOST_RESOLVERS_BLOCKED_UNTIL_SCOPED_G_HOST_PASS",
-  "next_evidence": "none; remaining IB07 work is the §6 excluded-host release note and exclusion assertion (including idol) against the candidate",
+  "next_evidence": "none; remaining IB07 work is a Post count contract decision and bounded production change (count field, unknown by default)",
   "rule34_native_integration": {
     "commit": "8aaefeaf3abd6723aef48ee8bcfd49f53f9953b4",
     "source_blob": "bd85dd1fcb515ecb5cfa6c62510528d43d9243b2",
@@ -385,5 +385,19 @@
     "limitation": "synchronous pre-postamble startup requests not counted live; local item 9 T1/T2 is the instrumented startup evidence"
   },
   "slot_provenance_live_runs_qualification": "POTENTIALLY_CONTAMINATED_SUPERSEDED_FOR_LIVE_HOST_CLAIMS (another userscript may have been enabled); clean basis is the r34e6 production conformance",
-  "gelbooru_gallery_container_caveat": "DISPOSITION_A_NOT_BLOCKING: gallery starts only on a matched container; none matched live; if matched, G-HOST paths build no Post and make no request (item 9 case B)"
+  "gelbooru_gallery_container_caveat": "DISPOSITION_A_NOT_BLOCKING: gallery starts only on a matched container; none matched live; if matched, G-HOST paths build no Post and make no request (item 9 case B)",
+  "excluded_host_row": {
+    "status": "SATISFIED",
+    "hosts": [
+      "rule34.us",
+      "chan.sankakucomplex.com",
+      "idol.sankakucomplex.com",
+      "beta.sankakucomplex.com"
+    ],
+    "removal_commit": "47423ce",
+    "assertions": "tests/host/ib07/exclusion_assertions.cjs 8/8 PASS, 9/9 controls (idol independent)",
+    "preferences": "retained (P1: no delete or change at startup)",
+    "release_note": "CHANGELOG.md Unreleased — Host scope changes",
+    "connect_permissions": "3 remain; release audit"
+  }
 }

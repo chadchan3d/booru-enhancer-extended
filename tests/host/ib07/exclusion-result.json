@@ -1,0 +1,154 @@
+{
+  "suite": "IB07 excluded-host assertions",
+  "excludedHosts": [
+    "rule34.us",
+    "chan.sankakucomplex.com",
+    "idol.sankakucomplex.com",
+    "beta.sankakucomplex.com"
+  ],
+  "assertions": 8,
+  "pass": 8,
+  "failed": [],
+  "controls": 9,
+  "controlFailures": [],
+  "results": [
+    {
+      "id": "X1-rule34.us",
+      "name": "rule34.us is not admitted by the committed @match list",
+      "verdict": "PASS",
+      "detail": null,
+      "controls": [
+        {
+          "name": "@match re-added for rule34.us",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X1-chan.sankakucomplex.com",
+      "name": "chan.sankakucomplex.com is not admitted by the committed @match list",
+      "verdict": "PASS",
+      "detail": null,
+      "controls": [
+        {
+          "name": "@match re-added for chan.sankakucomplex.com",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X1-idol.sankakucomplex.com",
+      "name": "idol.sankakucomplex.com is not admitted by the committed @match list",
+      "verdict": "PASS",
+      "detail": null,
+      "controls": [
+        {
+          "name": "@match re-added for idol.sankakucomplex.com",
+          "expected": false,
+          "observed": false,
+          "idolIndependent": true,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X1-beta.sankakucomplex.com",
+      "name": "beta.sankakucomplex.com is not admitted by the committed @match list",
+      "verdict": "PASS",
+      "detail": null,
+      "controls": [
+        {
+          "name": "@match re-added for beta.sankakucomplex.com",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X2",
+      "name": "no @include activation (only exact @match hosts are injected)",
+      "verdict": "PASS",
+      "detail": {
+        "include": 0
+      },
+      "controls": [
+        {
+          "name": "@include * added",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X3",
+      "name": "no generic fallback or generic action on any admitted host",
+      "verdict": "PASS",
+      "detail": {
+        "admittedHosts": 15,
+        "genericSelected": 0
+      },
+      "controls": [
+        {
+          "name": "dedicated adapter pattern narrowed (atfbooru falls to generic)",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        },
+        {
+          "name": "generic favorite selector re-added",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "X4",
+      "name": "production code names no excluded host (only @connect permissions remain, left to release audit)",
+      "verdict": "PASS",
+      "detail": {
+        "connectEntriesForExcludedHosts": 3
+      },
+      "controls": [
+        {
+          "name": "excluded host referenced in code",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "stored preferences are neither deleted nor changed at startup",
+      "verdict": "PASS",
+      "detail": {
+        "seededKeys": 5,
+        "runs": [
+          {
+            "deletes": 0,
+            "changedOrRemoved": 0
+          },
+          {
+            "deletes": 0,
+            "changedOrRemoved": 0
+          }
+        ]
+      },
+      "controls": [
+        {
+          "name": "startup deletes a stored preference",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ]
+    }
+  ]
+}

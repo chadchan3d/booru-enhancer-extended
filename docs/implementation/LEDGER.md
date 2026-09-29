@@ -5,29 +5,27 @@ IB07 — Current-host metadata, Post facts and scope corrections: close per blue
 
 ## Current state
 - Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `664bfe6366f03a6b1a27611087bcd6a91f2618f0` (commit `5064dfd`), unchanged in this task.
-- **IB07 overall: PARTIAL—NOT COMPLETE.** One blocker remains (see Unresolved).
-- §3 item 9: 31 PASS, 0 FAIL, 0 INCONCLUSIVE.
+- **IB07 overall: PARTIAL—NOT COMPLETE.** One blocker: the Post count fact (see Unresolved).
+- §3 item 9: 31/31 PASS.
 - Live production conformance:
-  - Rule34, e621 and e926: PASS(scope: logged-out native listing and ordinary image post), 6/6 runs (`TC_R34E6_PRODUCTION_RESULT_SUMMARY.json`).
-  - Gelbooru: PASS(scope) reused on the recorded diff basis.
-- The Rule34/e621/e926 conformance package, its results and the harness `setup` hook are committed with this update.
+  - Rule34, e621 and e926: PASS(scope), 6/6 runs.
+  - Gelbooru: PASS(scope) reused on the diff basis.
+- The §6 excluded-host row is now satisfied: `tests/host/ib07/exclusion_assertions.cjs` plus the `CHANGELOG.md` release note.
 
 ## Verified
-- Six live runs: failed=0 each; C00 `MATCH_EXPECTED_ARTIFACT` each; rows 1–6 match their route and context; host/context and adapter PASS; no enhancer request during Post production or the postamble window. The pre-postamble startup limitation is preserved.
-- The package corresponds to the committed artifact (`--check` up to date against `5064dfd`); verifier 57/57.
-- Earlier DevTools slot-provenance live runs are qualified as POTENTIALLY CONTAMINATED / SUPERSEDED FOR LIVE-HOST CLAIMS. They are preserved; the clean conformance runs are the current live basis. The unusual shapes stay NOT OBSERVED LIVE and fail closed.
-- **Gelbooru container caveat: disposition A.** The gallery starts only on a matched container; none matched live. If one ever matched, the G-HOST paths still build no Post and make no request (item 9 case B).
-- Acceptance checks from source:
-  - no Post or URL is persisted (storage writes are settings and viewer volume only), so signed URLs stay in memory;
-  - the Gelbooru API and HTML helpers are unreachable;
-  - the Gelbooru and Rule34 native parsers are host-gated.
+- Exclusion assertions against the committed userscript: 8/8 PASS, 9/9 controls.
+  - rule34.us, chan, idol and beta are each not admitted by `@match`; idol is tested independently.
+  - There is no `@include`.
+  - All 15 admitted hosts use a dedicated adapter, so the generic adapter is never selected, and it has no actions.
+  - No production code names an excluded host (3 `@connect` permissions remain for the release audit).
+- Stored preferences remain (P1): startup deletes or changes no seeded preference, including unknown keys; the deletion mutant is caught. Settings are per-script, not per host.
+- Release/migration note: `CHANGELOG.md` §"Unreleased — Host scope changes". It covers the four hosts, states rule34.xxx is unaffected, and states preferences are kept.
+- Count contract: the normalized Post (`emptyPost`) has no count field. `favCount` is a favorites tally. No contract document defines a count.
+- All other suites pass unchanged (see the latest status block).
 
 ## Unresolved
-- **Single IB07 blocker, the §6 row for rule34.us and three Sankaku matches** (§3 item 8: "Excluded hosts receive an explicit release/migration notice"; validation "Exclusion fixtures including idol; release note"). The matches were removed in `47423ce`, but:
-  - no release/migration notice exists in `CHANGELOG.md`/`README.md`;
-  - no exclusion assertion runs against the IB07 candidate (the only idol fixture is IB01's historical T10 oracle).
-- Note for the completion record: §3 item 10 "count" is read as a multi-page work count (G-PAGES/IB17). Booru posts here are single-media, so the Post model has no count field. This reading is to be stated explicitly in the completion record.
+- **Single IB07 blocker: the Post count fact is absent** (§3 item 10: "Post has … kind/count/naming facts"). Determination C: the field doesn't exist, so there is nothing that could be "unknown". Needs a contract decision, then one bounded production change: add a count field to the normalized Post with an unknown default. No host sets it (no observed count fact); no `count: 1` is written.
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-One bounded IB07 task: add a candidate exclusion assertion (production `@match` excludes rule34.us and the three Sankaku hosts, including idol; stored preferences untouched) and an explicit release/migration note. Then write the IB07 §11 completion record. IB08 is not eligible until then.
+Operator decision on the Post count representation (field name and unknown sentinel). Then the bounded IB07 production change with its assertion, then the IB07 §11 completion record. IB08 is not eligible until then.

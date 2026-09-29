@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Host scope changes
+
+- Booru Enhancer no longer activates on **rule34.us**, **chan.sankakucomplex.com**, **idol.sankakucomplex.com** or **beta.sankakucomplex.com**. None of these sites has a separately validated adapter or behavior in this release scope. On those sites, pages load without the enhancer.
+- **rule34.xxx** is unaffected and remains supported.
+- Your stored preferences are kept. Settings are shared across all sites, and removing these sites does not erase or reset any saved value.
+
 ## 1.2.7.3 — Rule34 loading and settings UX
 
 - Defer Rule34.xxx gallery metadata enrichment until hover/click instead of batch-fetching the full gallery at startup.
