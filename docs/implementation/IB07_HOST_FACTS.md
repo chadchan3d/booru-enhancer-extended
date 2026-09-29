@@ -1,7 +1,7 @@
 # IB07 — Current-host metadata, Post facts and scope corrections
 
 **Checkpoint state:** ACTIVE — V1-N native observation pending  
-**Production source blob:** `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b` (`9cade1a` plus the IB07 slot-inference restriction)  
+**Production source blob:** `2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0` (`9cade1a` plus the IB07 slot-inference restriction and the Rule34 preview correction)  
 **Prior checkpoint:** IB06 PASS for active TC implementation path
 
 ## Controlling invariant
@@ -294,3 +294,29 @@ Production blob: `30cadd68ebc6ca357a029ebdf1cfb028f081ee7b`.
 The shapes are NOT OBSERVED LIVE (`IB07_SLOT_PROVENANCE_EVIDENCE.md`). No request, selector or other slot changed.
 
 Gelbooru live production conformance is reused on the diff basis recorded there: neither changed line is reachable on gelbooru.com, and a harness check old vs new shows an identical Post and 0 requests. Rule34, e621 and e926 production conformance remains OPEN_NOT_RUN.
+
+## Rule34 preview slot
+
+Production blob: `2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0`.
+
+`rule34NativeImagePost` no longer sets `previewUrl` from the sample. The preview is the thumbnail slot: §3 item 10 lists thumbnail, sample, original and poster as distinct optional facts, and production's own `media.thumbQuality` choices name preview, sample and original as separate renditions. A Rule34 post page exposes no native preview, so the slot stays unknown, as it does on Gelbooru.
+
+No code documents the preview as an alias of the sample. Every consumer uses it either as a later fallback after the sample and original (viewer, open, media URL, reverse search) or as a video poster. In the old-vs-new harness check each of these resolves to the same URL, and requests are 0 in both.
+
+Item 9 `G3-3f-rule34.xxx` asserts that the preview stays unknown; restoring `previewUrl: sampleUrl` makes it FAIL.
+
+## Open: meaning of the Post `siteId`
+
+No production code reads `siteId`. Its values mix two meanings:
+- the master baseline uses adapter/family identity (`danbooru`, `e621`, `gelbooru-family`, `moebooru`, `generic`);
+- IB07 introduced exact-host values: `e926` (`5df9891`, "e926 remains a distinct site ID") and `gelbooru` (`9cade1a`).
+
+Rule34 Posts carry `gelbooru-family`, and no canonical exact Rule34 identifier exists in the codebase. No value is invented here: this needs a contract decision. Conformance proves exact host identity through the page host and route (C01/C02), not through `siteId`.
+
+## Gelbooru conformance reuse (reassessed)
+
+Since the Gelbooru-conformed body, production has changed only in host-gated code:
+- the two slot-restriction lines (Rule34 parser; e621/e926 normalizer);
+- one Rule34 preview line in `rule34NativeImagePost`, after its rule34.xxx hostname gate.
+
+None of these is reachable on gelbooru.com. In the harness, old vs new on a Gelbooru post gives an identical Post. The live Gelbooru PASS(scope) remains reusable on this diff basis.

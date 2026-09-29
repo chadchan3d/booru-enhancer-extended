@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB07",
   "status": "ACTIVE_GELBOORU_IMAGE_POST_PRODUCTION_CONFORMANCE_PASS_ITEM9_AND_ITEM10_OPEN",
-  "production_source_blob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
+  "production_source_blob": "2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0",
   "source_scope_correction": {
     "commit": "47423cebb0825c1dbadd0159e8dfc3a519be87db",
     "removed_matches": [
@@ -261,7 +261,9 @@
     "original_from_native_link": true,
     "original_dimensions_from_native_stats": true,
     "byte_size": "UNKNOWN",
-    "live_production_conformance": "OPEN_NOT_RUN"
+    "live_production_conformance": "OPEN_NOT_RUN",
+    "preview_slot": "UNKNOWN on post page (was sample URL); corrected in production blob 2011b22; item 9 G3-3f",
+    "site_id": "gelbooru-family (family label); siteId meaning is an open contract decision, no canonical exact Rule34 value exists"
   },
   "family_safeguard": {
     "remote_dapi_html_dispatch": "DISABLED_PENDING_SCOPED_G_HOST",
@@ -362,7 +364,7 @@
       "rendition policy",
       "other Gelbooru-family hosts"
     ],
-    "live_production_conformance_reuse": "REUSED_ON_DIFF_BASIS_FOR_30CADD6: changed lines unreachable on gelbooru.com; harness old vs new identical Post, 0 requests"
+    "live_production_conformance_reuse": "REUSED_ON_DIFF_BASIS_FOR_2011B22: changed lines (slot restriction, Rule34 preview) unreachable on gelbooru.com; harness old vs new identical Post, 0 requests"
   },
   "slot_inference_restriction": {
     "source_blob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",

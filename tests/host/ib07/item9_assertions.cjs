@@ -17,7 +17,7 @@ const { loadAndStart, pointerSweep, sleep, productionSource, gitBlobId } = requi
 const fx = require('./item9_fixtures.cjs');
 const { oracles } = require(path.resolve(__dirname, '../../assertions/ib01/oracles.cjs'));
 
-const PRODUCTION_BLOB = '30cadd68ebc6ca357a029ebdf1cfb028f081ee7b'; // Booru_Enhancer.user.js with the IB07 slot-inference restriction (9cade1a + two lines)
+const PRODUCTION_BLOB = '2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0'; // Booru_Enhancer.user.js with the IB07 slot-inference restriction and the Rule34 preview correction
 const SOURCE = productionSource();
 
 // ---- source mutation helpers ----------------------------------------------
@@ -66,6 +66,7 @@ const M = {
   e6OriginalIntoSample: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = fileUrl || d.sampleUrl;'),
   e6OriginalFabricated: (s) => mutateIn(s, 'normalizeE621NativeElement', "const fileUrl = d.fileUrl || '';", "const fileUrl = d.fileUrl || d.sampleUrl || '';"),
   e6EqualSampleDropped: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", "const sampleUrl = (d.sampleUrl && d.sampleUrl !== d.fileUrl) ? d.sampleUrl : '';"),
+  r34PreviewFromSample: (s) => mutateIn(s, 'rule34NativeImagePost', 'mediaType: guessMediaType(originalUrl || sampleUrl),', 'previewUrl: sampleUrl, mediaType: guessMediaType(originalUrl || sampleUrl),'),
   e6SampleFromFile: (s) => mutateIn(s, 'normalizeE621NativeElement', "const sampleUrl = d.sampleUrl || '';", 'const sampleUrl = d.sampleUrl || fileUrl;'),
 };
 
@@ -185,6 +186,13 @@ add('G3-3c-rule34.xxx', 3, 'rule34.xxx', 'no native Original link: original slot
   (o) => !!o.post && o.post.originalUrl === '' && o.post.sampleUrl === r34NoOriginal.sampleUrl,
   [{ name: 'original inferred from the sample again', mutate: M.r34OriginalFromSample, expect: false }],
   { finding: 1, hostSemantic: 'NOT OBSERVED LIVE: Rule34 post page with img#image and no native original link' });
+// Preview is the thumbnail slot, a distinct rendition (§3 item 10: thumbnail/
+// sample/original/poster); a Rule34 post page exposes no native preview.
+add('G3-3f-rule34.xxx', 3, 'rule34.xxx', 'no native preview on a post page: preview slot stays unknown (not filled from the sample)',
+  async (src) => { const c = await loadAndStart({ ...r34Distinct, source: src }); const p = await c.adapter.fetchPost('1001'); c.window.close();
+    return { post: p ? { previewEmpty: p.previewUrl === '', sampleIsNative: p.sampleUrl === r34Distinct.sampleUrl, originalIsNative: p.originalUrl === r34Distinct.originalUrl } : null }; },
+  (o) => !!o.post && o.post.previewEmpty && o.post.sampleIsNative && o.post.originalIsNative,
+  [{ name: 'preview filled from the sample again', mutate: M.r34PreviewFromSample, expect: false }]);
 add('G3-3d-rule34.xxx', 3, 'rule34.xxx', 'missing native sample is not fabricated (no img#image gives no sample)',
   async (src) => ({ post: (await fetchPosts(fx.rule34Post({ id: 1001, sample: false }), src, ['1001']))[0] }),
   (o) => o.post === null || o.post.sampleUrl === '',
@@ -219,7 +227,7 @@ for (const host of ['e621.net', 'e926.net']) {
     { finding: 2, hostSemantic: `NOT OBSERVED LIVE: ${host} card or container without data-sample-url` });
 }
 
-// Verdicts at production blob 30cadd6 (slot-inference restriction). Every
+// Verdicts at production blob 2011b22 (slot restriction + Rule34 preview). Every
 // assertion is expected to PASS. Rows with hostSemantic assert production's
 // fail-closed behavior only; their host shape stays NOT OBSERVED LIVE.
 const EXPECTED = {};

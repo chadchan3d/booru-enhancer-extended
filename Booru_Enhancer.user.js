@@ -1963,7 +1963,6 @@
 			id: String(id),
 			originalUrl,
 			sampleUrl,
-			previewUrl: sampleUrl,
 			mediaType: guessMediaType(originalUrl || sampleUrl),
 			width: sizeMatch ? Number(sizeMatch[1]) : 0,
 			height: sizeMatch ? Number(sizeMatch[2]) : 0,

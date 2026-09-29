@@ -1,11 +1,11 @@
 {
   "summary": {
     "suite": "IB07 §3 item 9 assertions",
-    "productionBlob": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
-    "productionBlobExpected": "30cadd68ebc6ca357a029ebdf1cfb028f081ee7b",
+    "productionBlob": "2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0",
+    "productionBlobExpected": "2011b22b58e9a36a6cebed7aba71c88f7fdd7fd0",
     "productionBlobIsExpected": true,
-    "assertions": 29,
-    "pass": 29,
+    "assertions": 30,
+    "pass": 30,
     "recorded": [
       "G1-T1T2-gelbooru-caseA"
     ],
@@ -17,7 +17,7 @@
       "G3-3d-e926.net"
     ],
     "vacuous": [],
-    "controls": 29,
+    "controls": 30,
     "controlFailures": [],
     "mismatchesAgainstExpected": []
   },
@@ -635,6 +635,35 @@
           "id": "1001",
           "sampleUrl": "<url>",
           "originalUrl": ""
+        }
+      }
+    },
+    {
+      "id": "G3-3f-rule34.xxx",
+      "group": 3,
+      "host": "rule34.xxx",
+      "name": "no native preview on a post page: preview slot stays unknown (not filled from the sample)",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "preview filled from the sample again",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "hostSemantic": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "previewEmpty": true,
+          "sampleIsNative": true,
+          "originalIsNative": true
         }
       }
     },
