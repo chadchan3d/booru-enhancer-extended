@@ -1,0 +1,954 @@
+{
+  "summary": {
+    "suite": "IB07 §3 item 9 assertions",
+    "productionBlob": "0715587162f65324fc1f85adf40e7f490b4220b3",
+    "productionBlobIsCommitted9cade1a": true,
+    "assertions": 29,
+    "pass": 26,
+    "recorded": [
+      "G1-T1T2-gelbooru-caseA"
+    ],
+    "fail": [
+      "G3-3c-rule34.xxx"
+    ],
+    "inconclusive": [
+      "G3-3d-e621.net",
+      "G3-3d-e926.net"
+    ],
+    "vacuous": [],
+    "controls": 29,
+    "controlFailures": [],
+    "mismatchesAgainstExpected": []
+  },
+  "results": [
+    {
+      "id": "G1-T1-rule34.xxx",
+      "group": 1,
+      "host": "rule34.xxx",
+      "name": "T1: startup issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "startup metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "gelbooru-family",
+        "cards": 3,
+        "batchCalls": 0,
+        "batchIds": 0,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "G1-T2-rule34.xxx",
+      "group": 1,
+      "host": "rule34.xxx",
+      "name": "T2: pointer sweep before dwell issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "per-hover metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "cardsSwept": 3,
+        "fetchPostCalls": 3,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-T1-e621.net",
+      "group": 1,
+      "host": "e621.net",
+      "name": "T1: startup issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "startup metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "e621",
+        "cards": 3,
+        "batchCalls": 1,
+        "batchIds": 3,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "G1-T2-e621.net",
+      "group": 1,
+      "host": "e621.net",
+      "name": "T2: pointer sweep before dwell issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "per-hover metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "cardsSwept": 3,
+        "fetchPostCalls": 0,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-T1-e926.net",
+      "group": 1,
+      "host": "e926.net",
+      "name": "T1: startup issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "startup metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "e621",
+        "cards": 3,
+        "batchCalls": 1,
+        "batchIds": 3,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "G1-T2-e926.net",
+      "group": 1,
+      "host": "e926.net",
+      "name": "T2: pointer sweep before dwell issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "per-hover metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "cardsSwept": 3,
+        "fetchPostCalls": 0,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-T1-gelbooru.com",
+      "group": 1,
+      "host": "gelbooru.com (case B: candidate container)",
+      "name": "T1: startup issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "startup metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "gelbooru-family",
+        "cards": 3,
+        "batchCalls": 1,
+        "batchIds": 3,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "G1-T2-gelbooru.com",
+      "group": 1,
+      "host": "gelbooru.com (case B: candidate container)",
+      "name": "T2: pointer sweep before dwell issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "per-hover metadata request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "cardsSwept": 3,
+        "fetchPostCalls": 3,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-T1T2-gelbooru-caseA",
+      "group": 1,
+      "host": "gelbooru.com (case A: observed markup)",
+      "name": "T1/T2 on the observed markup: gallery does not start; zero requests",
+      "verdict": "RECORDED(zero requests; path not reached)",
+      "expected": "RECORDED(zero requests; path not reached)",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": "path not reached on observed markup (0 enhanced cards); case B carries the proof",
+      "observation": {
+        "startup": {
+          "adapter": "gelbooru-family",
+          "cards": 0,
+          "batchCalls": 0,
+          "batchIds": 0,
+          "apiRequests": 0,
+          "postPageRequests": 0,
+          "otherRequests": 0,
+          "total": 0
+        },
+        "sweep": {
+          "cardsSwept": 0,
+          "fetchPostCalls": 0,
+          "apiRequests": 0,
+          "postPageRequests": 0,
+          "otherRequests": 0
+        }
+      }
+    },
+    {
+      "id": "G1-OD-rule34.xxx",
+      "group": 1,
+      "host": "rule34.xxx",
+      "name": "on-demand Post production issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "on-demand request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "gelbooru-family",
+        "posts": 1,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-OD-e621.net",
+      "group": 1,
+      "host": "e621.net",
+      "name": "on-demand Post production issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "on-demand request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "e621",
+        "posts": 1,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G1-OD-e926.net",
+      "group": 1,
+      "host": "e926.net",
+      "name": "on-demand Post production issues no enhancer metadata request",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": true,
+      "controls": [
+        {
+          "name": "on-demand request reintroduced",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "adapter": "e621",
+        "posts": 1,
+        "apiRequests": 0,
+        "postPageRequests": 0,
+        "otherRequests": 0
+      }
+    },
+    {
+      "id": "G2-ID-rule34.xxx",
+      "group": 2,
+      "host": "rule34.xxx",
+      "name": "post page: Post only for the exact requested id matching the route; mismatch and missing id give nothing",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "identity check removed",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": [
+        {
+          "id": "1001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        },
+        null,
+        null
+      ]
+    },
+    {
+      "id": "G2-ID-post-e621.net",
+      "group": 2,
+      "host": "e621.net",
+      "name": "post page: Post only when the native container id equals the requested id",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "post-page identity check removed",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "match": [
+          {
+            "id": "3001",
+            "sampleUrl": "<url>",
+            "originalUrl": "<url>"
+          },
+          null
+        ],
+        "mismatch": [
+          null
+        ]
+      }
+    },
+    {
+      "id": "G2-ID-listing-e621.net",
+      "group": 2,
+      "host": "e621.net",
+      "name": "listing: Post built from the card whose id equals the requested id; unknown id gives nothing",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "listing identity check removed",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "facts": {
+          "2001": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2002": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2003": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          }
+        },
+        "posts": [
+          {
+            "id": "2002",
+            "sampleUrl": "<url>",
+            "originalUrl": "<url>"
+          },
+          null
+        ]
+      }
+    },
+    {
+      "id": "G2-ID-post-e926.net",
+      "group": 2,
+      "host": "e926.net",
+      "name": "post page: Post only when the native container id equals the requested id",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "post-page identity check removed",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "match": [
+          {
+            "id": "3001",
+            "sampleUrl": "<url>",
+            "originalUrl": "<url>"
+          },
+          null
+        ],
+        "mismatch": [
+          null
+        ]
+      }
+    },
+    {
+      "id": "G2-ID-listing-e926.net",
+      "group": 2,
+      "host": "e926.net",
+      "name": "listing: Post built from the card whose id equals the requested id; unknown id gives nothing",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "listing identity check removed",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "facts": {
+          "2001": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2002": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2003": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          }
+        },
+        "posts": [
+          {
+            "id": "2002",
+            "sampleUrl": "<url>",
+            "originalUrl": "<url>"
+          },
+          null
+        ]
+      }
+    },
+    {
+      "id": "G3-3a-rule34.xxx",
+      "group": 3,
+      "host": "rule34.xxx",
+      "name": "distinct native sample and original stay in their own slots",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original placed into sample slot",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "1001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3c-rule34.xxx",
+      "group": 3,
+      "host": "rule34.xxx",
+      "name": "missing native original stays missing (not filled from the sample)",
+      "verdict": "FAIL",
+      "expected": "FAIL",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "corrected control: original left empty when no native original",
+          "expected": true,
+          "observed": true,
+          "ok": true
+        }
+      ],
+      "finding": 1,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "1001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3d-rule34.xxx",
+      "group": 3,
+      "host": "rule34.xxx",
+      "name": "missing native sample is not fabricated (no img#image gives no sample)",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "sample fabricated from the original link",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": null
+      }
+    },
+    {
+      "id": "G3-3a-post-e621.net",
+      "group": 3,
+      "host": "e621.net",
+      "name": "post page: distinct native sample and original stay in their own slots",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original placed into sample slot",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3a-listing-e621.net",
+      "group": 3,
+      "host": "e621.net",
+      "name": "listing: distinct native sample and original stay in their own slots",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original placed into sample slot",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "facts": {
+          "2001": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2002": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2003": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          }
+        },
+        "post": {
+          "id": "2001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3c-e621.net",
+      "group": 3,
+      "host": "e621.net",
+      "name": "missing native original stays missing (not filled from the sample)",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original fabricated from the sample",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": ""
+        }
+      }
+    },
+    {
+      "id": "G3-3e-e621.net",
+      "group": 3,
+      "host": "e621.net",
+      "name": "native sample equal to the original: slots equal because the native facts say so",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "native equal sample dropped",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3d-e621.net",
+      "group": 3,
+      "host": "e621.net",
+      "name": "no data-sample-url: is the sample slot correct?",
+      "verdict": "INCONCLUSIVE(sample-filled-from-original)",
+      "expected": "INCONCLUSIVE(sample-filled-from-original)",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "observation distinguishes behaviors: sample left empty",
+          "expected": "sample-left-empty",
+          "observed": "sample-left-empty",
+          "ok": true
+        }
+      ],
+      "finding": 2,
+      "inconclusiveNeeds": "Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.",
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3a-post-e926.net",
+      "group": 3,
+      "host": "e926.net",
+      "name": "post page: distinct native sample and original stay in their own slots",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original placed into sample slot",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3a-listing-e926.net",
+      "group": 3,
+      "host": "e926.net",
+      "name": "listing: distinct native sample and original stay in their own slots",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original placed into sample slot",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "facts": {
+          "2001": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2002": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          },
+          "2003": {
+            "fileUrl": "<url>",
+            "sampleUrl": "<url>"
+          }
+        },
+        "post": {
+          "id": "2001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3c-e926.net",
+      "group": 3,
+      "host": "e926.net",
+      "name": "missing native original stays missing (not filled from the sample)",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "original fabricated from the sample",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": ""
+        }
+      }
+    },
+    {
+      "id": "G3-3e-e926.net",
+      "group": 3,
+      "host": "e926.net",
+      "name": "native sample equal to the original: slots equal because the native facts say so",
+      "verdict": "PASS",
+      "expected": "PASS",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "native equal sample dropped",
+          "expected": false,
+          "observed": false,
+          "ok": true
+        }
+      ],
+      "finding": null,
+      "inconclusiveNeeds": null,
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    },
+    {
+      "id": "G3-3d-e926.net",
+      "group": 3,
+      "host": "e926.net",
+      "name": "no data-sample-url: is the sample slot correct?",
+      "verdict": "INCONCLUSIVE(sample-filled-from-original)",
+      "expected": "INCONCLUSIVE(sample-filled-from-original)",
+      "matchesExpected": true,
+      "pathRan": null,
+      "controls": [
+        {
+          "name": "observation distinguishes behaviors: sample left empty",
+          "expected": "sample-left-empty",
+          "observed": "sample-left-empty",
+          "ok": true
+        }
+      ],
+      "finding": 2,
+      "inconclusiveNeeds": "Needs G-HOST fact: how e621/e926 represent a post with no distinct sample rendition (data-sample-url absent, empty, or equal to data-file-url) and what the native page then displays. Not observed in IB07_E621_V1N.md or IB07_E926_V1N.md.",
+      "informational": null,
+      "observation": {
+        "post": {
+          "id": "3001",
+          "sampleUrl": "<url>",
+          "originalUrl": "<url>"
+        }
+      }
+    }
+  ]
+}

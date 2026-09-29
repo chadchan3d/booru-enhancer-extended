@@ -1,0 +1,12 @@
+{
+  "name": "ib07-host-assertions",
+  "private": true,
+  "description": "IB07 host assertions: Gelbooru native-post implementation test and §3 item 9 assertions.",
+  "scripts": {
+    "test": "node gelbooru_native_post.cjs && node item9_assertions.cjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "30.1.1"
+  }
+}
