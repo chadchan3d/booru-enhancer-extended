@@ -76,3 +76,62 @@ Repeat the e621 steps on `https://e926.net/posts`, in a fresh load of that page,
 ### Return
 
 Return the two sanitized JSON results (e621 and e926). If a result says `sanitationGuard: BLOCKED`, return it as it is and do not send anything else from that page.
+
+---
+
+# IB08 V9-R reversible ownership experiment
+
+**IB08 E-stage evidence only.** `IB08_V9R_Ownership_Experiment.user.js` is an isolated Tampermonkey script, separate from production, for e621.net and e926.net. It tests whether one owned rendition change can be applied and then disposed without disturbing native nodes, native edits or native responsive selection. The design and expected outcomes are in `docs/implementation/IB08_V9R_EVIDENCE.md` §2.
+
+## What the experiment does
+
+It picks five listing cards that match the observed pattern:
+- a `picture` with a WebP `source` and a JPEG `source` and an `img`;
+- single-candidate srcsets;
+- no `sizes` or `media`.
+
+On each card it changes **one attribute**: the WebP source's srcset, set to that card's own native sample. It then simulates five native situations, one per card:
+- no change;
+- a native edit;
+- a moved source;
+- a replaced source;
+- a replaced picture.
+
+It then disposes its change and, after you narrow the window, checks the result. Cards that do not match the pattern are never touched.
+
+The experiment itself makes no requests, and never touches storage, cookies or account data. Because the srcset changes, the browser loads each of the five cards' own sample images, and one or two native previews, as ordinary image loads. The output is sanitized in the same way as the baseline probe, and a leak guard withholds it if needed.
+
+## Local verification
+
+```
+node tests/browser/ib08/verify_v9r_ownership_experiment.cjs
+```
+
+## Operator steps
+
+Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, URLs or post IDs.
+
+### Setup
+
+1. In Tampermonkey, keep the **normal Booru Enhancer disabled**. **Disable the IB08 V9-R baseline probe** and every other userscript for e621 and e926.
+2. Tampermonkey → Create a new script → replace everything with the full contents of `tests/browser/ib08/IB08_V9R_Ownership_Experiment.user.js` → Save. Make sure it is enabled.
+
+### e621
+
+1. Log out of e621, or use a window where you are not logged in.
+2. Maximize a normal (wide) window. Open `https://e621.net/posts` directly and wait for the thumbnails to finish loading. Do not scroll.
+3. Tampermonkey icon → **IB08 ownership: Step 1 (wide window)**. Wait up to about 30 seconds for the box saying `Step 1 done`, then click **Close**.
+   - If the box says `INSUFFICIENT`, copy and return it as it is; the page was not changed.
+4. Without reloading or scrolling, make **the same window** clearly narrower, e.g. about half the screen width. Wait about 5 seconds.
+5. Tampermonkey icon → **IB08 ownership: Step 2 (after narrowing) and show result**. Wait for the result box.
+6. Copy the text (Ctrl+C) and save it as the e621 result. Check that `site` is `e621.net` and `viewportNarrowed` is `true`, and note `experimentVerdict`.
+
+Step 1 runs once per page load. To repeat, reload the page and start again from step 2.
+
+### e926
+
+Repeat the e621 steps on a fresh load of `https://e926.net/posts`, logged out. Check that `site` is `e926.net`. Do not reuse the e621 result.
+
+### Afterwards
+
+Disable the experiment script in Tampermonkey. Return the two sanitized JSON results. If a result says `sanitationGuard: BLOCKED`, return it as it is and nothing else from that page.

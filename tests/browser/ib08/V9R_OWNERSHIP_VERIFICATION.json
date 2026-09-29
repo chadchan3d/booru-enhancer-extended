@@ -1,0 +1,70 @@
+{
+  "checkpoint": "IB08",
+  "evidence_gate": "G-RENDITION",
+  "status": "E-STAGE LOCAL QUALIFICATION (not a gate result)",
+  "experiment": "IB08_V9R_Ownership_Experiment.user.js",
+  "experiment_sha256_lf": "2621c057fbc297815eb37806a517bace4db3fdf3f5dfa43df92ce8ee8c9fce6f",
+  "currentSrc_model": "jsdom has no image selection; the verifier models it (first supported-type <source> before the <img> with a srcset, else img src). Live selection is the operator run.",
+  "checks": 65,
+  "passed": 65,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault dispose never restores: caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault dispose overwrites native edit: caught by self-report",
+      "pass": true
+    },
+    {
+      "name": "fault dispose ignores value check and connection: caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault dispose moves source back (overrides native order): caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault dispose writes the current first source (position, not owned node): caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault owner records its own write as a native touch: caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault apply replaces the source node (clone): caught by self-report+independent-dom+static",
+      "pass": true
+    },
+    {
+      "name": "fault apply removes srcset: caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault apply also rewrites img src: caught by self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault pattern gate disabled: caught by host-identity+self-report+independent-dom",
+      "pass": true
+    },
+    {
+      "name": "fault e926 relabeled as e621: caught by host-identity",
+      "pass": true
+    },
+    {
+      "name": "fault leaked URL: caught by self-report+leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault leaked post ID: caught by leak-scan",
+      "pass": true
+    },
+    {
+      "name": "fault script-side request: caught by api-counter+static",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
