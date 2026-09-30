@@ -3,7 +3,7 @@
 **Checkpoint:** IB09 — Still-image hover dwell and cost (blueprint §3 IB09, items 9–10; §5 G-HOVER row).
 **Result:** G-HOVER(e621/e926 qualified still-image class), E → **PASS(scope)**.
 - **IB09 is PARTIAL — NOT COMPLETE:** the P stage and live production conformance remain.
-- Production `Booru_Enhancer.user.js` blob `bbaf9ac` is unchanged. No P-stage work has started. IB10 has not started.
+- At E closeout, production was blob `bbaf9ac`. The P stage (commit `16f821e`, blob `3161b51`) is recorded in `IB09_P_STAGE.md`. IB10 has not started.
 
 **Correction:** the first version of this record (commit `a423c33`) is superseded. It held the gate on a missing throttled session and described the other correctness sessions as waived. Both statements were wrong: the sessions below were run by the operator.
 
@@ -14,7 +14,7 @@
 | V3 overlay | **B, dwell-gated overlay.** The displayed rendition is shown at dwell, behind the generation and viewer checks. Nothing is assigned at pointer-enter | `IB09_V3_REOPEN.md` §3–4; `tests/host/ib09/v3_alternatives_assertions.cjs` 54/54 |
 | Dwell | **200 ms** | Fake-clock boundary sweep: stays of 0/40/100/199 give no upgrade; stays of 200/201/250 give one at 200 (`dwell_prototype_assertions.cjs:116-117`, 84/84). Held-out live sessions (§2) |
 | Before dwell | No new hover metadata request, and no upgraded or other hover media assignment | `afterDwell` is the single authority (`tests/host/ib09/dwell_prototype.cjs:51-104`). Variant B also removes the enter-time overlay assignment |
-| Still-image selection | Cheapest sufficient validated rendition; a current target is never downgraded. On IB08-qualified e621/e926 cards: a displayed PREVIEW → native SAMPLE (or native SAMPLE\|FILE alias) after dwell; a displayed SAMPLE or FILE → no upgrade | `hoverUpgradeEligible` (`dwell_prototype.cjs:32-40`) |
+| Still-image selection | Cheapest sufficient validated rendition; a current target is never downgraded. In the qualified e621/e926 still-image class, only displayed PREVIEW → native SAMPLE (or native SAMPLE\|FILE alias) has sufficient cost evidence for an automatic upgrade. A displayed SAMPLE or FILE needs no stronger replacement in this class. No separate Original-target class is qualified by this evidence. This is **not** a universal original ban (blueprint IB09 item 4); a separately validated cheap-original class remains possible | `hoverUpgradeEligible` (`dwell_prototype.cjs:32-40`) |
 | Unsupported or cost-inconclusive | Retain thumbnail/View | Blueprint IB09 item 11 |
 | Video | IB10 | Blueprint IB09 item 3 |
 
@@ -26,9 +26,9 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 | --- | --- | --- | --- | --- |
 | e621.net | A | Preview / ordinary | 1.1 | `IB09_LIVE_CHECK.md` §6. Accepted: 38 SAMPLE + 5 alias, 0 pure FILE; start 200–220 ms |
 | e621.net | **B** | **Preview / THROTTLED** (DevTools Slow 4G, Disable cache) | 1.2 (by field vocabulary; see below) | This section, operator-relayed |
-| e621.net | C | Sample / ordinary | — | Run by the operator; figures not relayed into this record |
-| e621.net | D | Original / ordinary | — | Run by the operator; figures not relayed into this record |
-| e926.net | A | Preview / ordinary | — | Run by the operator; figures not relayed into this record |
+| e621.net | C | Sample / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
+| e621.net | D | Original / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
+| e926.net | A | Preview / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
 | e926.net | B | Preview / throttled | — | Optional (`IB09_LIVE_CHECK.md:117`); **not run**. Throttled usefulness is observed on e621 only |
 | e926.net | C | Sample / ordinary | 1.2 | `IB09_LIVE_CHECK.md` §7. Accepted: 80 STILL, 0 hover media before dwell, 0 upgrades, 0 stale |
 | e926.net | D | Original / ordinary | 1.3 | `IB09_V3_REOPEN.md` §1. Accepted for correctness: 0 before dwell, 0 downgrade, 0 stale; reopened V3 (decided: B) |
@@ -68,7 +68,7 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 | No pre-dwell network or source assignment | Met locally and live: 0 before dwell in e621 A/B, e926 C/D. The overlay-reuse fetches seen in e926 D (38/80) are removed by B by construction | `IB09_V3_REOPEN.md` §1–4 |
 | Leave / re-entry / viewer joins | Met | Q5, Q8–Q10 (`dwell_prototype_assertions.cjs:102-107`); B viewer-before-dwell shows no overlay; live stale installs 0 |
 | Wrong-slot bytes and aliases | Met | Eligibility follows the displayed/native relationship. Live: e621 A 5 alias, e621 B 2 alias, 0 pure FILE; video FILE targets separated (observer 1.2) |
-| Known cheap original / sample / unknown / animated classes | Met by exclusion: only PREVIEW → native SAMPLE is admitted; the rest keep thumbnail/View | `hoverUpgradeEligible`; e926 C/D: 0 upgrades on SAMPLE/FILE cards |
+| Known cheap original / sample / unknown / animated classes | Met for the evidence collected. The native sample class is qualified. No separate cheap-original class was evidenced, so cost-inconclusive Original targets retain thumbnail/View under the item 11 fallback. Unknown and animated classes are not admitted | `hoverUpgradeEligible`; e926 C/D: 0 upgrades on SAMPLE/FILE cards |
 | Stale-generation protection | Met | Q8/Q9 + fault controls (`dwell_prototype_assertions.cjs:134-136`); live stale 0 |
 | V2 pilot, unthrottled | Met (regular profile; cache-limited) | `IB09_DWELL_PROTOTYPE.md` §1 |
 | Held-out throttled observation | **Met**: e621 B | §2 |
@@ -76,7 +76,7 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 
 **Item 10.**
 - The chosen dwell and ordering policy fits the frozen zero-pre-dwell allowance on the held-out cases.
-- Unknown originals retain thumbnail/View.
+- Cost-inconclusive originals retain thumbnail/View. No Original-target class is qualified here, which is different from a ban: a future cheap-original class can be validated separately.
 - The unknown-byte sample is admitted only as the IB08-validated native sample slot (G-RENDITION PASS(scope)) of a displayed preview.
 - The current placeholder (thumbnail) remains until the replacement loads.
 - Stale same-ID generations cannot apply.
@@ -94,14 +94,15 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 
 **Excluded (thumbnail/View, or unchanged native behavior):**
 - unsupported and cost-inconclusive classes;
-- originals as upgrade targets, and unknown and animated images;
+- Original targets: no separate Original-target class is qualified by this evidence, so cost-inconclusive Original cases keep thumbnail/View. This does not prohibit a future, separately validated cheap-original class;
+- unknown and animated images;
 - video (IB10);
 - logged-in contexts, post pages, the viewer (IB11), other hosts.
 
 **Limitations carried:**
-- e621 C/D and e926 A figures are not relayed into this record;
+- the e621 C/D and e926 A numeric rows are UNVERIFIED in this record until pasted in (the operator accepted the sessions);
 - e926 B was not run (throttled usefulness is e621 only);
 - transfer sizes are mostly browser-hidden;
-- the live sessions ran overlay A. B's pre-dwell zero is local and by construction, and is to be confirmed in P-stage live production conformance.
+- the live sessions ran overlay A. B's pre-dwell zero is local and by construction, and is confirmed by P-stage live production conformance (`IB09_P_STAGE.md`).
 
 **Opens:** the IB09 P stage for this scope only. **It does not open** automatic video admission (IB10).

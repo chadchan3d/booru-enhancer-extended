@@ -128,3 +128,46 @@ Run these on **e621** (`https://e621.net/posts`, logged out), then the same on *
 - the session's `condition` and `quality`.
 
 **Return** the labelled results: e621 A, B, C, D and e926 A, C, D, plus e926 B if run. Return any `sanitationGuard: BLOCKED` result as it is. Afterwards, disable this script.
+
+---
+
+# IB09 production conformance (P stage)
+
+**IB09 P-stage live conformance.** `IB09_Production_Conformance.user.js` is the committed IB09 production, commit `16f821e` (blob `3161b51`), **unpatched**, with the same observe-only hooks, followed by the IB09P observer. The observer is the E-stage observer 1.3 with three option-B metrics added: `stillOverlayBeforeDwell`, `stillOverlayOffsetMs` and `hoverFetchesBeforeDwell`. It confirms that the real artifact behaves as the qualified policy on the live sites.
+
+Local verification: `node tests/browser/ib09/build_ib09_conformance.cjs --check` and `node tests/browser/ib09/verify_ib09_conformance.cjs`.
+
+## Operator steps (normal Chrome, logged out, DevTools closed)
+
+**Setup:** in Tampermonkey, **disable** the normal Booru Enhancer and every other IB08/IB09 script, including `IB09_Dwell_Live_Check`. Then install `IB09_Production_Conformance.user.js` (Create a new script → paste → Save → enable).
+
+**Changing quality:** Tampermonkey icon → **Booru Enhancer: Settings** (listed under this script) → **Grid thumbnail quality**. Close the panel and **reload**.
+
+**Hover the same way as in the dwell live check:**
+- quick sweeps across a row;
+- rest on about 10 thumbnails for a second or more;
+- move straight to a neighbour;
+- leave and re-enter the same thumbnail.
+
+Do not click thumbnails. Start with **IB09P: Start session — ordinary network**, and end with **IB09P: Show results (ends the session)**. Copy and label each result.
+
+**Sessions:** run both on **e621** (`https://e621.net/posts`), then on **e926** (`https://e926.net/posts`):
+
+| Session | Setting |
+| --- | --- |
+| P1 | Preview |
+| P2 | Original |
+
+**Pass, per session:**
+- `production_body_identity` is `MATCH_EXPECTED_ARTIFACT`, with the right `site` and `quality`;
+- these are all 0: `newMediaBeforeDwell`, `stillOverlayBeforeDwell`, `hoverFetchesBeforeDwell`, `quickPassesStartingUpgrade`, `staleInstalled`;
+- `stillOverlayOffsetMs.min` ≥ 200.
+
+**Preview (P1) also passes if:**
+- `previewUpgrades.startedBeforeDwell` 0;
+- `pureFileTargets` 0, `otherTargets` 0, `startedWithoutUsableSample` 0;
+- targets are only `SAMPLE` or `SAMPLE|FILE`.
+
+**Original (P2) also passes if:** `upgradesOnSampleOrFileCards` 0 and `fileDowngradedToSample` 0.
+
+**Return** the four labelled results (e621 P1, P2; e926 P1, P2), including any `sanitationGuard: BLOCKED` result as it is. Afterwards, disable this script.

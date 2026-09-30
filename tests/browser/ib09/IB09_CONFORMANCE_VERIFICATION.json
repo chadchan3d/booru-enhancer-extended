@@ -1,0 +1,33 @@
+{
+  "checkpoint": "IB09",
+  "stage": "P-stage production-conformance package (local qualification)",
+  "production_commit": "16f821e",
+  "production_blob": "3161b51f7ef30e2dd5e7a1b6c94398f2745ad1e5",
+  "fixtures": "synthetic",
+  "checks": 29,
+  "passed": 29,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault dwell removed (production work at pointer-enter): caught",
+      "pass": true
+    },
+    {
+      "name": "fault option A overlay at pointer-enter (displayed SAMPLE reused before dwell): caught",
+      "pass": true
+    },
+    {
+      "name": "fault eligibility removed (FILE downgraded to SAMPLE): caught",
+      "pass": true
+    },
+    {
+      "name": "fault dwell 150 ms: caught",
+      "pass": true
+    },
+    {
+      "name": "fault executed body differs from the pinned artifact: identity MISMATCH",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
