@@ -3,7 +3,7 @@
 **Checkpoint:** IB09 — Still-image hover dwell and cost (blueprint §3 IB09, items 9–10; §5 G-HOVER row).
 **Result:** G-HOVER(e621/e926 qualified still-image class), E → **PASS(scope)**.
 - **IB09 is PARTIAL — NOT COMPLETE:** the P stage and live production conformance remain.
-- At E closeout, production was blob `bbaf9ac`. The P stage (commit `16f821e`, blob `3161b51`) is recorded in `IB09_P_STAGE.md`. IB10 has not started.
+- At E closeout, production was blob `bbaf9ac`. The P stage (commit `b9d133c`, blob `22e843c`) is recorded in `IB09_P_STAGE.md`. IB10 has not started.
 
 **Correction:** the first version of this record (commit `a423c33`) is superseded. It held the gate on a missing throttled session and described the other correctness sessions as waived. Both statements were wrong: the sessions below were run by the operator.
 
@@ -24,14 +24,42 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 
 | Host | Session | Quality / network | Observer | Record |
 | --- | --- | --- | --- | --- |
-| e621.net | A | Preview / ordinary | 1.1 | `IB09_LIVE_CHECK.md` §6. Accepted: 38 SAMPLE + 5 alias, 0 pure FILE; start 200–220 ms |
+| e621.net | A | Preview / ordinary | **1.2.0 rerun** (preferred; the earlier 1.1 run is superseded, `IB09_LIVE_CHECK.md` §6) | Operator-relayed below. Accepted: 0 pre-dwell media; start 200/200/220 ms; SAMPLE 27, SAMPLE\|FILE 9, pure FILE 0 |
 | e621.net | **B** | **Preview / THROTTLED** (DevTools Slow 4G, Disable cache) | 1.2 (by field vocabulary; see below) | This section, operator-relayed |
-| e621.net | C | Sample / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
-| e621.net | D | Original / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
-| e926.net | A | Preview / ordinary | — | Operator-accepted; relayed with the operator's session reports. The numeric rows are not in this agent's working record, so they are marked **UNVERIFIED here** until pasted in verbatim (no rerun) |
+| e621.net | C | Sample / ordinary | 1.1.0 | Operator-relayed below. Accepted: 0 before dwell, 0 upgrades, 0 downgrade, 0 stale |
+| e621.net | D | Original / ordinary | 1.2.0 | Operator-relayed below. Accepted: 0 before dwell, 0 still upgrades, 0 downgrade, 0 stale |
+| e926.net | A | Preview / ordinary | 1.2.0 | Operator-relayed below. Accepted: 22/22 once, start 200–220 ms, SAMPLE 21 + alias 1, pure FILE 0 |
 | e926.net | B | Preview / throttled | — | Optional (`IB09_LIVE_CHECK.md:117`); **not run**. Throttled usefulness is observed on e621 only |
 | e926.net | C | Sample / ordinary | 1.2 | `IB09_LIVE_CHECK.md` §7. Accepted: 80 STILL, 0 hover media before dwell, 0 upgrades, 0 stale |
 | e926.net | D | Original / ordinary | 1.3 | `IB09_V3_REOPEN.md` §1. Accepted for correctness: 0 before dwell, 0 downgrade, 0 stale; reopened V3 (decided: B) |
+
+
+**Other sessions, operator-relayed** (recorded as relayed; no rerun). The executed body is the same in every observer version.
+
+| Field | e621 A (1.2.0 rerun) | e621 C | e621 D | e926 A |
+| --- | --- | --- | --- | --- |
+| quality / network | Preview / ordinary | Sample / ordinary | Original / ordinary | Preview / ordinary |
+| observer | 1.2.0 | 1.1.0 | 1.2.0 | 1.2.0 |
+| generations (dropped beyond cap) | 80 | 80 (17) | 80 (12) | 80 (19) |
+| entry rendition | — | SAMPLE 72, SAMPLE\|FILE 8 | FILE 63, SAMPLE\|FILE 14, PREVIEW 3 | PREVIEW 80 |
+| stay ms (min / median / max) | — | 10 / 200 / 2180 | 10 / 250 / 1600 | 10 / 80 / 3190 |
+| quick passes / dwell reached | 34 / 46 | 39 / 41 | 37 / 43 | 58 / 22 |
+| new media before dwell | 0 | 0 | 0 | 0 |
+| Resource Timing loads before dwell | — | 0 | 0 | 0 |
+| quick passes starting upgrade | — | 0 | 0 | 0 |
+| still upgrades: eligible / started | 46/46, exactly once | 0 / 0 | 0 | 22 / 22, exactly once |
+| upgrade start ms | 200 / 200 / 220 | — | — | 200 / 210 / 220 |
+| targets | SAMPLE 27, SAMPLE\|FILE 9, pure FILE 0 | — | — | SAMPLE 21, SAMPLE\|FILE 1, pure FILE 0 |
+| displayed / left before displayable | — | — | — | 14 / 8 |
+| displayable after dwell ms | — | — | — | 0 / 20 / 350 |
+| media classes | STILL 74, VIDEO 4, ANIMATED 2 | — (1.1 has no split) | STILL 77, ANIMATED 3 | STILL 78, ANIMATED 2 |
+| other | — | moved from another card 77; same-card re-entry 2 | — | — |
+| upgrades on SAMPLE/FILE cards / FILE→SAMPLE | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| stale installed | 0 | 0 | 0 | 0 |
+
+"—" means the field was not relayed.
+
+**Arithmetic note (e621 A rerun).** The relayed target tally, SAMPLE 27 + SAMPLE|FILE 9 = 36, is less than the relayed 46/46 upgrades. The difference is not itemized in the relay, so it is recorded as relayed, not reconciled. No criterion depends on it: pure FILE 0, pre-dwell media 0, no downgrade and no stale install hold regardless.
 
 **e621 B, operator-relayed result:**
 
@@ -65,9 +93,9 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 | Required evidence | Status | Source |
 | --- | --- | --- |
 | Fake-clock dwell and 40 ms sweeps | Met | `dwell_prototype_assertions.cjs` Q3/Q4 (84/84); variant B sweep has 0 assignments (54/54) |
-| No pre-dwell network or source assignment | Met locally and live: 0 before dwell in e621 A/B, e926 C/D. The overlay-reuse fetches seen in e926 D (38/80) are removed by B by construction | `IB09_V3_REOPEN.md` §1–4 |
+| No pre-dwell network or source assignment | Met locally and live: 0 upgrade media before dwell in all seven sessions (e621 A/B/C/D, e926 A/C/D). The overlay-reuse fetches seen in e926 D (38/80) are removed by B by construction | `IB09_V3_REOPEN.md` §1–4 |
 | Leave / re-entry / viewer joins | Met | Q5, Q8–Q10 (`dwell_prototype_assertions.cjs:102-107`); B viewer-before-dwell shows no overlay; live stale installs 0 |
-| Wrong-slot bytes and aliases | Met | Eligibility follows the displayed/native relationship. Live: e621 A 5 alias, e621 B 2 alias, 0 pure FILE; video FILE targets separated (observer 1.2) |
+| Wrong-slot bytes and aliases | Met | Eligibility follows the displayed/native relationship. Live: e621 A (1.2.0) 9 alias, e621 B 2 alias, e926 A 1 alias, 0 pure FILE; video FILE targets separated (observer 1.2) |
 | Known cheap original / sample / unknown / animated classes | Met for the evidence collected. The native sample class is qualified. No separate cheap-original class was evidenced, so cost-inconclusive Original targets retain thumbnail/View under the item 11 fallback. Unknown and animated classes are not admitted | `hoverUpgradeEligible`; e926 C/D: 0 upgrades on SAMPLE/FILE cards |
 | Stale-generation protection | Met | Q8/Q9 + fault controls (`dwell_prototype_assertions.cjs:134-136`); live stale 0 |
 | V2 pilot, unthrottled | Met (regular profile; cache-limited) | `IB09_DWELL_PROTOTYPE.md` §1 |
@@ -100,7 +128,6 @@ All sessions ran the same executed body: production `bbaf9ac` + the 200 ms proto
 - logged-in contexts, post pages, the viewer (IB11), other hosts.
 
 **Limitations carried:**
-- the e621 C/D and e926 A numeric rows are UNVERIFIED in this record until pasted in (the operator accepted the sessions);
 - e926 B was not run (throttled usefulness is e621 only);
 - transfer sizes are mostly browser-hidden;
 - the live sessions ran overlay A. B's pre-dwell zero is local and by construction, and is confirmed by P-stage live production conformance (`IB09_P_STAGE.md`).

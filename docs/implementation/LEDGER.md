@@ -14,12 +14,12 @@ Frozen policy:
 
 Scope: e621.net and e926.net independently, logged-out native `/posts`, IB08-qualified still card.
 
-Production: commit `16f821e`, blob `3161b51` (hover module only, +50/−0). Local: P-stage assertions 115/115 (10 fault controls); conformance package verifier 29/29 (5).
+Production: commit `b9d133c`, blob `22e843c` (hover module only, +48/−0 against `bbaf9ac`). Local: P-stage assertions 111/111 (11 fault controls); conformance package verifier 30/30 (5). The dwell applies only to the qualified class (IB08 rendition fact `NATIVE_PREVIEW`/`OWNED_SAMPLE`/`OWNED_ORIGINAL`). The first P commit `16f821e` also covered still cards that fail the pattern; that was corrected.
 
 IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
 ## Current state
-- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `3161b51f7ef30e2dd5e7a1b6c94398f2745ad1e5` (commit `16f821e`, IB09 P stage). The previous blob `bbaf9ac` (`91fa86d`) is the IB08 and IB09 E-stage artifact.
+- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `22e843cbe27662fc27d17149534b055d7a249dae` (commit `b9d133c`, IB09 P stage). The previous blob `bbaf9ac` (`91fa86d`) is the IB08 and IB09 E-stage artifact.
 - **IB07 PASS(scope)** (native Post facts):
   - Rule34 listing identity and logged-out image post;
   - e621 and e926 listing and image post, each independently;
@@ -32,14 +32,16 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
 ## Verified
 - **IB09 held-out live sessions** (operator-run; normal Chrome; same executed body; observer 1.1–1.3). Nothing before dwell, no downgrade and no stale install in every relayed session:
-  - e621 A: Preview / ordinary; 38 SAMPLE + 5 alias, 0 pure FILE; start 200–220 ms;
+  - e621 A (1.2.0 rerun, preferred): Preview; 46 dwells, 46/46 once; start 200/200/220 ms; SAMPLE 27 + alias 9, pure FILE 0. The relayed tally of 36 is below 46 and is recorded as relayed;
   - **e621 B: Preview / THROTTLED** (Slow 4G, Disable cache): 80 generations, 34/34 eligible started once, at 200–220 ms (median 200); 32 SAMPLE + 2 alias, 0 pure FILE; 6/34 displayable before leave; displayable-after-dwell 0–1490 ms; cost 29 SIZE_UNAVAILABLE + 5 NO_ENTRY;
-  - e621 C (Sample), e621 D (Original), e926 A (Preview): operator-accepted. The numeric rows are UNVERIFIED in this record until pasted in verbatim (no rerun);
+  - e621 C (1.1.0): Sample; 80 generations, 0 upgrades, 0 downgrade, 0 stale;
+  - e621 D (1.2.0): Original; 80 generations, 0 still upgrades, 0 downgrade, 0 stale;
+  - e926 A (1.2.0): Preview; 22/22 once, at 200/210/220 ms; SAMPLE 21 + alias 1, pure FILE 0; displayable 0/20/350 ms after dwell;
   - e926 C: Sample; 80 STILL, 0 upgrades;
   - e926 D: Original; 0 downgrade. It reopened V3: 38/80 reuse-initiated fetches led to the decision for B.
-- **IB09 P stage on `3161b51`** (`IB09_P_STAGE.md`):
-  - `p_stage_assertions.cjs` 115/115 on the real production source: sweeps, Q1–Q10, alias, no-sample fallback, out-of-scope identity to `bbaf9ac`; 10/10 fault controls;
-  - conformance package verifier 29/29 (5/5);
+- **IB09 P stage on `22e843c`** (`IB09_P_STAGE.md`):
+  - `p_stage_assertions.cjs` 111/111 on the real production source: sweeps, Q1–Q10, alias, out-of-scope identity to `bbaf9ac` (no-sample, video, GIF, logged-in); 11/11 fault controls, including scope broadening;
+  - conformance package verifier 30/30 (5/5);
   - IB08 66/66, 24/24, 12/12, 14/14, 90/90; IB01–IB03, IB05, IB06 exit 0; IB07 pin-only exit 1 as before;
   - the E-stage suites are pinned to `bbaf9ac` and unchanged: 32/32, 84/84, 54/54; live package 57/57.
 - **IB09 hover baseline** (`tests/host/ib09/hover_baseline.cjs`): 32/32 on production `bbaf9ac`, with a reusable fake-clock harness (`hover_harness.cjs`). It covers e621 and e926 × preview/sample/original × S1–S8; the results are identical on both hosts.
@@ -79,12 +81,11 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - IB01–IB06 suites exit 0 on `bbaf9ac`.
 
 ## Unresolved
-- **IB09 live production conformance pending:** e621 and e926 × P1 Preview, P2 Original (`tests/browser/ib09/README.md`, "IB09 production conformance"; package `IB09_Production_Conformance.user.js` on `16f821e`).
-  - Production resolves V1/V2/V5 and replaces V3 with overlay B (`3161b51`), locally proven.
+- **IB09 live production conformance pending:** e621 and e926 × P1 Preview, P2 Original (`tests/browser/ib09/README.md`, "IB09 production conformance"; package `IB09_Production_Conformance.user.js` on `b9d133c`; pass criteria read `qualifiedClass` only).
+  - Within the qualified class, production resolves V1/V2/V5 and replaces V3 with overlay B (`22e843c`), locally proven.
   - Live confirmation of B's zero pre-dwell fetch comes from this run.
-- **IB09 scope boundary (unchanged by design):** video (IB10), GIF, logged-in pages, other routes and other hosts keep their existing immediate hover path, including pre-dwell work.
+- **IB09 scope boundary (unchanged by design):** still cards that fail the IB08 pattern (for example, no usable sample), video (IB10), GIF, logged-in pages, other routes and other hosts keep their existing immediate hover path, including pre-dwell work.
 - **IB09 E limitations carried:**
-  - the e621 C/D and e926 A numeric rows are UNVERIFIED here until pasted in verbatim;
   - e926 B (optional) was not run, so throttled usefulness is observed on e621 only;
   - transfer sizes are mostly browser-hidden (not counted as zero).
 - **IB08 retained limitations (non-blocking; completion record):**
@@ -100,4 +101,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs the IB09 production conformance: e621 and e926 × P1 Preview, P2 Original. The operator also pastes the e621 C/D and e926 A figures so they can be recorded verbatim. If conformance passes, write the IB09 §11 completion record. Do not mark IB09 complete before that. Do not start IB10.
+The operator runs the IB09 production conformance on `b9d133c`: e621 and e926 × P1 Preview, P2 Original. If conformance passes, write the IB09 §11 completion record. Do not mark IB09 complete before that. Do not start IB10.

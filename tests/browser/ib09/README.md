@@ -133,7 +133,7 @@ Run these on **e621** (`https://e621.net/posts`, logged out), then the same on *
 
 # IB09 production conformance (P stage)
 
-**IB09 P-stage live conformance.** `IB09_Production_Conformance.user.js` is the committed IB09 production, commit `16f821e` (blob `3161b51`), **unpatched**, with the same observe-only hooks, followed by the IB09P observer. The observer is the E-stage observer 1.3 with three option-B metrics added: `stillOverlayBeforeDwell`, `stillOverlayOffsetMs` and `hoverFetchesBeforeDwell`. It confirms that the real artifact behaves as the qualified policy on the live sites.
+**IB09 P-stage live conformance.** `IB09_Production_Conformance.user.js` is the committed IB09 production, commit `b9d133c` (blob `22e843c`), **unpatched**, with the same observe-only hooks, followed by the IB09P observer. The observer is the E-stage observer 1.3 plus a `qualifiedClass` report. That report covers only generations on G-HOVER qualified cards (the card's IB08 rendition fact, read only). Out-of-scope cards (video, GIF, cards without a usable sample) keep their previous hover path. They are counted in `outOfScopeGenerations`, not in the pass criteria. It confirms that the real artifact behaves as the qualified policy on the live sites.
 
 Local verification: `node tests/browser/ib09/build_ib09_conformance.cjs --check` and `node tests/browser/ib09/verify_ib09_conformance.cjs`.
 
@@ -160,8 +160,9 @@ Do not click thumbnails. Start with **IB09P: Start session — ordinary network*
 
 **Pass, per session:**
 - `production_body_identity` is `MATCH_EXPECTED_ARTIFACT`, with the right `site` and `quality`;
-- these are all 0: `newMediaBeforeDwell`, `stillOverlayBeforeDwell`, `hoverFetchesBeforeDwell`, `quickPassesStartingUpgrade`, `staleInstalled`;
-- `stillOverlayOffsetMs.min` ≥ 200.
+- in `qualifiedClass`, these are all 0: `newMediaBeforeDwell`, `overlayBeforeDwell`, `hoverFetchesBeforeDwell`, `quickPassesStartingAnything`;
+- `qualifiedClass.overlayOffsetMs.min` ≥ 200;
+- `staleInstalled` is 0.
 
 **Preview (P1) also passes if:**
 - `previewUpgrades.startedBeforeDwell` 0;

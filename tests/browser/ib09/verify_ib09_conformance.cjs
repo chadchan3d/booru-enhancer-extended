@@ -1,8 +1,8 @@
 'use strict';
 // Local qualification for IB09_Production_Conformance.user.js (no live site).
 // Static: the package is pinned. The derived script is current; its body minus
-// the observe-only hooks equals the committed P-stage production body (16f821e,
-// blob 3161b51); metadata is narrowed. Runtime: the REAL derived script runs
+// the observe-only hooks equals the committed P-stage production body (b9d133c,
+// blob 22e843c); metadata is narrowed. Runtime: the REAL derived script runs
 // in jsdom with a fake clock and the same synthetic image-load / Resource Timing
 // model as the E-stage verifier. Scripted pointer sequences stand in for the
 // operator here only; the observer itself generates no events. Every
@@ -26,7 +26,7 @@ const derived = fs.readFileSync(b.OUT, 'utf8');
 const REPO = path.resolve(__dirname, '../../..');
 const prodAtCommit = execFileSync('git', ['-C', REPO, 'show', `${b.COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 check('derived script matches a fresh build', derived === b.build().text);
-check('production blob at the pinned commit is 3161b51 (IB09 P stage)', execFileSync('git', ['-C', REPO, 'rev-parse', `${b.COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim() === b.EXPECTED_PRODUCTION_BLOB);
+check('production blob at the pinned commit is 22e843c (IB09 P stage)', execFileSync('git', ['-C', REPO, 'rev-parse', `${b.COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim() === b.EXPECTED_PRODUCTION_BLOB);
 const bodyInScript = derived.slice(derived.indexOf(WRAP_OPEN) + WRAP_OPEN.length, derived.indexOf(WRAP_CLOSE));
 check('executed body minus the observe-only hooks equals the committed production body (no prototype, no patch)', b.stripHooks(bodyInScript) === split(prodAtCommit).body);
 check('hooks are pure additions: 8 IB09L_HOOK calls, each guarded by typeof', (bodyInScript.match(/IB09L_HOOK\(/g) || []).length === 8 && (bodyInScript.match(/typeof IB09L_HOOK === 'function' && IB09L_HOOK\(/g) || []).length === 8);
@@ -42,10 +42,11 @@ const listingWith = (host, n, ext) => {
   if (!ext) return html;
   return html.replace(/data-file-ext="png"/g, `data-file-ext="${ext}"`).replace(/(data-file-url="[^"]*)\.png"/g, `$1.${ext}"`);
 };
-async function run({ url = 'https://e621.net/posts', quality = 'preview', text = derived, script, ext = null }) {
+async function run({ url = 'https://e621.net/posts', quality = 'preview', text = derived, script, ext = null, noSample = false }) {
   const menu = {}; let clock = null; const entries = []; const pending = new Set(); const cached = new Set();
   const host = new URL(url).hostname;
-  const c = h.load({ url, html: listingWith(host, 4, ext), source: text, settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
+  const html0 = listingWith(host, 4, ext);
+  const c = h.load({ url, html: noSample ? html0.replace(/data-sample-url="[^"]*"/g, 'data-sample-url=""') : html0, source: text, settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
     clock = hh.installFakeClock(w);
     w.performance.now = () => clock.now();
     w.performance.getEntriesByName = (n, t) => entries.filter((e) => e.name === n && (!t || e.entryType === t));
@@ -111,28 +112,35 @@ async function main() {
     check(`${host} menu: IB09P start (ordinary/throttled), marks and results only`, r.labels.filter((l) => l.startsWith('IB09P: ')).length === 6 && !r.labels.some((l) => l.startsWith('IB09L')), r.labels.join('|'));
     check(`${host} preview: identity MATCH, site, version P-1.0.0`, r.json && r.json.production_body_identity === 'MATCH_EXPECTED_ARTIFACT' && r.json.site === host && r.json.version === 'P-1.0.0', r.text.slice(0, 200));
     check(`${host} preview: 12 generations, 6 quick passes under dwell, 6 dwells`, s && s.generations === 12 && s.quickPassesUnderDwell === 6 && s.dwellReached === 6, JSON.stringify(s));
-    check(`${host} preview: nothing before dwell (no upgrade, no overlay, no hover-caused fetch); overlay offset >= 200`, s && s.newMediaBeforeDwell === 0 && s.stillOverlayBeforeDwell === 0 && s.hoverFetchesBeforeDwell === 0 && s.quickPassesStartingUpgrade === 0 && s.stillOverlayOffsetMs.min >= 200 && s.thumbNotDisplayedRendition === 0, JSON.stringify(s));
+    const qc = s && s.qualifiedClass;
+    check(`${host} preview: qualified class 12/12; nothing before dwell (no upgrade, no overlay, no hover-caused fetch); overlay offset >= 200; quick passes start nothing`, qc && qc.generations === 12 && s.outOfScopeGenerations === 0 && qc.newMediaBeforeDwell === 0 && qc.overlayBeforeDwell === 0 && qc.hoverFetchesBeforeDwell === 0 && qc.quickPassesStartingAnything === 0 && qc.overlayOffsetMs.min >= 200 && s.thumbNotDisplayedRendition === 0, JSON.stringify(s));
     check(`${host} preview: one SAMPLE upgrade per eligible dwell at >= 200 ms; no stale install`, s && s.previewUpgrades.eligibleGenerations === 6 && s.previewUpgrades.started === 6 && s.previewUpgrades.exactlyOnePerGeneration && s.previewUpgrades.startedBeforeDwell === 0 && s.previewUpgrades.startOffsetMs.min >= 200 && JSON.stringify(s.previewUpgrades.targetSlots) === '{"SAMPLE":6}' && s.staleInstalled === 0, JSON.stringify(s && s.previewUpgrades));
     check(`${host} preview: no leak; no enhancer network request`, leaks(r.text).length === 0 && r.network === 0, leaks(r.text).join(','));
     for (const [q, slot] of [['sample', 'SAMPLE'], ['original', 'FILE']]) {
       const x = await run({ url: `https://${host}/posts`, quality: q, script: MIX });
       const sx = S(x);
-      check(`${host} ${q}: entry ${slot}; nothing before dwell (overlay, fetch); no upgrade; FILE never downgraded`, sx && sx.entryRendition[slot] === 12 && sx.stillOverlayBeforeDwell === 0 && sx.hoverFetchesBeforeDwell === 0 && sx.upgradesOnSampleOrFileCards === 0 && sx.fileDowngradedToSample === 0 && sx.newMediaBeforeDwell === 0, JSON.stringify(sx));
+      check(`${host} ${q}: entry ${slot}; nothing before dwell (overlay, fetch); no upgrade; FILE never downgraded`, sx && sx.entryRendition[slot] === 12 && sx.qualifiedClass.generations === 12 && sx.qualifiedClass.overlayBeforeDwell === 0 && sx.qualifiedClass.hoverFetchesBeforeDwell === 0 && sx.qualifiedClass.newMediaBeforeDwell === 0 && sx.upgradesOnSampleOrFileCards === 0 && sx.fileDowngradedToSample === 0 && sx.newMediaBeforeDwell === 0, JSON.stringify(sx));
     }
   }
   // Out of scope: video keeps its immediate hover path (IB10), reported separately.
   {
     const r = await run({ quality: 'preview', script: MIX, ext: 'webm' });
     const s = S(r);
-    check('video cards (IB10): reported under otherMediaClasses.VIDEO; video upgrade still starts at enter (unchanged path); not counted as STILL', s && s.mediaClasses.VIDEO === 12 && s.otherMediaClasses.VIDEO.upgradesStarted > 0 && s.otherMediaClasses.VIDEO.startedBeforeDwell > 0 && s.previewUpgrades.eligibleGenerations === 0 && s.stillOverlayBeforeDwell === 0, JSON.stringify(s));
+    check('video cards (IB10): reported under otherMediaClasses.VIDEO; video upgrade still starts at enter (unchanged path); not counted as STILL', s && s.mediaClasses.VIDEO === 12 && s.otherMediaClasses.VIDEO.upgradesStarted > 0 && s.otherMediaClasses.VIDEO.startedBeforeDwell > 0 && s.previewUpgrades.eligibleGenerations === 0 && s.qualifiedClass.generations === 0 && s.outOfScopeGenerations === 12, JSON.stringify(s));
+  }
+  // Out of scope: a still card without a usable sample fails the IB08 pattern and keeps its previous path.
+  {
+    const r = await run({ quality: 'preview', script: MIX, noSample: true });
+    const s = S(r);
+    check('no-sample still cards: outside the qualified class (0 qualified, 12 out of scope); their previous immediate path is not counted against the qualified metrics', s && s.qualifiedClass.generations === 0 && s.outOfScopeGenerations === 12 && s.newMediaBeforeDwell > 0, JSON.stringify(s));
   }
 
   // ---- fault controls ----
   const faults = [
-    ['dwell removed (production work at pointer-enter)', (body) => mustReplace(body, '\t\t\tif (hoverStillCard(img)) {\n\t\t\t\tdwellTimer = setTimeout(', '\t\t\tif (false) {\n\t\t\t\tdwellTimer = setTimeout('), 'preview', (s) => s.newMediaBeforeDwell > 0 && s.stillOverlayBeforeDwell > 0],
-    ['option A overlay at pointer-enter (displayed SAMPLE reused before dwell)', (body) => mustReplace(body, '\t\t\tif (hoverStillCard(img)) {\n\t\t\t\tdwellTimer = setTimeout(', '\t\t\tshowImmediateThumbnail(img, token);\n\t\t\tif (hoverStillCard(img)) {\n\t\t\t\tdwellTimer = setTimeout('), 'sample', (s) => s.stillOverlayBeforeDwell > 0 && s.hoverFetchesBeforeDwell > 0],
-    ['eligibility removed (FILE downgraded to SAMPLE)', (body) => mustReplace(body, '\t\t\tif (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {', '\t\t\tif (false) {'), 'original', (s) => s.fileDowngradedToSample > 0],
-    ['dwell 150 ms', (body) => mustReplace(body, 'const HOVER_DWELL_MS = 200;', 'const HOVER_DWELL_MS = 150;'), 'preview', (s) => s.newMediaBeforeDwell > 0 || s.stillOverlayBeforeDwell > 0],
+    ['dwell removed (production work at pointer-enter)', (body) => mustReplace(body, '\t\t\tif (hoverQualifiedWrap(img)) {\n\t\t\t\tdwellTimer = setTimeout(', '\t\t\tif (false) {\n\t\t\t\tdwellTimer = setTimeout('), 'preview', (s) => s.qualifiedClass.newMediaBeforeDwell > 0 && s.qualifiedClass.overlayBeforeDwell > 0],
+    ['option A overlay at pointer-enter (displayed SAMPLE reused before dwell)', (body) => mustReplace(body, '\t\t\tif (hoverQualifiedWrap(img)) {\n\t\t\t\tdwellTimer = setTimeout(', '\t\t\tshowImmediateThumbnail(img, token);\n\t\t\tif (hoverQualifiedWrap(img)) {\n\t\t\t\tdwellTimer = setTimeout('), 'sample', (s) => s.qualifiedClass.overlayBeforeDwell > 0 && s.qualifiedClass.hoverFetchesBeforeDwell > 0],
+    ['eligibility removed (FILE downgraded to SAMPLE)', (body) => mustReplace(body, '\t\t\tif (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {', '\t\t\tif (false) {'), 'original', (s) => s.fileDowngradedToSample > 0],
+    ['dwell 150 ms', (body) => mustReplace(body, 'const HOVER_DWELL_MS = 200;', 'const HOVER_DWELL_MS = 150;'), 'preview', (s) => s.qualifiedClass.newMediaBeforeDwell > 0 || s.qualifiedClass.overlayBeforeDwell > 0],
   ];
   for (const [name, t, q, caught] of faults) {
     const { text } = b.build({ bodyTransform: t });

@@ -3055,17 +3055,15 @@ const IB07P_PRODUCTION_BODY = function () {
 			return { url, mediaType: isVideo ? 'video' : post.mediaType };
 		}
 
-		// IB09 still-image hover (G-HOVER PASS(scope)): a still card on a page the
-		// IB08 rendition contract admits (logged-out e621/e926 /posts). It waits for
-		// dwell. `qualified` is the IB08 still-image card pattern; other still cards
-		// there keep the thumbnail (no automatic upgrade). Every other card keeps
-		// its existing hover path (video is IB10; animated and other hosts unchanged).
-		function hoverStillCard(img) {
+		// IB09 G-HOVER(e621/e926 qualified still-image class) PASS(scope): a card
+		// whose IB08 rendition fact shows it matched the IB08 still-image pattern
+		// (logged-out e621/e926 /posts, still extension, two-source WebP/JPEG card
+		// with a usable native sample). Only these cards wait for dwell; every other
+		// card keeps its existing hover path (video is IB10; others out of scope).
+		function hoverQualifiedWrap(img) {
 			const wrap = img.closest('.be-thumb-wrap');
 			const rendition = wrap ? BE.modules.gallery?.getThumbRendition?.(wrap) : null;
-			if (!rendition || rendition === 'NATIVE_OUT_OF_SCOPE') return null;
-			if (!/^(jpe?g|png|webp)$/.test(String(wrap.getAttribute('data-file-ext') || '').toLowerCase())) return null;
-			return { wrap, qualified: rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' };
+			return rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' ? wrap : null;
 		}
 
 		// In the qualified class only a displayed native preview has cost evidence
@@ -3081,8 +3079,8 @@ const IB07P_PRODUCTION_BODY = function () {
 
 		function upgradeWhenReady(resolved, sourceImg, token) {
 			if (!resolved?.url || token !== requestToken) return;
-			const still = hoverStillCard(sourceImg);
-			if (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {
+			const qualifiedWrap = hoverQualifiedWrap(sourceImg);
+			if (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {
 				clearMediaState();
 				return;
 			}
@@ -3181,9 +3179,9 @@ const IB07P_PRODUCTION_BODY = function () {
 			clearTimeout(dwellTimer);
 			dwellTimer = null;
 
-			// IB09: a still card gets no hover work before dwell, not even the
+			// IB09: a qualified card gets no hover work before dwell, not even the
 			// overlay; leave, re-entry and an open viewer cancel it.
-			if (hoverStillCard(img)) {
+			if (hoverQualifiedWrap(img)) {
 				dwellTimer = setTimeout(() => {
 					dwellTimer = null;
 					typeof IB09L_HOOK === 'function' && IB09L_HOOK('dwell', { token, current: token === requestToken }); // IB09L
@@ -5488,7 +5486,7 @@ const IB07P_PRODUCTION_BODY = function () {
 };
 IB07P_PRODUCTION_BODY();
 /* IB09P PRODUCTION CONFORMANCE POSTAMBLE — test code, not production.
- * The body above is IB09 P-stage production (commit 16f821e, unpatched) with
+ * The body above is IB09 P-stage production (commit b9d133c, unpatched) with
  * observe-only IB09L_HOOK calls. Derived from the E-stage observer 1.3. This observer records the
  * operator's REAL pointer hovers (it generates no events) in bounded sessions.
  * Per hover generation, in memory only:
@@ -5505,7 +5503,7 @@ IB07P_PRODUCTION_BODY();
 (() => {
   'use strict';
 
-  const EXPECTED_BODY_SHA256 = 'a90ce131c5e5a3f80d47b8a88f175353c8b8844f1ddc6d5a399b7ec13615cd57';
+  const EXPECTED_BODY_SHA256 = '52ab2a5814aa625586bba5df7cba921149674110f68c07d254144781d74f4c41';
   const DWELL_MS = 200;
   const WRAP_FN_HEAD = 'function () {\n';
   const MAX_GENERATIONS = 80; // per session (bounded)
@@ -5573,6 +5571,7 @@ IB07P_PRODUCTION_BODY();
           entrySlot: slotOf(img?.currentSrc || img?.getAttribute?.('src') || '', card),
           media: mediaClassOf(card), usableSample: !!(card && String(card.getAttribute('data-sample-url') || '').trim()),
           cardImageLoadingAtEnter: !!img && img.complete === false,
+          qualified: ['NATIVE_PREVIEW', 'OWNED_SAMPLE', 'OWNED_ORIGINAL'].includes(BE?.modules?.gallery?.getThumbRendition?.(card)), // IB09P: G-HOVER class (read only)
           fromOtherCard: !!prev && prev.card !== card && prev.leaveT !== null && now() - prev.leaveT < 1000,
           reentrySameCard: !!prev && prev.card === card };
         session.generations.push(gen);
@@ -5646,11 +5645,19 @@ IB07P_PRODUCTION_BODY();
       unattributedCardMediaLoadsDuringHover: g.filter((x) => attributeEntries(x).OTHER > 0).length,
       cardImageLoadingAtEnter: g.filter((x) => x.cardImageLoadingAtEnter).length,
       quickPassesStartingUpgrade: g.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && up(x).length > 0).length,
-      // IB09P (option B): on a STILL card the overlay (displayed rendition) appears only at dwell,
-      // so no hover assignment of any kind, and no hover-caused fetch, precedes dwell.
-      stillOverlayBeforeDwell: g.filter((x) => x.media === 'STILL' && x.assigns.some((a) => a.kind === 'thumb' && a.t - x.enterT < DWELL_MS)).length,
-      stillOverlayOffsetMs: dist(g.filter((x) => x.media === 'STILL').map((x) => { const a = x.assigns.find((y) => y.kind === 'thumb'); return a ? a.t - x.enterT : NaN; })),
-      hoverFetchesBeforeDwell: g.filter((x) => { const e = attributeEntries(x); return e.UPGRADE + e.REUSE > 0; }).length,
+      // IB09P: the G-HOVER qualified class (IB08 still pattern). Option B: nothing - no overlay,
+      // no upgrade, no hover-caused fetch - precedes dwell. Out-of-scope cards keep their previous path.
+      qualifiedClass: (() => { const q = g.filter((x) => x.qualified); return {
+        generations: q.length,
+        quickPassesUnderDwell: q.filter((x) => stay(x) !== null && stay(x) < DWELL_MS).length,
+        dwellReached: q.filter((x) => x.dwellT !== null).length,
+        newMediaBeforeDwell: q.filter((x) => up(x).some((a) => a.t - x.enterT < DWELL_MS)).length,
+        overlayBeforeDwell: q.filter((x) => x.assigns.some((a) => a.kind === 'thumb' && a.t - x.enterT < DWELL_MS)).length,
+        overlayOffsetMs: dist(q.map((x) => { const a = x.assigns.find((y) => y.kind === 'thumb'); return a ? a.t - x.enterT : NaN; })),
+        hoverFetchesBeforeDwell: q.filter((x) => { const e = attributeEntries(x); return e.UPGRADE + e.REUSE > 0; }).length,
+        quickPassesStartingAnything: q.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && x.assigns.length > 0).length,
+      }; })(),
+      outOfScopeGenerations: g.filter((x) => !x.qualified).length,
       previewUpgrades: {
         eligibleGenerations: eligible.length,
         started: started.length,

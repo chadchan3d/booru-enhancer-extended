@@ -4,7 +4,10 @@
 // same observe-only hooks as the E-stage live check (the dwell hook sits in
 // production's dwell callback). It runs inside the IB07 wrapper, followed by
 // the IB09P observer: the E-stage observer 1.3 (ib09l_postamble.js) with its
-// labels renamed and three option-B metrics added (see POSTAMBLE_EDITS).
+// labels renamed, each generation tagged with the G-HOVER qualified class
+// (the card's IB08 rendition fact, read only), and a qualifiedClass report
+// added (see POSTAMBLE_EDITS). Out-of-scope cards keep their previous hover
+// path, so the pass criteria read qualifiedClass only.
 // Production (Booru_Enhancer.user.js) is not modified.
 // Pinning: removing the hook insertions reproduces the committed production body
 // byte-for-byte (the verifier checks this), and the C00 in-page hash pins the
@@ -17,8 +20,8 @@ const { split, BODY_START, WRAP_OPEN, WRAP_CLOSE } = require('../ib07/build_prod
 const { mustReplace } = require('../../host/ib09/dwell_prototype.cjs');
 const live = require('./build_ib09_live_package.cjs');
 
-const COMMIT = '16f821e';
-const EXPECTED_PRODUCTION_BLOB = '3161b51f7ef30e2dd5e7a1b6c94398f2745ad1e5';
+const COMMIT = 'b9d133c';
+const EXPECTED_PRODUCTION_BLOB = '22e843cbe27662fc27d17149534b055d7a249dae';
 const DWELL_MS = 200;
 const POSTAMBLE_MARKER = '/* IB09P PRODUCTION CONFORMANCE POSTAMBLE';
 const HOSTS = ['e621.net', 'e926.net'];
@@ -39,13 +42,24 @@ function stripHooks(src) { let s = src; for (const [a, b] of HOOKS) s = mustRepl
 const POSTAMBLE_EDITS = [
   ['/* IB09L DWELL LIVE CHECK POSTAMBLE — test code, not production.\n * The body above is production (commit 91fa86d) with the qualified 200 ms dwell\n * prototype and observe-only IB09L_HOOK calls.',
     `${POSTAMBLE_MARKER} — test code, not production.\n * The body above is IB09 P-stage production (commit ${COMMIT}, unpatched) with\n * observe-only IB09L_HOOK calls. Derived from the E-stage observer 1.3.`],
+  ["          cardImageLoadingAtEnter: !!img && img.complete === false,\n",
+    "          cardImageLoadingAtEnter: !!img && img.complete === false,\n"
+    + "          qualified: ['NATIVE_PREVIEW', 'OWNED_SAMPLE', 'OWNED_ORIGINAL'].includes(BE?.modules?.gallery?.getThumbRendition?.(card)), // IB09P: G-HOVER class (read only)\n"],
   ["      quickPassesStartingUpgrade: g.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && up(x).length > 0).length,\n",
     "      quickPassesStartingUpgrade: g.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && up(x).length > 0).length,\n"
-    + "      // IB09P (option B): on a STILL card the overlay (displayed rendition) appears only at dwell,\n"
-    + "      // so no hover assignment of any kind, and no hover-caused fetch, precedes dwell.\n"
-    + "      stillOverlayBeforeDwell: g.filter((x) => x.media === 'STILL' && x.assigns.some((a) => a.kind === 'thumb' && a.t - x.enterT < DWELL_MS)).length,\n"
-    + "      stillOverlayOffsetMs: dist(g.filter((x) => x.media === 'STILL').map((x) => { const a = x.assigns.find((y) => y.kind === 'thumb'); return a ? a.t - x.enterT : NaN; })),\n"
-    + "      hoverFetchesBeforeDwell: g.filter((x) => { const e = attributeEntries(x); return e.UPGRADE + e.REUSE > 0; }).length,\n"],
+    + "      // IB09P: the G-HOVER qualified class (IB08 still pattern). Option B: nothing - no overlay,\n"
+    + "      // no upgrade, no hover-caused fetch - precedes dwell. Out-of-scope cards keep their previous path.\n"
+    + "      qualifiedClass: (() => { const q = g.filter((x) => x.qualified); return {\n"
+    + "        generations: q.length,\n"
+    + "        quickPassesUnderDwell: q.filter((x) => stay(x) !== null && stay(x) < DWELL_MS).length,\n"
+    + "        dwellReached: q.filter((x) => x.dwellT !== null).length,\n"
+    + "        newMediaBeforeDwell: q.filter((x) => up(x).some((a) => a.t - x.enterT < DWELL_MS)).length,\n"
+    + "        overlayBeforeDwell: q.filter((x) => x.assigns.some((a) => a.kind === 'thumb' && a.t - x.enterT < DWELL_MS)).length,\n"
+    + "        overlayOffsetMs: dist(q.map((x) => { const a = x.assigns.find((y) => y.kind === 'thumb'); return a ? a.t - x.enterT : NaN; })),\n"
+    + "        hoverFetchesBeforeDwell: q.filter((x) => { const e = attributeEntries(x); return e.UPGRADE + e.REUSE > 0; }).length,\n"
+    + "        quickPassesStartingAnything: q.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && x.assigns.length > 0).length,\n"
+    + "      }; })(),\n"
+    + "      outOfScopeGenerations: g.filter((x) => !x.qualified).length,\n"],
   ["probe: 'ib09l-dwell-live-check', version: '1.3.0'", "probe: 'ib09p-production-conformance', version: 'P-1.0.0'"],
   ["{ probe: 'ib09l-dwell-live-check', site: SITE, sanitationGuard: 'BLOCKED' }", "{ probe: 'ib09p-production-conformance', site: SITE, sanitationGuard: 'BLOCKED' }"],
 ];

@@ -1,11 +1,11 @@
 {
   "checkpoint": "IB09",
   "stage": "P-stage production-conformance package (local qualification)",
-  "production_commit": "16f821e",
-  "production_blob": "3161b51f7ef30e2dd5e7a1b6c94398f2745ad1e5",
+  "production_commit": "b9d133c",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
   "fixtures": "synthetic",
-  "checks": 29,
-  "passed": 29,
+  "checks": 30,
+  "passed": 30,
   "failed": 0,
   "fault_controls": [
     {
