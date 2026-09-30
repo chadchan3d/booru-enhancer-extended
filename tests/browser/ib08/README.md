@@ -195,7 +195,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
 
 # IB08 P-stage production conformance (e621 / e926 rendition)
 
-**IB08 production conformance only.** `IB08_Rendition_Production_Conformance.user.js` is the committed production `Booru_Enhancer.user.js` (commit `b2b1d9f`, blob `a0f3041`), byte-for-byte, inside the IB07 wrapper, with a read-only postamble (`ib08p_postamble.js`).
+**IB08 production conformance only.** `IB08_Rendition_Production_Conformance.user.js` is the committed production `Booru_Enhancer.user.js` (commit `2765b9d`, blob `4ac1e36`: the P-stage contract plus the diagnosis-A terminal-disposal correction), byte-for-byte, inside the IB07 wrapper, with a read-only postamble (`ib08p_postamble.js`).
 - It runs only on e621.net and e926.net, and has no update URL.
 - Check P00 proves in the browser that the executed body is the committed artifact.
 
@@ -262,6 +262,6 @@ Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, U
 - The saved setting is shared, so set **Sample** again before e926 run S.
 - Do not reuse any e621 result.
 
-**Status after the first live run:** the dispose test (run D) is expected to FAIL on production `a0f3041` because of a production lifecycle defect (diagnosis A: the gallery re-enhances itself after dispose). Do not rerun until a corrected production artifact and a rebuilt package are provided.
+**Live rerun required:** all ten rows (e621 and e926, each S, D, P, O and L) on this artifact. Rows from the first live run (production `a0f3041`) are not carried forward. **Replace** the previously installed conformance script with this file; Tampermonkey must show it as the new build. P00 must read `MATCH_EXPECTED_ARTIFACT`.
 
 **Return** the ten sanitized results (e621 S, D, P, O, L; e926 S, D, P, O, L). If any result says `sanitationGuard: BLOCKED`, return it as it is. Afterwards, disable the conformance script and re-enable your normal enhancer if you use it.

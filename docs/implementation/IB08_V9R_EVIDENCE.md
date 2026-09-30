@@ -2,9 +2,9 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). **The first live production-conformance run is FAIL/PARTIAL (§6)**: dispose is not terminal in production (diagnosis A, correction proposed, not implemented). This file is not a completion record.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). **The diagnosis-A correction is implemented (§7). Live conformance on the new artifact is pending (all ten rows).** This file is not a completion record.
 
-**Production:** `Booru_Enhancer.user.js` blob `a0f3041c409a656f67fe23dc827b020b5cc399e6` (commit `b2b1d9f`), with the IB08 P-stage rendition contract. Before IB08: blob `32d0051` (commit `c551bb0`).
+**Production:** `Booru_Enhancer.user.js` blob `4ac1e36d01a81473d409cb6ff40a70fb9a77fc34` (commit `2765b9d`): the IB08 P-stage rendition contract (introduced in `b2b1d9f`, blob `a0f3041`) plus the diagnosis-A terminal-disposal correction. Before IB08: blob `32d0051` (commit `c551bb0`).
 
 ## 1. Native baseline (V9-R, live)
 
@@ -529,9 +529,42 @@ P09 checks the selected rendition (`currentSrc`); it was `NATIVE_FILE` on all fi
 - The correction changes the production blob. Exact-artifact conformance therefore requires **all ten rows** on the new artifact: e621 and e926, each S, D, P, O and L.
 - If carrying unaffected rows forward is accepted instead, the minimum is **e621 D, e926 D, e926 O and e926 L**. That requires the local proof that `applySiteThumbMedia` is byte-identical and that the diff is confined to the gallery lifecycle.
 
+## 7. Diagnosis-A correction (commit `2765b9d`, production blob `a0f3041` → `4ac1e36`)
+
+**Approved and implemented; confined to the gallery lifecycle:**
+
+| Location | Change |
+| --- | --- |
+| `Booru_Enhancer.user.js:3694-3697` | The gallery module keeps `disposedContainers` (`WeakSet`) |
+| `:3784` | `init(container)` first clears that container from the set, so explicit init always works |
+| `:4548` | `dispose()` records the container it held (it takes no argument) |
+| `:4555` | `wasDisposed(container)` is exposed on the gallery module |
+| `:5438-5439` | The app-level `bodyObserver` re-inits a container only if it is unmarked **and** not recorded as disposed |
+
+A genuinely new container is a different element, so it is not in the set and still initializes. `applySiteThumbMedia`, the rendition helpers, `BE.ownership`, the CSS and the settings schema are unchanged; the diff against `b2b1d9f` touches none of them.
+
+**Local qualification:**
+- **Lifecycle regression** `tests/host/ib08/dispose_lifecycle_regression.cjs`: **24/24**, e621 and e926 independently.
+  - Properties checked:
+    1. owned values restore at dispose;
+    2. no automatic re-enhancement after the 400 ms debounce or an unrelated body mutation;
+    3. native edit, move and source/picture replacements stay untouched;
+    4. a resize after dispose stays native;
+    5. explicit re-init works and clears the disposed state;
+    6. a genuinely new container initializes;
+    7. five dispose/init cycles are terminal each time, keep one action bar per card, and end native;
+    8. the body observer cannot bypass the barrier: marker absent, repeated body mutations, history navigation.
+  - **Fault controls (8/8):** barrier removed, dispose not recording and the previous production `a0f3041` are each caught by properties 2 and 8. Init not clearing is caught by property 5.
+- **L1–L9:** 66/66 with 19/19 production fault controls.
+- **IB01, IB02, IB03, IB05 and IB06:** exit 0.
+
+**Package rebuilt** from `2765b9d` (production body SHA-256 `82fea4833e044e9c046f3f635b49d19d8bd12606caf39fb29a6b945173308e6e`). Verifier **77/77** with 18 fault controls:
+- the dispose test past the debounce: every D check PASS on both hosts;
+- the barrier-removed production mutant is caught by D10, plus D02/D05/D06/D07;
+- regressions A/B/C reproduce the first live run with the revision-1 package.
+
 ## Open for G-RENDITION / IB08
 
-- **Production correction for diagnosis A:** needs approval, then implementation, local regression (the dispose-lifecycle test's known-failure oracle flips to PASS), and a package rebuild.
-- **Live production conformance on the corrected artifact,** e621 and e926 independently: all ten rows (minimum four if carry-forward is accepted).
+- **Live production conformance on artifact `4ac1e36`** (commit `2765b9d`): **all ten rows**, e621 and e926 independently, each S, D, P, O and L. First-run rows are not carried forward.
 - IB08 completion record only after that conformance is reviewed.
 - Danbooru rows: EXCLUDED(scope).

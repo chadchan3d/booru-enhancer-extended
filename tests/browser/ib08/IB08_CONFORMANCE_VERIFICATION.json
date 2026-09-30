@@ -1,18 +1,26 @@
 {
   "checkpoint": "IB08",
   "evidence_gate": "G-RENDITION",
-  "stage": "P-stage e621/e926 rendition production conformance package, revision 2 (after the first live run); local verification",
-  "known_production_failure": "dispose test on production a0f3041: D02/D05/D06/D07/D10 FAIL after the 400 ms body-observer debounce (diagnosis A, production lifecycle defect; correction proposed, not implemented)",
-  "production_commit": "b2b1d9f",
-  "production_source_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
-  "production_body_sha256": "dac83443e6ab7105810da8d96d90959349d65d3ac40ff2814396153efa37ab45",
+  "stage": "P-stage e621/e926 rendition production conformance package, revision 2, rebuilt for the diagnosis-A correction; local verification",
+  "diagnosis_a": "production a0f3041 failed the dispose test (gallery re-enhanced itself after dispose); the corrected production passes it past the debounce, and the barrier-removed mutant fails D10",
+  "production_commit": "2765b9d",
+  "production_source_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "production_body_sha256": "82fea4833e044e9c046f3f635b49d19d8bd12606caf39fb29a6b945173308e6e",
   "derived_script": "IB08_Rendition_Production_Conformance.user.js",
-  "derived_script_sha256": "b37948b93c6bbb7ad1e5cf07e26c1d48da648920136537868265a97d2ea33a83",
+  "derived_script_sha256": "6049a9535f865515dfa8139423c25e8b76555a365756c9a958942384afb10874",
   "currentSrc_model": "jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src",
-  "checks": 75,
-  "passed": 75,
+  "checks": 77,
+  "passed": 77,
   "failed": 0,
   "fault_controls": [
+    {
+      "name": "fault e621.net disposed-container barrier removed: caught by D10 (+ D02/D05/D06/D07), D01 still PASS",
+      "pass": true
+    },
+    {
+      "name": "fault e926.net disposed-container barrier removed: caught by D10 (+ D02/D05/D06/D07), D01 still PASS",
+      "pass": true
+    },
     {
       "name": "fault enhancer-signature write on a native non-card node (logged in): caught by P06",
       "pass": true

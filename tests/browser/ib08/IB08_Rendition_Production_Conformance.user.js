@@ -3659,6 +3659,10 @@ const IB07P_PRODUCTION_BODY = function () {
 	 * ============================================================ */
 	BE.modules.gallery = (() => {
 		let galleryContainer = null;
+		// IB08: containers this module disposed. Dispose is terminal for them:
+		// only an explicit init() re-enhances such a container, never the
+		// app-level body observer. A genuinely new container is unaffected.
+		const disposedContainers = new WeakSet();
 		let scrollObserver = null;
 		let sentinel = null;
 		let nextPageUrl = null;
@@ -3745,6 +3749,7 @@ const IB07P_PRODUCTION_BODY = function () {
 		}
 
 		function init(container) {
+			disposedContainers.delete(container);
 			const isNewContainer = galleryContainer !== container;
 
 			if (isNewContainer) {
@@ -4508,16 +4513,19 @@ const IB07P_PRODUCTION_BODY = function () {
 			disposeCardOwners();
 			galleryOwner?.dispose();
 			galleryOwner = null;
+			if (galleryContainer) disposedContainers.add(galleryContainer);
 			galleryContainer = null;
 			paginatorEl = null;
 			settingsListenerAttached = false;
 			resizeListenerAttached = false;
 		}
 
+		const wasDisposed = (container) => !!container && disposedContainers.has(container);
+
 		// IB08 provenance: which rendition a card shows (read-only, in memory).
 		const getThumbRendition = (wrap) => thumbRenditionByWrap.get(wrap) || null;
 
-		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll, getThumbRendition };
+		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll, getThumbRendition, wasDisposed };
 	})();
 
 	/* ============================================================ *
@@ -5395,7 +5403,8 @@ const IB07P_PRODUCTION_BODY = function () {
 		const bodyObserver = new MutationObserver(BE.dom.debounce(() => {
 			if (!BE.adapters.active) return;
 			const container = BE.adapters.active.getGalleryContainer();
-			if (container && !container.dataset.beGalleryInit) {
+			// A container the gallery disposed stays native until an explicit init.
+			if (container && !container.dataset.beGalleryInit && !BE.modules.gallery.wasDisposed(container)) {
 				BE.log.debug('[Nav] gallery container replaced, re-initializing gallery module');
 				safeStage('Gallery re-init', () => {
 					BE.modules.gallery.init(container);
@@ -5445,7 +5454,7 @@ IB07P_PRODUCTION_BODY();
 (() => {
   'use strict';
 
-  const EXPECTED_BODY_SHA256 = 'dac83443e6ab7105810da8d96d90959349d65d3ac40ff2814396153efa37ab45';
+  const EXPECTED_BODY_SHA256 = '82fea4833e044e9c046f3f635b49d19d8bd12606caf39fb29a6b945173308e6e';
   const WRAP_FN_HEAD = 'function () {\n';
   const SETTLE_MS = 2500;
   const LOAD_WAIT_MS = 8000;

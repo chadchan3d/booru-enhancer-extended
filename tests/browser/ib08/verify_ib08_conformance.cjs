@@ -13,10 +13,10 @@
 //   B - a card whose native file and sample URLs are the same (alias);
 //   C - a logged-in page with native and enhancer-UI writes off the cards.
 // The committed revision-1 package (commit 595629e) must reproduce each live
-// failure shape; revision 2 must attribute it correctly. Against production
-// a0f3041 the dispose test is a KNOWN FAILURE (production lifecycle defect,
-// diagnosis A): D02/D05/D06/D07/D10 FAIL, and D01 PASS once judged at
-// dispose time.
+// failure shape; revision 2 must attribute it correctly. Production a0f3041
+// failed the dispose test (diagnosis A, gallery re-enhanced itself after
+// dispose). The corrected production must pass it after the debounce, and a
+// production mutant that removes the disposed-container barrier must fail D10.
 // Requires `npm install` in tests/host/ib07 (pinned jsdom).
 const fs = require('fs');
 const path = require('path');
@@ -168,7 +168,7 @@ async function main() {
   // Revision-1 package (as run live) for the regressions.
   const OLD_REV = '595629e';
   const oldDerived = execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', `${OLD_REV}:tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-  const KNOWN_DISPOSE_ON_A0F3041 = { P00: 'PASS', D01: 'PASS', D10: 'FAIL', D02: 'FAIL', D03: 'PASS', D04: 'PASS', D05: 'FAIL', D06: 'FAIL', D07: 'FAIL', D08: 'PASS', D09: 'PASS' };
+  const BARRIER_REMOVED = (t) => mut(t, 'if (container && !container.dataset.beGalleryInit && !BE.modules.gallery.wasDisposed(container)) {', 'if (container && !container.dataset.beGalleryInit) {');
   for (const host of ['e621.net', 'e926.net']) {
     // A: live shape reproduced by revision 1 (D01 FAIL although the counts match; D02/D05/D06/D07 FAIL; residue).
     const o = await runScript({ url: `https://${host}/posts`, text: oldDerived, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
@@ -177,12 +177,17 @@ async function main() {
     const ores = (o.d2.j.checks.find((x) => x.id === 'D07') || {}).detail || {};
     check(`regression A ${host}: revision-1 package reproduces the live dispose shape (D01 FAIL with writes == expected; D02/D05/D06/D07 FAIL; D03/D04/D08/D09 PASS; residue > 0)`,
       os.D01 === 'FAIL' && od.disposeWrites === od.expected && ['D02', 'D05', 'D06', 'D07'].every((k) => os[k] === 'FAIL') && ['D03', 'D04', 'D08', 'D09'].every((k) => os[k] === 'PASS') && ores.residue > 0, JSON.stringify([os, od, ores]));
-    // A: revision 2 attributes it: D01 PASS at dispose time, D10 FAIL (re-enhancement) - known production failure.
+    // A: corrected production - dispose stays terminal past the debounce; every D check PASS.
     const r = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     const st = statusOf(r.d2.j);
     const d10 = (r.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
-    check(`${host} dispose test on a0f3041: KNOWN production failure attributed (D01 PASS at dispose time; D10 FAIL with re-enhanced cards; exact expected status map)`,
-      JSON.stringify(st) === JSON.stringify(KNOWN_DISPOSE_ON_A0F3041) && d10.reenhancedCards > 0 && d10.afterDisposeSignatureWrites > 0, JSON.stringify([st, d10]));
+    check(`${host} dispose test past the debounce on the corrected production: every D check PASS, no re-enhanced card`,
+      Object.keys(st).length === 11 && Object.values(st).every((x) => x === 'PASS') && d10.reenhancedCards === 0 && d10.afterDisposeSignatureWrites === 0, JSON.stringify([st, d10]));
+    // Fault: production with the barrier removed (the a0f3041 behavior) must fail D10 with the same attribution as live.
+    const fb = await runScript({ url: `https://${host}/posts`, text: BARRIER_REMOVED(derived), steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const fs2 = statusOf(fb.d2.j);
+    check(`fault ${host} disposed-container barrier removed: caught by D10 (+ D02/D05/D06/D07), D01 still PASS`,
+      fs2.D10 === 'FAIL' && ['D02', 'D05', 'D06', 'D07'].every((k) => fs2[k] === 'FAIL') && fs2.D01 === 'PASS', JSON.stringify(fs2));
     check(`${host} dispose test: no leak`, leaks(r.d1.t + r.d2.t).length === 0);
     // Immediately after dispose (before the debounce) everything is restored: the owner restoration itself is correct.
     const q = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
@@ -222,12 +227,12 @@ async function main() {
     const firstLabel = derived.replace("if (!rels.includes(expectedRelation[s.want])) counts.relationMismatch++;", 'if (rels[0] !== expectedRelation[s.want]) counts.relationMismatch++;');
     const g = await runScript({ url: 'https://e926.net/posts', quality: 'original', alias: true, text: firstLabel });
     check('fault P09 first-label comparison: caught on the alias card', firstLabel !== derived && statusOf(g.check.j).P09 === 'FAIL');
-    // Fault: D01 judged at step 2 again must fail on a0f3041 after the debounce (the live D01 shape).
-    const lateD01 = derived.replace('dw.length === expectedDisposeWrites && disposeRun.restoredAtDispose === expectedDisposeWrites,', "dw.length === expectedDisposeWrites && dw.every((r) => r.target.getAttribute('srcset') === [...native.values()].find((n) => n.sources[0] === r.target)?.sourceAttrs[0][1]),");
+    // Fault: D01 judged at step 2 again, on production without the barrier, reproduces the live D01 shape.
+    const lateD01 = BARRIER_REMOVED(derived).replace('dw.length === expectedDisposeWrites && disposeRun.restoredAtDispose === expectedDisposeWrites,', "dw.length === expectedDisposeWrites && dw.every((r) => r.target.getAttribute('srcset') === [...native.values()].find((n) => n.sources[0] === r.target)?.sourceAttrs[0][1]),");
     const l = await runScript({ url: 'https://e621.net/posts', text: lateD01, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     check('fault D01 judged after re-enhancement: reproduces the live D01 FAIL', lateD01 !== derived && statusOf(l.d2.j).D01 === 'FAIL');
-    // Fault: D10 disabled must let the re-enhancement through only if D10 is removed (proves D10 is the attributing check).
-    const noD10 = derived.replace("after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,", 'true,');
+    // Fault: with D10 disabled, re-enhancement (barrier removed) is attributed by no dispose-time check (D01 stays PASS).
+    const noD10 = BARRIER_REMOVED(derived).replace("after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,", 'true,');
     const n = await runScript({ url: 'https://e621.net/posts', text: noD10, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     check('fault D10 disabled: the re-enhancement is then attributed by no dispose-time check (D01 stays PASS)', noD10 !== derived && statusOf(n.d2.j).D10 === 'PASS' && statusOf(n.d2.j).D01 === 'PASS');
   }
@@ -260,8 +265,8 @@ async function main() {
 
   const passed = results.filter((x) => x.pass).length;
   const summary = {
-    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 2 (after the first live run); local verification',
-    known_production_failure: 'dispose test on production a0f3041: D02/D05/D06/D07/D10 FAIL after the 400 ms body-observer debounce (diagnosis A, production lifecycle defect; correction proposed, not implemented)',
+    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 2, rebuilt for the diagnosis-A correction; local verification',
+    diagnosis_a: 'production a0f3041 failed the dispose test (gallery re-enhanced itself after dispose); the corrected production passes it past the debounce, and the barrier-removed mutant fails D10',
     production_commit: COMMIT, production_source_blob: EXPECTED_PRODUCTION_BLOB, production_body_sha256: built.bodySha,
     derived_script: path.basename(OUT), derived_script_sha256: crypto.createHash('sha256').update(derived).digest('hex'),
     currentSrc_model: 'jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src',
