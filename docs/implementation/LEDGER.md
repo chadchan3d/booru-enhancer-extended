@@ -1,107 +1,50 @@
 # Ledger
 
 ## Current milestone
-**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. The P stage is implemented (commit `b2b1d9f`). The first live production-conformance run was FAIL/PARTIAL (evidence record §6). The diagnosis-A correction is implemented (commit `2765b9d`, §7). The second live run on `4ac1e36` was PASS except D10, a package measurement defect (§8). **The presentation residue blocked closure and is corrected with CSS scoping** (commit `91fa86d`, §9). **One final live run of all ten rows on production `bbaf9ac` is pending.** IB08 is not closed.
+**IB08 — Reversible native rendition integration: COMPLETE, PASS(scope)** (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
-IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
+The next milestone, **IB09 — Still-image hover dwell and cost**, is eligible but not started. It needs its own assignment.
 
 ## Current state
-- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `bbaf9ac63f5c0292018b974f00c7b30d8b478bb5` (commit `91fa86d`): the IB08 P stage (`b2b1d9f`), terminal gallery disposal (`2765b9d`), and card presentation CSS scoped to the active gallery (`91fa86d`). IB07 closed on blob `32d0051` (commit `c551bb0`).
-- IB07 PASS(scope):
-  - Rule34: native listing identity (no listing Post) and logged-out image post;
-  - e621 and e926 (independently): native listing Posts and logged-out image post;
-  - Gelbooru: logged-out native image post; listing gallery inactive where no candidate container matches.
-  - All native-only; the unusual slot shapes fail closed and stay NOT OBSERVED LIVE.
-- Post contract:
-  - `siteId` is the canonical site identity for qualified hosts;
-  - `pageCount` is `null` (unknown) or a positive integer, set to 1 only by the qualified single-item producers.
-- Rebuilt conformance packages and exact-artifact results are committed.
-- IB08 artifacts (`tests/browser/ib08/`, operator steps in its `README.md`):
-  - baseline probe `IB08_V9R_Baseline_Probe.user.js`, read-only;
-  - B1 login-state probe `IB08_B1_Login_State_Probe.user.js` 1.1.0, read-only; reports login-relevant names with value classes, and counts for everything else;
-  - ownership experiment `IB08_V9R_Ownership_Experiment.user.js`, isolated E stage. It makes one owned WebP-source srcset change per card on five pattern cards; simulates native edit, moved source, replaced source and replaced picture; disposes; then checks after a resize.
-- **G-RENDITION transition (E stage): OPEN → PASS(scope).** Scope:
-  - e621.net and e926.net, each independently;
-  - logged-out native listing;
-  - the observed two-source WebP/JPEG pattern (single-candidate srcsets, no `sizes`/`media`, `img` src only);
-  - one owned WebP-source srcset set to the native sample;
-  - Tampermonkey × Chrome at the operator's DPR (versions and DPR not relayed);
-  - non-pattern cards stay native.
-
-  Not covered: other routes, logged-in state, other media, DPRs, runtimes, hosts or patterns, and the `original` rendition. Danbooru row: EXCLUDED(scope). This is not production conformance and not an IB08 PASS.
-- **IB08 P-stage contract in production** (evidence record §5):
-  - **Admission:** e621.net/e926.net `/posts` with `body[data-user-is-anonymous="true"]` and the proven two-source WebP/JPEG card pattern.
-  - **Writes:** a single owned write to the WebP source srcset. `sample` uses the card's native sample URL; `original` uses its native file URL; `preview` stays native.
-  - **Everything else stays native:** logged-in pages, other routes, non-pattern cards, video/GIF. `media.thumbQuality` stays stored.
-  - **Undo:** IB04 dispose. Gallery disposal is terminal for the disposed container: the app-level body observer no longer re-inits it; only an explicit `gallery.init` does, and a genuinely new container still initializes.
-  - **Presentation:** `.be-thumb-wrap` and `.be-thumb-img` rules are scoped with `:where(.be-gallery-grid)` (specificity unchanged), so a stale token left by the IB04 native-touch rule has no enhancer presentation after dispose. Ownership semantics are unchanged.
-  - The B3 release note is in `CHANGELOG.md`.
-- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`, built from `91fa86d`.
-  - Revision 2 added write attribution by region and signature, alias-aware P09 and D01 at dispose time.
-  - Revision 3 makes D10 use direct re-enhancement indicators (gallery.init calls, new owners, action bars, signature writes) and reports stale class state separately.
-  - Revision 4 adds D11: no enhancer stylesheet rule matches any card, image or the container after dispose.
+- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `bbaf9ac63f5c0292018b974f00c7b30d8b478bb5` (commit `91fa86d`), unchanged by closeout.
+- **IB07 PASS(scope)** (native Post facts):
+  - Rule34 listing identity and logged-out image post;
+  - e621 and e926 listing and image post, each independently;
+  - Gelbooru logged-out image post.
+- **IB08 PASS(scope)**, G-RENDITION PASS(scope). Scope: e621.net and e926.net independently, logged-out (`body[data-user-is-anonymous="true"]`) native `/posts`, the two-source WebP/JPEG card pattern.
+  - **Writes:** a single owned write to the WebP source srcset. `sample` uses the native sample URL; `original` uses the native file URL; `preview` stays native.
+  - **Everything else stays native;** `media.thumbQuality` stays stored.
+  - **Dispose:** restores owned values, keeps native changes, is terminal for the disposed container, and leaves no enhancer presentation. Card CSS is scoped with `:where(.be-gallery-grid)`.
+  - **Release note:** `CHANGELOG.md`, "Unreleased — e621/e926 grid thumbnail quality".
 
 ## Verified
-- IB08 live baseline, operator-relayed, e621 and e926 independently:
-  - all 6 sampled cards kept card/img/picture/source identity across the wide→narrow resize;
-  - each picture had 2 single-candidate WebP/JPEG sources, with no `sizes` or `media`;
-  - `currentSrc` stayed `NATIVE_PREVIEW_WEBP`.
-- IB08 live ownership experiment, operator-relayed, e621 and e926 independently: `ALL_EXPECTATIONS_MET`. Observed:
-  - control restoration;
-  - native-edit preservation;
-  - moved-source preservation;
-  - replaced-source and replaced-picture protection;
-  - post-resize behavior.
-- IB08 local:
-  - baseline probe verifier 56/56, 6/6 fault controls;
-  - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom;
-  - B1 login-state probe 1.1.0 verifier 59/59, 12/12 fault controls, synthetic fixtures; includes a regression reproducing the 1.0.0 live block;
-  - P-stage production assertions L1–L9 66/66, 19/19 production fault controls (`tests/host/ib08/rendition-result.json`);
-  - production-conformance package revision 4, built from `91fa86d`: verifier 90/90, 23 fault controls. Regressions reproduce both live runs' failure shapes; the barrier-removed mutant is caught by D10; the previous unscoped CSS is caught by D11; the container-class rewrite is detected by D11;
-  - presentation-residue regression `tests/host/ib08/presentation_residue_regression.cjs` 14/14 on both hosts; the previous unscoped CSS is the fault control;
-  - D10 diagnosis `tests/host/ib08/dispose_reenhancement_indicators.cjs` 12/12 on both hosts. A site class touch leaves stale `be-thumb-wrap` with zero init calls, owners, wrapper calls, action bars and rendition writes; the positive control and the barrier-removed fault register on every indicator;
-  - lifecycle regression `tests/host/ib08/dispose_lifecycle_regression.cjs` 24/24 on both hosts. Properties 1–8 hold; 8/8 fault controls, including the previous production `a0f3041`, are caught;
-  - L1–L9 66/66 (19/19), D10 indicators 12/12, lifecycle 24/24 (8/8), all on `bbaf9ac`; IB01–IB06 exit 0.
-- IB08 B1 live, operator-relayed, e621 and e926 independently: `body[data-user-is-anonymous]` is `true` when logged out and `false` when logged in.
-  - `data-user-level` corroborates.
-  - `data-user-is-member` is rejected, because it differs between hosts when logged in.
-- Live exact-artifact conformance on `c551bb0`: 7/7 PASS, 0 failed checks, C00 matched on each.
-  - Rule34 listing 42 cards and image post;
-  - e621 listing 72/72 and image post;
-  - e926 listing 74/74 and image post;
-  - Gelbooru image post 16/16.
-- Local:
-  - item 9 31/31; `pageCount` 11/11; excluded hosts and preferences 8/8;
-  - Gelbooru native-post 14/14; conformance verifiers 60/60 and 29/29; slot-probe verifier 53/53;
-  - IB01 14/14; IB02 21/21; IB03 11/11; IB05 23/23; IB06 21/21.
-- No endpoint strategy is reachable: the Gelbooru-family DAPI/HTML helpers and the legacy `normalizeE621` are uncalled, and the native producers contain no network call.
+- **IB08 final live D rows on `bbaf9ac`,** operator-relayed, PASS on e621 and e926:
+  - D01 67/67 and 70/70;
+  - D10 (no re-init, owners, action bars or writes after dispose);
+  - D11 (no enhancer presentation);
+  - residue 0.
+- **IB08 S/P/O/L:** carried forward from the second live run on `4ac1e36`. The only change since then is the CSS scoping, and the rows were requalified locally.
+- **IB08 local on `bbaf9ac`:**
+  - L1–L9 66/66 (19/19 fault controls);
+  - lifecycle 24/24 (8/8);
+  - D10 indicators 12/12;
+  - presentation 14/14;
+  - package verifier 90/90 (23 fault controls).
+- IB08 E stage: V9-R baseline and ownership experiment, live on both hosts; B1 marker live on both hosts.
+- IB07 live exact-artifact conformance on `c551bb0`: 7/7 PASS.
+- IB01–IB06 suites exit 0 on `bbaf9ac`.
 
 ## Unresolved
-- **First live production-conformance run (production `a0f3041`, package revision 1): FAIL/PARTIAL.**
-  - PASS: e621 S/P/O/L and e926 S/P. e621 O had `settled:false`; P09 passed, so no repeat is required.
-  - FAIL:
-    - e621 D and e926 D: diagnosis A.
-    - e926 O: P09 only. Diagnosis B: a file/sample alias; a package defect, production correct.
-    - e926 L: P06 only. Diagnosis C: 4 off-card writes, not the rendition path, source undetermined; a package defect, since there was no provenance.
-- **Diagnosis A:** a production lifecycle defect, pre-existing since the import; **corrected in `2765b9d`** (evidence record §7).
-  - `gallery.dispose()` removed the owned `data-be-gallery-init` marker, and the unowned app-level `bodyObserver` re-inited the gallery within 400 ms (live residue 67/71 = owned − 2).
-  - The fix is a disposed-container barrier in the gallery lifecycle only.
-- **Second live run (production `4ac1e36`, package revision 2): PASS except D10 on both hosts.**
-  - S, P, O and L PASS on e621 and e926.
-  - D: D01–D09 PASS, residue 0; D10 FAIL only.
-  - `reenhancedCards` 70/75 counted cards still carrying the owned `be-thumb-wrap` class. It is left by the IB04 whole-record native-touch rule after a site class rewrite; it is not a re-init. There were zero post-dispose signature and card-media writes, and a re-init would have written the sample on every pattern card.
-  - Package measurement defect, corrected in revision 3; no production change for D10.
-- **Presentation residue:** decided as blocking and corrected in `91fa86d` (CSS scoping only; G-OWN untouched).
-  - **Residual case:** if the site also rewrites the gallery container's class, `be-gallery-grid` survives dispose under the same IB04 rule. Live D11 measures this.
-- **Final live run required:** all ten rows on production `bbaf9ac` (e621 S/D/P/O/L, e926 S/D/P/O/L) with package revision 4. No earlier rows are carried forward.
-- IB08 completion record only after that run is reviewed.
-- IB07 host suites pin the IB07 blob, so they now exit 1 on the pin alone. All their assertions and controls pass (L9). The historical results are not edited.
-- **Retained limitations (not blockers):**
-  - Live request counting starts at the postamble. Synchronous pre-postamble startup requests are not counted live; the local item 9 T1/T2 suite is the startup evidence.
-  - The earlier slot-provenance live runs stay POTENTIALLY CONTAMINATED / SUPERSEDED.
-  - Tampermonkey and Chrome versions were not relayed.
-- Deferred to later checkpoints: video/GIF, pagination, hover, viewer, favorites/actions, downloads, other hosts, Pixiv.
-- Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
+- **IB08 retained limitations (non-blocking; completion record):**
+  - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
+  - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
+  - S/P/O/L are carried forward from `4ac1e36`;
+  - runtime versions and DPR were not relayed;
+  - the first run's four e926 logged-in off-card writes stayed unattributed (not the rendition path).
+- **IB07 host suites** pin the IB07 blob, so they exit 1 on the pin alone. All their assertions and controls pass; the historical results are not edited.
+- **Retained:** live request counting starts at the postamble; the local item 9 T1/T2 suite is the startup evidence. The earlier slot-provenance live runs stay POTENTIALLY CONTAMINATED / SUPERSEDED.
+- **Deferred to later checkpoints:** hover (IB09), video/GIF (IB10), viewer (IB11), pagination (IB12), downloads (IB13), favorites/actions (IB14), other hosts, Pixiv (IB17).
+- **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator installs package revision 4 (built from `91fa86d`) and runs all ten rows. Review the results, then the IB08 completion record can be considered. Do not start IB09.
+Await an explicit IB09 assignment. Do not start IB09 without it.

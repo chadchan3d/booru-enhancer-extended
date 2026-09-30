@@ -2,7 +2,7 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). The diagnosis-A correction is implemented (§7). The second live run on `4ac1e36` was PASS except D10, a package measurement defect (§8). **The presentation residue is corrected with CSS scoping (§9, production `bbaf9ac`). One final clean live run of all ten rows on that artifact is pending.** This file is not a completion record.
+**Status:** **IB08 COMPLETE — PASS(scope)** (`docs/implementation/IB08_COMPLETION_RECORD.md`). G-RENDITION is PASS(scope) for the qualified e621 and e926 logged-out `/posts` two-source WebP/JPEG pattern, each host independently. The final live D rows on production `bbaf9ac` passed (§10); the S/P/O/L rows are carried forward from `4ac1e36` (§10).
 
 **Production:** `Booru_Enhancer.user.js` blob `bbaf9ac63f5c0292018b974f00c7b30d8b478bb5` (commit `91fa86d`). It contains:
 - the IB08 P-stage rendition contract (`b2b1d9f`, blob `a0f3041`);
@@ -682,9 +682,28 @@ The CSS fix removes the residue's effect without writing to a site-touched attri
 
 **Live:** one final clean run of **all ten rows** on production `bbaf9ac` (e621 and e926, each S, D, P, O and L). Earlier rows were on superseded artifacts.
 
-## Open for G-RENDITION / IB08
+## 10. Final live D rows (production `bbaf9ac`, package revision 4) — PASS on both hosts
 
-- **Final live run:** all ten rows on production `bbaf9ac` (commit `91fa86d`) with package revision 4.
-- If D11 fails because the site also rewrote the container class, that residual case needs a decision.
-- IB08 completion record only after that run is reviewed.
-- Danbooru rows: EXCLUDED(scope).
+**Evidence form:** operator-relayed summary. P00 was `MATCH_EXPECTED_ARTIFACT` on both rows.
+
+| Check | e621.net | e926.net |
+| --- | --- | --- |
+| D01 | PASS: `disposeWrites 67`, `restoredAtDispose 67`, expected 67 | PASS: 70 / 70 / 70 |
+| D10 | PASS: galleryInitCalls 0, ownersCreated 0, actionBarsAdded 0, thumbWrapperCalls 0, signatureWrites 0, cardMediaWrites 0 | PASS: all 0 |
+| Stale state (informational) | cardsWithEnhancerClass 71, ofWhichSiteTouchedClass 71 | 75, 75 |
+| D02–D07 | PASS; residue 0 | PASS; residue 0 |
+| D11 | PASS: cards 0, images 0, container presentation false, `containerKeepsGalleryClass` false | PASS: same |
+| D08, D09 | PASS, PASS | PASS, PASS |
+| Overall | **PASS** | **PASS** |
+
+The stale-state figures confirm the §8 mechanism live: every card that kept the owned class had its class rewritten by the site. D11 confirms the §9 correction live: those tokens carry no enhancer presentation. The container kept no gallery class, so the residual container case (§9) did not occur.
+
+**Carried-forward rows (operator decision).** S, P, O and L passed on both hosts in the second live run, on production `4ac1e36` (§8). They are carried forward as exact-behavior evidence and are **not** re-run on `bbaf9ac`.
+- The only production change since then is `91fa86d` (two presentation selectors scoped under the active gallery).
+- Rendition logic, admission, ownership, the mutation contract, settings and saved intent are unchanged.
+- They were requalified locally on `bbaf9ac` (L1–L9 66/66, 19/19).
+- The changed behavior (disposal presentation) passed live in the D rows above.
+
+## Closed
+
+IB08 is complete, PASS(scope). See `docs/implementation/IB08_COMPLETION_RECORD.md`. Danbooru rows: EXCLUDED(scope).
