@@ -4585,7 +4585,11 @@
     box-sizing: border-box;
     overflow-x: hidden;
 }
-			.be-thumb-wrap {
+			/* IB08: card presentation applies only inside an active gallery
+			   container. A be-thumb-wrap / be-thumb-img token that survives
+			   dispose (the IB04 owner leaves a class a site rewrote) then has no
+			   visual effect. :where() keeps the original specificity. */
+			:where(.be-gallery-grid) .be-thumb-wrap {
 				position: relative;
 				overflow: hidden;
 				min-width: 0;
@@ -4608,7 +4612,7 @@
 				max-width: none !important;
 				margin: 0 !important;
 			}
-			.be-thumb-img {
+			:where(.be-gallery-grid) .be-thumb-img {
 				display: block;
 				width: 100%;
 				height: 100%;

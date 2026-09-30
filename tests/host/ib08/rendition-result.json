@@ -2,7 +2,7 @@
   "checkpoint": "IB08",
   "stage": "P (local production assertions L1–L9)",
   "evidence_gate": "G-RENDITION",
-  "production_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
   "fixtures": "synthetic, not live markup",
   "checks": 66,
   "passed": 66,

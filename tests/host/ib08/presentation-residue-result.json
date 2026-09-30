@@ -1,0 +1,211 @@
+{
+  "checkpoint": "IB08",
+  "finding": "presentation residue after dispose (CSS scoping)",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
+  "previous_production_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "fixtures": "synthetic",
+  "observations": {
+    "e621.net site class rewrite, dispose, re-init": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      },
+      "afterReinit": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      }
+    },
+    "e621.net no site touch, dispose": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 0,
+        "staleImgTokens": 0,
+        "containerHasGalleryClass": false
+      }
+    },
+    "e621.net new container": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      },
+      "newContainer": {
+        "cardsWithEnhancerRules": 2,
+        "imgsWithEnhancerRules": 2,
+        "staleWrapTokens": 2,
+        "staleImgTokens": 2,
+        "containerHasGalleryClass": true
+      }
+    },
+    "e621.net previous unscoped CSS (fault control)": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      }
+    },
+    "e621.net site also rewrites the container class (observation)": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      }
+    },
+    "e926.net site class rewrite, dispose, re-init": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      },
+      "afterReinit": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      }
+    },
+    "e926.net no site touch, dispose": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 0,
+        "staleImgTokens": 0,
+        "containerHasGalleryClass": false
+      }
+    },
+    "e926.net new container": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 0,
+        "imgsWithEnhancerRules": 0,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      },
+      "newContainer": {
+        "cardsWithEnhancerRules": 2,
+        "imgsWithEnhancerRules": 2,
+        "staleWrapTokens": 2,
+        "staleImgTokens": 2,
+        "containerHasGalleryClass": true
+      }
+    },
+    "e926.net previous unscoped CSS (fault control)": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": false
+      }
+    },
+    "e926.net site also rewrites the container class (observation)": {
+      "enhancerRuleCount": 12,
+      "active": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      },
+      "afterDispose": {
+        "cardsWithEnhancerRules": 5,
+        "imgsWithEnhancerRules": 5,
+        "staleWrapTokens": 5,
+        "staleImgTokens": 5,
+        "containerHasGalleryClass": true
+      }
+    }
+  },
+  "checks": 14,
+  "passed": 14,
+  "failed": 0,
+  "failures": []
+}

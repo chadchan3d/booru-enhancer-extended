@@ -1,58 +1,10 @@
 {
   "checkpoint": "IB08",
   "diagnosis": "A (terminal gallery disposal)",
-  "production_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
   "previous_production_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
   "fixtures": "synthetic",
   "observations": {
-    "disposeNotRecorded e926.net": {
-      "ownedBefore": 6,
-      "ownedAtDispose": 0,
-      "restoredAtDispose": true,
-      "wasDisposedAfterDispose": false,
-      "ownedAfterDebounce": 4,
-      "wrappedAfterDebounce": 6,
-      "ownedAfterBodyMutation": 4,
-      "nativeEditKept": true,
-      "nativeMoveKept": true,
-      "replacementsNative": false,
-      "ownedAfterResize": 4,
-      "ownedAfterBypassAttempts": 4,
-      "wrappedAfterBypassAttempts": 6,
-      "ownedAfterExplicitInit": 4,
-      "wasDisposedAfterInit": false,
-      "cycles": [
-        {
-          "afterDispose": 4,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 4,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 4,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 4,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 4,
-          "afterInit": 4,
-          "bars": "111111"
-        }
-      ],
-      "ownedAtEnd": 4,
-      "barsAtEnd": 6,
-      "ownedInNewContainer": 2,
-      "oldStillDisposed": false
-    },
     "barrierRemoved e621.net": {
       "ownedBefore": 6,
       "ownedAtDispose": 0,
@@ -101,11 +53,59 @@
       "ownedInNewContainer": 2,
       "oldStillDisposed": false
     },
-    "disposeNotRecorded e621.net": {
+    "previousProduction e621.net": {
       "ownedBefore": 6,
       "ownedAtDispose": 0,
       "restoredAtDispose": true,
-      "wasDisposedAfterDispose": false,
+      "wasDisposedAfterDispose": "absent",
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": "absent",
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": "absent"
+    },
+    "barrierRemoved e926.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
       "ownedAfterDebounce": 4,
       "wrappedAfterDebounce": 6,
       "ownedAfterBodyMutation": 4,
@@ -149,11 +149,11 @@
       "ownedInNewContainer": 2,
       "oldStillDisposed": false
     },
-    "barrierRemoved e926.net": {
+    "disposeNotRecorded e926.net": {
       "ownedBefore": 6,
       "ownedAtDispose": 0,
       "restoredAtDispose": true,
-      "wasDisposedAfterDispose": true,
+      "wasDisposedAfterDispose": false,
       "ownedAfterDebounce": 4,
       "wrappedAfterDebounce": 6,
       "ownedAfterBodyMutation": 4,
@@ -245,11 +245,11 @@
       "ownedInNewContainer": 2,
       "oldStillDisposed": "absent"
     },
-    "previousProduction e621.net": {
+    "disposeNotRecorded e621.net": {
       "ownedBefore": 6,
       "ownedAtDispose": 0,
       "restoredAtDispose": true,
-      "wasDisposedAfterDispose": "absent",
+      "wasDisposedAfterDispose": false,
       "ownedAfterDebounce": 4,
       "wrappedAfterDebounce": 6,
       "ownedAfterBodyMutation": 4,
@@ -260,7 +260,7 @@
       "ownedAfterBypassAttempts": 4,
       "wrappedAfterBypassAttempts": 6,
       "ownedAfterExplicitInit": 4,
-      "wasDisposedAfterInit": "absent",
+      "wasDisposedAfterInit": false,
       "cycles": [
         {
           "afterDispose": 4,
@@ -291,7 +291,55 @@
       "ownedAtEnd": 4,
       "barsAtEnd": 6,
       "ownedInNewContainer": 2,
-      "oldStillDisposed": "absent"
+      "oldStillDisposed": false
+    },
+    "production e621.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": true,
+      "ownedAfterResize": 0,
+      "ownedAfterBypassAttempts": 0,
+      "wrappedAfterBypassAttempts": 0,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 0,
+      "barsAtEnd": 0,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": true
     },
     "production e926.net": {
       "ownedBefore": 6,
@@ -405,54 +453,6 @@
       "wrappedAfterBypassAttempts": 0,
       "ownedAfterExplicitInit": 4,
       "wasDisposedAfterInit": true,
-      "cycles": [
-        {
-          "afterDispose": 0,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 0,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 0,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 0,
-          "afterInit": 4,
-          "bars": "111111"
-        },
-        {
-          "afterDispose": 0,
-          "afterInit": 4,
-          "bars": "111111"
-        }
-      ],
-      "ownedAtEnd": 0,
-      "barsAtEnd": 0,
-      "ownedInNewContainer": 2,
-      "oldStillDisposed": true
-    },
-    "production e621.net": {
-      "ownedBefore": 6,
-      "ownedAtDispose": 0,
-      "restoredAtDispose": true,
-      "wasDisposedAfterDispose": true,
-      "ownedAfterDebounce": 0,
-      "wrappedAfterDebounce": 0,
-      "ownedAfterBodyMutation": 0,
-      "nativeEditKept": true,
-      "nativeMoveKept": true,
-      "replacementsNative": true,
-      "ownedAfterResize": 0,
-      "ownedAfterBypassAttempts": 0,
-      "wrappedAfterBypassAttempts": 0,
-      "ownedAfterExplicitInit": 4,
-      "wasDisposedAfterInit": false,
       "cycles": [
         {
           "afterDispose": 0,
