@@ -8,6 +8,15 @@
 // modelled (first supported <source> before the <img> with a srcset, else img
 // src). Every check must PASS on the committed artifact, production mutants
 // must flip a check, and outputs must not leak planted values.
+// Revision 2 adds the first live run's failure classes as regressions:
+//   A - dispose then a wait past production's 400 ms body-observer debounce;
+//   B - a card whose native file and sample URLs are the same (alias);
+//   C - a logged-in page with native and enhancer-UI writes off the cards.
+// The committed revision-1 package (commit 595629e) must reproduce each live
+// failure shape; revision 2 must attribute it correctly. Against production
+// a0f3041 the dispose test is a KNOWN FAILURE (production lifecycle defect,
+// diagnosis A): D02/D05/D06/D07/D10 FAIL, and D01 PASS once judged at
+// dispose time.
 // Requires `npm install` in tests/host/ib07 (pinned jsdom).
 const fs = require('fs');
 const path = require('path');
@@ -54,20 +63,22 @@ const H = '0123456789abcdef0123456789abcdef';
 const U = (id) => ({ file: `${M}/data/${H}_${id}.png`, sample: `${M}/data/sample/${H}_${id}.jpg`, preview: `${M}/data/preview/${H}_${id}.jpg`, webp: `${M}/data/preview/${H}_${id}.webp` });
 function card(id, kind = 'ok') {
   const u = U(id);
+  if (kind === 'alias') u.file = u.sample; // native file URL == native sample URL
   const ext = kind === 'video' ? 'webm' : 'png';
   const s1 = kind === 'sizes' ? `<source srcset="${u.webp}" type="image/webp" sizes="100px">` : `<source srcset="${u.webp}" type="image/webp">`;
   return `<article class="thumbnail" data-id="${id}" data-md5="${H}" data-file-ext="${ext}" data-file-url="${u.file}" data-sample-url="${u.sample}"
     data-preview-url="${u.preview}" data-preview-webp="${u.webp}"><a href="/posts/${id}" class="thm-link"><picture>${s1}<source srcset="${u.preview}" type="image/jpeg"><img src="${u.preview}" alt=""></picture></a></article>`;
 }
-const listing = (anon) => `<!doctype html><html><head></head><body data-user-is-anonymous="${anon}" data-user-level="${anon === 'true' ? '0' : '20'}">
-  <section id="posts-container" class="posts-container">${[...Array.from({ length: 7 }, (_, i) => card(String(9001 + i))), card('9101', 'video'), card('9102', 'sizes')].join('')}</section></body></html>`;
+const listing = (anon, { alias = false } = {}) => `<!doctype html><html><head></head><body data-user-is-anonymous="${anon}" data-user-level="${anon === 'true' ? '0' : '20'}">
+  <header><img id="nav-avatar" src="${M}/ui/avatar.png" alt=""></header>
+  <section id="posts-container" class="posts-container">${[...Array.from({ length: 7 }, (_, i) => card(String(9001 + i), alias && i === 2 ? 'alias' : 'ok')), card('9101', 'video'), card('9102', 'sizes')].join('')}</section></body></html>`;
 const RAW = ['9001', '9002', '9101', H, 'static.example', 'http'];
 const leaks = (t) => RAW.filter((r) => t.includes(r));
 
 const FAST = (text) => text.replace('const SETTLE_MS = 2500;', 'const SETTLE_MS = 0;');
-async function runScript({ url = 'https://e621.net/posts', anon = 'true', quality = 'sample', text = derived, steps = ['check'] }) {
+async function runScript({ url = 'https://e621.net/posts', anon = 'true', quality = 'sample', text = derived, steps = ['check'], alias = false, nativeActions = null }) {
   const menu = {};
-  const c = h.load({ url, html: listing(anon), source: FAST(text), settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
+  const c = h.load({ url, html: listing(anon, { alias }), source: FAST(text), settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
     if (!w.crypto || !w.crypto.subtle) Object.defineProperty(w, 'crypto', { value: webcrypto, configurable: true });
     if (!w.TextEncoder) w.TextEncoder = TextEncoder;
     w.GM_registerMenuCommand = (name, fn) => { menu[name] = fn; return 0; };
@@ -81,10 +92,12 @@ async function runScript({ url = 'https://e621.net/posts', anon = 'true', qualit
     } });
   } });
   await h.sleep(250);
+  if (nativeActions) { nativeActions(c.window); await h.sleep(20); }
   const out = {};
   const read = () => { const t = c.window.document.querySelector('#ib08p-result textarea')?.value || ''; try { return { t, j: JSON.parse(t) }; } catch { return { t, j: null }; } };
   for (const step of steps) {
     if (step === 'narrow') { c.window.innerWidth = 900; continue; }
+    if (step === 'wait') { await h.sleep(700); continue; } // past production's 400 ms body-observer debounce
     const name = { check: 'IB08P: Check this page (current quality)', d1: 'IB08P: Dispose test step 1 (wide window)', d2: 'IB08P: Dispose test step 2 (after narrowing)' }[step];
     await menu[name]();
     out[step] = read();
@@ -104,6 +117,14 @@ const SCEN = [
   ['e926 logged out, original', { url: 'https://e926.net/posts', quality: 'original' }],
   ['e926 logged in, sample saved (inert)', { url: 'https://e926.net/posts', anon: 'false', quality: 'sample' }],
 ];
+// Diagnosis C: writes that are not enhancer rendition writes (native header image, a late native
+// image, an enhancer-UI image), made after production mounted.
+const OFF_CARD_WRITES = (w) => {
+  const d = w.document;
+  d.querySelector('#nav-avatar').setAttribute('src', `${M}/ui/avatar2.png`);
+  const late = d.createElement('img'); d.body.appendChild(late); late.setAttribute('src', `${M}/ui/late.png`);
+  const ui = d.createElement('div'); ui.id = 'be-test-ui'; const uimg = d.createElement('img'); ui.appendChild(uimg); d.body.appendChild(ui); uimg.setAttribute('src', `${M}/ui/overlay.png`);
+};
 const EXPECT_NA = { 'e621 logged in, original saved (inert)': ['P09'], 'e926 logged in, sample saved (inert)': ['P09'] };
 
 const mut = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`mutant pattern not unique: ${from.slice(0, 50)}`); return text.replace(from, to); };
@@ -144,16 +165,73 @@ async function main() {
     check(`${name}: site identity`, r.check.j && r.check.j.site === new URL(opts.url || 'https://e621.net/posts').hostname);
     check(`${name}: no leak`, leaks(r.check.t).length === 0, leaks(r.check.t).join(','));
   }
+  // Revision-1 package (as run live) for the regressions.
+  const OLD_REV = '595629e';
+  const oldDerived = execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', `${OLD_REV}:tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const KNOWN_DISPOSE_ON_A0F3041 = { P00: 'PASS', D01: 'PASS', D10: 'FAIL', D02: 'FAIL', D03: 'PASS', D04: 'PASS', D05: 'FAIL', D06: 'FAIL', D07: 'FAIL', D08: 'PASS', D09: 'PASS' };
   for (const host of ['e621.net', 'e926.net']) {
-    const r = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
+    // A: live shape reproduced by revision 1 (D01 FAIL although the counts match; D02/D05/D06/D07 FAIL; residue).
+    const o = await runScript({ url: `https://${host}/posts`, text: oldDerived, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const os = statusOf(o.d2.j);
+    const od = (o.d2.j.checks.find((x) => x.id === 'D01') || {}).detail || {};
+    const ores = (o.d2.j.checks.find((x) => x.id === 'D07') || {}).detail || {};
+    check(`regression A ${host}: revision-1 package reproduces the live dispose shape (D01 FAIL with writes == expected; D02/D05/D06/D07 FAIL; D03/D04/D08/D09 PASS; residue > 0)`,
+      os.D01 === 'FAIL' && od.disposeWrites === od.expected && ['D02', 'D05', 'D06', 'D07'].every((k) => os[k] === 'FAIL') && ['D03', 'D04', 'D08', 'D09'].every((k) => os[k] === 'PASS') && ores.residue > 0, JSON.stringify([os, od, ores]));
+    // A: revision 2 attributes it: D01 PASS at dispose time, D10 FAIL (re-enhancement) - known production failure.
+    const r = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     const st = statusOf(r.d2.j);
-    check(`${host} dispose test: D01–D09 and P00 PASS`, Object.keys(st).length === 10 && Object.values(st).every((s) => s === 'PASS'), JSON.stringify(st) + r.d2.t.slice(0, 200));
+    const d10 = (r.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
+    check(`${host} dispose test on a0f3041: KNOWN production failure attributed (D01 PASS at dispose time; D10 FAIL with re-enhanced cards; exact expected status map)`,
+      JSON.stringify(st) === JSON.stringify(KNOWN_DISPOSE_ON_A0F3041) && d10.reenhancedCards > 0 && d10.afterDisposeSignatureWrites > 0, JSON.stringify([st, d10]));
     check(`${host} dispose test: no leak`, leaks(r.d1.t + r.d2.t).length === 0);
+    // Immediately after dispose (before the debounce) everything is restored: the owner restoration itself is correct.
+    const q = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
+    const qs = statusOf(q.d2.j);
+    check(`${host} dispose test before the debounce fires: every D check PASS (owner restoration correct)`, Object.keys(qs).length === 11 && Object.values(qs).every((x) => x === 'PASS'), JSON.stringify(qs));
     const r2 = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'd2'] });
     check(`${host} dispose test without narrowing: D08 FAIL`, statusOf(r2.d2.j).D08 === 'FAIL');
     const r3 = await runScript({ url: `https://${host}/posts`, anon: 'false', steps: ['d1'] });
     check(`${host} dispose test refused when logged in (no simulation, no dispose)`, r3.d1.j && /Needs a logged-out/.test(r3.d1.j.error || ''));
   }
+  // B: file/sample alias under original.
+  for (const host of ['e621.net', 'e926.net']) {
+    const oldB = await runScript({ url: `https://${host}/posts`, quality: 'original', alias: true, text: oldDerived });
+    check(`regression B ${host}: revision-1 package fails P09 on a file==sample alias card (live e926 O shape)`, statusOf(oldB.check.j).P09 === 'FAIL', JSON.stringify(statusOf(oldB.check.j)));
+    const b = await runScript({ url: `https://${host}/posts`, quality: 'original', alias: true });
+    const p09 = (b.check.j.checks.find((x) => x.id === 'P09') || {}).detail || {};
+    check(`${host} original with an alias card: every check PASS; alias recorded as equality facts only`, Object.values(statusOf(b.check.j)).every((x) => x === 'PASS') && p09.sampledAliased === 1 && p09.fileEqualsSampleCards === 1, JSON.stringify([statusOf(b.check.j), p09]));
+    check(`${host} alias scenario: no leak`, leaks(b.check.t).length === 0);
+  }
+  // C: native and enhancer-UI writes off the cards on a logged-in page.
+  for (const host of ['e621.net', 'e926.net']) {
+    const oldC = await runScript({ url: `https://${host}/posts`, anon: 'false', text: oldDerived, nativeActions: OFF_CARD_WRITES });
+    check(`regression C ${host}: revision-1 package counts off-card writes as unexplained and fails P06 (live e926 L shape)`, statusOf(oldC.check.j).P06 === 'FAIL', JSON.stringify(statusOf(oldC.check.j)));
+    const c = await runScript({ url: `https://${host}/posts`, anon: 'false', nativeActions: OFF_CARD_WRITES });
+    const p06 = (c.check.j.checks.find((x) => x.id === 'P06') || {}).detail || {};
+    const regions = Object.keys(p06.offCardWritesByRegion || {});
+    check(`${host} logged in with off-card writes: P06 PASS and writes attributed by region (native pre-existing, late native, enhancer UI)`,
+      statusOf(c.check.j).P06 === 'PASS' && p06.strayEnhancerSignatureWrites === 0 && ['NATIVE_PREEXISTING:img.src', 'LATE_OTHER:img.src', 'ENHANCER_UI:img.src'].every((k) => regions.includes(k)), JSON.stringify(p06));
+    check(`${host} C scenario: no leak`, leaks(c.check.t).length === 0);
+  }
+  {
+    // Fault: an enhancer rendition write on a native non-card node while logged in must fail P06.
+    const signatureOnNative = (w) => { OFF_CARD_WRITES(w); w.document.querySelector('#nav-avatar').setAttribute('src', w.document.querySelector('article').getAttribute('data-sample-url')); };
+    const f = await runScript({ url: 'https://e926.net/posts', anon: 'false', nativeActions: signatureOnNative });
+    check('fault enhancer-signature write on a native non-card node (logged in): caught by P06', statusOf(f.check.j).P06 === 'FAIL', JSON.stringify(statusOf(f.check.j)));
+    // Fault: P09 back to first-label semantics must fail the alias scenario.
+    const firstLabel = derived.replace("if (!rels.includes(expectedRelation[s.want])) counts.relationMismatch++;", 'if (rels[0] !== expectedRelation[s.want]) counts.relationMismatch++;');
+    const g = await runScript({ url: 'https://e926.net/posts', quality: 'original', alias: true, text: firstLabel });
+    check('fault P09 first-label comparison: caught on the alias card', firstLabel !== derived && statusOf(g.check.j).P09 === 'FAIL');
+    // Fault: D01 judged at step 2 again must fail on a0f3041 after the debounce (the live D01 shape).
+    const lateD01 = derived.replace('dw.length === expectedDisposeWrites && disposeRun.restoredAtDispose === expectedDisposeWrites,', "dw.length === expectedDisposeWrites && dw.every((r) => r.target.getAttribute('srcset') === [...native.values()].find((n) => n.sources[0] === r.target)?.sourceAttrs[0][1]),");
+    const l = await runScript({ url: 'https://e621.net/posts', text: lateD01, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    check('fault D01 judged after re-enhancement: reproduces the live D01 FAIL', lateD01 !== derived && statusOf(l.d2.j).D01 === 'FAIL');
+    // Fault: D10 disabled must let the re-enhancement through only if D10 is removed (proves D10 is the attributing check).
+    const noD10 = derived.replace("after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,", 'true,');
+    const n = await runScript({ url: 'https://e621.net/posts', text: noD10, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    check('fault D10 disabled: the re-enhancement is then attributed by no dispose-time check (D01 stays PASS)', noD10 !== derived && statusOf(n.d2.j).D10 === 'PASS' && statusOf(n.d2.j).D01 === 'PASS');
+  }
+
   // Fault controls: production mutants inside the derived script.
   for (const [name, scenario, fn, targets] of FAULTS) {
     let text; try { text = fn(derived); } catch (e) { check(`fault ${name}: mutant applied`, false, e.message); continue; }
@@ -182,7 +260,8 @@ async function main() {
 
   const passed = results.filter((x) => x.pass).length;
   const summary = {
-    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package; local verification (not yet executed live)',
+    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 2 (after the first live run); local verification',
+    known_production_failure: 'dispose test on production a0f3041: D02/D05/D06/D07/D10 FAIL after the 400 ms body-observer debounce (diagnosis A, production lifecycle defect; correction proposed, not implemented)',
     production_commit: COMMIT, production_source_blob: EXPECTED_PRODUCTION_BLOB, production_body_sha256: built.bodySha,
     derived_script: path.basename(OUT), derived_script_sha256: crypto.createHash('sha256').update(derived).digest('hex'),
     currentSrc_model: 'jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src',

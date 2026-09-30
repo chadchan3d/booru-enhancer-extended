@@ -2,7 +2,7 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3). B1 is resolved and B2 decided. The P stage is **implemented** (§5) and locally qualified. Live production conformance is pending. This file is not a completion record.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). **The first live production-conformance run is FAIL/PARTIAL (§6)**: dispose is not terminal in production (diagnosis A, correction proposed, not implemented). This file is not a completion record.
 
 **Production:** `Booru_Enhancer.user.js` blob `a0f3041c409a656f67fe23dc827b020b5cc399e6` (commit `b2b1d9f`), with the IB08 P-stage rendition contract. Before IB08: blob `32d0051` (commit `c551bb0`).
 
@@ -418,8 +418,120 @@ A write the owner refuses, because the site touched the attribute, reports `REFU
 - Fault controls, 13/13 caught: 11 production mutants and 2 postamble leak controls.
 - Operator steps are in `tests/browser/ib08/README.md` (P-stage section). The live runs are pending.
 
+## 6. First live production-conformance run (package revision 1, production `a0f3041`) — FAIL/PARTIAL
+
+**Evidence form:** operator-relayed summary of the sanitized results. Every run used the exact expected production artifact (P00 `MATCH_EXPECTED_ARTIFACT`).
+
+| Run | e621.net | e926.net |
+| --- | --- | --- |
+| S (sample) | PASS | PASS |
+| P (preview) | PASS | PASS |
+| O (original) | PASS; all five sampled cards `NATIVE_FILE`; `settled:false` | **FAIL**, P09 only: 4 cards `NATIVE_FILE`, 1 `NATIVE_SAMPLE`, `settled:true`. Provenance `OWNED_ORIGINAL`, one owned write per pattern card, final attributes and node identity correct |
+| L (logged in) | PASS | **FAIL**, P06 only: `loginMarker FALSE`, every card `NATIVE_OUT_OF_SCOPE`, final state and node identity correct, 4 unexplained writes (`totalRenditionWrites: 4`) |
+| D (dispose/resize) | **FAIL**: D01 FAIL with `disposeWrites 66 = expected 66`; D02, D05, D06, D07 FAIL (`residue 67`); D03, D04, D08, D09 PASS | **FAIL**, same shape: `disposeWrites 70 = expected 70`, `residue 71` |
+
+### Diagnosis A — dispose not terminal (both hosts): **production lifecycle defect**, plus conformance-package defects that mis-attributed it
+
+**Event sequence:**
+1. **Before disposal:** every pattern card is owned (`OWNED_SAMPLE`).
+2. **Simulated native changes:** card 2 edit, card 3 move, card 4 source replacement, card 5 picture replacement.
+3. **`gallery.dispose()`** (`Booru_Enhancer.user.js:4535-4546`):
+   - `disposeCardOwners` restores every owned WebP srcset that was not natively touched and is still connected. That is 66 writes on e621 and 70 on e926, exactly as expected; the owner restoration is correct.
+   - `galleryOwner.dispose()` restores the container's owned `data-be-gallery-init` attribute, which was originally absent, so it is **removed**.
+4. **The app-level `bodyObserver`** (`:5427-5441`, `watchSpaNavigation`) is created once at startup and owned by nothing, so it is **never disconnected**. Dispose's own removal of each card's action bar is a body mutation. 400 ms later, the observer finds the container without `data-be-gallery-init` and calls `gallery.init` → `enhanceThumbnails`.
+5. **New owners are created, and every card still matching the pattern is owned again:**
+   - cards 1, 4 and 5 are re-owned, including the fresh replacement source and picture;
+   - card 2 no longer matches (its WebP srcset is the native edit) and stays native;
+   - card 3 no longer matches (moved order) and stays native.
+
+   So the re-owned count is `owned − 2`: 69 − 2 = **67** on e621 and 73 − 2 = **71** on e926, exactly the live `residue`.
+6. **Resize** is not involved; D08 PASS.
+7. **At Step 2 (≥ 2.5 s later):** D02/D05/D06/D07 see sample residue. D03/D04 PASS because those cards fall outside the pattern.
+
+**Why D01 failed with matching counts (package defect):** D01 re-read each restored node's value at Step 2, after re-enhancement had written the sample back. It therefore mixed "restored at dispose" with "re-enhanced later". Revision 2 judges D01 at dispose time and adds D10 for re-enhancement.
+
+**Why the local verifier missed it (package defect):** it ran Step 2 immediately, before the 400 ms debounce. The IB04 production conformance (`tests/browser/ib04/IB04_Production_Conformance.user.js:4588-4596`) also asserted only immediately after dispose.
+
+**Other questions:**
+- The body observer has existed since the 1.2.7.1 import, so this is **pre-existing**; IB08's dispose-then-resize test exposed it.
+- The package **does not cause** it: locally, dispose alone re-enhances within 700 ms with no other page change. Its overlay and simulation are merely further body mutations.
+- No other enhancer observer or listener re-applies rendition: the settings listener and hover are owned by the disposed gallery owner.
+
+**Proof** (`tests/host/ib08/dispose_lifecycle_regression.cjs`, 14/14, both hosts):
+- restoration happens at dispose;
+- **known failure reproduced:** every card is re-owned within the debounce;
+- the cause is isolated: with the body-observer re-init disabled, or with the marker kept, dispose stays terminal;
+- the proposed correction keeps dispose terminal, while explicit `gallery.init` and a genuinely new container still enhance.
+
+**Proposed production correction (not implemented):** make `gallery.dispose()` terminal for the disposed container, without weakening the owner or the SPA path:
+- the gallery module records containers it disposed (`WeakSet`);
+- explicit `gallery.init(container)` clears the record;
+- the gallery exposes `wasDisposed(container)`;
+- `bodyObserver` re-inits only if the container is not marked **and** was not disposed.
+
+The change is confined to the gallery lifecycle (`:3693`, `:3780`, `:4535-4546`, `:5430`). `applySiteThumbMedia` and `BE.ownership` are unchanged.
+
+### Diagnosis B — e926 O, one `NATIVE_SAMPLE`: **conformance-package defect (label order); production correct**
+
+The recorded facts force the conclusion:
+- P07 passed, so the WebP srcset holds exactly the native `data-file-url` string, and the JPEG source and `img` are native.
+- The browser can only select one of those: the file URL, or the JPEG preview (labelled `NATIVE_PREVIEW`).
+- `currentSrc` is labelled `NATIVE_SAMPLE` with `settled:true`, so it equals both the file URL and the sample URL. For that card, **native file URL = native sample URL** (an alias).
+- Revision 1 returned the first matching label, and SAMPLE was checked before FILE.
+- The alias class exists live: IB07 recorded 10 of 140 cards with sample equal to file.
+
+**Correction (revision 2):** P09 accepts the expected label from all matching labels, and reports `sampledAliased` and `fileEqualsSampleCards` (counts only, never values). Production is unchanged.
+
+**Proof:**
+- the revision-1 package fails P09 on a local alias card, on both hosts;
+- revision 2 passes it and records the alias;
+- a fault control restoring first-label comparison fails P09.
+
+### Diagnosis C — e926 L, 4 unexplained writes: **not the rendition path; source undetermined (package defect: no provenance)**
+
+**Not `applySiteThumbMedia` or the card owner:**
+- `applySiteThumbMedia` returns before any write when the marker isn't `"true"` (`:4085`);
+- P05 shows every card `NATIVE_OUT_OF_SCOPE`;
+- P06 `writeMismatch 0` means no write on any snapshot card media;
+- revision 1 counted as "unexplained" only writes on nodes outside the snapshot cards.
+
+**No other enhancer path writes rendition attributes on native pre-existing nodes:** every other `src` write (`:2997`, `:3036`, `:3101`, `:3165`, `:3555`, `:3644`, `:3648`) targets enhancer-created hover or viewer media.
+
+**Remaining candidates, not distinguishable from the revision-1 output:**
+- enhancer UI (hover-preview media, settings-panel inputs);
+- native e926 logged-in page behavior;
+- cards or nodes added after load.
+
+A local hover sweep in jsdom produced no such writes, so no candidate is confirmed. e621 L had none.
+
+**Correction (revision 2):**
+- writes are attributed by region at the moment they occur;
+- enhancer rendition writes are identified by value (a card's native sample/file URL) on any native node;
+- P06 fails only on card writes or stray signature writes, and reports the other regions.
+
+**Proof:**
+- revision 1 fails P06 on a local logged-in page with native and enhancer-UI off-card writes;
+- revision 2 passes it with the writes attributed by region;
+- a fault control writing a card's sample URL onto a native non-card node while logged in fails P06.
+
+### e621 O `settled:false`
+
+P09 checks the selected rendition (`currentSrc`); it was `NATIVE_FILE` on all five sampled cards. `settled` records whether the loads also finished within 8 seconds, and is informational in both package revisions; a repeat is required only when P09 fails. **No repeat is required** by the package definition. The row is still rerun, because production changes (below).
+
+**E-stage scope:** unaffected. The E-stage experiment used its own owner and made no gallery re-init, and its live results stand. The defect is in the production lifecycle around the owner, not in the proven mutation premise.
+
+**Package revision 2:** rebuilt from the same production `b2b1d9f` for local qualification. Verifier **75/75**, including:
+- regressions A, B and C: revision 1 reproduces each live shape, and revision 2 attributes it;
+- the known production failure on `a0f3041`: D02/D05/D06/D07/D10 FAIL, D01 PASS;
+- 4 new fault controls.
+
+**Rerun after the production correction:**
+- The correction changes the production blob. Exact-artifact conformance therefore requires **all ten rows** on the new artifact: e621 and e926, each S, D, P, O and L.
+- If carrying unaffected rows forward is accepted instead, the minimum is **e621 D, e926 D, e926 O and e926 L**. That requires the local proof that `applySiteThumbMedia` is byte-identical and that the diff is confined to the gallery lifecycle.
+
 ## Open for G-RENDITION / IB08
 
-- Live production conformance on e621 and e926, independently: runs S (sample), D (dispose/resize), P (preview), O (original) and L (logged in) per host.
+- **Production correction for diagnosis A:** needs approval, then implementation, local regression (the dispose-lifecycle test's known-failure oracle flips to PASS), and a package rebuild.
+- **Live production conformance on the corrected artifact,** e621 and e926 independently: all ten rows (minimum four if carry-forward is accepted).
 - IB08 completion record only after that conformance is reviewed.
 - Danbooru rows: EXCLUDED(scope).

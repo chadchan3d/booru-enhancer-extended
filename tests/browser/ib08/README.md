@@ -203,6 +203,20 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
 
 **Output:** statuses, enums, booleans and counts only, behind a leak guard.
 
+**Package revision 2** (after the first live run):
+- **Write attribution:** every recorded write is attributed when it happens, by region:
+  - `CARD_MEDIA`: native card media from the load snapshot;
+  - `LATE_CARD_MEDIA`: card media added later;
+  - `ENHANCER_UI`: enhancer UI created later;
+  - `NATIVE_PREEXISTING`: native nodes present at load;
+  - `LATE_OTHER`: other later nodes.
+
+  Each write is also marked if its new value is a card's native sample or file URL (the enhancer rendition signature).
+- **P06** fails on unexpected card writes, or on any signature write outside the owned cards. Other off-card writes are reported by region, not counted as enhancer writes.
+- **P09** judges the *selected* rendition (`currentSrc`) and accepts a card whose native file and sample URLs are the same. `settled` is informational: it says whether image loads also completed within 8 seconds.
+- **D01** is judged at dispose time.
+- **D10** fails on any enhancer rendition write, or any re-enhanced card, after dispose.
+
 **What the checks prove:**
 - **Check this page** (P00–P11):
   - production identity, route, and that the recorder was installed before enhancement;
@@ -214,7 +228,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
   - the displayed rendition on in-view cards;
   - the saved quality value;
   - no enhancer request.
-- **Dispose test** (D01–D09): after simulated native edit, move and replacements, production's own `gallery.dispose()` restores only what it owns, keeps native changes, and leaves no sample residue. The window is narrowed afterwards.
+- **Dispose test** (D01–D10): after simulated native edit, move and replacements, production's own `gallery.dispose()` restores only what it owns, keeps native changes, stays terminal (no re-enhancement), and leaves no sample residue. The window is narrowed afterwards.
 
 Local verification: `node tests/browser/ib08/build_ib08_conformance.cjs --check` and `node tests/browser/ib08/verify_ib08_conformance.cjs`.
 
@@ -228,6 +242,8 @@ Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, U
 
 **Changing the quality:** use Tampermonkey icon → **Booru Enhancer: Settings** (listed under the conformance script) → **Grid thumbnail quality**. After each change, close the panel and **reload** the page before running a check. The check measures writes from page load, so a reload is required.
 
+**Before each check,** move the mouse pointer off the thumbnails (for example onto the page header), so hover previews don't add enhancer-UI writes. They are attributed either way.
+
 **For each run:** copy the result (it is already selected), label it (for example "e621 S"), and close the box. Each result must show `"production_body_identity": "MATCH_EXPECTED_ARTIFACT"` and the right `site`.
 
 **e621 runs**, in a maximized (wide) window, **logged out**, on `https://e621.net/posts` (no scrolling before a check):
@@ -240,10 +256,12 @@ Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, U
 | **O** | set **Original** | Reload, then **IB08P: Check this page**. This loads each post's full original image, so allow a little longer. |
 | **L** | leave **Original** | **Log in** to e621 with the site's normal controls. Reload `/posts`, then **IB08P: Check this page**. Expect `loginMarker: "FALSE"` and no rendition writes. Then log out again. |
 
-**If P09 fails with `"settled": false`** (images still loading), wait a few seconds and run **IB08P: Check this page** again without reloading. The check is read-only, and a repeat is valid. Report which attempt you returned.
+**If P09 fails with `"settled": false`** (images still loading), wait a few seconds and run **IB08P: Check this page** again without reloading. The check is read-only, and a repeat is valid. Report which attempt you returned. A P09 **PASS** with `settled:false` needs no repeat.
 
 **e926 runs:** repeat S, D, P, O and L on `https://e926.net/posts`, logged out except for L.
 - The saved setting is shared, so set **Sample** again before e926 run S.
 - Do not reuse any e621 result.
+
+**Status after the first live run:** the dispose test (run D) is expected to FAIL on production `a0f3041` because of a production lifecycle defect (diagnosis A: the gallery re-enhances itself after dispose). Do not rerun until a corrected production artifact and a rebuilt package are provided.
 
 **Return** the ten sanitized results (e621 S, D, P, O, L; e926 S, D, P, O, L). If any result says `sanitationGuard: BLOCKED`, return it as it is. Afterwards, disable the conformance script and re-enable your normal enhancer if you use it.

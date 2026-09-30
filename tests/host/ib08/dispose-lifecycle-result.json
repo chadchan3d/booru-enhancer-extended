@@ -1,0 +1,100 @@
+{
+  "checkpoint": "IB08",
+  "diagnosis": "A (dispose not terminal)",
+  "production_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
+  "fixtures": "synthetic",
+  "observations": {
+    "e621.net production": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 5,
+      "wrappedAfterDebounce": 5,
+      "ownedAfterBodyMutation": 5,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 5,
+      "ownedInNewContainer": 2
+    },
+    "e621.net noBodyReinit": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 0
+    },
+    "e621.net markerKept": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": true,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 2
+    },
+    "e621.net proposedFix": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 2
+    },
+    "e926.net production": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 5,
+      "wrappedAfterDebounce": 5,
+      "ownedAfterBodyMutation": 5,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 5,
+      "ownedInNewContainer": 2
+    },
+    "e926.net noBodyReinit": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 0
+    },
+    "e926.net markerKept": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": true,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 2
+    },
+    "e926.net proposedFix": {
+      "ownedBefore": 5,
+      "ownedAtDispose": 0,
+      "markerAtDispose": false,
+      "ownedAfterDebounce": 0,
+      "wrappedAfterDebounce": 0,
+      "ownedAfterBodyMutation": 0,
+      "ownedAfterExplicitInit": 5,
+      "ownedAfterSecondDispose": 0,
+      "ownedInNewContainer": 2
+    }
+  },
+  "checks": 14,
+  "passed": 14,
+  "failed": 0,
+  "failures": []
+}

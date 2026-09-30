@@ -1,7 +1,7 @@
 # Ledger
 
 ## Current milestone
-**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. **The P stage is implemented** (commit `b2b1d9f`) and locally qualified. **Live production conformance is pending.** IB08 is not closed.
+**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. The P stage is implemented (commit `b2b1d9f`). **The first live production-conformance run is FAIL/PARTIAL** (evidence record §6). Dispose is not terminal in production (diagnosis A), and the correction is proposed, not implemented. IB08 is not closed.
 
 IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
@@ -35,7 +35,7 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - **Everything else stays native:** logged-in pages, other routes, non-pattern cards, video/GIF. `media.thumbQuality` stays stored.
   - **Undo:** IB04 dispose.
   - The B3 release note is in `CHANGELOG.md`.
-- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js` (from `b2b1d9f`).
+- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`. It is at revision 2 (write attribution by region and signature, alias-aware P09, D01 at dispose time, new D10), still built from `b2b1d9f`.
 
 ## Verified
 - IB08 live baseline, operator-relayed, e621 and e926 independently:
@@ -53,7 +53,8 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom;
   - B1 login-state probe 1.1.0 verifier 59/59, 12/12 fault controls, synthetic fixtures; includes a regression reproducing the 1.0.0 live block;
   - P-stage production assertions L1–L9 66/66, 19/19 production fault controls (`tests/host/ib08/rendition-result.json`);
-  - production-conformance package verifier 55/55, 13/13 fault controls.
+  - production-conformance package revision 2 verifier 75/75, including regressions A/B/C and the known production failure on `a0f3041`;
+  - dispose-lifecycle diagnosis `tests/host/ib08/dispose_lifecycle_regression.cjs` 14/14: the known failure is reproduced, the cause isolated, and the proposed fix proven on both hosts.
 - IB08 B1 live, operator-relayed, e621 and e926 independently: `body[data-user-is-anonymous]` is `true` when logged out and `false` when logged in.
   - `data-user-level` corroborates.
   - `data-user-is-member` is rejected, because it differs between hosts when logged in.
@@ -69,7 +70,18 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - No endpoint strategy is reachable: the Gelbooru-family DAPI/HTML helpers and the legacy `normalizeE621` are uncalled, and the native producers contain no network call.
 
 ## Unresolved
-- **Live production conformance pending,** per host independently (README, P-stage section): runs S (sample), D (dispose then resize), P (preview), O (original, the B2 row) and L (logged in).
+- **First live production-conformance run (production `a0f3041`, package revision 1): FAIL/PARTIAL.**
+  - PASS: e621 S/P/O/L and e926 S/P. e621 O had `settled:false`; P09 passed, so no repeat is required.
+  - FAIL:
+    - e621 D and e926 D: diagnosis A.
+    - e926 O: P09 only. Diagnosis B: a file/sample alias; a package defect, production correct.
+    - e926 L: P06 only. Diagnosis C: 4 off-card writes, not the rendition path, source undetermined; a package defect, since there was no provenance.
+- **Diagnosis A:** a production lifecycle defect, pre-existing since the import.
+  - `gallery.dispose()` removes the owned `data-be-gallery-init` marker.
+  - The unowned app-level `bodyObserver` (`Booru_Enhancer.user.js:5427-5441`) then re-inits the gallery within 400 ms and re-owns every card still matching the pattern.
+  - The live residue of 67/71 equals owned − 2.
+  - Proposed correction, **not implemented**: the gallery records the containers it disposed; `bodyObserver` skips them; explicit init and genuinely new containers are unaffected.
+- **Rerun after the correction:** all ten rows on the new artifact, or at least e621 D, e926 D, e926 O and e926 L if carry-forward is accepted.
 - IB08 completion record only after that conformance is reviewed.
 - IB07 host suites pin the IB07 blob, so they now exit 1 on the pin alone. All their assertions and controls pass (L9). The historical results are not edited.
 - **Retained limitations (not blockers):**
@@ -80,4 +92,4 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs the IB08 production-conformance package on e621 and e926 (runs S, D, P, O, L each) and returns ten sanitized results. Review them, then decide on the IB08 completion record. Do not start IB09.
+Await approval of the diagnosis-A production correction. Then implement it, run the local regression and a package rebuild, and do the live rerun. No IB08 completion record before passing conformance. Do not start IB09.

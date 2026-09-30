@@ -8,7 +8,21 @@
  * report. It changes nothing, except in the explicit dispose test: that test
  * simulates the site editing, moving and replacing nodes, then calls
  * production's own gallery dispose. Output: statuses, enums, booleans and
- * counts only; a leak guard withholds anything carrying a captured value. */
+ * counts only; a leak guard withholds anything carrying a captured value.
+ *
+ * Revision 2 (after the first live run):
+ *   - every recorded write is attributed when it happens: native card media
+ *     from the load snapshot, card media added later, enhancer UI created
+ *     later, pre-existing native nodes, or other later nodes. It also records
+ *     whether the new value is a native sample/file URL of a card (the
+ *     enhancer rendition signature);
+ *   - P06 fails on unexpected card-media writes or any enhancer-signature
+ *     write outside the owned cards; other off-card writes are reported by
+ *     region instead of being counted as enhancer writes;
+ *   - P09 accepts the expected rendition when a card's native file and
+ *     sample URLs are the same (alias), and reports alias counts;
+ *   - D01 judges dispose writes at dispose time; D10 fails on any enhancer
+ *     rendition write after dispose (re-enhancement). */
 (() => {
   'use strict';
 
@@ -70,13 +84,27 @@
       sampleRaw: (a.getAttribute('data-sample-url') || '').trim(), fileRaw: (a.getAttribute('data-file-url') || '').trim(),
     });
   }
-  const log = []; // { phase, record }
+  const preexisting = new WeakSet(document.querySelectorAll('*'));
+  const cardMedia = new WeakSet();
+  for (const n of native.values()) for (const el of [n.picture, n.img, ...n.sources]) if (el) cardMedia.add(el);
+  const signatureValues = new Set();
+  for (const n of native.values()) for (const v of [n.sampleRaw, n.fileRaw]) if (v) { signatureValues.add(v); signatureValues.add(abs(v)); }
+  const regionOf = (t) => {
+    if (cardMedia.has(t)) return 'CARD_MEDIA';
+    if (['picture', 'source', 'img'].includes(t.localName) && t.closest && t.closest('article')) return 'LATE_CARD_MEDIA';
+    if (!preexisting.has(t) && t.closest && t.closest('[id^="be-"], [class*="be-"]')) return 'ENHANCER_UI';
+    if (preexisting.has(t)) return 'NATIVE_PREEXISTING';
+    return 'LATE_OTHER';
+  };
+  const log = []; // { phase, r, region, signature }
   let phase = 'production';
   const keep = (r) => r.type === 'attributes' || (r.type === 'childList'
     && (r.target.localName === 'picture' || [...r.addedNodes, ...r.removedNodes].some((n) => ['picture', 'source', 'img'].includes(n.localName))));
-  const recorder = new MutationObserver((recs) => { for (const r of recs) if (keep(r)) log.push({ phase, r }); });
+  const entry = (r) => ({ phase, r, region: regionOf(r.target),
+    signature: r.type === 'attributes' && signatureValues.has(String(r.target.getAttribute(r.attributeName) || '').trim()) });
+  const recorder = new MutationObserver((recs) => { for (const r of recs) if (keep(r)) log.push(entry(r)); });
   recorder.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: RENDITION_ATTRS, attributeOldValue: true });
-  const flush = () => { for (const r of recorder.takeRecords()) if (keep(r)) log.push({ phase, r }); };
+  const flush = () => { for (const r of recorder.takeRecords()) if (keep(r)) log.push(entry(r)); };
 
   async function sourceIdentity() {
     if (typeof IB07P_PRODUCTION_BODY !== 'function') return 'UNAVAILABLE';
@@ -88,12 +116,14 @@
     return hex === EXPECTED_BODY_SHA256 ? 'MATCH_EXPECTED_ARTIFACT' : 'MISMATCH';
   }
 
-  function relation(img, n) {
+  // All native labels the displayed URL matches (a card's file and sample URLs can be the same).
+  function relations(img, n) {
     const url = img ? img.currentSrc || '' : '';
-    if (!url) return 'UNKNOWN';
-    for (const [label, v] of [['NATIVE_PREVIEW_WEBP', n.facts.webp], ['NATIVE_PREVIEW', n.facts.preview], ['NATIVE_SAMPLE', n.facts.sample], ['NATIVE_FILE', n.facts.file]]) if (v && v === url) return label;
-    return 'UNKNOWN';
+    const out = [];
+    if (url) for (const [label, v] of [['NATIVE_PREVIEW_WEBP', n.facts.webp], ['NATIVE_PREVIEW', n.facts.preview], ['NATIVE_SAMPLE', n.facts.sample], ['NATIVE_FILE', n.facts.file]]) if (v && v === url) out.push(label);
+    return out.length ? out : ['UNKNOWN'];
   }
+  const relation = (img, n) => relations(img, n)[0];
   async function waitForImages(imgs) {
     const deadline = Date.now() + LOAD_WAIT_MS;
     while (Date.now() < deadline) { if (imgs.every((i) => !i || i.complete)) { await sleep(300); return true; } await sleep(200); }
@@ -164,8 +194,10 @@
     const cards = [...native.keys()];
     const counts = { cardsOnPage: cards.length, pattern: 0, unsupported: 0, enumMismatch: 0, writeMismatch: 0, stateMismatch: 0, identityMismatch: 0, relationMismatch: 0, relationUnsettled: 0 };
     const byEnum = {};
-    const prodWrites = log.filter((x) => x.phase === 'production').map((x) => x.r);
+    const prodEntries = log.filter((x) => x.phase === 'production');
+    const prodWrites = prodEntries.map((x) => x.r);
     const writesOn = (nodes) => prodWrites.filter((r) => nodes.includes(r.target));
+    const ownedNodes = new Set();
     const sampled = [];
     for (const a of cards) {
       const n = native.get(a);
@@ -176,6 +208,7 @@
       if (got !== want) counts.enumMismatch++;
       const owned = want === 'OWNED_SAMPLE' || want === 'OWNED_ORIGINAL';
       const cardNodes = [n.picture, n.img, ...n.sources].filter(Boolean);
+      if (owned && n.sources[0]) ownedNodes.add(n.sources[0]);
       const w = writesOn(cardNodes);
       const okWrites = owned ? (w.length === 1 && w[0].type === 'attributes' && w[0].target === n.sources[0] && w[0].attributeName === 'srcset') : w.length === 0;
       if (!okWrites) counts.writeMismatch++;
@@ -190,20 +223,30 @@
       if (!stateOk) counts.stateMismatch++;
       if (n.cls === 'PATTERN' && loggedOut && sampled.length < SAMPLE_CARDS && inView(a)) sampled.push({ a, n, img, want });
     }
-    const unexplained = prodWrites.filter((r) => ![...native.values()].some((n) => [n.picture, n.img, ...n.sources].includes(r.target))).length;
+    const offCard = {};
+    for (const x of prodEntries) if (x.region !== 'CARD_MEDIA') { const k = `${x.region}:${x.r.target.localName}.${x.r.attributeName || 'children'}`; offCard[k] = (offCard[k] || 0) + 1; }
+    // Enhancer rendition signature on a native node other than an owned card's WebP source.
+    const strayEnhancerWrites = prodEntries.filter((x) => x.signature && x.region !== 'ENHANCER_UI' && !ownedNodes.has(x.r.target)).length;
     const settled = await waitForImages(sampled.map((s) => s.img));
-    const relations = {};
+    const relationCounts = {};
+    let sampledAliased = 0;
     for (const s of sampled) {
-      const rel = relation(s.img, s.n);
-      relations[rel] = (relations[rel] || 0) + 1;
-      if (rel !== expectedRelation[s.want]) counts.relationMismatch++;
+      const rels = relations(s.img, s.n);
+      const key = rels.join('|');
+      relationCounts[key] = (relationCounts[key] || 0) + 1;
+      if (rels.length > 1) sampledAliased++;
+      if (!rels.includes(expectedRelation[s.want])) counts.relationMismatch++;
     }
+    const fileEqualsSampleCards = [...native.values()].filter((n) => n.cls === 'PATTERN' && n.facts.file && n.facts.file === n.facts.sample).length;
     check('P04', 'login marker recorded (data-user-is-anonymous)', marker === 'TRUE' || marker === 'FALSE', { marker });
     check('P05', 'every card reports the contract provenance for its pattern, login state and quality', counts.enumMismatch === 0, { byEnum });
-    check('P06', loggedOut ? 'owned cards: exactly one write, on the WebP source srcset; all other cards: none' : 'logged in: zero rendition writes on any card', counts.writeMismatch === 0 && unexplained === 0, { writeMismatch: counts.writeMismatch, unexplainedWrites: unexplained, totalRenditionWrites: prodWrites.length });
+    check('P06', loggedOut ? 'owned cards: exactly one write, on the WebP source srcset; no enhancer rendition write anywhere else' : 'logged in: zero enhancer rendition writes on any card or node',
+      counts.writeMismatch === 0 && strayEnhancerWrites === 0,
+      { writeMismatch: counts.writeMismatch, strayEnhancerSignatureWrites: strayEnhancerWrites, totalRecordedWrites: prodWrites.length, offCardWritesByRegion: offCard });
     check('P07', 'final attributes: WebP srcset = expected native string; JPEG source, img and non-pattern cards unchanged', counts.stateMismatch === 0, { stateMismatch: counts.stateMismatch });
     check('P08', 'picture/source/img node identity unchanged on every card', counts.identityMismatch === 0, { identityMismatch: counts.identityMismatch });
-    check('P09', 'displayed rendition (currentSrc) matches the quality on sampled in-view pattern cards', loggedOut ? (sampled.length > 0 && counts.relationMismatch === 0) : null, { sampled: sampled.length, relations, settled });
+    check('P09', 'selected rendition (currentSrc) matches the quality on sampled in-view pattern cards (settled = loads also complete; informational)', loggedOut ? (sampled.length > 0 && counts.relationMismatch === 0) : null,
+      { sampled: sampled.length, relations: relationCounts, sampledAliased, fileEqualsSampleCards, settled });
     check('P10', 'saved quality intent is a valid stored value (read only)', ['preview', 'sample', 'original'].includes(quality), { quality });
     check('P11', 'no enhancer request observed from postamble load to this check', requests.total === 0, { requests: requests.total });
     const result = {
@@ -240,7 +283,10 @@
     BE.modules.gallery.dispose();
     flush();
     phase = 'after';
-    disposeRun = { chosen, ownedTotal, viewportA: viewport(), disposeWrites: log.filter((x) => x.phase === 'dispose').map((x) => x.r) };
+    const disposeWrites = log.filter((x) => x.phase === 'dispose').map((x) => x.r);
+    const nativeOf = (t) => [...native.values()].find((n) => n.sources[0] === t);
+    const restoredAtDispose = disposeWrites.filter((r) => r.type === 'attributes' && r.attributeName === 'srcset' && nativeOf(r.target) && r.target.getAttribute('srcset') === nativeOf(r.target).sourceAttrs[0][1]).length;
+    disposeRun = { chosen, ownedTotal, viewportA: viewport(), disposeWrites, restoredAtDispose };
     return show(JSON.stringify({ probe: 'ib08p-rendition-conformance', site: SITE, step: 'Dispose step 1 done', next: 'Close this box, narrow the SAME window, wait about 5 seconds, then run Dispose step 2.' }, null, 2));
   }
 
@@ -259,9 +305,14 @@
     await waitForImages([k1.img, k2.img, k3.img, k4.img, k5.img]);
     const dw = disposeRun.disposeWrites;
     const expectedDisposeWrites = disposeRun.ownedTotal - 3; // native edit kept, two disconnected owned sources
-    check('D01', 'dispose writes only WebP-source srcset restorations, one per remaining owned card, no node operations',
-      dw.length === expectedDisposeWrites && dw.every((r) => r.type === 'attributes' && r.attributeName === 'srcset' && r.target.getAttribute('srcset') === [...native.values()].find((n) => n.sources[0] === r.target)?.sourceAttrs[0][1]),
-      { disposeWrites: dw.length, expected: expectedDisposeWrites });
+    check('D01', 'dispose writes only WebP-source srcset restorations to the native value (judged at dispose time), one per remaining owned card, no node operations',
+      dw.length === expectedDisposeWrites && disposeRun.restoredAtDispose === expectedDisposeWrites,
+      { disposeWrites: dw.length, restoredAtDispose: disposeRun.restoredAtDispose, expected: expectedDisposeWrites });
+    const after = log.filter((x) => x.phase === 'after');
+    const reenhancedCards = [...native.keys()].filter((a) => a.classList.contains('be-thumb-wrap')).length;
+    check('D10', 'no enhancer rendition write and no re-enhanced card after dispose (dispose is terminal)',
+      after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,
+      { afterDisposeSignatureWrites: after.filter((x) => x.signature).length, afterDisposeCardMediaWrites: after.filter((x) => x.region === 'CARD_MEDIA' || x.region === 'LATE_CARD_MEDIA').length, reenhancedCards });
     check('D02', 'control card restored and shows the native WebP preview', k1.sources[0].getAttribute('srcset') === c1.sourceAttrs[0][1] && relation(k1.img, c1) === 'NATIVE_PREVIEW_WEBP');
     check('D03', 'native edit kept through dispose', k2.sources[0] === c2.sources[0] && c2.sources[0].getAttribute('srcset') === c2.sourceAttrs[1][1] && relation(k2.img, c2) === 'NATIVE_PREVIEW');
     check('D04', 'moved source: native order kept, WebP srcset restored', k3.sources[0] === c3.sources[1] && k3.sources[1] === c3.sources[0] && c3.sources[0].getAttribute('srcset') === c3.sourceAttrs[0][1] && relation(k3.img, c3) === 'NATIVE_PREVIEW');
