@@ -5,11 +5,19 @@
   "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
   "executed_body_sha256": "b5362552d2b95ca1b2f815cdbbccecae99e384568ce2598a543bbdf12e6f64ae",
   "derived_script": "IB09_Dwell_Live_Check.user.js",
-  "derived_script_sha256": "6d14256f75d44c67b481ed4f97b8b502b551a4b120d5a7f5055f696309623ab5",
-  "checks": 51,
-  "passed": 51,
+  "derived_script_sha256": "ff61f180a268c8a7db9db1ed3b87b8854831e9eb1d6dc8d05fa712ef0af08153",
+  "checks": 57,
+  "passed": 57,
   "failed": 0,
   "fault_controls": [
+    {
+      "name": "fault real hover-triggered load before dwell: caught by hoverLoadsBeforeDwell (and hooks)",
+      "pass": true
+    },
+    {
+      "name": "fault attribution without causal provenance: false hover loads appear on the reuse-only session",
+      "pass": true
+    },
     {
       "name": "fault erroneous FILE fallback when the sample is absent/invalid: caught (pure FILE target on STILL cards)",
       "pass": true

@@ -192,6 +192,64 @@ It stayed until closed by hand.
 - **Caveat:** e621 A's usefulness figures (displayable-after-dwell and cost classes) include up to 3 video generations, 3 of 46, so they are indicative only for still images.
 - **No rerun is required.**
 
-## 7. Not decided here
+## 7. Live session e926 C (sample, ordinary) and the `resourceTimingLoadsBeforeDwell` diagnosis
+
+**Operator-relayed result (package 1.2):**
+- `MATCH_EXPECTED_ARTIFACT`; quality sample;
+- 80 generations, all STILL: 52 quick passes, 28 reached dwell;
+- `newMediaBeforeDwell` 0 and `quickPassesStartingUpgrade` 0;
+- no eligible PREVIEW generations and no hover upgrades;
+- `upgradesOnSampleOrFileCards` 0, `fileDowngradedToSample` 0, `staleInstalled` 0;
+- **but `resourceTimingLoadsBeforeDwell` = 6.**
+
+**Root cause (observer reporting defect, no causal provenance).** In package 1.2 the field counted every hover generation for which **any** Resource Timing entry for the card's `data-sample-url` or `data-file-url` started within the window from pointer-enter to +200 ms (`ib09l_postamble.js`, 1.2, line 126). It never checked that the hover code started the request.
+
+With the Sample quality, IB08 points the card's grid WebP source at the **sample** URL. V3's immediate overlay (`showImmediateThumbnail`, `Booru_Enhancer.user.js:3029`) reuses the card's displayed URL, which is that same sample. So the field counted, indiscriminately:
+- the grid's own fetch of a card's sample (a card still loading, or scrolled into view as the pointer landed on it);
+- a V3 reuse that fetched because the displayed image was not yet in the memory cache;
+- revalidation.
+
+None of these is a hover upgrade. Under Preview (e621 A) the grid shows preview URLs, which the metric doesn't look at, so it stayed 0.
+
+**Answers:**
+1. **Hover-generated only?** No. The field matched card URLs by time only, so native, grid, lazy or background loads could be counted.
+2. **How entries were linked to a hover:** by URL (the card's sample or file) and by `startTime` inside the hover's window, with no link to a hover assignment.
+3. **An already-started native request finishing during a hover:** not counted (its `startTime` precedes the hover). A native request **starting** during the hover was counted.
+4. **Immediate reuse of the displayed image:** yes, if the reuse misses the memory cache (the displayed image not yet loaded, or evicted). Under Sample, the reuse URL is the sample.
+5. **Delayed, lazy, revalidation or unrelated loads:** delayed and lazy grid loads and revalidations of the card's sample or file, yes. Unrelated URLs, no.
+6. **Causal provenance:** none, in package 1.2.
+7. **An actual violation of "zero new hover media loads before dwell"?** No. The hooks, which are cache-independent, show zero hover media before dwell (`newMediaBeforeDwell` 0), and the session made no upgrades at all. The only hover media activity before dwell was the V3 overlay reuse of the displayed rendition, which is permitted. Some of the 6 entries may be V3 reuse fetches. That is consistent with the recorded V3 limit: reuse is not claimed free in every state.
+
+**Classification:** an observer reporting defect, together with expected browser and grid activity. It is not a product or prototype defect.
+
+**Correction (observer 1.3.0; test package only; executed body unchanged).** Each hover records whether the card's own image was still loading at pointer-enter. Each Resource Timing entry for the card's sample or file that starts inside the dwell window is attributed exactly once:
+
+| Class | Meaning | Reported as |
+| --- | --- | --- |
+| UPGRADE | the hover code assigned this URL as an upgrade before dwell, and the entry started at or after that assignment. **The only class that violates the rule** | `hoverLoadsBeforeDwell`, must be 0 |
+| REUSE | the V3 overlay assigned the displayed URL, the card image was already loaded, and the entry started after the assignment. V3 cost observation only | `renditionReuseFetchesBeforeDwell` |
+| DISPLAY_STILL_LOADING | the card's own image was still loading at enter | `cardDisplayLoadsDuringHover` |
+| OTHER | native, lazy, revalidation, or unrelated to any hover assignment | `unattributedCardMediaLoadsDuringHover` |
+
+Entries that started before the hover began, or at or after the dwell boundary, are excluded. The old field is removed.
+
+**Local verification: 57/57.** The new cases, on e926:
+
+| Case | Result |
+| --- | --- |
+| (a) Reuse of the displayed rendition that fetches | REUSE 4; the invariant stays 0 |
+| (b) A native request already in flight before the hover | not counted |
+| (c) An unrelated page resource | not counted |
+| (d) A card still loading at enter | DISPLAY_STILL_LOADING 1 |
+| (e) Post-dwell upgrades starting at 200 ms | never counted as before-dwell |
+| Package 1.2 regression | reproduces the e926 C shape (4 Resource Timing "loads" with zero hook-observed media) |
+| **Fault:** a real hover load before dwell (dwell 150) | caught |
+| **Fault:** attribution without provenance | caught |
+
+All earlier fault controls still pass. The executed body is unchanged.
+
+**e926 C disposition: ACCEPTED.** The frozen rule holds (zero hover media before dwell, and no upgrades on SAMPLE cards), and the 6 entries are not hover upgrades. **No rerun is required.** Whether some were V3 reuse fetches can only be split with 1.3, which is optional and is V3 cost information only.
+
+## 8. Not decided here
 
 This record does not choose the final dwell, and it gives no G-HOVER PASS and no production change.

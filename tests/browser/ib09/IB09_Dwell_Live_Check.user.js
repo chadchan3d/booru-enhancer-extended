@@ -5543,6 +5543,7 @@ IB07P_PRODUCTION_BODY();
         gen = { card, enterT: now(), leaveT: null, token: null, dwellT: null, assigns: [],
           entrySlot: slotOf(img?.currentSrc || img?.getAttribute?.('src') || '', card),
           media: mediaClassOf(card), usableSample: !!(card && String(card.getAttribute('data-sample-url') || '').trim()),
+          cardImageLoadingAtEnter: !!img && img.complete === false,
           fromOtherCard: !!prev && prev.card !== card && prev.leaveT !== null && now() - prev.leaveT < 1000,
           reentrySameCard: !!prev && prev.card === card };
         session.generations.push(gen);
@@ -5565,6 +5566,25 @@ IB07P_PRODUCTION_BODY();
     if (e.encodedBodySize > 0 && e.transferSize < e.encodedBodySize && e.transferSize < 2048) return { cls: 'REVALIDATED' };
     return { cls: 'NETWORK', kib: Math.round(e.transferSize / 1024) };
   }
+  const rtFrom = (url, t0) => (performance.getEntriesByName(abs(url), 'resource') || []).filter((e) => e.startTime >= t0 - 1);
+  function attributeEntries(x) {
+    const out = { UPGRADE: 0, REUSE: 0, DISPLAY_STILL_LOADING: 0, OTHER: 0 };
+    if (!x.card) return out;
+    const end = x.enterT + DWELL_MS;
+    for (const attr of ['data-sample-url', 'data-file-url']) {
+      const u = abs(x.card.getAttribute(attr));
+      if (!u) continue;
+      for (const e of performance.getEntriesByName(u, 'resource') || []) {
+        if (e.startTime < x.enterT || e.startTime >= end) continue; // in flight before hover, or after dwell
+        const mine = x.assigns.filter((a) => a.url && abs(a.url) === u && e.startTime >= a.t - 1 && a.t < end);
+        if (mine.some((a) => a.kind !== 'thumb')) out.UPGRADE++;
+        else if (mine.some((a) => a.kind === 'thumb') && !x.cardImageLoadingAtEnter) out.REUSE++;
+        else if (x.cardImageLoadingAtEnter) out.DISPLAY_STILL_LOADING++;
+        else out.OTHER++;
+      }
+    }
+    return out;
+  }
   function analyze(s) {
     const g = s.generations;
     const tally = (xs) => xs.reduce((m, x) => { m[x] = (m[x] || 0) + 1; return m; }, {});
@@ -5583,7 +5603,19 @@ IB07P_PRODUCTION_BODY();
       dwellReached: g.filter((x) => x.dwellT !== null).length,
       thumbNotDisplayedRendition: g.filter((x) => x.assigns.some((a) => a.kind === 'thumb' && a.slot !== x.entrySlot)).length,
       newMediaBeforeDwell: g.filter((x) => up(x).some((a) => a.t - x.enterT < DWELL_MS)).length,
-      resourceTimingLoadsBeforeDwell: g.filter((x) => x.card && ['data-sample-url', 'data-file-url'].some((attr) => (performance.getEntriesByName(abs(x.card.getAttribute(attr)), 'resource') || []).some((e) => e.startTime >= x.enterT && e.startTime < x.enterT + DWELL_MS))).length,
+      // Revision 1.3: every Resource Timing entry for this card's SAMPLE/FILE that starts inside
+      // [enter, enter + dwell) is attributed exactly once (see attributeEntries):
+      //   UPGRADE - its URL was assigned by the hover code as an upgrade in this generation and the
+      //             entry started at/after that assignment (the only class that violates the rule);
+      //   REUSE   - the V3 overlay reused the displayed rendition, the card image was already loaded
+      //             at enter, and the entry started at/after that assignment (V3 cost observation);
+      //   DISPLAY_STILL_LOADING - the card's own displayed image was still loading at enter (grid load);
+      //   OTHER   - native / lazy / revalidation / unrelated to any hover assignment.
+      hoverLoadsBeforeDwell: g.filter((x) => attributeEntries(x).UPGRADE > 0).length,
+      renditionReuseFetchesBeforeDwell: g.filter((x) => attributeEntries(x).REUSE > 0).length,
+      cardDisplayLoadsDuringHover: g.filter((x) => attributeEntries(x).DISPLAY_STILL_LOADING > 0).length,
+      unattributedCardMediaLoadsDuringHover: g.filter((x) => attributeEntries(x).OTHER > 0).length,
+      cardImageLoadingAtEnter: g.filter((x) => x.cardImageLoadingAtEnter).length,
       quickPassesStartingUpgrade: g.filter((x) => stay(x) !== null && stay(x) < DWELL_MS && up(x).length > 0).length,
       previewUpgrades: {
         eligibleGenerations: eligible.length,
@@ -5679,7 +5711,7 @@ IB07P_PRODUCTION_BODY();
     document.querySelector('#ib09l-toast')?.remove();
     await sleep(RT_WAIT_MS);
     const identity = await sourceIdentity();
-    const out = { probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
+    const out = { probe: 'ib09l-dwell-live-check', version: '1.3.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
       notes: 'Timing comes from hooks in the running code (cache-independent). Cost classes come from Resource Timing: NO_ENTRY is not zero cost, and unknown cache state is not cold.' };
     show(guard(JSON.stringify(out, null, 2)));
     return out;

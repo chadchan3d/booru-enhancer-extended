@@ -39,7 +39,8 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB09 live check package** (`tests/browser/ib09/IB09_Dwell_Live_Check.user.js`). It is production `bbaf9ac` + the 200 ms prototype + 8 observe-only hooks, with its body minus the hooks pinned to the qualified prototype and C00 in the page.
   - Verifier 44/44, 10/10 fault controls.
   - Observer 1.1.0: non-blocking click-through toast instead of the blocking result box at session start; session data and executed body identical to the previous package.
-  - Observer 1.2.0: the still-image rule is evaluated over STILL cards only; video, animated and unknown cards are reported separately; true SAMPLE, alias, pure FILE and no-usable-sample outcomes are split. Verifier 51/51.
+  - Observer 1.2.0: the still-image rule is evaluated over STILL cards only; video, animated and unknown cards are reported separately; true SAMPLE, alias, pure FILE and no-usable-sample outcomes are split.
+  - Observer 1.3.0: Resource Timing entries are attributed causally; only UPGRADE entries (`hoverLoadsBeforeDwell`) count against the rule. Verifier 57/57.
   - Timing comes from the hooks (cache-independent); cost is classified per observation.
   - Bounded to 80 generations per session.
 - **IB09 V2 pilot probe** (`tests/browser/ib09/IB09_V2_Hover_Cost_Probe.user.js`): verifier 39/39 on a synthetic browser model, 11/11 fault controls.
@@ -68,6 +69,9 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - Package defect: the 3 FILE targets were video posts (IB10 path, after dwell) counted in the still-image statistics. Corrected in observer 1.2.
   - Still-image targets: 38 SAMPLE + 5 native SAMPLE|FILE alias, 0 pure FILE.
   - The usefulness timing includes up to 3 video generations and is indicative only. No rerun.
+- **IB09 live e926 C** (sample, ordinary; package 1.2): **accepted.** 80 STILL generations, zero hover media before dwell, no upgrades, no stale install.
+  - `resourceTimingLoadsBeforeDwell` 6 was an observer defect: time-window matching of the card's sample/file with no causal provenance. Under Sample, the grid displays the sample, so grid loads and V3 reuse fetches were counted.
+  - Corrected in observer 1.3 (causal UPGRADE/REUSE/DISPLAY/OTHER attribution; verifier 57/57). No rerun.
 - **IB09 still needed before a production proposal:** the held-out live sessions (README "Dwell live check"). These are A (preview, ordinary), C (sample) and D (original) on both hosts, and B (preview, Slow 4G with Disable cache) on e621, optionally on e926.
   - Normal Chrome only (Tampermonkey cannot run in Incognito here). Cold cost is taken only from the B session's Disable-cache run.
   - G-HOVER OPEN.
@@ -80,6 +84,7 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB07 host suites** pin the IB07 blob, so they exit 1 on the pin alone. All their assertions and controls pass; the historical results are not edited.
 - **Retained:** live request counting starts at the postamble; the local item 9 T1/T2 suite is the startup evidence. The earlier slot-provenance live runs stay POTENTIALLY CONTAMINATED / SUPERSEDED.
 - **Deferred to later checkpoints:** video/GIF (IB10), viewer (IB11), pagination (IB12), downloads (IB13), favorites/actions (IB14), other hosts, Pixiv (IB17).
+- **Deferred UI note (IB15, operator):** increase the settings-window text/font size for readability.
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next

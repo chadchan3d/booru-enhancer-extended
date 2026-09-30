@@ -43,7 +43,7 @@ check('observer makes no request, storage, cookie or settings write, and dispatc
 // ---- runtime model ----
 const M = hh.M;
 async function run({ url = 'https://e621.net/posts', quality = 'preview', text = derived, model = {}, script, html = null }) {
-  const { delay = 150, cachedSamples = false } = model;
+  const { delay = 150, cachedSamples = false, precacheCard = false } = model;
   const menu = {}; let clock = null; const entries = []; const pending = new Set(); const cached = new Set();
   const c = h.load({ url, html: html || hh.listing(new URL(url).hostname, 4).html, source: text, settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
     clock = hh.installFakeClock(w);
@@ -52,6 +52,7 @@ async function run({ url = 'https://e621.net/posts', quality = 'preview', text =
     if (!w.crypto || !w.crypto.subtle) Object.defineProperty(w, 'crypto', { value: webcrypto, configurable: true });
     if (!w.TextEncoder) w.TextEncoder = TextEncoder;
     w.GM_registerMenuCommand = (name, fn) => { menu[name] = fn; return 0; };
+    if (precacheCard) for (const a of w.document.querySelectorAll('article')) for (const k of ['data-sample-url', 'data-file-url', 'data-preview-url', 'data-preview-webp']) { const v = a.getAttribute(k); if (v) cached.add(new URL(v, w.location.href).href); }
     const desc = Object.getOwnPropertyDescriptor(w.HTMLImageElement.prototype, 'src');
     Object.defineProperty(w.HTMLImageElement.prototype, 'src', { configurable: true, get() { return desc.get.call(this); }, set(v) {
       desc.set.call(this, v);
@@ -79,6 +80,10 @@ async function run({ url = 'https://e621.net/posts', quality = 'preview', text =
   const cards = [...w.document.querySelectorAll('article')];
   const img = (i) => cards[i].querySelector('img');
   const api = {
+    // Model controls (verifier only): inject a Resource Timing entry; mark a card's own image as still loading.
+    pushEntry: (u, offset = 0) => entries.push({ name: new URL(u, w.location.href).href, entryType: 'resource', startTime: clock.now() + offset, duration: 50, transferSize: 300 * 1024 + 300, encodedBodySize: 300 * 1024, decodedBodySize: 600 * 1024 }),
+    setCardLoading: (i, loading) => { if (loading) pending.add(img(i)); else pending.delete(img(i)); },
+    cardAttr: (i, k) => cards[i].getAttribute(k),
     enter: async (i) => { img(i).dispatchEvent(new w.MouseEvent('pointerover', { bubbles: true })); await clock.advance(0); },
     leave: async (i) => { img(i).dispatchEvent(new w.MouseEvent('pointerout', { bubbles: true, relatedTarget: w.document.body })); await clock.advance(0); },
     wait: (ms) => clock.advance(ms),
@@ -115,7 +120,7 @@ async function main() {
     const s = r.json && r.json.sessions && r.json.sessions[0];
     check(`${host} preview: identity MATCH, site`, r.json && r.json.production_body_identity === 'MATCH_EXPECTED_ARTIFACT' && r.json.site === host, r.text.slice(0, 200));
     check(`${host} preview: 12 generations, PREVIEW at entry, 6 quick passes under dwell, 6 dwells`, s && s.generations === 12 && s.entryRendition.PREVIEW === 12 && s.quickPassesUnderDwell === 6 && s.dwellReached === 6, JSON.stringify(s));
-    check(`${host} preview: zero new hover media before dwell (hooks) and zero Resource Timing card-media loads before dwell; quick passes start nothing`, s && s.newMediaBeforeDwell === 0 && s.resourceTimingLoadsBeforeDwell === 0 && s.quickPassesStartingUpgrade === 0 && s.thumbNotDisplayedRendition === 0, JSON.stringify(s));
+    check(`${host} preview: zero new hover media before dwell (hooks) and zero Resource Timing card-media loads before dwell; quick passes start nothing`, s && s.newMediaBeforeDwell === 0 && s.hoverLoadsBeforeDwell === 0 && s.quickPassesStartingUpgrade === 0 && s.thumbNotDisplayedRendition === 0, JSON.stringify(s));
     check(`${host} preview: one SAMPLE upgrade per eligible dwell, none before 200 ms`, s && s.previewUpgrades.eligibleGenerations === 6 && s.previewUpgrades.started === 6 && s.previewUpgrades.exactlyOnePerGeneration && s.previewUpgrades.startedBeforeDwell === 0 && s.previewUpgrades.startOffsetMs.min >= 200 && JSON.stringify(s.previewUpgrades.targetSlots) === '{"SAMPLE":6}', JSON.stringify(s && s.previewUpgrades));
     check(`${host} preview: every started upgrade is displayed or left before displayable; cold loads NETWORK (displayable 150 ms after dwell), repeats NO_ENTRY (about 10 ms)`, s && s.previewUpgrades.displayed + s.previewUpgrades.leftBeforeDisplayable === 6 && s.previewUpgrades.leftBeforeDisplayable === 3 && s.previewUpgrades.displayableAfterDwellMs.max === 150 && s.previewUpgrades.displayableAfterDwellMs.min === 10 && s.previewUpgrades.costClasses.NETWORK === 3 && s.previewUpgrades.costClasses.NO_ENTRY === 3 && s.previewUpgrades.networkTransferKiB.median === 300, JSON.stringify(s && s.previewUpgrades));
     check(`${host} preview: generation-safe (stale blocked, never installed); A->B and re-entry recorded`, s && s.staleInstalled === 0 && s.staleBlocked >= 0 && s.movedFromAnotherCard >= 1 && s.reentrySameCard >= 1, JSON.stringify(s));
@@ -145,7 +150,7 @@ async function main() {
     const r = await run({ quality: 'preview', script: MIX });
     check('starting a session leaves no result box and no textarea; only a small click-through toast', r.uiAtStart.resultBox === false && r.uiAtStart.textareas === 0 && r.uiAtStart.ownElements === 1 && r.uiAtStart.allClickThrough && r.uiAtStart.toastSmall, JSON.stringify(r.uiAtStart));
     check('the acknowledgement disappears by itself; nothing of the observer remains over the gallery while recording', r.uiAfter.ownElements === 0 && r.uiDuring.resultBox === false && r.uiDuring.nonClickThrough === 0, JSON.stringify([r.uiAfter, r.uiDuring]));
-    check('Show results still returns the sanitized session output', r.json && r.json.version === '1.2.0' && r.json.sessions.length === 1 && leaks(r.text).length === 0, r.text.slice(0, 200));
+    check('Show results still returns the sanitized session output', r.json && r.json.version === '1.3.0' && r.json.sessions.length === 1 && leaks(r.text).length === 0, r.text.slice(0, 200));
     // Session data unchanged by the UI correction: same pointer sequence through the previous package (a9543c9).
     const prevPkg = execFileSync('git', ['-C', REPO, 'show', 'a9543c9:tests/browser/ib09/IB09_Dwell_Live_Check.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     const prevBody = prevPkg.slice(prevPkg.indexOf(WRAP_OPEN) + WRAP_OPEN.length, prevPkg.indexOf(WRAP_CLOSE));
@@ -153,7 +158,8 @@ async function main() {
     const old = await run({ quality: 'preview', text: prevPkg, script: MIX });
     // Every field the previous package reported is unchanged (1.2 only adds fields; this fixture is all STILL cards).
     const pick = (a, b) => (Array.isArray(a) ? a.map((x, i) => pick(x, b ? b[i] : undefined)) : a && typeof a === 'object' ? Object.fromEntries(Object.keys(a).map((k) => [k, pick(a[k], b ? b[k] : undefined)])) : b);
-    check('session data unchanged by the UI and reporting corrections (every previously reported field identical for the same pointer sequence)', JSON.stringify(old.json.sessions) === JSON.stringify(pick(old.json.sessions, r.json.sessions)), JSON.stringify([old.json.sessions[0].previewUpgrades, r.json.sessions[0].previewUpgrades]));
+    for (const x of old.json.sessions) delete x.resourceTimingLoadsBeforeDwell; // replaced in 1.3 by causally attributed fields
+    check('session data unchanged by the UI and reporting corrections (every previously reported field identical for the same pointer sequence, apart from the replaced Resource Timing field)', JSON.stringify(old.json.sessions) === JSON.stringify(pick(old.json.sessions, r.json.sessions)), JSON.stringify([old.json.sessions[0].previewUpgrades, r.json.sessions[0].previewUpgrades]));
     check('regression: the previous package opened a blocking result box at session start (the reported defect)', old.uiAtStart.resultBox === true && old.uiAtStart.allClickThrough === false, JSON.stringify(old.uiAtStart));
     // Usefulness marks.
     const marked = await run({ quality: 'preview', script: async (a) => {
@@ -201,10 +207,43 @@ async function main() {
     ['stale install after leave (hide invalidates nothing)', mb("\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n\t\t\trequestToken++;\n\t\t\tactiveUpgradeUrl = '';\n\t\t\tclearMediaState();\n\t\t\tcancelPendingUpgrade();", '\t\tfunction hide() {\n\t\t\tclearMediaState();'), 'preview', (x) => x.json.sessions[0].staleInstalled > 0],
     ['old-generation work after re-entry', withBody(mustReplace(mustReplace(mustReplace(body, '\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n', '\t\tfunction hide() {\n'), "\t\t\tclearTimeout(dwellTimer);\n\n\t\t\t// V3", '\n\t\t\t// V3'), "\t\tasync function afterDwell(img, token) {\n", '\t\tasync function afterDwell(img, token) {\n\t\t\ttoken = requestToken;\n')), 'preview', (x) => x.json.sessions[0].newMediaBeforeDwell > 0 || x.json.sessions[0].previewUpgrades.startedBeforeDwell > 0 || x.json.sessions[0].quickPassesStartingUpgrade > 0],
     ['timing attributed from Resource Timing instead of the hooks (cache/no-entry)', derived.replace("      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };", "      if (d.kind !== 'thumb') return;\n      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };"), 'preview-cached', (x) => x.json.sessions[0].previewUpgrades.started !== 6],
-    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
-    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.3.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.3.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.3.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.3.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
     ['unbounded sampling', derived.replace('const MAX_GENERATIONS = 80;', 'const MAX_GENERATIONS = 100000;'), 'preview-many', (x) => x.json.sessions[0].generations > 80],
   ];
+  // Causal Resource Timing attribution (e926 C diagnosis). Sample quality: the card's displayed rendition IS its sample.
+  {
+    const P12 = execFileSync('git', ['-C', REPO, 'show', '4d4f3af:tests/browser/ib09/IB09_Dwell_Live_Check.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    const hoverEach = async (a) => { for (let i = 0; i < 4; i++) { await a.enter(i); await a.wait(300); await a.leave(i); await a.wait(30); } };
+    const S = (x) => x.json.sessions[0];
+    // (a) current-rendition reuse that fetches (displayed image loaded, reuse not cached)
+    const reuse = await run({ url: 'https://e926.net/posts', quality: 'sample', script: hoverEach });
+    check('reuse of the displayed rendition that fetches: counted as REUSE (V3 cost), not as a hover load; invariant stays 0', S(reuse).hoverLoadsBeforeDwell === 0 && S(reuse).renditionReuseFetchesBeforeDwell === 4 && S(reuse).newMediaBeforeDwell === 0, JSON.stringify(S(reuse)));
+    const old12 = await run({ url: 'https://e926.net/posts', quality: 'sample', text: P12, script: hoverEach });
+    check('regression: package 1.2 counts the same reuse fetches as resourceTimingLoadsBeforeDwell with zero hook-observed media (the e926 C shape)', S(old12).resourceTimingLoadsBeforeDwell === 4 && S(old12).newMediaBeforeDwell === 0, JSON.stringify(S(old12)));
+    // (b) native request in flight before hover; (c) unrelated resource during hover; (d) grid load of a card still loading at enter
+    const native = await run({ url: 'https://e926.net/posts', quality: 'sample', model: { precacheCard: true }, script: async (a) => {
+      a.pushEntry(a.cardAttr(0, 'data-sample-url'), -50); await a.enter(0); await a.wait(300); await a.leave(0); await a.wait(30);                       // (b)
+      await a.enter(1); a.pushEntry(`${M}/unrelated/page-asset.png`, 20); await a.wait(300); await a.leave(1); await a.wait(30);                           // (c)
+      a.setCardLoading(2, true); await a.enter(2); a.pushEntry(a.cardAttr(2, 'data-sample-url'), 10); await a.wait(300); await a.leave(2); await a.wait(30);  // (d)
+      a.setCardLoading(2, false);
+    } });
+    const n = S(native);
+    check('in-flight native request, unrelated page resource and a still-loading card display: none counted as hover loads or reuse fetches',
+      n.hoverLoadsBeforeDwell === 0 && n.renditionReuseFetchesBeforeDwell === 0 && n.cardDisplayLoadsDuringHover === 1 && n.cardImageLoadingAtEnter === 1 && n.unattributedCardMediaLoadsDuringHover === 0 && n.newMediaBeforeDwell === 0, JSON.stringify(n));
+    // (e) post-dwell hover upgrade (preview quality, network): starts at 200, not before dwell
+    const post = await run({ url: 'https://e926.net/posts', quality: 'preview', model: { precacheCard: false }, script: hoverEach });
+    check('post-dwell upgrade loads (at 200 ms) are never counted as before-dwell loads', S(post).hoverLoadsBeforeDwell === 0 && S(post).previewUpgrades.started === 4 && S(post).previewUpgrades.startOffsetMs.min >= 200, JSON.stringify(S(post)));
+    // Fault: a real hover-triggered load before dwell (dwell 150 in the executed body, re-pinned).
+    const early = withBody(mustReplace(body, 'const HOVER_DWELL_MS = 200;', 'const HOVER_DWELL_MS = 150;'));
+    const fe = await run({ url: 'https://e926.net/posts', quality: 'preview', text: early, script: hoverEach });
+    check('fault real hover-triggered load before dwell: caught by hoverLoadsBeforeDwell (and hooks)', S(fe).hoverLoadsBeforeDwell > 0 && S(fe).newMediaBeforeDwell > 0, JSON.stringify(S(fe)));
+    // Fault: attribution without provenance (every in-window entry treated as a hover upgrade load).
+    const noProv = derived.replace("        if (mine.some((a) => a.kind !== 'thumb')) out.UPGRADE++;", '        if (true) out.UPGRADE++;');
+    const fp = await run({ url: 'https://e926.net/posts', quality: 'sample', text: noProv, script: hoverEach });
+    check('fault attribution without causal provenance: false hover loads appear on the reuse-only session', noProv !== derived && S(fp).hoverLoadsBeforeDwell > 0, JSON.stringify(S(fp)));
+  }
+
   // Target-provenance fault controls on the mixed fixture.
   {
     const fileFallback = withBody(mustReplace(body, '\t\t\treturn showingPreview && same(resolved.url, wrap.dataset.sampleUrl) && !same(resolved.url, current);', '\t\t\treturn showingPreview && (same(resolved.url, wrap.dataset.sampleUrl) || same(resolved.url, wrap.dataset.fileUrl)) && !same(resolved.url, current);'));
