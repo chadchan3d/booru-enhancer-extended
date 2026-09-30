@@ -1,20 +1,28 @@
 {
   "checkpoint": "IB08",
   "evidence_gate": "G-RENDITION",
-  "stage": "P-stage e621/e926 rendition production conformance package, revision 3 (direct re-enhancement indicators in D10), built from 2765b9d; local verification",
+  "stage": "P-stage e621/e926 rendition production conformance package, revision 4 (D10 direct re-enhancement indicators; D11 no enhancer presentation after dispose); local verification",
   "diagnosis_a": "production a0f3041 failed the dispose test (gallery re-enhanced itself after dispose); the corrected production passes it past the debounce, and the barrier-removed mutant fails D10",
-  "production_commit": "2765b9d",
-  "production_source_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
-  "production_body_sha256": "82fea4833e044e9c046f3f635b49d19d8bd12606caf39fb29a6b945173308e6e",
+  "production_commit": "91fa86d",
+  "production_source_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
+  "production_body_sha256": "d8943f3bd12444c896dcd3ca2961814dce3adb9d5f8cbb80b76c35387b84648b",
   "derived_script": "IB08_Rendition_Production_Conformance.user.js",
-  "derived_script_sha256": "8a63a43b84850db8fd9519b9432b9b15e39c01089a08ef21c48540928cec7a68",
+  "derived_script_sha256": "4f2efa366f8f6c97436e7cebda18d62e0a77310ef08768b0bb265557e435d14c",
   "currentSrc_model": "jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src",
-  "checks": 84,
-  "passed": 84,
+  "checks": 90,
+  "passed": 90,
   "failed": 0,
   "fault_controls": [
     {
+      "name": "fault e621.net previous unscoped CSS: caught by D11 only among the D checks (P00 flags the altered body)",
+      "pass": true
+    },
+    {
       "name": "fault e621.net disposed-container barrier removed: caught by D10 via direct indicators (init call, new owners, action bars, signature writes), D01 still PASS",
+      "pass": true
+    },
+    {
+      "name": "fault e926.net previous unscoped CSS: caught by D11 only among the D checks (P00 flags the altered body)",
       "pass": true
     },
     {

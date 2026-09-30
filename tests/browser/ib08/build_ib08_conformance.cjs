@@ -13,8 +13,8 @@ const { execFileSync } = require('child_process');
 const { split, BODY_START, WRAP_OPEN, WRAP_CLOSE } = require('../ib07/build_production_conformance.cjs');
 
 // Production with the IB08 P-stage rendition contract.
-const COMMIT = '2765b9d';
-const EXPECTED_PRODUCTION_BLOB = '4ac1e36d01a81473d409cb6ff40a70fb9a77fc34';
+const COMMIT = '91fa86d';
+const EXPECTED_PRODUCTION_BLOB = 'bbaf9ac63f5c0292018b974f00c7b30d8b478bb5';
 const POSTAMBLE_MARKER = '/* IB08P E621/E926 RENDITION PRODUCTION CONFORMANCE POSTAMBLE';
 const HOSTS = ['e621.net', 'e926.net'];
 const OUT = path.join(__dirname, 'IB08_Rendition_Production_Conformance.user.js');

@@ -30,7 +30,12 @@
  * rendition-signature writes, all after dispose. An enhancer class still on a
  * card (be-thumb-wrap) is stale state, not re-enhancement. It is reported
  * separately with whether the site touched that card's class attribute
- * after load (class-mutation categories, counts only). */
+ * after load (class-mutation categories, counts only).
+ *
+ * Revision 4 (presentation residue): D11 fails if any rule of the enhancer
+ * stylesheet (selector mentioning be-thumb or be-gallery-grid) still matches
+ * a card, its image or the gallery container after dispose. Stale class
+ * tokens may remain (IB04 rule), but they must have no enhancer presentation. */
 (() => {
   'use strict';
 
@@ -376,6 +381,25 @@
     const residue = [...document.querySelectorAll('article source, article img')].filter((el) => [...native.values()].some((n) => (n.sampleRaw && el.getAttribute('srcset') === n.sampleRaw) || (n.sampleRaw && el.getAttribute('src') === n.sampleRaw))).length;
     const restoredOthers = [...native.keys()].filter((a) => !disposeRun.chosen.includes(a)).every((a) => { const n = native.get(a); const c = cur(a); return JSON.stringify(c.sources.map(attrsOf)) === JSON.stringify(n.sourceAttrs) && JSON.stringify(attrsOf(c.img)) === JSON.stringify(n.imgAttrs); });
     check('D07', 'every other card is back to its native rendition attributes; no sample residue on connected nodes', restoredOthers && residue === 0, { residue });
+    const enhancerRules = [];
+    for (const sheet of document.styleSheets) {
+      let rules; try { rules = sheet.cssRules; } catch { continue; }
+      for (const r of rules || []) if (r.selectorText && /be-thumb|be-gallery-grid/.test(r.selectorText)) enhancerRules.push(r.selectorText);
+    }
+    const matchesAny = (el) => !!el && enhancerRules.some((sel) => { try { return el.matches(sel); } catch { return false; } });
+    const cardsNow = [...native.keys()].filter((a) => a.isConnected);
+    const galleryRoot = cardsNow[0] ? cardsNow[0].closest('#posts-container, .posts-container') : null;
+    const presentation = {
+      enhancerRules: enhancerRules.length,
+      cardsWithEnhancerPresentation: cardsNow.filter(matchesAny).length,
+      imagesWithEnhancerPresentation: cardsNow.filter((a) => matchesAny(a.querySelector('img'))).length,
+      containerWithEnhancerPresentation: matchesAny(galleryRoot),
+      staleCardTokens: cardsNow.filter((a) => a.classList.contains('be-thumb-wrap')).length,
+      staleImageTokens: cardsNow.filter((a) => a.querySelector('img')?.classList.contains('be-thumb-img')).length,
+      containerKeepsGalleryClass: !!galleryRoot && galleryRoot.classList.contains('be-gallery-grid'),
+    };
+    check('D11', 'no enhancer presentation after dispose: no enhancer stylesheet rule matches any card, image or the gallery container (stale tokens may remain)',
+      enhancerRules.length > 0 && presentation.cardsWithEnhancerPresentation === 0 && presentation.imagesWithEnhancerPresentation === 0 && !presentation.containerWithEnhancerPresentation, presentation);
     check('D08', 'viewport narrowed between steps (dispose, then resize)', viewport().width < disposeRun.viewportA.width, { before: disposeRun.viewportA, after: viewport() });
     check('D09', 'no enhancer request observed', requests.total === 0, { requests: requests.total });
     const result = { probe: 'ib08p-rendition-conformance', site: SITE, command: 'dispose', production_body_identity: identity, checks,

@@ -195,7 +195,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
 
 # IB08 P-stage production conformance (e621 / e926 rendition)
 
-**IB08 production conformance only.** `IB08_Rendition_Production_Conformance.user.js` is the committed production `Booru_Enhancer.user.js` (commit `2765b9d`, blob `4ac1e36`: the P-stage contract plus the diagnosis-A terminal-disposal correction), byte-for-byte, inside the IB07 wrapper, with a read-only postamble (`ib08p_postamble.js`).
+**IB08 production conformance only.** `IB08_Rendition_Production_Conformance.user.js` is the committed production `Booru_Enhancer.user.js` (commit `91fa86d`, blob `bbaf9ac`: the P-stage contract, terminal gallery disposal, and card presentation CSS scoped to the active gallery), byte-for-byte, inside the IB07 wrapper, with a read-only postamble (`ib08p_postamble.js`).
 - It runs only on e621.net and e926.net, and has no update URL.
 - Check P00 proves in the browser that the executed body is the committed artifact.
 
@@ -216,6 +216,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
 - **P09** judges the *selected* rendition (`currentSrc`) and accepts a card whose native file and sample URLs are the same. `settled` is informational: it says whether image loads also completed within 8 seconds.
 - **D01** is judged at dispose time.
 - **D10** (revision 3) fails only on real re-enhancement after dispose, measured directly: a call through `gallery.init`, a new owner, an inserted action bar, or an enhancer rendition write. An enhancer class still on a card is stale state and is reported separately in `staleState`, together with whether the site rewrote that card's class after load.
+- **D11** (revision 4) fails if any rule of the enhancer stylesheet still matches a card, its image or the gallery container after dispose. Stale class tokens may remain; they must have no enhancer presentation.
 
 **What the checks prove:**
 - **Check this page** (P00–P11):
@@ -228,7 +229,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
   - the displayed rendition on in-view cards;
   - the saved quality value;
   - no enhancer request.
-- **Dispose test** (D01–D10): after simulated native edit, move and replacements, production's own `gallery.dispose()` restores only what it owns, keeps native changes, stays terminal (no re-enhancement), and leaves no sample residue. The window is narrowed afterwards.
+- **Dispose test** (D01–D11): after simulated native edit, move and replacements, production's own `gallery.dispose()` restores only what it owns, keeps native changes, stays terminal (no re-enhancement), and leaves no sample residue and no enhancer presentation. The window is narrowed afterwards.
 
 Local verification: `node tests/browser/ib08/build_ib08_conformance.cjs --check` and `node tests/browser/ib08/verify_ib08_conformance.cjs`.
 
@@ -262,6 +263,6 @@ Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, U
 - The saved setting is shared, so set **Sample** again before e926 run S.
 - Do not reuse any e621 result.
 
-**Live rerun required (package revision 3):** only **e621 D** and **e926 D**. The production artifact (`4ac1e36`) is unchanged since the second live run, whose S, P, O and L rows passed on both hosts; revision 3 changes only the dispose test's D10 measurement. **Replace** the previously installed conformance script with this file; Tampermonkey must show it as the new build. P00 must read `MATCH_EXPECTED_ARTIFACT`.
+**Final live run required (package revision 4, production `bbaf9ac`):** all **ten rows**, e621 and e926, each S, D, P, O and L. Earlier live rows were on superseded artifacts and are not carried forward. **Replace** the installed conformance script with this file. **Replace** the previously installed conformance script with this file; Tampermonkey must show it as the new build. P00 must read `MATCH_EXPECTED_ARTIFACT`.
 
 **Return** the ten sanitized results (e621 S, D, P, O, L; e926 S, D, P, O, L). If any result says `sanitationGuard: BLOCKED`, return it as it is. Afterwards, disable the conformance script and re-enable your normal enhancer if you use it.

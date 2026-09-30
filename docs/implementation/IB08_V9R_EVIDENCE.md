@@ -2,9 +2,14 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). The diagnosis-A correction is implemented (§7). **The second live run on `4ac1e36` is PASS except D10 on both hosts (§8); D10 is a package measurement defect, and production is terminal.** Only e621 D and e926 D need rerunning with package revision 3. This file is not a completion record.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). The diagnosis-A correction is implemented (§7). The second live run on `4ac1e36` was PASS except D10, a package measurement defect (§8). **The presentation residue is corrected with CSS scoping (§9, production `bbaf9ac`). One final clean live run of all ten rows on that artifact is pending.** This file is not a completion record.
 
-**Production:** `Booru_Enhancer.user.js` blob `4ac1e36d01a81473d409cb6ff40a70fb9a77fc34` (commit `2765b9d`): the IB08 P-stage rendition contract (introduced in `b2b1d9f`, blob `a0f3041`) plus the diagnosis-A terminal-disposal correction. Before IB08: blob `32d0051` (commit `c551bb0`).
+**Production:** `Booru_Enhancer.user.js` blob `bbaf9ac63f5c0292018b974f00c7b30d8b478bb5` (commit `91fa86d`). It contains:
+- the IB08 P-stage rendition contract (`b2b1d9f`, blob `a0f3041`);
+- terminal gallery disposal (`2765b9d`, blob `4ac1e36`);
+- card presentation CSS scoped to the active gallery (`91fa86d`).
+
+Before IB08: blob `32d0051` (commit `c551bb0`).
 
 ## 1. Native baseline (V9-R, live)
 
@@ -630,9 +635,56 @@ Whether this blocks IB08 closure is an operator decision.
 - Production is unchanged since the second run, so the second run's S, P, O and L rows stand on the same exact artifact.
 - Revision 3's only behavioral change is the dispose test's D10 measurement, plus load-time counters that observe without changing production behavior.
 
+## 9. Presentation-residue correction (commit `91fa86d`, production `4ac1e36` → `bbaf9ac`)
+
+**Decision (operator):** the presentation residue blocks IB08 closure. The CSS-only correction is approved; ownership semantics stay unchanged.
+
+**CSS audit** (injected stylesheet, `injectStyles`, `Booru_Enhancer.user.js:4571` onward):
+
+| Selector | Before | Outlives the gallery? | Action |
+| --- | --- | --- | --- |
+| `.be-thumb-wrap` (position, overflow, min sizes, aspect-ratio 3/4, background, border-radius) | unscoped | **yes**, on any element with a stale token | scoped |
+| `.be-thumb-img` (display block, 100% size, object-fit contain) | unscoped | **yes**; `ownClass(img, 'be-thumb-img')` follows the same native-touch rule | scoped |
+| `.be-gallery-grid > .be-thumb-wrap, .be-gallery-grid .be-thumb-wrap` | scoped | no | none |
+| `.be-gallery-grid[data-be-adapter="e621"] …` (wrap, link, picture, image, desc/extra) | scoped | no | none |
+| `.be-gallery-grid.be-compact-mode …` (wrap, actions, action buttons) | scoped | no | none |
+| Action bars / buttons | removed at dispose (owner additions) | no | none |
+
+**Change:** the two unscoped selectors become `:where(.be-gallery-grid) .be-thumb-wrap` and `:where(.be-gallery-grid) .be-thumb-img`.
+- `:where()` adds no specificity, so each rule keeps its original (0,1,0) specificity and source order. Appearance and cascade while the gallery is active are unchanged.
+- Once dispose removes `be-gallery-grid` from the container, a stale token matches no enhancer rule.
+
+**Ownership / G-OWN untouched, and why:**
+- The operator directed it.
+- The residue came from presentation rules that did not require an active gallery, not from an ownership fault. The IB04 whole-record native-touch rule never overwrites site-changed class attributes, and G-OWN passed with it.
+- Token-level restoration would change the semantics G-OWN was qualified on, and would need its own review.
+
+The CSS fix removes the residue's effect without writing to a site-touched attribute.
+
+**Residual case, measured rather than assumed:** the container keeps `be-gallery-grid` under the same rule if the site also rewrote the **container's** class. Every gallery-scoped rule would then still apply. The local regression shows this as an observation. Package check D11 measures it live and fails on it.
+
+**Local qualification** on production `bbaf9ac`, both hosts:
+- `tests/host/ib08/presentation_residue_regression.cjs`: **14/14**.
+  - With the gallery active, enhancer presentation applies to every card and image.
+  - After a site class rewrite and then dispose, stale tokens remain on cards and images, but no enhancer rule matches them, and the container lost `be-gallery-grid`.
+  - A no-touch dispose restores normally.
+  - Explicit re-init makes the presentation active again.
+  - A new container initializes with presentation.
+  - Fault control: the previous unscoped CSS keeps enhancer rules on stale-token cards and images.
+- **D10 indicators** 12/12; **lifecycle** 24/24 (8/8 fault controls); **L1–L9** 66/66 (19/19); **IB01–IB06** exit 0.
+
+**Package revision 4**, built from `91fa86d` (production body SHA-256 `d8943f3bd12444c896dcd3ca2961814dce3adb9d5f8cbb80b76c35387b84648b`), adds **D11**: no enhancer stylesheet rule matches any card, image or the gallery container after dispose.
+- Verifier **90/90**, 23 fault controls.
+- With a site class rewrite on cards and images, D11 passes: stale tokens are reported, and no enhancer presentation applies.
+- The previous unscoped CSS is caught by D11 alone among the D checks.
+- The container-class-rewrite detection control fails D11 as intended.
+- The dispose test past the debounce passes every D check.
+
+**Live:** one final clean run of **all ten rows** on production `bbaf9ac` (e621 and e926, each S, D, P, O and L). Earlier rows were on superseded artifacts.
+
 ## Open for G-RENDITION / IB08
 
-- **Live rerun:** e621 D and e926 D with package revision 3, on production `4ac1e36` (commit `2765b9d`).
-- **Decision:** is the non-rendition presentation residue (stale `be-thumb-wrap` plus the unscoped CSS rule) an IB08 closure condition, or recorded as a known IB04-policy limitation?
-- IB08 completion record only after the D rows pass and that decision is made.
+- **Final live run:** all ten rows on production `bbaf9ac` (commit `91fa86d`) with package revision 4.
+- If D11 fails because the site also rewrote the container class, that residual case needs a decision.
+- IB08 completion record only after that run is reviewed.
 - Danbooru rows: EXCLUDED(scope).

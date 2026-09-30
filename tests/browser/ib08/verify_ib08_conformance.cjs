@@ -21,6 +21,10 @@
 // every card leaves the enhancer class after dispose (stale state). The
 // revision-2 package counted that as re-enhancement; revision 3 must not, and
 // must still fail D10 on real re-enhancement (barrier removed).
+// Revision 4 adds D11 (no enhancer presentation after dispose). With the
+// scoped CSS, stale tokens left by a site class rewrite carry no enhancer
+// rule; the previous unscoped CSS must fail D11; a site rewrite of the
+// container class (be-gallery-grid survives) must be detected by D11.
 // Requires `npm install` in tests/host/ib07 (pinned jsdom).
 const fs = require('fs');
 const path = require('path');
@@ -124,7 +128,9 @@ const SCEN = [
 // Diagnosis C: writes that are not enhancer rendition writes (native header image, a late native
 // image, an enhancer-UI image), made after production mounted.
 // Second live run: a site script rewriting every card's class after enhancement (no token change).
-const SITE_CLASS_TOUCH = (w) => { for (const a of w.document.querySelectorAll('article')) a.classList.remove('blacklisted'); };
+const SITE_CLASS_TOUCH = (w) => { for (const a of w.document.querySelectorAll('article')) { a.classList.remove('blacklisted'); a.querySelector('img')?.classList.remove('blacklisted'); } };
+const SITE_CONTAINER_TOUCH = (w) => { SITE_CLASS_TOUCH(w); w.document.querySelector('#posts-container').classList.remove('blacklisted'); };
+const UNSCOPED_CSS = (t) => mut(mut(t, ':where(.be-gallery-grid) .be-thumb-wrap {', '.be-thumb-wrap {'), ':where(.be-gallery-grid) .be-thumb-img {', '.be-thumb-img {');
 const OFF_CARD_WRITES = (w) => {
   const d = w.document;
   d.querySelector('#nav-avatar').setAttribute('src', `${M}/ui/avatar2.png`);
@@ -188,7 +194,7 @@ async function main() {
     const st = statusOf(r.d2.j);
     const d10 = (r.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
     check(`${host} dispose test past the debounce on the corrected production: every D check PASS, no re-enhanced card`,
-      Object.keys(st).length === 11 && Object.values(st).every((x) => x === 'PASS') && d10.afterDispose.galleryInitCalls === 0 && d10.afterDispose.ownersCreated === 0 && d10.afterDispose.actionBarsAdded === 0 && d10.afterDispose.signatureWrites === 0 && d10.staleState.cardsWithEnhancerClass === 0, JSON.stringify([st, d10]));
+      Object.keys(st).length === 12 && Object.values(st).every((x) => x === 'PASS') && d10.afterDispose.galleryInitCalls === 0 && d10.afterDispose.ownersCreated === 0 && d10.afterDispose.actionBarsAdded === 0 && d10.afterDispose.signatureWrites === 0 && d10.staleState.cardsWithEnhancerClass === 0, JSON.stringify([st, d10]));
     // Second live run shape: site class touch -> revision 2 FAILs D10 on stale class; revision 3 PASSes and reports it as stale state.
     const REV2 = execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', '87362a6:tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     const r2t = await runScript({ url: `https://${host}/posts`, text: REV2, nativeActions: SITE_CLASS_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
@@ -201,6 +207,16 @@ async function main() {
       Object.values(r3s).every((x) => x === 'PASS') && r3d.staleState.cardsWithEnhancerClass > 0 && r3d.staleState.ofWhichSiteTouchedClass === r3d.staleState.cardsWithEnhancerClass
       && r3d.staleState.classMutationCategories.UNCHANGED_REWRITE > 0 && r3d.afterDispose.galleryInitCalls === 0 && r3d.afterDispose.ownersCreated === 0 && r3d.afterDispose.actionBarsAdded === 0, JSON.stringify([r3s, r3d]));
     check(`${host} revision 3 site class touch: no leak`, leaks(r3t.d1.t + r3t.d2.t).length === 0);
+    const d11 = (r3t.d2.j.checks.find((x) => x.id === 'D11') || {}).detail || {};
+    check(`${host} site class rewrite (cards and images): stale tokens remain but D11 PASS - no enhancer rule matches any card, image or the container`,
+      r3s.D11 === 'PASS' && d11.staleCardTokens > 0 && d11.staleImageTokens > 0 && d11.cardsWithEnhancerPresentation === 0 && d11.imagesWithEnhancerPresentation === 0 && d11.containerWithEnhancerPresentation === false && d11.enhancerRules > 0, JSON.stringify(d11));
+    const uc = await runScript({ url: `https://${host}/posts`, text: UNSCOPED_CSS(derived), nativeActions: SITE_CLASS_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const ucs = statusOf(uc.d2.j);
+    // P00 fails for any production mutant (body identity); every other D check must PASS and D11 must FAIL.
+    check(`fault ${host} previous unscoped CSS: caught by D11 only among the D checks (P00 flags the altered body)`, ucs.D11 === 'FAIL' && ucs.P00 === 'FAIL' && Object.entries(ucs).filter(([k]) => k !== 'D11' && k !== 'P00').every(([, v]) => v === 'PASS'), JSON.stringify(ucs));
+    const ct = await runScript({ url: `https://${host}/posts`, nativeActions: SITE_CONTAINER_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const ctd = (ct.d2.j.checks.find((x) => x.id === 'D11') || {}).detail || {};
+    check(`${host} detection control: a site rewrite of the container class keeps be-gallery-grid, and D11 reports the residue (FAIL)`, statusOf(ct.d2.j).D11 === 'FAIL' && ctd.containerKeepsGalleryClass === true && ctd.cardsWithEnhancerPresentation > 0, JSON.stringify(ctd));
     // Fault: production with the barrier removed (the a0f3041 behavior) must fail D10 with the same attribution as live.
     const fb = await runScript({ url: `https://${host}/posts`, text: BARRIER_REMOVED(derived), steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     const fs2 = statusOf(fb.d2.j);
@@ -212,7 +228,7 @@ async function main() {
     // Immediately after dispose (before the debounce) everything is restored: the owner restoration itself is correct.
     const q = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
     const qs = statusOf(q.d2.j);
-    check(`${host} dispose test before the debounce fires: every D check PASS (owner restoration correct)`, Object.keys(qs).length === 11 && Object.values(qs).every((x) => x === 'PASS'), JSON.stringify(qs));
+    check(`${host} dispose test before the debounce fires: every D check PASS (owner restoration correct)`, Object.keys(qs).length === 12 && Object.values(qs).every((x) => x === 'PASS'), JSON.stringify(qs));
     const r2 = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'd2'] });
     check(`${host} dispose test without narrowing: D08 FAIL`, statusOf(r2.d2.j).D08 === 'FAIL');
     const r3 = await runScript({ url: `https://${host}/posts`, anon: 'false', steps: ['d1'] });
@@ -292,7 +308,7 @@ async function main() {
 
   const passed = results.filter((x) => x.pass).length;
   const summary = {
-    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 3 (direct re-enhancement indicators in D10), built from 2765b9d; local verification',
+    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 4 (D10 direct re-enhancement indicators; D11 no enhancer presentation after dispose); local verification',
     diagnosis_a: 'production a0f3041 failed the dispose test (gallery re-enhanced itself after dispose); the corrected production passes it past the debounce, and the barrier-removed mutant fails D10',
     production_commit: COMMIT, production_source_blob: EXPECTED_PRODUCTION_BLOB, production_body_sha256: built.bodySha,
     derived_script: path.basename(OUT), derived_script_sha256: crypto.createHash('sha256').update(derived).digest('hex'),
