@@ -113,25 +113,33 @@ G-HOVER(e621/e926 qualified still-image class). Each host was evidenced independ
 
 | Session | Result |
 | --- | --- |
-| e621 P1 Preview | PASS (operator-relayed verdict) |
-| e621 P2 Original | PASS (operator-relayed verdict) |
-| e926 P1 Preview | PASS (operator-relayed verdict) |
-| e926 P2 Original | PASS, detail below |
+| e621 P1 Preview | PASS |
+| e621 P2 Original | PASS |
+| e926 P1 Preview | PASS |
+| e926 P2 Original | PASS |
 
-**e926 P2 Original, as relayed:**
-- identity matched;
-- qualified class: 77 generations (37 quick passes under dwell, 40 reached dwell);
-- `newMediaBeforeDwell` 0, `overlayBeforeDwell` 0, `hoverFetchesBeforeDwell` 0, `quickPassesStartingAnything` 0;
-- overlay offset 200 / 200 / 220 ms;
-- no Preview upgrades; `upgradesOnSampleOrFileCards` 0; `fileDowngradedToSample` 0; `staleInstalled` 0;
-- 3 out-of-scope generations (2 VIDEO, 1 ANIMATED) kept their prior behavior.
+**Per-session figures, as relayed** (qualified class = `qualifiedClass`; timings are min / median / max):
 
-The per-field figures for the other three sessions are not reproduced in this record. Their PASS verdicts are as relayed by the operator.
+| Field | e621 P1 Preview | e621 P2 Original | e926 P1 Preview | e926 P2 Original |
+| --- | --- | --- | --- | --- |
+| identity | matched | matched | matched | matched |
+| qualified generations | 69 | 66 | 71 | 77 |
+| quick passes / dwell reached | 36 / 33 | 29 / 37 | 42 / 29 | 37 / 40 |
+| new media / overlay / hover fetches before dwell | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 |
+| quick passes starting anything | 0 | 0 | 0 | 0 |
+| overlay offset ms | 200 / 210 / 220 | 200 / 200 / 220 | 200 / 200 / 220 | 200 / 200 / 220 |
+| still upgrades: eligible / started | 33 / 33, exactly once | 0 | 29 / 29, exactly once | 0 |
+| targets | SAMPLE 30, SAMPLE\|FILE 3, pure FILE 0 | — | SAMPLE 26, SAMPLE\|FILE 3, pure FILE 0 | — |
+| upgrades on SAMPLE/FILE cards / FILE→SAMPLE | — / 0 | 0 / 0 | — / 0 | 0 / 0 |
+| stale installed | 0 | 0 | 0 | 0 |
+| out of scope (previous path kept) | 11 = 6 VIDEO + 5 ANIMATED | 14 = 6 VIDEO + 8 ANIMATED | 9 = 7 VIDEO + 2 ANIMATED | 3 = 2 VIDEO + 1 ANIMATED |
+
+"—" means the field was not relayed. Each session covers 80 generations (qualified + out of scope).
 
 **Unexecuted:**
 - e926 throttled (E stage, optional);
 - other runtimes and managers (IB18);
-- live out-of-scope behavior beyond the incidental video/animated generations reported above (locally proven identical).
+- live out-of-scope behavior beyond the video/animated generations reported above (locally proven identical).
 
 ## Preservation (§6 "Hover enabled" row; item 8)
 
@@ -163,7 +171,6 @@ No donor code was copied or translated. All changes are original to this reposit
 
 ## Retained limitations (non-blocking)
 
-- **Relayed detail:** the per-field figures for e621 P1/P2 and e926 P1 conformance are not reproduced here (verdicts only).
 - **Overlay A during E stage:** the E-stage live sessions ran overlay A. Option B's pre-dwell zero was proven locally and confirmed live by production conformance.
 - **Throttled usefulness:** observed on e621 only (e926 B optional, not run).
 - **Unchanged out-of-scope paths:** still cards outside the pattern, video, GIF, logged-in pages and other hosts keep their previous immediate hover work before dwell. This is by design; they are outside G-HOVER scope.

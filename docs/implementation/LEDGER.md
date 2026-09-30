@@ -26,8 +26,11 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB09 PASS(scope)**, G-HOVER PASS(scope), as in the Current milestone. Release notes: `CHANGELOG.md` ("grid thumbnail quality", "hover preview timing").
 
 ## Verified
-- **IB09 live production conformance on `b9d133c`** (package `IB09_Production_Conformance.user.js`, identity matched): e621 P1/P2 and e926 P1/P2 all PASS (operator-relayed).
-  - e926 P2 (Original): qualified 77 generations (37 quick passes, 40 dwells); 0 new media, overlay, hover fetch or quick-pass work before dwell; overlay at 200/200/220 ms; no upgrade, downgrade or stale install; 3 out-of-scope generations (2 VIDEO, 1 ANIMATED) kept their prior behavior.
+- **IB09 live production conformance on `b9d133c`** (package `IB09_Production_Conformance.user.js`, identity matched): all four sessions PASS (operator-relayed; figures in the completion record). In every session the qualified class had 0 new media, 0 overlay, 0 hover fetches and 0 quick-pass work before dwell; the overlay appeared at ≥ 200 ms; there were no downgrades and no stale installs.
+  - e621 P1: 69 qualified, 33/33 upgraded once (SAMPLE 30, alias 3, pure FILE 0); 11 out of scope.
+  - e621 P2: 66 qualified, 0 upgrades; 14 out of scope.
+  - e926 P1: 71 qualified, 29/29 upgraded once (SAMPLE 26, alias 3, pure FILE 0); 9 out of scope.
+  - e926 P2: 77 qualified, 0 upgrades; 3 out of scope. Out-of-scope video/animated generations kept their prior behavior.
 - **IB09 local on `22e843c`:**
   - P-stage assertions 111/111 (11/11 fault controls);
   - conformance verifier 30/30 (5/5);
@@ -39,7 +42,6 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
 ## Unresolved
 - **IB09 retained limitations (non-blocking; completion record):**
-  - per-field figures for e621 P1/P2 and e926 P1 conformance are not reproduced (verdicts only);
   - throttled usefulness is observed on e621 only;
   - transfer sizes are mostly browser-hidden;
   - out-of-scope cards (out-of-pattern stills, video, GIF, logged-in pages, other hosts) keep their previous immediate hover work by design;
