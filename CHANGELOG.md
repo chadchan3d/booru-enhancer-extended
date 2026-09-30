@@ -24,6 +24,18 @@ The site's own thumbnail now stays in these cases, which were previously enhance
 
 Your saved **Grid thumbnail quality** choice is kept even where it currently has no effect, and it applies again wherever the thumbnail is supported.
 
+## Unreleased — e621/e926 hover preview timing
+
+On the e621 and e926 post listing (`/posts`) while **logged out**, the hover preview for still images now waits until the pointer rests on a thumbnail for **200 ms**. Moving the pointer across the grid no longer starts any image loads or post lookups.
+
+After that pause:
+- the preview shows the thumbnail you are looking at;
+- with **Grid thumbnail quality** set to **Preview**, it then loads the post's sample image;
+- with **Sample** or **Original**, the thumbnail already shows the best image, so nothing more is loaded;
+- if a post has no usable sample image, the preview keeps the thumbnail. **View** still opens the full image.
+
+Videos, GIFs, logged-in pages and other sites keep their current hover behavior.
+
 ## 1.2.7.3 — Rule34 loading and settings UX
 
 - Defer Rule34.xxx gallery metadata enrichment until hover/click instead of batch-fetching the full gallery at startup.

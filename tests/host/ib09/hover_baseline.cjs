@@ -21,7 +21,7 @@ const Module = require('module');
 const hh = require('./hover_harness.cjs');
 const h = require(path.resolve(__dirname, '../ib07/item9_harness.cjs'));
 
-const PROD = h.productionSource();
+const PROD = hh.eStageSource(); // pinned: E-stage evidence on bbaf9ac
 const results = [];
 const check = (name, ok, detail = '') => results.push({ name, pass: !!ok, detail: ok ? '' : String(detail).slice(0, 400) });
 

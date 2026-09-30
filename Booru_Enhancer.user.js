@@ -2876,6 +2876,9 @@
 		let activeUpgradeUrl = '';
 		let pendingUpgradeMedia = null;
 		let stateTimer = null;
+		let dwellTimer = null;
+		// IB09 G-HOVER(e621/e926 qualified still-image class) PASS(scope): frozen dwell.
+		const HOVER_DWELL_MS = 200;
 
 		const MAX_WIDTH_PX = 1100;
 		const MAX_WIDTH_VW = 0.75;
@@ -3080,8 +3083,37 @@
 			return { url, mediaType: isVideo ? 'video' : post.mediaType };
 		}
 
+		// IB09 still-image hover (G-HOVER PASS(scope)): a still card on a page the
+		// IB08 rendition contract admits (logged-out e621/e926 /posts). It waits for
+		// dwell. `qualified` is the IB08 still-image card pattern; other still cards
+		// there keep the thumbnail (no automatic upgrade). Every other card keeps
+		// its existing hover path (video is IB10; animated and other hosts unchanged).
+		function hoverStillCard(img) {
+			const wrap = img.closest('.be-thumb-wrap');
+			const rendition = wrap ? BE.modules.gallery?.getThumbRendition?.(wrap) : null;
+			if (!rendition || rendition === 'NATIVE_OUT_OF_SCOPE') return null;
+			if (!/^(jpe?g|png|webp)$/.test(String(wrap.getAttribute('data-file-ext') || '').toLowerCase())) return null;
+			return { wrap, qualified: rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' };
+		}
+
+		// In the qualified class only a displayed native preview has cost evidence
+		// for an automatic upgrade, and only to that card's native sample (or its
+		// sample/file alias). A displayed sample or file is already sufficient; any
+		// other target keeps the thumbnail (View remains available).
+		function qualifiedUpgradeAllowed(sourceImg, wrap, resolved) {
+			const same = (a, b) => { try { return !!a && !!b && new URL(a, location.href).href === new URL(b, location.href).href; } catch { return false; } };
+			const current = sourceImg.currentSrc || sourceImg.src || '';
+			const showingPreview = same(current, wrap.dataset.previewUrl) || same(current, wrap.dataset.previewWebp);
+			return showingPreview && same(resolved.url, wrap.dataset.sampleUrl) && !same(resolved.url, current);
+		}
+
 		function upgradeWhenReady(resolved, sourceImg, token) {
 			if (!resolved?.url || token !== requestToken) return;
+			const still = hoverStillCard(sourceImg);
+			if (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {
+				clearMediaState();
+				return;
+			}
 
 			const currentThumbUrl = sourceImg.currentSrc || sourceImg.src || '';
 			if (resolved.mediaType !== 'video' && resolved.url === currentThumbUrl) {
@@ -3172,7 +3204,23 @@
 			activeUpgradeUrl = '';
 			clearMediaState();
 			cancelPendingUpgrade();
+			clearTimeout(dwellTimer);
+			dwellTimer = null;
 
+			// IB09: a still card gets no hover work before dwell, not even the
+			// overlay; leave, re-entry and an open viewer cancel it.
+			if (hoverStillCard(img)) {
+				dwellTimer = setTimeout(() => {
+					dwellTimer = null;
+					if (token !== requestToken || BE.modules.viewer?.isOpen?.()) return;
+					resolveHover(img, token);
+				}, HOVER_DWELL_MS);
+				return;
+			}
+			return resolveHover(img, token);
+		}
+
+		async function resolveHover(img, token) {
 			// Instant response from the already-loaded grid thumbnail.
 			showImmediateThumbnail(img, token);
 
@@ -3215,6 +3263,8 @@
 		}
 
 		function hide() {
+			clearTimeout(dwellTimer);
+			dwellTimer = null;
 			requestToken++;
 			activeUpgradeUrl = '';
 			clearMediaState();

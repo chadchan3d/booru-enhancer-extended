@@ -23,6 +23,19 @@
 const path = require('path');
 const h = require(path.resolve(__dirname, '../ib07/item9_harness.cjs'));
 
+// The IB09 E-stage suites (baseline, dwell prototype, V3 alternatives) characterize
+// production as it was before the IB09 P stage. They are pinned to that committed
+// blob so the P-stage production change does not rewrite their evidence.
+const E_STAGE_COMMIT = '91fa86d';
+const E_STAGE_BLOB = 'bbaf9ac63f5c0292018b974f00c7b30d8b478bb5';
+function eStageSource() {
+  const { execFileSync } = require('child_process');
+  const repo = path.resolve(__dirname, '../../..');
+  const blob = execFileSync('git', ['-C', repo, 'rev-parse', `${E_STAGE_COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
+  if (blob !== E_STAGE_BLOB) throw new Error('E-stage production blob mismatch');
+  return execFileSync('git', ['-C', repo, 'show', `${E_STAGE_COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).replace(/\r\n/g, '\n');
+}
+
 const M = 'https://static.example';
 const H = '0123456789abcdef0123456789abcdef';
 const U = (id) => ({ file: `${M}/data/${H}_${id}.png`, sample: `${M}/data/sample/${H}_${id}.jpg`, preview: `${M}/data/preview/${H}_${id}.jpg`, webp: `${M}/data/preview/${H}_${id}.webp` });
@@ -163,4 +176,4 @@ function timeline(s) {
   };
 }
 
-module.exports = { session, timeline, classifySlot, installFakeClock, U, card, listing, M };
+module.exports = { session, timeline, classifySlot, installFakeClock, eStageSource, U, card, listing, M };
