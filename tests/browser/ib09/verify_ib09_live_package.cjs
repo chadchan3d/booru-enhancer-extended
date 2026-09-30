@@ -84,12 +84,18 @@ async function run({ url = 'https://e621.net/posts', quality = 'preview', text =
     wait: (ms) => clock.advance(ms),
     menu: async (label) => { const k = Object.keys(menu).find((x) => x.startsWith(label)); const p = menu[k](); await clock.advance(2000); return p; },
   };
-  await api.menu('IB09L: Start session — ordinary');
+  { const k = Object.keys(menu).find((x) => x.startsWith('IB09L: Start session — ordinary')); menu[k](); await clock.advance(0); }
+  const own = () => [...w.document.querySelectorAll('[id^="ib09l"]')];
+  const uiAtStart = { resultBox: !!w.document.querySelector('#ib09l-result'), textareas: w.document.querySelectorAll('textarea').length,
+    ownElements: own().length, allClickThrough: own().every((el) => el.style.pointerEvents === 'none'), toastSmall: own().every((el) => el.id !== 'ib09l-toast' || (el.style.maxWidth === '280px' && el.style.position === 'fixed')) };
+  await clock.advance(3000);
+  const uiAfter = { ownElements: own().length };
   await script(api);
+  const uiDuring = { resultBox: !!w.document.querySelector('#ib09l-result'), nonClickThrough: own().filter((el) => el.style.pointerEvents !== 'none').length };
   await api.menu('IB09L: Show results');
   const txt = w.document.querySelector('#ib09l-result textarea')?.value || '';
   let json = null; try { json = JSON.parse(txt); } catch { json = null; }
-  const out = { text: txt, json, network: c.requests.length };
+  const out = { text: txt, json, network: c.requests.length, uiAtStart, uiAfter, uiDuring };
   w.close();
   return out;
 }
@@ -134,6 +140,29 @@ async function main() {
     check('bounded sampling: 90 hovers record 80 generations, 10 dropped', s.generations === 80 && s.droppedBeyondCap === 10, JSON.stringify([s.generations, s.droppedBeyondCap]));
   }
 
+  // UI correction (revision 1.1): non-blocking during recording; results only on request.
+  {
+    const r = await run({ quality: 'preview', script: MIX });
+    check('starting a session leaves no result box and no textarea; only a small click-through toast', r.uiAtStart.resultBox === false && r.uiAtStart.textareas === 0 && r.uiAtStart.ownElements === 1 && r.uiAtStart.allClickThrough && r.uiAtStart.toastSmall, JSON.stringify(r.uiAtStart));
+    check('the acknowledgement disappears by itself; nothing of the observer remains over the gallery while recording', r.uiAfter.ownElements === 0 && r.uiDuring.resultBox === false && r.uiDuring.nonClickThrough === 0, JSON.stringify([r.uiAfter, r.uiDuring]));
+    check('Show results still returns the sanitized session output', r.json && r.json.version === '1.1.0' && r.json.sessions.length === 1 && leaks(r.text).length === 0, r.text.slice(0, 200));
+    // Session data unchanged by the UI correction: same pointer sequence through the previous package (a9543c9).
+    const prevPkg = execFileSync('git', ['-C', REPO, 'show', 'a9543c9:tests/browser/ib09/IB09_Dwell_Live_Check.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    const prevBody = prevPkg.slice(prevPkg.indexOf(WRAP_OPEN) + WRAP_OPEN.length, prevPkg.indexOf(WRAP_CLOSE));
+    check('pinning unchanged: the executed body is identical to the previous package body (same production + 200 ms prototype + hooks)', prevBody === bodyInScript);
+    const old = await run({ quality: 'preview', text: prevPkg, script: MIX });
+    check('session data unchanged by the UI correction (sessions identical to the previous package for the same pointer sequence)', JSON.stringify(old.json.sessions) === JSON.stringify(r.json.sessions), JSON.stringify([old.json.sessions[0].generations, r.json.sessions[0].generations]));
+    check('regression: the previous package opened a blocking result box at session start (the reported defect)', old.uiAtStart.resultBox === true && old.uiAtStart.allClickThrough === false, JSON.stringify(old.uiAtStart));
+    // Usefulness marks.
+    const marked = await run({ quality: 'preview', script: async (a) => {
+      await a.enter(0); await a.wait(500); await a.leave(0); await a.wait(30); await a.menu('IB09L: Mark last upgrade — useful');
+      await a.enter(1); await a.wait(500); await a.leave(1); await a.wait(30); await a.menu('IB09L: Mark last upgrade — noticeable but late');
+      await a.menu('IB09L: Mark last upgrade — too late');  // same upgrade: must not double-count
+    } });
+    const u = marked.json.sessions[0].usefulness;
+    check('usefulness marks: one per upgrade, not double-counted; no pointer events generated', u.useful === 1 && u.late === 1 && u.tooLate === 0 && marked.json.sessions[0].generations === 2, JSON.stringify(u));
+  }
+
   // ---- fault controls ----
   const body = bodyInScript;
   const withBody = (nb) => derived.replace(body, nb).replace(built.bodySha, crypto.createHash('sha256').update(nb, 'utf8').digest('hex')); // re-pinned so behavior (not C00) is tested
@@ -146,8 +175,8 @@ async function main() {
     ['stale install after leave (hide invalidates nothing)', mb("\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n\t\t\trequestToken++;\n\t\t\tactiveUpgradeUrl = '';\n\t\t\tclearMediaState();\n\t\t\tcancelPendingUpgrade();", '\t\tfunction hide() {\n\t\t\tclearMediaState();'), 'preview', (x) => x.json.sessions[0].staleInstalled > 0],
     ['old-generation work after re-entry', withBody(mustReplace(mustReplace(mustReplace(body, '\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n', '\t\tfunction hide() {\n'), "\t\t\tclearTimeout(dwellTimer);\n\n\t\t\t// V3", '\n\t\t\t// V3'), "\t\tasync function afterDwell(img, token) {\n", '\t\tasync function afterDwell(img, token) {\n\t\t\ttoken = requestToken;\n')), 'preview', (x) => x.json.sessions[0].newMediaBeforeDwell > 0 || x.json.sessions[0].previewUpgrades.startedBeforeDwell > 0 || x.json.sessions[0].quickPassesStartingUpgrade > 0],
     ['timing attributed from Resource Timing instead of the hooks (cache/no-entry)', derived.replace("      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };", "      if (d.kind !== 'thumb') return;\n      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };"), 'preview-cached', (x) => x.json.sessions[0].previewUpgrades.started !== 6],
-    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.0.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.0.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
-    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.0.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.0.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
     ['unbounded sampling', derived.replace('const MAX_GENERATIONS = 80;', 'const MAX_GENERATIONS = 100000;'), 'preview-many', (x) => x.json.sessions[0].generations > 80],
   ];
   for (const [name, text, mode, caught] of faults) {

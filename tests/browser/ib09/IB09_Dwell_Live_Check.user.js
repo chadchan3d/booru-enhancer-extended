@@ -5619,27 +5619,44 @@ IB07P_PRODUCTION_BODY();
     const close = document.createElement('button'); close.textContent = 'Close'; close.onclick = () => root.remove();
     root.append(ta, close); document.body.appendChild(root); ta.focus(); ta.select();
   }
-  const note = (text) => show(JSON.stringify({ probe: 'ib09l-dwell-live-check', site: SITE, ...text }, null, 2));
+  // Revision 1.1 (operator report): every message other than Show results is a small,
+  // transient, click-through toast in the bottom-left corner. It is never focusable, never
+  // over the gallery's pointer path, and removed automatically. The full result box
+  // (show) appears only for "IB09L: Show results", after the session has ended.
+  let toastTimer = null;
+  function toast(message, ms = 2500) {
+    document.querySelector('#ib09l-toast')?.remove();
+    clearTimeout(toastTimer);
+    const el = document.createElement('div');
+    el.id = 'ib09l-toast';
+    el.textContent = message;
+    el.style.cssText = 'position:fixed;left:8px;bottom:8px;max-width:280px;z-index:2147483647;pointer-events:none;background:rgba(17,17,17,.85);color:#eee;padding:4px 8px;border-radius:4px;font:12px/1.3 sans-serif';
+    document.body.appendChild(el);
+    toastTimer = setTimeout(() => el.remove(), ms);
+  }
 
   function start(condition) {
-    if (!SITE || !/^\/posts\/?$/.test(location.pathname)) return note({ error: 'open a logged-out e621/e926 /posts listing' });
-    if (document.body?.getAttribute('data-user-is-anonymous') !== 'true') return note({ error: 'must be logged out' });
-    if (!hover) return note({ error: 'hover module not available' });
-    if (sessions.length >= MAX_SESSIONS) return note({ error: 'session limit reached; reload the page' });
+    if (!SITE || !/^\/posts\/?$/.test(location.pathname)) return toast('IB09L: open a logged-out e621/e926 /posts listing', 5000);
+    if (document.body?.getAttribute('data-user-is-anonymous') !== 'true') return toast('IB09L: must be logged out', 5000);
+    if (!hover) return toast('IB09L: hover module not available', 5000);
+    if (sessions.length >= MAX_SESSIONS) return toast('IB09L: session limit reached; reload the page', 5000);
+    document.querySelector('#ib09l-result')?.remove(); // never leave an earlier result box over the gallery
     session = { condition, quality: BE.settings.get('media.thumbQuality'), generations: [], dropped: 0, staleBlocked: 0, staleInstalled: 0, usefulness: { useful: 0, late: 0, tooLate: 0 } };
     sessions.push(session); gen = null;
-    note({ status: `session started: ${condition}, quality ${session.quality}. Hover cards normally, then use "IB09L: Show results".`, maxGenerations: MAX_GENERATIONS });
+    toast(`IB09L recording (${condition.toLowerCase()}, ${session.quality})`);
   }
   function mark(kind) {
-    if (!session) return;
+    if (!session) return toast('IB09L: no active session');
     const last = [...session.generations].reverse().find((x) => x.entrySlot === 'PREVIEW' && x.assigns.some((a) => a.kind !== 'thumb'));
-    if (last && !last.marked) { last.marked = true; session.usefulness[kind]++; }
+    if (last && !last.marked) { last.marked = true; session.usefulness[kind]++; toast(`IB09L: marked ${kind}`, 1500); }
+    else toast('IB09L: no unmarked upgrade to mark', 1500);
   }
   async function results() {
-    session = null; gen = null;
+    session = null; gen = null; // recording ends before any result UI appears
+    document.querySelector('#ib09l-toast')?.remove();
     await sleep(RT_WAIT_MS);
     const identity = await sourceIdentity();
-    const out = { probe: 'ib09l-dwell-live-check', version: '1.0.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
+    const out = { probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
       notes: 'Timing comes from hooks in the running code (cache-independent). Cost classes come from Resource Timing: NO_ENTRY is not zero cost, and unknown cache state is not cold.' };
     show(guard(JSON.stringify(out, null, 2)));
     return out;

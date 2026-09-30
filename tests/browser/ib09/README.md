@@ -105,9 +105,11 @@ Local verification: `node tests/browser/ib09/build_ib09_live_package.cjs --check
 - sweep the pointer quickly across a row of thumbnails a few times;
 - rest on about 10 different thumbnails for a second or more each;
 - move straight from one thumbnail to its neighbour;
-- leave a thumbnail and come back to it.
+- **leave and re-enter:** move the pointer completely off a thumbnail, then back onto that same thumbnail. This is pointer movement only, not a click.
 
-Do not click thumbnails. After a resting hover where the enlarged image sharpens, you may use one of **IB09L: Mark last upgrade — useful / noticeable but late / too late to matter**.
+Do not click thumbnails.
+
+**While recording, nothing covers the gallery.** Starting a session shows only a small note in the bottom-left corner for about two seconds. It lets clicks and hovers pass through, and it disappears by itself. The result box appears only when you choose **Show results**. After a resting hover where the enlarged image sharpens, you may use one of **IB09L: Mark last upgrade — useful / noticeable but late / too late to matter**.
 
 **Ending a session:** Tampermonkey → **IB09L: Show results (ends the session)**. Copy the result (it is already selected) and label it.
 

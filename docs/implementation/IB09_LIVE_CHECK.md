@@ -116,6 +116,35 @@ The metadata block matches only e621.net and e926.net, with no update target.
 
 **Why B is optional on e926:** A, C and D give host-independent correctness on each host. B only characterizes how late the upgrade arrives on a slow, uncached link, which is dominated by the throttle and the image size. If e926 B is skipped, the record states that throttled usefulness was observed on e621 only.
 
-## 5. Not decided here
+## 5. Package correction 1.1 (operator report; test package only)
+
+**Defect:** the result box stayed open over the gallery during recording, which made natural hovering impractical.
+
+**Root cause:** `start()` (and the error paths) sent its acknowledgement through `note()` → `show()`, which creates the same box used for the final results:
+- a full-screen `position:fixed; inset:20px` box at the maximum z-index;
+- a focused textarea;
+- a Close button.
+
+It stayed until closed by hand.
+
+**Correction** (observer postamble only; version 1.1.0):
+- Every message except **Show results** is now a small click-through toast in the bottom-left corner: `pointer-events:none`, at most 280 px wide, removed automatically after 1.5–5 s. This covers session start, errors and usefulness marks.
+- `start()` also removes any earlier result box.
+- `results()` ends the session before any result UI appears, so the result box cannot create observations.
+- The production body, the 200 ms prototype, the hooks, the recording and the analysis are **unchanged**.
+
+**Verification (44/44):**
+- Starting a session leaves no result box and no textarea, only one click-through toast, which disappears by itself.
+- Nothing of the observer covers the gallery while recording.
+- Show results still returns sanitized output.
+- Usefulness marks work, one per upgrade and never double-counted.
+- **Session data is identical to the previous package for the same pointer sequence.**
+- **The executed body is identical to the previous package body**, so the pinning is unchanged.
+- A regression shows the previous package opened a blocking box at session start.
+- All 10 fault controls still pass.
+
+**Completed valid sessions do not need repeating:** the recorded data and the executed body are unchanged by this correction.
+
+## 6. Not decided here
 
 This record does not choose the final dwell, and it gives no G-HOVER PASS and no production change.
