@@ -39,7 +39,7 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB09 V2 live** (operator-relayed, e621 and e926 separately, regular Chrome profile): PREVIEW, SAMPLE and FILE reuse 4/4 `NO_ENTRY`, 0 ms on both hosts. The abort experiment is inconclusive.
 - **IB09 dwell prototype** (`tests/host/ib09/dwell_prototype.cjs`, a test-time patch; assertions 84/84). The boundary sweep (0/40/100/199/200/201/250) gives no upgrade under 200 and one at 200. Metadata runs only after dwell. SAMPLE/FILE get no upgrade. Leave, re-entry, A→B, stale results and viewer takeover are clean. 10/10 fault controls are caught.
 - **IB09 live check package** (`tests/browser/ib09/IB09_Dwell_Live_Check.user.js`). It is production `bbaf9ac` + the 200 ms prototype + 8 observe-only hooks, with its body minus the hooks pinned to the qualified prototype and C00 in the page.
-  - Verifier 44/44, 10/10 fault controls.
+  - Verifier at 1.1.0: 44/44, 10/10 fault controls.
   - Observer 1.1.0: non-blocking click-through toast instead of the blocking result box at session start; session data and executed body identical to the previous package.
   - Observer 1.2.0: the still-image rule is evaluated over STILL cards only; video, animated and unknown cards are reported separately; true SAMPLE, alias, pure FILE and no-usable-sample outcomes are split.
   - Observer 1.3.0: Resource Timing entries are attributed causally; only UPGRADE entries (`hoverLoadsBeforeDwell`) count against the rule. Verifier 57/57.
@@ -96,4 +96,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs the live check sessions and returns the labelled results. No final dwell, production change or G-HOVER PASS before they are reviewed. Do not start IB10.
+Await the operator's V3 decision (recommended B, dwell-gated overlay). Then the IB09 P-stage implementation and live production conformance. No production change or G-HOVER PASS before that. Do not start IB10.
