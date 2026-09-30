@@ -3,7 +3,13 @@
 ## Current milestone
 **IB09 — Still-image hover dwell and cost: PARTIAL — NOT COMPLETE. G-HOVER OPEN.**
 
-The E-stage baseline characterization of current production hover is done, locally only (`docs/implementation/IB09_HOVER_BASELINE.md`). The V2 live hover-cost pilot probe is prepared and locally qualified (`docs/implementation/IB09_V2_PILOT.md`); the live runs are pending. No dwell is chosen, V3 is undecided, and production is unchanged.
+E stage so far:
+- local baseline (`IB09_HOVER_BASELINE.md`);
+- V2 live cost pilot, accepted with a regular-Chrome cache limitation (`IB09_DWELL_PROTOTYPE.md` §1);
+- frozen decisions (§2): V3 accepted; zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only);
+- isolated 200 ms dwell prototype, locally qualified (84/84).
+
+Production is unchanged; 200 ms is an E-stage candidate, not a production constant.
 
 IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
@@ -27,6 +33,8 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - `preview` and `original` assign a SAMPLE upgrade at t=0, including in a 40 ms sweep.
   - Stale generations cannot apply (three guards).
   - 7 fault and negative controls are caught.
+- **IB09 V2 live** (operator-relayed, e621 and e926 separately, regular Chrome profile): PREVIEW, SAMPLE and FILE reuse 4/4 `NO_ENTRY`, 0 ms on both hosts. The abort experiment is inconclusive.
+- **IB09 dwell prototype** (`tests/host/ib09/dwell_prototype.cjs`, a test-time patch; assertions 84/84). The boundary sweep (0/40/100/199/200/201/250) gives no upgrade under 200 and one at 200. Metadata runs only after dwell. SAMPLE/FILE get no upgrade. Leave, re-entry, A→B, stale results and viewer takeover are clean. 10/10 fault controls are caught.
 - **IB09 V2 pilot probe** (`tests/browser/ib09/IB09_V2_Hover_Cost_Probe.user.js`): verifier 39/39 on a synthetic browser model, 11/11 fault controls.
   - Bounded to 16 cards and 32 image loads per host.
   - Sizes hidden by the browser are never counted as zero; no "free" claim is made.
@@ -48,12 +56,8 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - IB01–IB06 suites exit 0 on `bbaf9ac`.
 
 ## Unresolved
-- **IB09 invariant conflicts in current production** (baseline §Invariant comparison):
-  - V1: `preview` starts a SAMPLE fetch at pointer-enter;
-  - V2: `original` starts a SAMPLE "upgrade" over a displayed FILE (slot-name choice, `Booru_Enhancer.user.js:3065`);
-  - V5: a 40 ms sweep incurs V1/V2;
-  - V3 (decision needed): the overlay shows the current rendition at t=0.
-  - Real browser cost (bytes, cache, abort effect) is unmeasured, pending the V2 pilot live runs (e621 and e926, separate Incognito windows).
+- **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 is accepted.
+- **IB09 still needed before a production proposal:** held-out live usefulness and transfer observations of the 200 ms candidate, throttled and unthrottled, with a clean-profile cost baseline. G-HOVER OPEN.
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
@@ -66,4 +70,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs the V2 pilot probe on e621 and on e926 (`tests/browser/ib09/README.md`) and returns two sanitized results. No dwell choice, V3 decision or production change before that evidence is reviewed. Do not start IB10.
+Next bounded step: a live held-out E-stage check of the 200 ms prototype (see `IB09_DWELL_PROTOTYPE.md` §6). No production change and no G-HOVER PASS before it. Do not start IB10.

@@ -1,0 +1,2507 @@
+{
+  "checkpoint": "IB09",
+  "stage": "E-stage isolated dwell prototype (200 ms candidate); production unchanged",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
+  "dwellMs": 200,
+  "fixtures": "synthetic",
+  "timelines": {
+    "e621.net preview": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 300,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 230,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 450,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": true,
+          "g2Started": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 450,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 500,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e621.net sample": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": false,
+          "g2Started": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e621.net original": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": false,
+          "g2Started": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e621.net sweep": {
+      "0": [],
+      "40": [],
+      "100": [],
+      "199": [],
+      "200": [
+        200
+      ],
+      "201": [
+        200
+      ],
+      "250": [
+        200
+      ]
+    },
+    "e926.net preview": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 300,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 230,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 450,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": true,
+          "g2Started": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 200,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 450,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 500,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e926.net sample": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": false,
+          "g2Started": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e926.net original": {
+      "Q1": {
+        "meta": {
+          "enters": [
+            0
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q2": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "leaveAt": 199
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      },
+      "Q5": {
+        "meta": {
+          "enters": [
+            0,
+            100
+          ],
+          "leaveAt": 50
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 300,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q6": {
+        "meta": {
+          "enters": [
+            0,
+            30
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 230,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q7": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ]
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q8": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "visibleAfter": false,
+          "staleCompleted": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0
+      },
+      "Q9": {
+        "meta": {
+          "enters": [
+            0,
+            250
+          ],
+          "childGenAfterStale": 2,
+          "childGenEnd": 2,
+          "g1Started": false,
+          "g2Started": false
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 250,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 250,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 200,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 450,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0
+      },
+      "Q10": {
+        "meta": {
+          "enters": [
+            0
+          ],
+          "viewerOpen": true
+        },
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [],
+        "network": 0
+      }
+    },
+    "e926.net sweep": {
+      "0": [],
+      "40": [],
+      "100": [],
+      "199": [],
+      "200": [
+        200
+      ],
+      "201": [
+        200
+      ],
+      "250": [
+        200
+      ]
+    }
+  },
+  "checks": 84,
+  "passed": 84,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault upgrade starts at pointer-enter: caught",
+      "pass": true
+    },
+    {
+      "name": "fault only one of the two upgrade triggers delayed (metadata path left at enter): caught",
+      "pass": true
+    },
+    {
+      "name": "fault FILE downgraded to SAMPLE (eligibility removed): caught",
+      "pass": true
+    },
+    {
+      "name": "fault SAMPLE unnecessarily reloads SAMPLE: caught",
+      "pass": true
+    },
+    {
+      "name": "fault leave fails to cancel the pending dwell (timer kept and token check removed): caught",
+      "pass": true
+    },
+    {
+      "name": "fault stale dwell generation fires after re-entry: caught",
+      "pass": true
+    },
+    {
+      "name": "fault stale image completion installs (install guards removed): caught",
+      "pass": true
+    },
+    {
+      "name": "fault fast card A -> card B starts A's upgrade: caught",
+      "pass": true
+    },
+    {
+      "name": "fault viewer takeover leaves the delayed hover upgrade armed: caught",
+      "pass": true
+    },
+    {
+      "name": "fault upgrade fires at 199 ms: caught by the boundary sweep",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
