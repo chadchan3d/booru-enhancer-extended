@@ -1,7 +1,7 @@
 # IB09 — P stage: frozen still-image hover policy in production
 
 **Checkpoint:** IB09 — Still-image hover dwell and cost (blueprint §3 IB09, item 3 "P", items 9–11). **G-HOVER(e621/e926 qualified still-image class) PASS(scope)** (`IB09_E_CLOSEOUT.md` §4).
-**Status: PARTIAL — NOT COMPLETE.** Live production conformance is pending. IB10 has not started.
+**Status:** superseded by `IB09_COMPLETION_RECORD.md`. All four live production-conformance sessions passed, and IB09 is PASS(scope). IB10 has not started.
 
 ## 1. Production artifact
 
@@ -84,4 +84,4 @@
 
 ## 4. Completion
 
-IB09 stays **PARTIAL — NOT COMPLETE** until the four live conformance results are returned and pass. After that comes the §11 completion record.
+All four live conformance sessions passed. See `IB09_COMPLETION_RECORD.md`.
