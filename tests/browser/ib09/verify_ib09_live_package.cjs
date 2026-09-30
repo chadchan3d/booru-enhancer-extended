@@ -42,10 +42,10 @@ check('observer makes no request, storage, cookie or settings write, and dispatc
 
 // ---- runtime model ----
 const M = hh.M;
-async function run({ url = 'https://e621.net/posts', quality = 'preview', text = derived, model = {}, script }) {
+async function run({ url = 'https://e621.net/posts', quality = 'preview', text = derived, model = {}, script, html = null }) {
   const { delay = 150, cachedSamples = false } = model;
   const menu = {}; let clock = null; const entries = []; const pending = new Set(); const cached = new Set();
-  const c = h.load({ url, html: hh.listing(new URL(url).hostname, 4).html, source: text, settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
+  const c = h.load({ url, html: html || hh.listing(new URL(url).hostname, 4).html, source: text, settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
     clock = hh.installFakeClock(w);
     w.performance.now = () => clock.now();
     w.performance.getEntriesByName = (n, t) => entries.filter((e) => e.name === n && (!t || e.entryType === t));
@@ -145,13 +145,15 @@ async function main() {
     const r = await run({ quality: 'preview', script: MIX });
     check('starting a session leaves no result box and no textarea; only a small click-through toast', r.uiAtStart.resultBox === false && r.uiAtStart.textareas === 0 && r.uiAtStart.ownElements === 1 && r.uiAtStart.allClickThrough && r.uiAtStart.toastSmall, JSON.stringify(r.uiAtStart));
     check('the acknowledgement disappears by itself; nothing of the observer remains over the gallery while recording', r.uiAfter.ownElements === 0 && r.uiDuring.resultBox === false && r.uiDuring.nonClickThrough === 0, JSON.stringify([r.uiAfter, r.uiDuring]));
-    check('Show results still returns the sanitized session output', r.json && r.json.version === '1.1.0' && r.json.sessions.length === 1 && leaks(r.text).length === 0, r.text.slice(0, 200));
+    check('Show results still returns the sanitized session output', r.json && r.json.version === '1.2.0' && r.json.sessions.length === 1 && leaks(r.text).length === 0, r.text.slice(0, 200));
     // Session data unchanged by the UI correction: same pointer sequence through the previous package (a9543c9).
     const prevPkg = execFileSync('git', ['-C', REPO, 'show', 'a9543c9:tests/browser/ib09/IB09_Dwell_Live_Check.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     const prevBody = prevPkg.slice(prevPkg.indexOf(WRAP_OPEN) + WRAP_OPEN.length, prevPkg.indexOf(WRAP_CLOSE));
     check('pinning unchanged: the executed body is identical to the previous package body (same production + 200 ms prototype + hooks)', prevBody === bodyInScript);
     const old = await run({ quality: 'preview', text: prevPkg, script: MIX });
-    check('session data unchanged by the UI correction (sessions identical to the previous package for the same pointer sequence)', JSON.stringify(old.json.sessions) === JSON.stringify(r.json.sessions), JSON.stringify([old.json.sessions[0].generations, r.json.sessions[0].generations]));
+    // Every field the previous package reported is unchanged (1.2 only adds fields; this fixture is all STILL cards).
+    const pick = (a, b) => (Array.isArray(a) ? a.map((x, i) => pick(x, b ? b[i] : undefined)) : a && typeof a === 'object' ? Object.fromEntries(Object.keys(a).map((k) => [k, pick(a[k], b ? b[k] : undefined)])) : b);
+    check('session data unchanged by the UI and reporting corrections (every previously reported field identical for the same pointer sequence)', JSON.stringify(old.json.sessions) === JSON.stringify(pick(old.json.sessions, r.json.sessions)), JSON.stringify([old.json.sessions[0].previewUpgrades, r.json.sessions[0].previewUpgrades]));
     check('regression: the previous package opened a blocking result box at session start (the reported defect)', old.uiAtStart.resultBox === true && old.uiAtStart.allClickThrough === false, JSON.stringify(old.uiAtStart));
     // Usefulness marks.
     const marked = await run({ quality: 'preview', script: async (a) => {
@@ -161,6 +163,30 @@ async function main() {
     } });
     const u = marked.json.sessions[0].usefulness;
     check('usefulness marks: one per upgrade, not double-counted; no pointer events generated', u.useful === 1 && u.late === 1 && u.tooLate === 0 && marked.json.sessions[0].generations === 2, JSON.stringify(u));
+  }
+
+  // Target-slot provenance regression (e621 A diagnosis): true SAMPLE, SAMPLE/FILE alias,
+  // pure FILE (a video post: native file is webm), absent sample, empty sample.
+  const H2 = '0123456789abcdef0123456789abcdef';
+  const mixCard = (id, { ext = 'png', sample = 'distinct' } = {}) => {
+    const file = `${M}/data/${H2}_${id}.${ext}`; const samp = `${M}/data/sample/${H2}_${id}.jpg`;
+    const sampleAttr = sample === 'absent' ? '' : sample === 'empty' ? 'data-sample-url=""' : `data-sample-url="${sample === 'alias' ? file : samp}"`;
+    return `<article class="thumbnail" data-id="${id}" data-file-ext="${ext}" data-file-url="${file}" ${sampleAttr} data-preview-url="${M}/data/preview/${H2}_${id}.jpg" data-preview-webp="${M}/data/preview/${H2}_${id}.webp"><a href="/posts/${id}"><picture><source srcset="${M}/data/preview/${H2}_${id}.webp" type="image/webp"><source srcset="${M}/data/preview/${H2}_${id}.jpg" type="image/jpeg"><img src="${M}/data/preview/${H2}_${id}.jpg" alt=""></picture></a></article>`;
+  };
+  const MIXED = `<!doctype html><html><head></head><body data-user-is-anonymous="true"><section id="posts-container">${[mixCard('101'), mixCard('102', { sample: 'alias' }), mixCard('103', { ext: 'webm' }), mixCard('104', { sample: 'absent' }), mixCard('105', { sample: 'empty' })].join('')}</section></body></html>`;
+  const HOVER_ALL = async (a) => { for (let i = 0; i < 5; i++) { await a.enter(i); await a.wait(400); await a.leave(i); await a.wait(30); } };
+  {
+    const r = await run({ html: MIXED, script: HOVER_ALL });
+    const pu = r.json.sessions[0].previewUpgrades; const vid = r.json.sessions[0].otherMediaClasses.VIDEO;
+    check('target provenance: STILL eligible 4; started 2 = one true SAMPLE + one SAMPLE/FILE alias; zero pure FILE; the 2 cards without a usable sample start nothing',
+      pu.eligibleGenerations === 4 && pu.started === 2 && pu.nativeSampleTargets === 1 && pu.sampleFileAliasTargets === 1 && pu.pureFileTargets === 0 && pu.eligibleWithoutUsableSample === 2 && pu.startedWithoutUsableSample === 0 && JSON.stringify(pu.upgradeKinds) === '{"upgrade":2}', JSON.stringify(pu));
+    check('video post reported separately (IB10 scope): 1 generation, one after-dwell upgrade-video to FILE, none before dwell', vid.generations === 1 && vid.upgradesStarted === 1 && JSON.stringify(vid.upgradeKinds) === '{"upgrade-video":1}' && JSON.stringify(vid.targetSlots) === '{"FILE":1}' && vid.startedBeforeDwell === 0, JSON.stringify(vid));
+    check('media classes tallied from native file extensions', JSON.stringify(r.json.sessions[0].mediaClasses) === '{"STILL":4,"VIDEO":1}', JSON.stringify(r.json.sessions[0].mediaClasses));
+    const prev = execFileSync('git', ['-C', REPO, 'show', 'e93fe4e:tests/browser/ib09/IB09_Dwell_Live_Check.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    const o = await run({ html: MIXED, text: prev, script: HOVER_ALL });
+    check('regression: the previous package (1.1) counts the video post as a PREVIEW still upgrade with a FILE target (the e621 A shape)', o.json.sessions[0].previewUpgrades.targetSlots.FILE === 1 && o.json.sessions[0].previewUpgrades.eligibleGenerations === 5, JSON.stringify(o.json.sessions[0].previewUpgrades));
+    const prevBody2 = prev.slice(prev.indexOf(WRAP_OPEN) + WRAP_OPEN.length, prev.indexOf(WRAP_CLOSE));
+    check('executed body unchanged by the reporting correction (identical to package 1.1)', prevBody2 === bodyInScript);
   }
 
   // ---- fault controls ----
@@ -175,10 +201,19 @@ async function main() {
     ['stale install after leave (hide invalidates nothing)', mb("\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n\t\t\trequestToken++;\n\t\t\tactiveUpgradeUrl = '';\n\t\t\tclearMediaState();\n\t\t\tcancelPendingUpgrade();", '\t\tfunction hide() {\n\t\t\tclearMediaState();'), 'preview', (x) => x.json.sessions[0].staleInstalled > 0],
     ['old-generation work after re-entry', withBody(mustReplace(mustReplace(mustReplace(body, '\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n', '\t\tfunction hide() {\n'), "\t\t\tclearTimeout(dwellTimer);\n\n\t\t\t// V3", '\n\t\t\t// V3'), "\t\tasync function afterDwell(img, token) {\n", '\t\tasync function afterDwell(img, token) {\n\t\t\ttoken = requestToken;\n')), 'preview', (x) => x.json.sessions[0].newMediaBeforeDwell > 0 || x.json.sessions[0].previewUpgrades.startedBeforeDwell > 0 || x.json.sessions[0].quickPassesStartingUpgrade > 0],
     ['timing attributed from Resource Timing instead of the hooks (cache/no-entry)', derived.replace("      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };", "      if (d.kind !== 'thumb') return;\n      const rec = { t, kind: d.kind, slot, token: d.token, url: d.url };"), 'preview-cached', (x) => x.json.sessions[0].previewUpgrades.started !== 6],
-    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
-    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['raw URL leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, u: document.querySelector('article').getAttribute('data-sample-url'),"), 'preview', (x) => leaks(x.text).length > 0],
+    ['ID leakage', derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;').replace("probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE,", "probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, id: document.querySelector('article').getAttribute('data-id'),"), 'preview', (x) => leaks(x.text).length > 0],
     ['unbounded sampling', derived.replace('const MAX_GENERATIONS = 80;', 'const MAX_GENERATIONS = 100000;'), 'preview-many', (x) => x.json.sessions[0].generations > 80],
   ];
+  // Target-provenance fault controls on the mixed fixture.
+  {
+    const fileFallback = withBody(mustReplace(body, '\t\t\treturn showingPreview && same(resolved.url, wrap.dataset.sampleUrl) && !same(resolved.url, current);', '\t\t\treturn showingPreview && (same(resolved.url, wrap.dataset.sampleUrl) || same(resolved.url, wrap.dataset.fileUrl)) && !same(resolved.url, current);'));
+    const f1 = await run({ html: MIXED, text: fileFallback, script: HOVER_ALL });
+    check('fault erroneous FILE fallback when the sample is absent/invalid: caught (pure FILE target on STILL cards)', f1.json.sessions[0].previewUpgrades.pureFileTargets > 0 && f1.json.sessions[0].previewUpgrades.startedWithoutUsableSample > 0, JSON.stringify(f1.json.sessions[0].previewUpgrades));
+    const videoAsStill = derived.replace("if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return 'STILL';", "return 'STILL';");
+    const f2 = await run({ html: MIXED, text: videoAsStill, script: HOVER_ALL });
+    check('fault observer counts a video post as STILL: caught (pure FILE target appears in the still-image rule)', videoAsStill !== derived && f2.json.sessions[0].previewUpgrades.pureFileTargets > 0, JSON.stringify(f2.json.sessions[0].previewUpgrades));
+  }
   for (const [name, text, mode, caught] of faults) {
     if (text === derived) { check(`fault ${name}: mutant applied`, false, 'no change'); continue; }
     const quality = mode.startsWith('preview') ? 'preview' : mode;

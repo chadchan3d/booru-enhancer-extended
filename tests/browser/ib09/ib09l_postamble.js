@@ -41,6 +41,16 @@
     return labels.length ? labels.join('|') : 'UNKNOWN';
   }
 
+  // Card media class from the native file extension (IB09 still-image rule applies to STILL only;
+  // VIDEO is IB10 scope and ANIMATED needs its own eligibility; both are reported separately).
+  function mediaClassOf(card) {
+    const ext = String(card?.getAttribute('data-file-ext') || '').toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return 'STILL';
+    if (['webm', 'mp4', 'mov'].includes(ext)) return 'VIDEO';
+    if (['gif', 'apng'].includes(ext)) return 'ANIMATED';
+    return 'UNKNOWN';
+  }
+
   // ---- hooks from the instrumented body (observe only) ----
   IB09L_HOOK = function hook(ev, d) {
     if (!session || !gen) return;
@@ -72,6 +82,7 @@
         const prev = session.generations[session.generations.length - 1];
         gen = { card, enterT: now(), leaveT: null, token: null, dwellT: null, assigns: [],
           entrySlot: slotOf(img?.currentSrc || img?.getAttribute?.('src') || '', card),
+          media: mediaClassOf(card), usableSample: !!(card && String(card.getAttribute('data-sample-url') || '').trim()),
           fromOtherCard: !!prev && prev.card !== card && prev.leaveT !== null && now() - prev.leaveT < 1000,
           reentrySameCard: !!prev && prev.card === card };
         session.generations.push(gen);
@@ -100,7 +111,8 @@
     const up = (x) => x.assigns.filter((a) => a.kind !== 'thumb');
     const firstUp = (x) => up(x)[0] || null;
     const stay = (x) => (x.leaveT === null ? null : x.leaveT - x.enterT);
-    const eligible = g.filter((x) => x.entrySlot === 'PREVIEW' && x.dwellT !== null);
+    // Revision 1.2: the still-image rule is evaluated over STILL cards only.
+    const eligible = g.filter((x) => x.media === 'STILL' && x.entrySlot === 'PREVIEW' && x.dwellT !== null);
     const started = eligible.filter((x) => firstUp(x));
     const costs = started.map((x) => costClass(firstUp(x).url, firstUp(x).t));
     return {
@@ -120,12 +132,23 @@
         startOffsetMs: dist(started.map((x) => firstUp(x).t - x.enterT)),
         startedBeforeDwell: started.filter((x) => firstUp(x).t - x.enterT < DWELL_MS).length,
         targetSlots: tally(started.map((x) => firstUp(x).slot)),
+        upgradeKinds: tally(started.map((x) => firstUp(x).kind)),
+        nativeSampleTargets: started.filter((x) => firstUp(x).slot === 'SAMPLE').length,
+        sampleFileAliasTargets: started.filter((x) => firstUp(x).slot === 'SAMPLE|FILE').length,
+        pureFileTargets: started.filter((x) => firstUp(x).slot === 'FILE').length,
+        otherTargets: started.filter((x) => !['SAMPLE', 'SAMPLE|FILE', 'FILE'].includes(firstUp(x).slot)).length,
+        eligibleWithoutUsableSample: eligible.filter((x) => !x.usableSample).length,
+        startedWithoutUsableSample: started.filter((x) => !x.usableSample).length,
         displayableAfterDwellMs: dist(started.filter((x) => firstUp(x).installT).map((x) => firstUp(x).installT - (x.enterT + DWELL_MS))),
         displayed: started.filter((x) => firstUp(x).installT).length,
         leftBeforeDisplayable: started.filter((x) => !firstUp(x).installT && x.leaveT !== null).length,
         costClasses: tally(costs.map((c) => c.cls)),
         networkTransferKiB: (() => { const v = costs.filter((c) => c.kib !== undefined).map((c) => c.kib).sort((a, b) => a - b); return v.length ? { n: v.length, min: v[0], median: v[Math.floor((v.length - 1) / 2)], max: v[v.length - 1] } : 'NONE'; })(),
       },
+      mediaClasses: tally(g.map((x) => x.media)),
+      otherMediaClasses: Object.fromEntries(['VIDEO', 'ANIMATED', 'UNKNOWN'].map((m) => { const xs = g.filter((x) => x.media === m); return [m, { generations: xs.length, dwellReached: xs.filter((x) => x.dwellT !== null).length,
+        upgradesStarted: xs.filter((x) => firstUp(x)).length, upgradeKinds: tally(xs.filter((x) => firstUp(x)).map((x) => firstUp(x).kind)), targetSlots: tally(xs.filter((x) => firstUp(x)).map((x) => firstUp(x).slot)),
+        startedBeforeDwell: xs.filter((x) => firstUp(x) && firstUp(x).t - x.enterT < DWELL_MS).length }]; })),
       upgradesOnSampleOrFileCards: g.filter((x) => (x.entrySlot === 'SAMPLE' || x.entrySlot === 'FILE') && up(x).length > 0).length,
       fileDowngradedToSample: g.filter((x) => x.entrySlot === 'FILE' && up(x).some((a) => a.slot.includes('SAMPLE'))).length,
       staleBlocked: s.staleBlocked, staleInstalled: s.staleInstalled,
@@ -196,7 +219,7 @@
     document.querySelector('#ib09l-toast')?.remove();
     await sleep(RT_WAIT_MS);
     const identity = await sourceIdentity();
-    const out = { probe: 'ib09l-dwell-live-check', version: '1.1.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
+    const out = { probe: 'ib09l-dwell-live-check', version: '1.2.0', site: SITE, dwellMs: DWELL_MS, production_body_identity: identity, sessions: sessions.map(analyze),
       notes: 'Timing comes from hooks in the running code (cache-independent). Cost classes come from Resource Timing: NO_ENTRY is not zero cost, and unknown cache state is not cold.' };
     show(guard(JSON.stringify(out, null, 2)));
     return out;

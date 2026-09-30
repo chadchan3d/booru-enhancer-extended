@@ -145,6 +145,53 @@ It stayed until closed by hand.
 
 **Completed valid sessions do not need repeating:** the recorded data and the executed body are unchanged by this correction.
 
-## 6. Not decided here
+## 6. Live session e621 A (preview, ordinary) and the FILE-target diagnosis
+
+**Operator-relayed result (package 1.1):**
+- `MATCH_EXPECTED_ARTIFACT`;
+- 80 generations: 34 quick passes under dwell and 46 reached dwell;
+- `newMediaBeforeDwell` 0, `resourceTimingLoadsBeforeDwell` 0, `quickPassesStartingUpgrade` 0;
+- eligible 46, started 46, exactly one per generation;
+- start offset 200/200/220 ms, none before dwell;
+- `upgradesOnSampleOrFileCards` 0, `fileDowngradedToSample` 0, `staleInstalled` 0;
+- **`targetSlots`: SAMPLE 38, SAMPLE|FILE 5, FILE 3.**
+
+**Root cause of the 3 FILE targets: video posts counted in the still-image statistics (package reporting defect).**
+
+1. **Which URL an eligible still-image upgrade uses.** `hoverUpgradeEligible` (prototype) admits a non-video upgrade only if the card shows its native preview and the target equals that card's own `data-sample-url` (`dwell_prototype.cjs:39`). A started still-image upgrade is therefore always the native sample.
+2. **Whether any path can choose `data-file-url` over a usable sample.** For still images, no. `directUpgradeFromDom` prefers `sampleUrl`, and even a metadata-path fallback to the original is refused by the gate. The **only** FILE path is video: for a video post, production's `directUpgradeFromDom` returns the native file (`Booru_Enhancer.user.js:3062-3063`). The prototype deliberately leaves video unchanged behind the same dwell (`dwell_prototype.cjs:33`, IB10 scope). The package records it as an `upgrade-video` assignment.
+3. **What `FILE` means in the package.** The assigned URL equals the card's `data-file-url` and not its `data-sample-url`. `SAMPLE|FILE` means it equals both.
+4. **Missing or invalid samples?** No. With no usable sample, the gate refuses any upgrade. Such cards appear as eligible but not started, and all 46 started.
+5. **Classifier or provenance errors?** The slot classification is correct; these really are file URLs. They are video files, started after dwell by the unchanged video path.
+6. **Why they counted as eligible.** Package 1.1 defined eligibility as "PREVIEW at entry and dwell reached" without checking the card's media class. Video posts show the native preview, so they were included, and every upgrade kind was tallied together.
+7. **`SAMPLE|FILE`.** This is native aliasing: the site's sample URL equals its file URL. The target is still the card's native sample slot, and nothing is downgraded, so it is **acceptable** under the PREVIEW→SAMPLE rule.
+8. **Classification.** A **live-package reporting defect**. It is not a production or prototype defect, and not an unsupported-card admission issue in the code under test. Hover video remains IB10 scope.
+
+**Correction (observer 1.2.0; test package only; executed body unchanged):**
+- each generation records the card's media class from its native `data-file-ext`: STILL (jpg/jpeg/png/webp), VIDEO (webm/mp4/mov), ANIMATED (gif/apng) or UNKNOWN;
+- `previewUpgrades` (the IB09 still-image rule) now covers **STILL** cards only, with `upgradeKinds`, `nativeSampleTargets`, `sampleFileAliasTargets`, `pureFileTargets` (must be 0), `otherTargets`, `eligibleWithoutUsableSample` and `startedWithoutUsableSample`;
+- VIDEO, ANIMATED and UNKNOWN cards are reported separately under `otherMediaClasses`;
+- the whole-session invariants (nothing before dwell, no stale install) still cover every generation.
+
+**Local verification: 51/51.**
+- A new fixture has a true SAMPLE target, a SAMPLE/FILE alias, a video post (pure FILE), an absent sample and an empty sample:
+  - STILL: eligible 4, started 2 (1 SAMPLE, 1 alias), pure FILE 0, and the 2 cards without a usable sample start nothing;
+  - VIDEO: 1 `upgrade-video` to FILE, after dwell.
+- The previous package reproduces the e621 A shape (FILE counted as a still upgrade).
+- The executed body is identical to package 1.1.
+- Every field the previous packages reported is unchanged.
+- **New fault controls,** both caught:
+  - an erroneous FILE fallback when the sample is absent or invalid (a pure FILE target on STILL cards);
+  - the observer counting a video post as STILL.
+- All earlier fault controls still pass.
+
+**e621 A disposition: ACCEPTED** for correctness on e621 ordinary network (questions 1, 2, 5 and 6), with this reclassification.
+- **The 3 FILE targets are video.** The code path above allows no other way to get a pure FILE target.
+- **So the still-image rule holds:** 43 still upgrades, 38 SAMPLE + 5 SAMPLE|FILE alias, and 0 pure FILE.
+- **Timing invariants hold** across all 46 upgrades, including video.
+- **Caveat:** e621 A's usefulness figures (displayable-after-dwell and cost classes) include up to 3 video generations, 3 of 46, so they are indicative only for still images.
+- **No rerun is required.**
+
+## 7. Not decided here
 
 This record does not choose the final dwell, and it gives no G-HOVER PASS and no production change.
