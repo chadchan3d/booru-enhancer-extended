@@ -1,100 +1,493 @@
 {
   "checkpoint": "IB08",
-  "diagnosis": "A (dispose not terminal)",
-  "production_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
+  "diagnosis": "A (terminal gallery disposal)",
+  "production_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "previous_production_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
   "fixtures": "synthetic",
   "observations": {
-    "e621.net production": {
-      "ownedBefore": 5,
+    "disposeNotRecorded e926.net": {
+      "ownedBefore": 6,
       "ownedAtDispose": 0,
-      "markerAtDispose": false,
-      "ownedAfterDebounce": 5,
-      "wrappedAfterDebounce": 5,
-      "ownedAfterBodyMutation": 5,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 5,
-      "ownedInNewContainer": 2
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": false,
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": false
     },
-    "e621.net noBodyReinit": {
-      "ownedBefore": 5,
+    "barrierRemoved e621.net": {
+      "ownedBefore": 6,
       "ownedAtDispose": 0,
-      "markerAtDispose": false,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": false
+    },
+    "disposeNotRecorded e621.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": false,
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": false
+    },
+    "barrierRemoved e926.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": false
+    },
+    "previousProduction e926.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": "absent",
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": "absent",
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": "absent"
+    },
+    "previousProduction e621.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": "absent",
+      "ownedAfterDebounce": 4,
+      "wrappedAfterDebounce": 6,
+      "ownedAfterBodyMutation": 4,
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": false,
+      "ownedAfterResize": 4,
+      "ownedAfterBypassAttempts": 4,
+      "wrappedAfterBypassAttempts": 6,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": "absent",
+      "cycles": [
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 4,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 4,
+      "barsAtEnd": 6,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": "absent"
+    },
+    "production e926.net": {
+      "ownedBefore": 6,
+      "ownedAtDispose": 0,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
       "ownedAfterDebounce": 0,
       "wrappedAfterDebounce": 0,
       "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 0
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": true,
+      "ownedAfterResize": 0,
+      "ownedAfterBypassAttempts": 0,
+      "wrappedAfterBypassAttempts": 0,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 0,
+      "barsAtEnd": 0,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": true
     },
-    "e621.net markerKept": {
-      "ownedBefore": 5,
+    "initNotClearing e621.net": {
+      "ownedBefore": 6,
       "ownedAtDispose": 0,
-      "markerAtDispose": true,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
       "ownedAfterDebounce": 0,
       "wrappedAfterDebounce": 0,
       "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 2
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": true,
+      "ownedAfterResize": 0,
+      "ownedAfterBypassAttempts": 0,
+      "wrappedAfterBypassAttempts": 0,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": true,
+      "cycles": [
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 0,
+      "barsAtEnd": 0,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": true
     },
-    "e621.net proposedFix": {
-      "ownedBefore": 5,
+    "initNotClearing e926.net": {
+      "ownedBefore": 6,
       "ownedAtDispose": 0,
-      "markerAtDispose": false,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
       "ownedAfterDebounce": 0,
       "wrappedAfterDebounce": 0,
       "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 2
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": true,
+      "ownedAfterResize": 0,
+      "ownedAfterBypassAttempts": 0,
+      "wrappedAfterBypassAttempts": 0,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": true,
+      "cycles": [
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 0,
+      "barsAtEnd": 0,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": true
     },
-    "e926.net production": {
-      "ownedBefore": 5,
+    "production e621.net": {
+      "ownedBefore": 6,
       "ownedAtDispose": 0,
-      "markerAtDispose": false,
-      "ownedAfterDebounce": 5,
-      "wrappedAfterDebounce": 5,
-      "ownedAfterBodyMutation": 5,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 5,
-      "ownedInNewContainer": 2
-    },
-    "e926.net noBodyReinit": {
-      "ownedBefore": 5,
-      "ownedAtDispose": 0,
-      "markerAtDispose": false,
+      "restoredAtDispose": true,
+      "wasDisposedAfterDispose": true,
       "ownedAfterDebounce": 0,
       "wrappedAfterDebounce": 0,
       "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 0
-    },
-    "e926.net markerKept": {
-      "ownedBefore": 5,
-      "ownedAtDispose": 0,
-      "markerAtDispose": true,
-      "ownedAfterDebounce": 0,
-      "wrappedAfterDebounce": 0,
-      "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 2
-    },
-    "e926.net proposedFix": {
-      "ownedBefore": 5,
-      "ownedAtDispose": 0,
-      "markerAtDispose": false,
-      "ownedAfterDebounce": 0,
-      "wrappedAfterDebounce": 0,
-      "ownedAfterBodyMutation": 0,
-      "ownedAfterExplicitInit": 5,
-      "ownedAfterSecondDispose": 0,
-      "ownedInNewContainer": 2
+      "nativeEditKept": true,
+      "nativeMoveKept": true,
+      "replacementsNative": true,
+      "ownedAfterResize": 0,
+      "ownedAfterBypassAttempts": 0,
+      "wrappedAfterBypassAttempts": 0,
+      "ownedAfterExplicitInit": 4,
+      "wasDisposedAfterInit": false,
+      "cycles": [
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        },
+        {
+          "afterDispose": 0,
+          "afterInit": 4,
+          "bars": "111111"
+        }
+      ],
+      "ownedAtEnd": 0,
+      "barsAtEnd": 0,
+      "ownedInNewContainer": 2,
+      "oldStillDisposed": true
     }
   },
-  "checks": 14,
-  "passed": 14,
+  "checks": 24,
+  "passed": 24,
   "failed": 0,
   "failures": []
 }

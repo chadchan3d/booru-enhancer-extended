@@ -3691,6 +3691,10 @@
 	 * ============================================================ */
 	BE.modules.gallery = (() => {
 		let galleryContainer = null;
+		// IB08: containers this module disposed. Dispose is terminal for them:
+		// only an explicit init() re-enhances such a container, never the
+		// app-level body observer. A genuinely new container is unaffected.
+		const disposedContainers = new WeakSet();
 		let scrollObserver = null;
 		let sentinel = null;
 		let nextPageUrl = null;
@@ -3777,6 +3781,7 @@
 		}
 
 		function init(container) {
+			disposedContainers.delete(container);
 			const isNewContainer = galleryContainer !== container;
 
 			if (isNewContainer) {
@@ -4540,16 +4545,19 @@
 			disposeCardOwners();
 			galleryOwner?.dispose();
 			galleryOwner = null;
+			if (galleryContainer) disposedContainers.add(galleryContainer);
 			galleryContainer = null;
 			paginatorEl = null;
 			settingsListenerAttached = false;
 			resizeListenerAttached = false;
 		}
 
+		const wasDisposed = (container) => !!container && disposedContainers.has(container);
+
 		// IB08 provenance: which rendition a card shows (read-only, in memory).
 		const getThumbRendition = (wrap) => thumbRenditionByWrap.get(wrap) || null;
 
-		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll, getThumbRendition };
+		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll, getThumbRendition, wasDisposed };
 	})();
 
 	/* ============================================================ *
@@ -5427,7 +5435,8 @@
 		const bodyObserver = new MutationObserver(BE.dom.debounce(() => {
 			if (!BE.adapters.active) return;
 			const container = BE.adapters.active.getGalleryContainer();
-			if (container && !container.dataset.beGalleryInit) {
+			// A container the gallery disposed stays native until an explicit init.
+			if (container && !container.dataset.beGalleryInit && !BE.modules.gallery.wasDisposed(container)) {
 				BE.log.debug('[Nav] gallery container replaced, re-initializing gallery module');
 				safeStage('Gallery re-init', () => {
 					BE.modules.gallery.init(container);
