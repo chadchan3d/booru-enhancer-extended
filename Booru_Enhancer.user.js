@@ -3083,17 +3083,15 @@
 			return { url, mediaType: isVideo ? 'video' : post.mediaType };
 		}
 
-		// IB09 still-image hover (G-HOVER PASS(scope)): a still card on a page the
-		// IB08 rendition contract admits (logged-out e621/e926 /posts). It waits for
-		// dwell. `qualified` is the IB08 still-image card pattern; other still cards
-		// there keep the thumbnail (no automatic upgrade). Every other card keeps
-		// its existing hover path (video is IB10; animated and other hosts unchanged).
-		function hoverStillCard(img) {
+		// IB09 G-HOVER(e621/e926 qualified still-image class) PASS(scope): a card
+		// whose IB08 rendition fact shows it matched the IB08 still-image pattern
+		// (logged-out e621/e926 /posts, still extension, two-source WebP/JPEG card
+		// with a usable native sample). Only these cards wait for dwell; every other
+		// card keeps its existing hover path (video is IB10; others out of scope).
+		function hoverQualifiedWrap(img) {
 			const wrap = img.closest('.be-thumb-wrap');
 			const rendition = wrap ? BE.modules.gallery?.getThumbRendition?.(wrap) : null;
-			if (!rendition || rendition === 'NATIVE_OUT_OF_SCOPE') return null;
-			if (!/^(jpe?g|png|webp)$/.test(String(wrap.getAttribute('data-file-ext') || '').toLowerCase())) return null;
-			return { wrap, qualified: rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' };
+			return rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' ? wrap : null;
 		}
 
 		// In the qualified class only a displayed native preview has cost evidence
@@ -3109,8 +3107,8 @@
 
 		function upgradeWhenReady(resolved, sourceImg, token) {
 			if (!resolved?.url || token !== requestToken) return;
-			const still = hoverStillCard(sourceImg);
-			if (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {
+			const qualifiedWrap = hoverQualifiedWrap(sourceImg);
+			if (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {
 				clearMediaState();
 				return;
 			}
@@ -3207,9 +3205,9 @@
 			clearTimeout(dwellTimer);
 			dwellTimer = null;
 
-			// IB09: a still card gets no hover work before dwell, not even the
+			// IB09: a qualified card gets no hover work before dwell, not even the
 			// overlay; leave, re-entry and an open viewer cancel it.
-			if (hoverStillCard(img)) {
+			if (hoverQualifiedWrap(img)) {
 				dwellTimer = setTimeout(() => {
 					dwellTimer = null;
 					if (token !== requestToken || BE.modules.viewer?.isOpen?.()) return;

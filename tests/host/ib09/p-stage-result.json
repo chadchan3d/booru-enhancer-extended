@@ -1,7 +1,7 @@
 {
   "checkpoint": "IB09",
   "stage": "P-stage production (G-HOVER(e621/e926 qualified still-image class) PASS(scope))",
-  "production_blob": "3161b51f7ef30e2dd5e7a1b6c94398f2745ad1e5",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
   "e_stage_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
   "dwellMs": 200,
   "fixtures": "synthetic",
@@ -2131,8 +2131,8 @@
       }
     }
   },
-  "checks": 115,
-  "passed": 115,
+  "checks": 111,
+  "passed": 111,
   "failed": 0,
   "fault_controls": [
     {
@@ -2160,10 +2160,6 @@
       "pass": true
     },
     {
-      "name": "fault unqualified still card upgrades (fallback removed): caught",
-      "pass": true
-    },
-    {
       "name": "fault stale image completion installs (install guards removed): caught",
       "pass": true
     },
@@ -2172,7 +2168,15 @@
       "pass": true
     },
     {
-      "name": "fault video brought under the still-image dwell: caught by the out-of-scope equality",
+      "name": "fault dwell scope broadened beyond the qualified class (no usable sample): caught by the out-of-scope equality",
+      "pass": true
+    },
+    {
+      "name": "fault dwell scope broadened beyond the qualified class (video): caught by the out-of-scope equality",
+      "pass": true
+    },
+    {
+      "name": "fault dwell scope broadened beyond the qualified class (GIF): caught by the out-of-scope equality",
       "pass": true
     }
   ],

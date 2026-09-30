@@ -32,9 +32,7 @@ After that pause:
 - the preview shows the thumbnail you are looking at;
 - with **Grid thumbnail quality** set to **Preview**, it then loads the post's sample image;
 - with **Sample** or **Original**, the thumbnail already shows the best image, so nothing more is loaded;
-- if a post has no usable sample image, the preview keeps the thumbnail. **View** still opens the full image.
-
-Videos, GIFs, logged-in pages and other sites keep their current hover behavior.
+Posts outside the standard thumbnail layout (for example, those without a usable sample image), videos, GIFs, logged-in pages and other sites keep their current hover behavior.
 
 ## 1.2.7.3 — Rule34 loading and settings UX
 

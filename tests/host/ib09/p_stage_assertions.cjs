@@ -3,14 +3,13 @@
 // no patch). Ports the E-stage prototype scenarios (dwell_prototype_assertions.cjs
 // Q1-Q10 and the boundary sweep) to production with the frozen policy:
 //   - G-HOVER(e621/e926 qualified still-image class) PASS(scope), 200 ms dwell;
-//   - nothing before dwell for a still card: no overlay (option B), no upgrade,
-//     no metadata; leave / re-entry / viewer cancel the pending dwell;
-//   - qualified (IB08 still pattern): displayed PREVIEW -> native SAMPLE or
+//   - qualified class = the IB08 still-image card pattern (rendition fact
+//     NATIVE_PREVIEW / OWNED_SAMPLE / OWNED_ORIGINAL): nothing before dwell, no
+//     overlay (option B), no upgrade, no metadata; leave / re-entry / viewer
+//     cancel the pending dwell; displayed PREVIEW -> native SAMPLE or
 //     SAMPLE|FILE alias only; displayed SAMPLE / FILE -> no upgrade;
-//   - other still cards on the admitted page (e.g. no usable sample): thumbnail
-//     at dwell, no automatic upgrade;
-//   - out of scope (video, GIF, logged-in page): hover timeline identical to the
-//     E-stage production blob bbaf9ac.
+//   - out of scope (no usable sample / pattern not met, video, GIF, logged-in
+//     page): hover timeline identical to the E-stage production blob bbaf9ac.
 // t = ms since the first pointer-enter. Fixtures are synthetic.
 const fs = require('fs');
 const path = require('path');
@@ -144,15 +143,8 @@ async function main() {
       const ok = quality === 'preview' ? upgrades(r.tl).length === 1 && upgrades(r.tl)[0].t === 200 && upgrades(r.tl)[0].slot === 'SAMPLE|FILE' : upgrades(r.tl).length === 0;
       check(`${host} alias ${quality}: ${quality === 'preview' ? 'one SAMPLE|FILE alias upgrade at 200' : 'displayed alias gets no upgrade'}; invariants`, ok && Object.values(inv).every(Boolean), JSON.stringify([inv, r.tl.assigns]));
     }
-    // No usable sample (IB08 pattern not met): thumbnail at dwell, never a FILE load.
-    for (const quality of ['preview', 'original']) {
-      const r = await scenario(PROD, host, quality, 'Q1', FIX.noSample);
-      check(`${host} no usable sample ${quality}: nothing before dwell, thumbnail at 200, no upgrade (no FILE load)`, upgrades(r.tl).length === 0 && overlays(r.tl).map((a) => a.t).join() === '200' && hoverAssigns(r.tl).every((a) => a.t >= 200), JSON.stringify(r.tl.assigns));
-      const sw = await sweep(PROD, host, quality, 40, FIX.noSample);
-      check(`${host} no usable sample ${quality}: 40 ms sweep starts nothing`, hoverAssigns(sw).length === 0 && sw.metadata.length === 0, JSON.stringify(sw.assigns));
-    }
-    // Out of scope: identical hover behavior to the E-stage blob.
-    for (const [name, fix] of [['video (IB10)', FIX.video], ['GIF (animated)', FIX.gif], ['logged-in page', FIX.loggedIn]]) {
+    // Out of scope (not the IB08 still pattern): identical hover behavior to the E-stage blob.
+    for (const [name, fix] of [['no usable sample (pattern not met)', FIX.noSample], ['video (IB10)', FIX.video], ['GIF (animated)', FIX.gif], ['logged-in page', FIX.loggedIn]]) {
       const strip = (tl) => JSON.stringify({ assigns: tl.assigns, installs: tl.installs, metadata: tl.metadata, network: tl.network, videos: tl.videos, vbl: tl.videosBeforeLeave });
       const same = [];
       for (const T of [40, 250]) same.push(strip(await sweep(PROD, host, 'preview', T, fix)) === strip(await sweep(BASE, host, 'preview', T, fix)));
@@ -161,23 +153,24 @@ async function main() {
       check(`${host} out of scope ${name}: hover timeline identical to E-stage production (40 ms sweep, 250 ms stay, sustained)`, same.every(Boolean), JSON.stringify([same, a.tl.assigns, b.tl.assigns]));
     }
   }
-  // The video fixture must actually exercise the video path (otherwise the equality above is vacuous).
+  // The fixtures must actually exercise their paths (otherwise the equality above is vacuous).
   {
     const tl = await sweep(BASE, 'e621.net', 'preview', 40, FIX.video);
     check('control: the video fixture starts a video element at enter on the E-stage blob (fixture is live)', tl.videosBeforeLeave >= 1, JSON.stringify(tl));
+    const ns = await sweep(PROD, 'e621.net', 'preview', 40, FIX.noSample);
+    check('control: the no-sample card keeps its previous immediate path on production (work at enter; not the dwell class)', hoverAssigns(ns).some((a) => a.t === 0), JSON.stringify(ns.assigns));
   }
 
   // ---- fault controls (mutants of production) ----
   const m = (from, to) => mustReplace(PROD.replace(/\r\n/g, '\n'), from, to);
-  const DWELL_ARM = '\t\t\tif (hoverStillCard(img)) {\n\t\t\t\tdwellTimer = setTimeout(() => {';
+  const DWELL_ARM = '\t\t\tif (hoverQualifiedWrap(img)) {\n\t\t\t\tdwellTimer = setTimeout(() => {';
   const faults = [
     ['dwell removed (work at pointer-enter)', m(DWELL_ARM, '\t\t\tif (false) {\n\t\t\t\tdwellTimer = setTimeout(() => {'), 'preview', 'Q1', null, (r) => !invariants(r, 'preview').nothingBeforeDwell],
     ['option A restored (overlay at pointer-enter)', m(DWELL_ARM, `\t\t\tshowImmediateThumbnail(img, token);\n${DWELL_ARM}`), 'preview', 'Q1', null, (r) => !invariants(r, 'preview').nothingBeforeDwell],
     ['leave fails to cancel the pending dwell (timer kept, token check removed)', m('\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n', '\t\tfunction hide() {\n').replace('\t\t\t\t\tif (token !== requestToken || BE.modules.viewer?.isOpen?.()) return;\n\t\t\t\t\tresolveHover(img, token);', '\t\t\t\t\tif (BE.modules.viewer?.isOpen?.()) return;\n\t\t\t\t\tresolveHover(img, requestToken);'), 'preview', 'Q2', null, (r) => upgrades(r.tl).length > 0],
     ['viewer-before-dwell check removed', m('\t\t\t\t\tif (token !== requestToken || BE.modules.viewer?.isOpen?.()) return;\n', '\t\t\t\t\tif (token !== requestToken) return;\n'), 'preview', 'Q10', null, (r) => hoverAssigns(r.tl).length > 0],
-    ['eligibility gate removed (FILE downgraded to SAMPLE)', m('\t\t\tif (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {', '\t\t\tif (false) {'), 'original', 'Q1', null, (r) => !invariants(r, 'original').ordering],
+    ['eligibility gate removed (FILE downgraded to SAMPLE)', m('\t\t\tif (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {', '\t\t\tif (false) {'), 'original', 'Q1', null, (r) => !invariants(r, 'original').ordering],
     ['SAMPLE redundantly reloads SAMPLE', m('\t\t\treturn showingPreview && same(resolved.url, wrap.dataset.sampleUrl) && !same(resolved.url, current);', '\t\t\treturn true;').replace("\t\t\tif (resolved.mediaType !== 'video' && resolved.url === currentThumbUrl) {\n\t\t\t\tclearMediaState();\n\t\t\t\treturn;\n\t\t\t}", ''), 'sample', 'Q1', null, (r) => !invariants(r, 'sample').ordering],
-    ['unqualified still card upgrades (fallback removed)', m('\t\t\tif (still && !(still.qualified && qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved))) {', '\t\t\tif (still && still.qualified && !qualifiedUpgradeAllowed(sourceImg, still.wrap, resolved)) {'), 'preview', 'Q1', FIX.noSample, (r) => upgrades(r.tl).length > 0],
     ['stale image completion installs (install guards removed)', m("\t\t\timage.addEventListener('load', async () => {\n\t\t\t\tif (token !== requestToken || activeUpgradeUrl !== resolved.url) return;\n\t\t\t\ttry { await image.decode(); } catch { /* load is enough */ }\n\t\t\t\tif (token !== requestToken || activeUpgradeUrl !== resolved.url) return;\n\t\t\t\tinstallMedia(image, sourceImg, token);",
       "\t\t\timage.addEventListener('load', async () => {\n\t\t\t\ttry { await image.decode(); } catch { /* load is enough */ }\n\t\t\t\tinstallMedia(image, sourceImg, requestToken);"), 'preview', 'Q9', null, (r) => !invariants(r, 'preview').noStaleInstall || r.meta.childGenAfterStale !== null],
   ];
@@ -191,9 +184,12 @@ async function main() {
     check('fault dwell 199 ms: caught by the boundary sweep', upgrades(tl).length === 1 && upgrades(tl)[0].t === 199);
   }
   {
-    const vid = m("\t\t\tif (!/^(jpe?g|png|webp)$/.test(String(wrap.getAttribute('data-file-ext') || '').toLowerCase())) return null;\n", '');
-    const [a, b] = [await sweep(vid, 'e621.net', 'preview', 40, FIX.video), await sweep(BASE, 'e621.net', 'preview', 40, FIX.video)];
-    check('fault video brought under the still-image dwell: caught by the out-of-scope equality', JSON.stringify([a.assigns, a.videosBeforeLeave]) !== JSON.stringify([b.assigns, b.videosBeforeLeave]));
+    // Scope broadened to every non-out-of-scope card (e.g. treating NATIVE_UNSUPPORTED as qualified).
+    const broad = m("\t\t\treturn rendition === 'NATIVE_PREVIEW' || rendition === 'OWNED_SAMPLE' || rendition === 'OWNED_ORIGINAL' ? wrap : null;", "\t\t\treturn rendition && rendition !== 'NATIVE_OUT_OF_SCOPE' ? wrap : null;");
+    for (const [name, fix] of [['no usable sample', FIX.noSample], ['video', FIX.video], ['GIF', FIX.gif]]) {
+      const [a, b] = [await sweep(broad, 'e621.net', 'preview', 40, fix), await sweep(BASE, 'e621.net', 'preview', 40, fix)];
+      check(`fault dwell scope broadened beyond the qualified class (${name}): caught by the out-of-scope equality`, JSON.stringify([a.assigns, a.videosBeforeLeave]) !== JSON.stringify([b.assigns, b.videosBeforeLeave]));
+    }
   }
 
   const passed = results.filter((x) => x.pass).length;
