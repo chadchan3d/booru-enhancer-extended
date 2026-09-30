@@ -17,6 +17,10 @@
 // failed the dispose test (diagnosis A, gallery re-enhanced itself after
 // dispose). The corrected production must pass it after the debounce, and a
 // production mutant that removes the disposed-container barrier must fail D10.
+// Revision 3 adds the second live run's D10 shape: a site-side class touch on
+// every card leaves the enhancer class after dispose (stale state). The
+// revision-2 package counted that as re-enhancement; revision 3 must not, and
+// must still fail D10 on real re-enhancement (barrier removed).
 // Requires `npm install` in tests/host/ib07 (pinned jsdom).
 const fs = require('fs');
 const path = require('path');
@@ -119,6 +123,8 @@ const SCEN = [
 ];
 // Diagnosis C: writes that are not enhancer rendition writes (native header image, a late native
 // image, an enhancer-UI image), made after production mounted.
+// Second live run: a site script rewriting every card's class after enhancement (no token change).
+const SITE_CLASS_TOUCH = (w) => { for (const a of w.document.querySelectorAll('article')) a.classList.remove('blacklisted'); };
 const OFF_CARD_WRITES = (w) => {
   const d = w.document;
   d.querySelector('#nav-avatar').setAttribute('src', `${M}/ui/avatar2.png`);
@@ -182,12 +188,26 @@ async function main() {
     const st = statusOf(r.d2.j);
     const d10 = (r.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
     check(`${host} dispose test past the debounce on the corrected production: every D check PASS, no re-enhanced card`,
-      Object.keys(st).length === 11 && Object.values(st).every((x) => x === 'PASS') && d10.reenhancedCards === 0 && d10.afterDisposeSignatureWrites === 0, JSON.stringify([st, d10]));
+      Object.keys(st).length === 11 && Object.values(st).every((x) => x === 'PASS') && d10.afterDispose.galleryInitCalls === 0 && d10.afterDispose.ownersCreated === 0 && d10.afterDispose.actionBarsAdded === 0 && d10.afterDispose.signatureWrites === 0 && d10.staleState.cardsWithEnhancerClass === 0, JSON.stringify([st, d10]));
+    // Second live run shape: site class touch -> revision 2 FAILs D10 on stale class; revision 3 PASSes and reports it as stale state.
+    const REV2 = execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'show', '87362a6:tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    const r2t = await runScript({ url: `https://${host}/posts`, text: REV2, nativeActions: SITE_CLASS_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const r2s = statusOf(r2t.d2.j); const r2d = (r2t.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
+    check(`regression D10 ${host}: revision-2 package reproduces the second live shape (D10 FAIL only; 0 signature and card-media writes; reenhancedCards > 0)`,
+      r2s.D10 === 'FAIL' && Object.entries(r2s).filter(([k]) => k !== 'D10').every(([, v]) => v === 'PASS') && r2d.afterDisposeSignatureWrites === 0 && r2d.afterDisposeCardMediaWrites === 0 && r2d.reenhancedCards > 0, JSON.stringify([r2s, r2d]));
+    const r3t = await runScript({ url: `https://${host}/posts`, nativeActions: SITE_CLASS_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    const r3s = statusOf(r3t.d2.j); const r3d = (r3t.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
+    check(`${host} revision 3 with a site class touch: every D check PASS; stale enhancer class reported, all on site-touched cards; zero re-enhancement indicators`,
+      Object.values(r3s).every((x) => x === 'PASS') && r3d.staleState.cardsWithEnhancerClass > 0 && r3d.staleState.ofWhichSiteTouchedClass === r3d.staleState.cardsWithEnhancerClass
+      && r3d.staleState.classMutationCategories.UNCHANGED_REWRITE > 0 && r3d.afterDispose.galleryInitCalls === 0 && r3d.afterDispose.ownersCreated === 0 && r3d.afterDispose.actionBarsAdded === 0, JSON.stringify([r3s, r3d]));
+    check(`${host} revision 3 site class touch: no leak`, leaks(r3t.d1.t + r3t.d2.t).length === 0);
     // Fault: production with the barrier removed (the a0f3041 behavior) must fail D10 with the same attribution as live.
     const fb = await runScript({ url: `https://${host}/posts`, text: BARRIER_REMOVED(derived), steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     const fs2 = statusOf(fb.d2.j);
-    check(`fault ${host} disposed-container barrier removed: caught by D10 (+ D02/D05/D06/D07), D01 still PASS`,
-      fs2.D10 === 'FAIL' && ['D02', 'D05', 'D06', 'D07'].every((k) => fs2[k] === 'FAIL') && fs2.D01 === 'PASS', JSON.stringify(fs2));
+    const fbd = (fb.d2.j.checks.find((x) => x.id === 'D10') || {}).detail || {};
+    check(`fault ${host} disposed-container barrier removed: caught by D10 via direct indicators (init call, new owners, action bars, signature writes), D01 still PASS`,
+      fs2.D10 === 'FAIL' && ['D02', 'D05', 'D06', 'D07'].every((k) => fs2[k] === 'FAIL') && fs2.D01 === 'PASS'
+      && fbd.afterDispose.galleryInitCalls > 0 && fbd.afterDispose.ownersCreated > 0 && fbd.afterDispose.actionBarsAdded > 0 && fbd.afterDispose.signatureWrites > 0, JSON.stringify([fs2, fbd]));
     check(`${host} dispose test: no leak`, leaks(r.d1.t + r.d2.t).length === 0);
     // Immediately after dispose (before the debounce) everything is restored: the owner restoration itself is correct.
     const q = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
@@ -232,9 +252,16 @@ async function main() {
     const l = await runScript({ url: 'https://e621.net/posts', text: lateD01, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     check('fault D01 judged after re-enhancement: reproduces the live D01 FAIL', lateD01 !== derived && statusOf(l.d2.j).D01 === 'FAIL');
     // Fault: with D10 disabled, re-enhancement (barrier removed) is attributed by no dispose-time check (D01 stays PASS).
-    const noD10 = BARRIER_REMOVED(derived).replace("after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,", 'true,');
+    const noD10 = BARRIER_REMOVED(derived).replace('ac.galleryInit === 0 && ac.ownersCreated === 0 && ac.actionBarsAdded === 0 && signatureAfter === 0,', 'true,');
     const n = await runScript({ url: 'https://e621.net/posts', text: noD10, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
     check('fault D10 disabled: the re-enhancement is then attributed by no dispose-time check (D01 stays PASS)', noD10 !== derived && statusOf(n.d2.j).D10 === 'PASS' && statusOf(n.d2.j).D01 === 'PASS');
+  }
+
+  {
+    // Fault: D10 criterion reverted to the stale-class metric must false-fail on a site class touch.
+    const staleMetric = derived.replace('ac.galleryInit === 0 && ac.ownersCreated === 0 && ac.actionBarsAdded === 0 && signatureAfter === 0,', 'stale.length === 0,');
+    const sm = await runScript({ url: 'https://e926.net/posts', text: staleMetric, nativeActions: SITE_CLASS_TOUCH, steps: ['check', 'd1', 'narrow', 'wait', 'd2'] });
+    check('fault D10 reverted to the stale-class metric: false FAIL on a site class touch (the second live shape)', staleMetric !== derived && statusOf(sm.d2.j).D10 === 'FAIL');
   }
 
   // Fault controls: production mutants inside the derived script.
@@ -265,7 +292,7 @@ async function main() {
 
   const passed = results.filter((x) => x.pass).length;
   const summary = {
-    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 2, rebuilt for the diagnosis-A correction; local verification',
+    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package, revision 3 (direct re-enhancement indicators in D10), built from 2765b9d; local verification',
     diagnosis_a: 'production a0f3041 failed the dispose test (gallery re-enhanced itself after dispose); the corrected production passes it past the debounce, and the barrier-removed mutant fails D10',
     production_commit: COMMIT, production_source_blob: EXPECTED_PRODUCTION_BLOB, production_body_sha256: built.bodySha,
     derived_script: path.basename(OUT), derived_script_sha256: crypto.createHash('sha256').update(derived).digest('hex'),

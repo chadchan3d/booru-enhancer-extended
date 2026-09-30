@@ -1,7 +1,7 @@
 # Ledger
 
 ## Current milestone
-**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. The P stage is implemented (commit `b2b1d9f`). The first live production-conformance run was FAIL/PARTIAL (evidence record §6). **The diagnosis-A correction is implemented** (commit `2765b9d`, §7). **The live rerun of all ten rows on the new artifact is pending.** IB08 is not closed.
+**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. The P stage is implemented (commit `b2b1d9f`). The first live production-conformance run was FAIL/PARTIAL (evidence record §6). The diagnosis-A correction is implemented (commit `2765b9d`, §7). **The second live run on `4ac1e36` is PASS except D10 on both hosts** (§8). D10 was a package measurement defect: production dispose is terminal, and revision 3 measures re-enhancement directly. IB08 is not closed.
 
 IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
@@ -35,7 +35,9 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - **Everything else stays native:** logged-in pages, other routes, non-pattern cards, video/GIF. `media.thumbQuality` stays stored.
   - **Undo:** IB04 dispose. Gallery disposal is terminal for the disposed container: the app-level body observer no longer re-inits it; only an explicit `gallery.init` does, and a genuinely new container still initializes.
   - The B3 release note is in `CHANGELOG.md`.
-- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`. It is at revision 2 (write attribution by region and signature, alias-aware P09, D01 at dispose time, new D10), built from `2765b9d`.
+- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`, built from `2765b9d`.
+  - Revision 2 added write attribution by region and signature, alias-aware P09 and D01 at dispose time.
+  - Revision 3 makes D10 use direct re-enhancement indicators (gallery.init calls, new owners, action bars, signature writes) and reports stale class state separately.
 
 ## Verified
 - IB08 live baseline, operator-relayed, e621 and e926 independently:
@@ -53,7 +55,8 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom;
   - B1 login-state probe 1.1.0 verifier 59/59, 12/12 fault controls, synthetic fixtures; includes a regression reproducing the 1.0.0 live block;
   - P-stage production assertions L1–L9 66/66, 19/19 production fault controls (`tests/host/ib08/rendition-result.json`);
-  - production-conformance package revision 2, rebuilt from `2765b9d`: verifier 77/77, 18 fault controls. The dispose test passes past the debounce on both hosts; the barrier-removed mutant is caught by D10; regressions A/B/C reproduce the first live run;
+  - production-conformance package revision 3, built from `2765b9d`: verifier 84/84, 19 fault controls. Regressions reproduce both live runs' failure shapes; the barrier-removed mutant is caught by D10's direct indicators;
+  - D10 diagnosis `tests/host/ib08/dispose_reenhancement_indicators.cjs` 12/12 on both hosts. A site class touch leaves stale `be-thumb-wrap` with zero init calls, owners, wrapper calls, action bars and rendition writes; the positive control and the barrier-removed fault register on every indicator;
   - lifecycle regression `tests/host/ib08/dispose_lifecycle_regression.cjs` 24/24 on both hosts. Properties 1–8 hold; 8/8 fault controls, including the previous production `a0f3041`, are caught;
   - L1–L9 66/66 (19/19) on `4ac1e36`; IB01–IB06 exit 0.
 - IB08 B1 live, operator-relayed, e621 and e926 independently: `body[data-user-is-anonymous]` is `true` when logged out and `false` when logged in.
@@ -80,8 +83,15 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - **Diagnosis A:** a production lifecycle defect, pre-existing since the import; **corrected in `2765b9d`** (evidence record §7).
   - `gallery.dispose()` removed the owned `data-be-gallery-init` marker, and the unowned app-level `bodyObserver` re-inited the gallery within 400 ms (live residue 67/71 = owned − 2).
   - The fix is a disposed-container barrier in the gallery lifecycle only.
-- **Live rerun required: all ten rows on artifact `4ac1e36`** (e621 S/D/P/O/L, e926 S/D/P/O/L). First-run rows are not carried forward for IB08 closure.
-- IB08 completion record only after that conformance is reviewed.
+- **Second live run (production `4ac1e36`, package revision 2): PASS except D10 on both hosts.**
+  - S, P, O and L PASS on e621 and e926.
+  - D: D01–D09 PASS, residue 0; D10 FAIL only.
+  - `reenhancedCards` 70/75 counted cards still carrying the owned `be-thumb-wrap` class. It is left by the IB04 whole-record native-touch rule after a site class rewrite; it is not a re-init. There were zero post-dispose signature and card-media writes, and a re-init would have written the sample on every pattern card.
+  - Package measurement defect, corrected in revision 3; no production change for D10.
+- **Minimum live rerun:** e621 D and e926 D with package revision 3, on the same production `4ac1e36`.
+- **Separate finding, decision needed:** the stale `be-thumb-wrap` class keeps the **unscoped** `.be-thumb-wrap` CSS rule (`Booru_Enhancer.user.js:4588-4596`: aspect-ratio, overflow, background) on site-touched cards after dispose. This is a non-rendition presentation residue.
+  - Candidates, not implemented: (a) scope the rule under `.be-gallery-grid` (CSS only); (b) token-level class restoration (IB04 semantics, would need G-OWN review).
+- IB08 completion record only after the D rows pass and that decision is made.
 - IB07 host suites pin the IB07 blob, so they now exit 1 on the pin alone. All their assertions and controls pass (L9). The historical results are not edited.
 - **Retained limitations (not blockers):**
   - Live request counting starts at the postamble. Synchronous pre-postamble startup requests are not counted live; the local item 9 T1/T2 suite is the startup evidence.
@@ -91,4 +101,4 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator reinstalls the rebuilt conformance package (built from `2765b9d`) and reruns all ten rows. Review the results, then decide on the IB08 completion record. Do not start IB09.
+The operator installs package revision 3 and reruns e621 D and e926 D, and decides on the presentation-residue finding. Then the IB08 completion record can be considered. Do not start IB09.

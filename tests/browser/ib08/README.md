@@ -215,7 +215,7 @@ Check that each result shows `"version": "1.1.0"`, the right `site` and `declare
 - **P06** fails on unexpected card writes, or on any signature write outside the owned cards. Other off-card writes are reported by region, not counted as enhancer writes.
 - **P09** judges the *selected* rendition (`currentSrc`) and accepts a card whose native file and sample URLs are the same. `settled` is informational: it says whether image loads also completed within 8 seconds.
 - **D01** is judged at dispose time.
-- **D10** fails on any enhancer rendition write, or any re-enhanced card, after dispose.
+- **D10** (revision 3) fails only on real re-enhancement after dispose, measured directly: a call through `gallery.init`, a new owner, an inserted action bar, or an enhancer rendition write. An enhancer class still on a card is stale state and is reported separately in `staleState`, together with whether the site rewrote that card's class after load.
 
 **What the checks prove:**
 - **Check this page** (P00–P11):
@@ -262,6 +262,6 @@ Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, U
 - The saved setting is shared, so set **Sample** again before e926 run S.
 - Do not reuse any e621 result.
 
-**Live rerun required:** all ten rows (e621 and e926, each S, D, P, O and L) on this artifact. Rows from the first live run (production `a0f3041`) are not carried forward. **Replace** the previously installed conformance script with this file; Tampermonkey must show it as the new build. P00 must read `MATCH_EXPECTED_ARTIFACT`.
+**Live rerun required (package revision 3):** only **e621 D** and **e926 D**. The production artifact (`4ac1e36`) is unchanged since the second live run, whose S, P, O and L rows passed on both hosts; revision 3 changes only the dispose test's D10 measurement. **Replace** the previously installed conformance script with this file; Tampermonkey must show it as the new build. P00 must read `MATCH_EXPECTED_ARTIFACT`.
 
 **Return** the ten sanitized results (e621 S, D, P, O, L; e926 S, D, P, O, L). If any result says `sanitationGuard: BLOCKED`, return it as it is. Afterwards, disable the conformance script and re-enable your normal enhancer if you use it.

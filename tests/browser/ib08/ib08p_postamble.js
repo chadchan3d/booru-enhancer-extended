@@ -22,7 +22,15 @@
  *   - P09 accepts the expected rendition when a card's native file and
  *     sample URLs are the same (alias), and reports alias counts;
  *   - D01 judges dispose writes at dispose time; D10 fails on any enhancer
- *     rendition write after dispose (re-enhancement). */
+ *     rendition write after dispose (re-enhancement).
+ *
+ * Revision 3 (after the second live run): D10 measures re-enhancement
+ * directly: calls through BE.modules.gallery.init, new owners
+ * (BE.ownership.create), enhancer action bars inserted, and enhancer
+ * rendition-signature writes, all after dispose. An enhancer class still on a
+ * card (be-thumb-wrap) is stale state, not re-enhancement. It is reported
+ * separately with whether the site touched that card's class attribute
+ * after load (class-mutation categories, counts only). */
 (() => {
   'use strict';
 
@@ -96,6 +104,48 @@
     if (preexisting.has(t)) return 'NATIVE_PREEXISTING';
     return 'LATE_OTHER';
   };
+  // Direct re-enhancement instruments (counts by phase; production looks these properties up at call time).
+  const calls = {};
+  const bump = (k) => { calls[phase] = calls[phase] || { galleryInit: 0, ownersCreated: 0, thumbWrapper: 0, actionBarsAdded: 0 }; calls[phase][k]++; };
+  if (BE?.modules?.gallery && typeof BE.modules.gallery.init === 'function') {
+    const initOrig = BE.modules.gallery.init;
+    BE.modules.gallery.init = function countedInit(...a) { bump('galleryInit'); return initOrig.apply(this, a); };
+  }
+  if (BE?.ownership && typeof BE.ownership.create === 'function') {
+    const createOrig = BE.ownership.create;
+    BE.ownership.create = function countedCreate(...a) { bump('ownersCreated'); return createOrig.apply(this, a); };
+  }
+  for (const ad of BE?.adapters?.registry || []) {
+    const gw = ad.getThumbWrapper;
+    if (typeof gw === 'function') ad.getThumbWrapper = function countedWrapper(...a) { bump('thumbWrapper'); return gw.apply(this, a); };
+  }
+  new MutationObserver((recs) => { for (const r of recs) for (const n of r.addedNodes) if (n.classList && n.classList.contains('be-thumb-actions')) bump('actionBarsAdded'); })
+    .observe(document.documentElement, { subtree: true, childList: true });
+  // Class-attribute history of the snapshot cards (in memory; categories only).
+  const classLog = [];
+  const classObserver = new MutationObserver((recs) => { for (const r of recs) classLog.push(r); });
+  const classAtLoad = new Map();
+  for (const a of document.querySelectorAll('article.thumbnail, article.post-preview')) { classAtLoad.set(a, a.getAttribute('class') || ''); classObserver.observe(a, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
+  function classHistory() {
+    classLog.push(...classObserver.takeRecords());
+    const byCard = new Map();
+    for (const r of classLog) { if (!byCard.has(r.target)) byCard.set(r.target, []); byCard.get(r.target).push(r); }
+    const cats = { ENHANCER_ADD: 0, ENHANCER_REMOVE: 0, UNCHANGED_REWRITE: 0, OTHER_TOKEN_CHANGE: 0 };
+    const nativeTouchedCards = new Set();
+    const toks = (v) => new Set(String(v || '').split(/\s+/).filter(Boolean));
+    for (const [card, rs] of byCard) {
+      rs.forEach((r, i) => {
+        const before = toks(r.oldValue);
+        const after = toks(i + 1 < rs.length ? rs[i + 1].oldValue : card.getAttribute('class'));
+        const added = [...after].filter((t) => !before.has(t)); const removed = [...before].filter((t) => !after.has(t));
+        if (added.length === 1 && added[0] === 'be-thumb-wrap' && !removed.length) cats.ENHANCER_ADD++;
+        else if (removed.length === 1 && removed[0] === 'be-thumb-wrap' && !added.length) cats.ENHANCER_REMOVE++;
+        else if (!added.length && !removed.length) { cats.UNCHANGED_REWRITE++; nativeTouchedCards.add(card); }
+        else { cats.OTHER_TOKEN_CHANGE++; nativeTouchedCards.add(card); }
+      });
+    }
+    return { cats, nativeTouchedCards };
+  }
   const log = []; // { phase, r, region, signature }
   let phase = 'production';
   const keep = (r) => r.type === 'attributes' || (r.type === 'childList'
@@ -309,10 +359,15 @@
       dw.length === expectedDisposeWrites && disposeRun.restoredAtDispose === expectedDisposeWrites,
       { disposeWrites: dw.length, restoredAtDispose: disposeRun.restoredAtDispose, expected: expectedDisposeWrites });
     const after = log.filter((x) => x.phase === 'after');
-    const reenhancedCards = [...native.keys()].filter((a) => a.classList.contains('be-thumb-wrap')).length;
-    check('D10', 'no enhancer rendition write and no re-enhanced card after dispose (dispose is terminal)',
-      after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length === 0 && reenhancedCards === 0,
-      { afterDisposeSignatureWrites: after.filter((x) => x.signature).length, afterDisposeCardMediaWrites: after.filter((x) => x.region === 'CARD_MEDIA' || x.region === 'LATE_CARD_MEDIA').length, reenhancedCards });
+    const ac = calls.after || { galleryInit: 0, ownersCreated: 0, thumbWrapper: 0, actionBarsAdded: 0 };
+    const signatureAfter = after.filter((x) => x.signature && x.region !== 'ENHANCER_UI').length;
+    const { cats, nativeTouchedCards } = classHistory();
+    const stale = [...native.keys()].filter((a) => a.classList.contains('be-thumb-wrap'));
+    check('D10', 'no re-enhancement after dispose: no gallery.init call, no new owner, no action bar inserted, no enhancer rendition write (dispose is terminal)',
+      ac.galleryInit === 0 && ac.ownersCreated === 0 && ac.actionBarsAdded === 0 && signatureAfter === 0,
+      { afterDispose: { galleryInitCalls: ac.galleryInit, ownersCreated: ac.ownersCreated, actionBarsAdded: ac.actionBarsAdded, thumbWrapperCalls: ac.thumbWrapper, signatureWrites: signatureAfter,
+        cardMediaWrites: after.filter((x) => x.region === 'CARD_MEDIA' || x.region === 'LATE_CARD_MEDIA').length },
+      staleState: { cardsWithEnhancerClass: stale.length, ofWhichSiteTouchedClass: stale.filter((a) => nativeTouchedCards.has(a)).length, classMutationCategories: cats } });
     check('D02', 'control card restored and shows the native WebP preview', k1.sources[0].getAttribute('srcset') === c1.sourceAttrs[0][1] && relation(k1.img, c1) === 'NATIVE_PREVIEW_WEBP');
     check('D03', 'native edit kept through dispose', k2.sources[0] === c2.sources[0] && c2.sources[0].getAttribute('srcset') === c2.sourceAttrs[1][1] && relation(k2.img, c2) === 'NATIVE_PREVIEW');
     check('D04', 'moved source: native order kept, WebP srcset restored', k3.sources[0] === c3.sources[1] && k3.sources[1] === c3.sources[0] && c3.sources[0].getAttribute('srcset') === c3.sourceAttrs[0][1] && relation(k3.img, c3) === 'NATIVE_PREVIEW');

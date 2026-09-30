@@ -2,7 +2,7 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). **The diagnosis-A correction is implemented (§7). Live conformance on the new artifact is pending (all ten rows).** This file is not a completion record.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3); the diagnosis in §6 does not contradict it. B1 is resolved and B2 decided. The P stage is implemented (§5). The first live production-conformance run was FAIL/PARTIAL (§6). The diagnosis-A correction is implemented (§7). **The second live run on `4ac1e36` is PASS except D10 on both hosts (§8); D10 is a package measurement defect, and production is terminal.** Only e621 D and e926 D need rerunning with package revision 3. This file is not a completion record.
 
 **Production:** `Booru_Enhancer.user.js` blob `4ac1e36d01a81473d409cb6ff40a70fb9a77fc34` (commit `2765b9d`): the IB08 P-stage rendition contract (introduced in `b2b1d9f`, blob `a0f3041`) plus the diagnosis-A terminal-disposal correction. Before IB08: blob `32d0051` (commit `c551bb0`).
 
@@ -563,8 +563,76 @@ A genuinely new container is a different element, so it is not in the set and st
 - the barrier-removed production mutant is caught by D10, plus D02/D05/D06/D07;
 - regressions A/B/C reproduce the first live run with the revision-1 package.
 
+## 8. Second live production-conformance run (production `4ac1e36`, package revision 2) — PASS except D10 on both hosts
+
+**Evidence form:** operator-relayed summary. P00 was `MATCH_EXPECTED_ARTIFACT` on every row.
+
+| Run | e621.net | e926.net |
+| --- | --- | --- |
+| S, P, O, L | PASS | PASS (O alias-aware; L with zero rendition writes) |
+| D | D01 PASS (65 of 65 restored at dispose); D02–D09 PASS; residue 0. **D10 FAIL:** `afterDisposeSignatureWrites 0`, `afterDisposeCardMediaWrites 0`, `reenhancedCards 70` | D01 PASS (70 of 70); D02–D09 PASS; residue 0. **D10 FAIL:** 0, 0, `reenhancedCards 75` |
+
+### D10 diagnosis: **package measurement defect.** Production dispose is terminal; no production change is needed for D10
+
+**1. What increments `reenhancedCards`.** In revision 2, `reenhancedCards` counted snapshot cards whose `class` still contains `be-thumb-wrap` at Step 2 (`ib08p_postamble.js`, revision 2).
+
+**2. Is that proof of re-init?** No. `be-thumb-wrap` stays whenever dispose does not remove it:
+- The IB04 class record marks itself `nativeTouched` on **any** later mutation of the card's `class` attribute (`Booru_Enhancer.user.js:553-575`).
+- `dispose` then skips the whole record (`:647-650`).
+- A site script rewriting a card's classes after enhancement is enough, even when no token actually changes (for example, `classList.remove` of an absent token still rewrites the attribute).
+
+**3. What it actually detects:** state that survived the original enhancement: the owned class token left in place under the IB04 native-touch rule. It is not a new owner, a new action bar or a new rendition. Action bars are removed at dispose (`additions`), and the in-memory provenance map is not a DOM class.
+
+**4. Does the barrier hold live?** Yes, on the recorded facts. A re-init after dispose runs `enhanceThumbnail` on every card, and with Sample saved that writes the sample URL on every pattern card (`applySiteThumbMedia`). It would therefore show as signature writes, card-media writes and residue, and all three were **0** on both hosts. D02–D07 also passed, with native `currentSrc` and native changes preserved.
+
+**5. Caller of a re-init:** none. The facts exclude one, and the local instruments below confirm it.
+
+**6. Correction (package revision 3):** D10 now fails only on direct evidence of re-enhancement after dispose:
+- a call through `BE.modules.gallery.init`, which the app-level body observer and startup use;
+- a new owner (`BE.ownership.create`, used for every card owner);
+- an inserted `.be-thumb-actions`;
+- an enhancer rendition-signature write.
+
+It also reports `thumbWrapperCalls`, which is `enhanceThumbnail`'s first step. The stale class is reported separately (`staleState`), with counts of cards whose class the site rewrote after load (class-mutation categories, counts only). The invariant is not weakened: every real re-enhancement path trips at least one indicator.
+
+**Local proof, production `4ac1e36`, both hosts:**
+
+**`tests/host/ib08/dispose_reenhancement_indicators.cjs`: 12/12.** Instruments are installed before production runs.
+
+| Case | Stale-class cards | Init calls, owners, wrapper calls, action bars, rendition writes |
+| --- | --- | --- |
+| Site class touch, then dispose (the live shape) | every card | all 0 |
+| No site touch | 0 (class restored) | all 0 |
+| Explicit init after dispose (positive control) | — | all register |
+| Barrier removed (fault control) | — | all register, plus sample residue |
+
+**Package verifier: 84/84, 19 fault controls:**
+- The revision-2 package reproduces the second live shape: D10 FAIL only, with zero writes and `reenhancedCards > 0`.
+- Revision 3 passes every D check on the same scenario and reports the stale class, all of it on site-touched cards, with zero re-enhancement indicators.
+- The barrier-removed production mutant is caught by D10 through all four direct indicators.
+- D10 reverted to the stale-class metric is a fault control that false-fails the site-touch scenario.
+
+### Separate finding: non-rendition presentation residue (not D10; decision needed)
+
+The stale `be-thumb-wrap` class is harmless to renditions, but it is **not inert**:
+- the stylesheet stays injected after gallery dispose;
+- it contains an **unscoped** rule `.be-thumb-wrap { position: relative; overflow: hidden; aspect-ratio: 3/4; background …; border-radius … }` (`Booru_Enhancer.user.js:4588-4596`).
+
+On cards whose class the site rewrote, dispose therefore leaves enhancer presentation (box aspect ratio, clipping, background) on native cards. This follows from the IB04 whole-record native-touch rule, which the G-OWN evidence accepted. It is outside the rendition-attribute contract, and it is not proven live: revision 3 reports the counts.
+
+**Candidate corrections (not implemented; neither changes renditions):**
+- (a) scope the rule under `.be-gallery-grid` (CSS only). This removes the effect wherever the container's gallery class is restored.
+- (b) restore owned class **tokens** even when the class attribute was natively touched. This is an IB04 ownership-semantics change, and would need G-OWN review.
+
+Whether this blocks IB08 closure is an operator decision.
+
+**Minimum live rerun:** **e621 D and e926 D** with package revision 3, on the same production `4ac1e36`.
+- Production is unchanged since the second run, so the second run's S, P, O and L rows stand on the same exact artifact.
+- Revision 3's only behavioral change is the dispose test's D10 measurement, plus load-time counters that observe without changing production behavior.
+
 ## Open for G-RENDITION / IB08
 
-- **Live production conformance on artifact `4ac1e36`** (commit `2765b9d`): **all ten rows**, e621 and e926 independently, each S, D, P, O and L. First-run rows are not carried forward.
-- IB08 completion record only after that conformance is reviewed.
+- **Live rerun:** e621 D and e926 D with package revision 3, on production `4ac1e36` (commit `2765b9d`).
+- **Decision:** is the non-rendition presentation residue (stale `be-thumb-wrap` plus the unscoped CSS rule) an IB08 closure condition, or recorded as a known IB04-policy limitation?
+- IB08 completion record only after the D rows pass and that decision is made.
 - Danbooru rows: EXCLUDED(scope).

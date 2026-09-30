@@ -1,0 +1,100 @@
+{
+  "checkpoint": "IB08",
+  "diagnosis": "second live run D10 (stale enhancer class vs re-enhancement)",
+  "production_blob": "4ac1e36d01a81473d409cb6ff40a70fb9a77fc34",
+  "fixtures": "synthetic",
+  "observations": {
+    "e621.net native class touch": {
+      "enhancedBefore": 6,
+      "initCalls": 0,
+      "ownersCreated": 0,
+      "wrapperCalls": 0,
+      "actionBarsAdded": 0,
+      "renditionWrites": 0,
+      "staleClassCards": 6,
+      "sampleResidue": 0,
+      "liveActionBars": 0
+    },
+    "e621.net no native touch": {
+      "enhancedBefore": 6,
+      "initCalls": 0,
+      "ownersCreated": 0,
+      "wrapperCalls": 0,
+      "actionBarsAdded": 0,
+      "renditionWrites": 0,
+      "staleClassCards": 0,
+      "sampleResidue": 0,
+      "liveActionBars": 0
+    },
+    "e621.net explicit init (positive control)": {
+      "enhancedBefore": 6,
+      "initCalls": 1,
+      "ownersCreated": 13,
+      "wrapperCalls": 6,
+      "actionBarsAdded": 6,
+      "renditionWrites": 6,
+      "staleClassCards": 6,
+      "sampleResidue": 6,
+      "liveActionBars": 6
+    },
+    "e621.net barrier removed (fault control)": {
+      "enhancedBefore": 6,
+      "initCalls": 1,
+      "ownersCreated": 13,
+      "wrapperCalls": 12,
+      "actionBarsAdded": 6,
+      "renditionWrites": 6,
+      "staleClassCards": 6,
+      "sampleResidue": 6,
+      "liveActionBars": 6
+    },
+    "e926.net native class touch": {
+      "enhancedBefore": 6,
+      "initCalls": 0,
+      "ownersCreated": 0,
+      "wrapperCalls": 0,
+      "actionBarsAdded": 0,
+      "renditionWrites": 0,
+      "staleClassCards": 6,
+      "sampleResidue": 0,
+      "liveActionBars": 0
+    },
+    "e926.net no native touch": {
+      "enhancedBefore": 6,
+      "initCalls": 0,
+      "ownersCreated": 0,
+      "wrapperCalls": 0,
+      "actionBarsAdded": 0,
+      "renditionWrites": 0,
+      "staleClassCards": 0,
+      "sampleResidue": 0,
+      "liveActionBars": 0
+    },
+    "e926.net explicit init (positive control)": {
+      "enhancedBefore": 6,
+      "initCalls": 1,
+      "ownersCreated": 13,
+      "wrapperCalls": 6,
+      "actionBarsAdded": 6,
+      "renditionWrites": 6,
+      "staleClassCards": 6,
+      "sampleResidue": 6,
+      "liveActionBars": 6
+    },
+    "e926.net barrier removed (fault control)": {
+      "enhancedBefore": 6,
+      "initCalls": 1,
+      "ownersCreated": 13,
+      "wrapperCalls": 12,
+      "actionBarsAdded": 6,
+      "renditionWrites": 6,
+      "staleClassCards": 6,
+      "sampleResidue": 6,
+      "liveActionBars": 6
+    }
+  },
+  "checks": 12,
+  "passed": 12,
+  "failed": 0,
+  "failures": []
+}
