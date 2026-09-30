@@ -32,7 +32,7 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
 ## Verified
 - **IB09 held-out live sessions** (operator-run; normal Chrome; same executed body; observer 1.1–1.3). Nothing before dwell, no downgrade and no stale install in every relayed session:
-  - e621 A (1.2.0 rerun, preferred): Preview; 46 dwells, 46/46 once; start 200/200/220 ms; SAMPLE 27 + alias 9, pure FILE 0. The relayed tally of 36 is below 46 and is recorded as relayed;
+  - e621 A, 1.2 rerun (preferred): Preview; 41 dwells, 36/36 eligible still upgraded once, at 200/200/210 ms; SAMPLE 27 + alias 9, pure FILE 0; 0 displayed, 36 left before displayable. The earlier 1.1 run (46/46; SAMPLE 38, alias 5, and 3 FILE diagnosed as non-still noise) is recorded separately;
   - **e621 B: Preview / THROTTLED** (Slow 4G, Disable cache): 80 generations, 34/34 eligible started once, at 200–220 ms (median 200); 32 SAMPLE + 2 alias, 0 pure FILE; 6/34 displayable before leave; displayable-after-dwell 0–1490 ms; cost 29 SIZE_UNAVAILABLE + 5 NO_ENTRY;
   - e621 C (1.1.0): Sample; 80 generations, 0 upgrades, 0 downgrade, 0 stale;
   - e621 D (1.2.0): Original; 80 generations, 0 still upgrades, 0 downgrade, 0 stale;
