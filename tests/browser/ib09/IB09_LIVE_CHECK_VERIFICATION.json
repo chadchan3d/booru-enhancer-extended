@@ -1,0 +1,55 @@
+{
+  "checkpoint": "IB09",
+  "stage": "E-stage held-out live check package (200 ms candidate), local qualification",
+  "production_commit": "91fa86d",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
+  "executed_body_sha256": "b5362552d2b95ca1b2f815cdbbccecae99e384568ce2598a543bbdf12e6f64ae",
+  "derived_script": "IB09_Dwell_Live_Check.user.js",
+  "derived_script_sha256": "a1ae81118543fe91a8e46c441e9e56d8c479ed1950ea0231771013be7e1765ef",
+  "checks": 37,
+  "passed": 37,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault package not pinned (body altered without re-pinning): caught",
+      "pass": true
+    },
+    {
+      "name": "fault upgrade before 200 ms (dwell 150): caught",
+      "pass": true
+    },
+    {
+      "name": "fault SAMPLE -> SAMPLE: caught",
+      "pass": true
+    },
+    {
+      "name": "fault FILE -> SAMPLE: caught",
+      "pass": true
+    },
+    {
+      "name": "fault stale install after leave (hide invalidates nothing): caught",
+      "pass": true
+    },
+    {
+      "name": "fault old-generation work after re-entry: caught",
+      "pass": true
+    },
+    {
+      "name": "fault timing attributed from Resource Timing instead of the hooks (cache/no-entry): caught",
+      "pass": true
+    },
+    {
+      "name": "fault raw URL leakage: caught",
+      "pass": true
+    },
+    {
+      "name": "fault ID leakage: caught",
+      "pass": true
+    },
+    {
+      "name": "fault unbounded sampling: caught",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

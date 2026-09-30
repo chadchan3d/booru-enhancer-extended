@@ -162,4 +162,4 @@ function timeline(s) {
   };
 }
 
-module.exports = { session, timeline, classifySlot, U, card, listing, M };
+module.exports = { session, timeline, classifySlot, installFakeClock, U, card, listing, M };

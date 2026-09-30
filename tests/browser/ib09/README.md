@@ -74,3 +74,55 @@ An Incognito window starts with an empty cache and logged out, so "cold" loads r
 **Bandwidth:** each run downloads up to 12 sample images and 4 full original files, typically a few MB to tens of MB.
 
 **Return:** the two sanitized JSON results. If a result says `sanitationGuard: BLOCKED`, `error` or `INSUFFICIENT`, return it as it is.
+
+---
+
+# IB09 dwell live check (200 ms candidate)
+
+**IB09 G-HOVER E-stage evidence only.** `IB09_Dwell_Live_Check.user.js` is production commit `91fa86d` (blob `bbaf9ac`) with the locally qualified 200 ms dwell prototype and observe-only hooks, followed by an observer.
+
+It records **your own normal hovering**; it generates no events. It reports sanitized per-session aggregates:
+- whether any new hover media starts before 200 ms;
+- whether each PREVIEW card held past 200 ms starts exactly one SAMPLE upgrade;
+- whether SAMPLE and FILE cards stay untouched, and FILE never downgrades;
+- whether quick passes start nothing;
+- whether stale results can install;
+- how long after dwell the upgrade becomes displayable.
+
+No URLs or IDs are reported. Production itself is unchanged. The design is in `docs/implementation/IB09_LIVE_CHECK.md`.
+
+Local verification: `node tests/browser/ib09/build_ib09_live_package.cjs --check` and `node tests/browser/ib09/verify_ib09_live_package.cjs`.
+
+## Operator steps (normal Chrome; Incognito is not needed)
+
+**Setup (once):**
+1. In Tampermonkey, **disable** the normal Booru Enhancer and every other IB08/IB09 script, including the V2 probe.
+2. Install `tests/browser/ib09/IB09_Dwell_Live_Check.user.js`: Create a new script → paste the whole file → Save → enable.
+
+**Changing quality:** Tampermonkey icon → **Booru Enhancer: Settings** (listed under this script) → **Grid thumbnail quality**. Close the panel and **reload** the page.
+
+**How to hover in a session (about 1–2 minutes):**
+- sweep the pointer quickly across a row of thumbnails a few times;
+- rest on about 10 different thumbnails for a second or more each;
+- move straight from one thumbnail to its neighbour;
+- leave a thumbnail and come back to it.
+
+Do not click thumbnails. After a resting hover where the enlarged image sharpens, you may use one of **IB09L: Mark last upgrade — useful / noticeable but late / too late to matter**.
+
+**Ending a session:** Tampermonkey → **IB09L: Show results (ends the session)**. Copy the result (it is already selected) and label it.
+
+Run these on **e621** (`https://e621.net/posts`, logged out), then the same on **e926** (`https://e926.net/posts`, logged out):
+
+| Session | Setting | Before starting | Menu |
+| --- | --- | --- | --- |
+| A | Preview | DevTools closed; reload | **IB09L: Start session — ordinary network** |
+| B (e621 required, e926 optional) | Preview | Press **F12** → **Network** tab → tick **Disable cache** → throttling dropdown (it shows "No throttling") → **Slow 4G**. **Keep DevTools open for the whole session**, because throttling and Disable cache only apply while it is open. Reload the page | **IB09L: Start session — throttled network** |
+| C | Sample | DevTools closed (untick Disable cache and set **No throttling** first); reload | ordinary |
+| D | Original | DevTools closed; reload | ordinary |
+
+**Check each result for:**
+- `"production_body_identity": "MATCH_EXPECTED_ARTIFACT"`;
+- the right `site`;
+- the session's `condition` and `quality`.
+
+**Return** the labelled results: e621 A, B, C, D and e926 A, C, D, plus e926 B if run. Return any `sanitationGuard: BLOCKED` result as it is. Afterwards, disable this script.

@@ -7,7 +7,8 @@ E stage so far:
 - local baseline (`IB09_HOVER_BASELINE.md`);
 - V2 live cost pilot, accepted with a regular-Chrome cache limitation (`IB09_DWELL_PROTOTYPE.md` §1);
 - frozen decisions (§2): V3 accepted; zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only);
-- isolated 200 ms dwell prototype, locally qualified (84/84).
+- isolated 200 ms dwell prototype, locally qualified (84/84);
+- held-out live check package prepared and qualified (`IB09_LIVE_CHECK.md`, 37/37); the live sessions are pending.
 
 Production is unchanged; 200 ms is an E-stage candidate, not a production constant.
 
@@ -35,6 +36,10 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - 7 fault and negative controls are caught.
 - **IB09 V2 live** (operator-relayed, e621 and e926 separately, regular Chrome profile): PREVIEW, SAMPLE and FILE reuse 4/4 `NO_ENTRY`, 0 ms on both hosts. The abort experiment is inconclusive.
 - **IB09 dwell prototype** (`tests/host/ib09/dwell_prototype.cjs`, a test-time patch; assertions 84/84). The boundary sweep (0/40/100/199/200/201/250) gives no upgrade under 200 and one at 200. Metadata runs only after dwell. SAMPLE/FILE get no upgrade. Leave, re-entry, A→B, stale results and viewer takeover are clean. 10/10 fault controls are caught.
+- **IB09 live check package** (`tests/browser/ib09/IB09_Dwell_Live_Check.user.js`). It is production `bbaf9ac` + the 200 ms prototype + 8 observe-only hooks, with its body minus the hooks pinned to the qualified prototype and C00 in the page.
+  - Verifier 37/37, 10/10 fault controls.
+  - Timing comes from the hooks (cache-independent); cost is classified per observation.
+  - Bounded to 80 generations per session.
 - **IB09 V2 pilot probe** (`tests/browser/ib09/IB09_V2_Hover_Cost_Probe.user.js`): verifier 39/39 on a synthetic browser model, 11/11 fault controls.
   - Bounded to 16 cards and 32 image loads per host.
   - Sizes hidden by the browser are never counted as zero; no "free" claim is made.
@@ -57,7 +62,9 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
 ## Unresolved
 - **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 is accepted.
-- **IB09 still needed before a production proposal:** held-out live usefulness and transfer observations of the 200 ms candidate, throttled and unthrottled, with a clean-profile cost baseline. G-HOVER OPEN.
+- **IB09 still needed before a production proposal:** the held-out live sessions (README "Dwell live check"). These are A (preview, ordinary), C (sample) and D (original) on both hosts, and B (preview, Slow 4G with Disable cache) on e621, optionally on e926.
+  - Normal Chrome only (Tampermonkey cannot run in Incognito here). Cold cost is taken only from the B session's Disable-cache run.
+  - G-HOVER OPEN.
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
@@ -70,4 +77,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Next bounded step: a live held-out E-stage check of the 200 ms prototype (see `IB09_DWELL_PROTOTYPE.md` §6). No production change and no G-HOVER PASS before it. Do not start IB10.
+The operator runs the live check sessions and returns the labelled results. No final dwell, production change or G-HOVER PASS before they are reviewed. Do not start IB10.
