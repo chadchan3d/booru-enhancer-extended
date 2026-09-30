@@ -1,0 +1,34 @@
+{
+  "checkpoint": "IB10",
+  "stage": "E-stage V3-C controlled experiment, local qualification (no real browser)",
+  "production_commit": "b9d133c",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
+  "media": {
+    "mp4": {
+      "size": 3623853,
+      "sha256": "9ba765f0a3c0e8035f96de18bf9f364d750ff1e9698d80ffe579494ee308b45e"
+    },
+    "webm": {
+      "size": 3091428,
+      "sha256": "467649067aecd56d4d49ca9885eb87a6df5150af1bae6f565a1dba8b3eeb4a61"
+    }
+  },
+  "checks": 29,
+  "passed": 29,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault altered fixture: the server refuses to start (SHA-256 gate)",
+      "pass": true
+    },
+    {
+      "name": "fault executed body differs from production: identity MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "fault host substitution removed: the e621 path does not run (no hover video) - the shim is load-bearing",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

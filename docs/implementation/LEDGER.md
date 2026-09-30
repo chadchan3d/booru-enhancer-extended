@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`); there is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). The V3-C controlled experiment is prepared and locally qualified (`IB10_V3C.md`); its operator run is pending. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -35,6 +35,7 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 V3-C package** (`tests/browser/ib10/`): 29/29 local qualification (3/3 fault controls). The executed body equals production `22e843c` byte for byte. Fixture SHA-256 values (mp4 `9ba765f0…`, webm `46764906…`) are computed and pinned; operator confirmation is requested.
 - **IB10 E baseline** on `22e843c` (`tests/host/ib10/hover_video_baseline.cjs`): 34/34 on e621 and e926, webm and mp4. 7/7 fault controls, including 2 positive controls (release on leave; dwell for video).
 - **IB09 live production conformance on `b9d133c`:** e621 P1/P2 and e926 P1/P2 all PASS, with the artifact identity matched. In the qualified class every session showed 0 before-dwell media, overlay, fetches and quick-pass work, and 0 downgrades and stale installs. Out-of-scope video and animated generations kept their previous behavior.
 - **Local on `22e843c`:**
@@ -57,8 +58,11 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle, E stage.**
+**Active checkpoint: IB10 — Muted hover-video lifecycle, E stage (V3-C).**
 
-**One bounded next action (not executed):** prepare **V3-C**, the controlled hover-video byte experiment in TC. It is a local Range-capable server that logs request ranges and bytes, plus an e621-shaped `/posts` fixture running production `b9d133c` unchanged. It measures bytes up to 5 s after leave for five runs: leave before readiness; leave after `loadeddata`; five re-entries; A→B; viewer takeover. Each runs with and without Range.
+**One bounded next action (operator):**
+1. Confirm the two fixture SHA-256 values.
+2. Run V3-C: `tests/browser/ib10/README.md`; 54 runs, about 10 minutes; Chrome + Tampermonkey; tab in front; mouse off the page.
+3. Return `ib10-v3c-results.json`.
 
-Test media must be supplied (one webm and one mp4 clip), because no encoder is available here. V3-L (live, observe-only) follows V3-C. No production change before G-VIDEO E evidence.
+Then analyze it (`analyze_ib10_v3c.cjs`) and settle D2/D3 by transport evidence. Do not start V3-L, and make no production change before that.
