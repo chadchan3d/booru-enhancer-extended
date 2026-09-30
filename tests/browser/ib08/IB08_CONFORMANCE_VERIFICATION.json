@@ -1,0 +1,65 @@
+{
+  "checkpoint": "IB08",
+  "evidence_gate": "G-RENDITION",
+  "stage": "P-stage e621/e926 rendition production conformance package; local verification (not yet executed live)",
+  "production_commit": "b2b1d9f",
+  "production_source_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
+  "production_body_sha256": "dac83443e6ab7105810da8d96d90959349d65d3ac40ff2814396153efa37ab45",
+  "derived_script": "IB08_Rendition_Production_Conformance.user.js",
+  "derived_script_sha256": "cd9577fe7c01f147a8d5640cf42fe3977903426b297a1217992b6b44742baccf",
+  "currentSrc_model": "jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src",
+  "checks": 55,
+  "passed": 55,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault production body altered: caught by P00",
+      "pass": true
+    },
+    {
+      "name": "fault JPEG source also written: caught by P06+P07",
+      "pass": true
+    },
+    {
+      "name": "fault img src written: caught by P06+P07",
+      "pass": true
+    },
+    {
+      "name": "fault login gate removed: caught by P05+P06",
+      "pass": true
+    },
+    {
+      "name": "fault login gate removed (e926): caught by P05+P06",
+      "pass": true
+    },
+    {
+      "name": "fault preview writes the JPEG preview: caught by P06+P07",
+      "pass": true
+    },
+    {
+      "name": "fault original mapped to sample: caught by P07+P09",
+      "pass": true
+    },
+    {
+      "name": "fault source node cloned/replaced: caught by P08",
+      "pass": true
+    },
+    {
+      "name": "fault sizes/media pattern check removed: caught by P05+P06",
+      "pass": true
+    },
+    {
+      "name": "fault request from rendition path: caught by P11",
+      "pass": true
+    },
+    {
+      "name": "fault owner bypassed on apply (dispose cannot restore): caught by D01+D02+D07",
+      "pass": true
+    },
+    {
+      "name": "fault postamble leak with guard disabled: caught by leak scan",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,198 @@
+'use strict';
+// Local verification for the IB08 e621/e926 rendition production-conformance
+// build (no live site). Static: the derived script is current, its production
+// body is byte-identical to the committed artifact, metadata changes are
+// limited, and the postamble makes no request and no storage/cookie access.
+// Runtime: the REAL derived userscript (production body + postamble) runs in
+// jsdom on synthetic listings. jsdom has no image selection, so currentSrc is
+// modelled (first supported <source> before the <img> with a srcset, else img
+// src). Every check must PASS on the committed artifact, production mutants
+// must flip a check, and outputs must not leak planted values.
+// Requires `npm install` in tests/host/ib07 (pinned jsdom).
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const { webcrypto } = require('crypto');
+const { TextEncoder } = require('util');
+const { execFileSync } = require('child_process');
+const { build, COMMIT, EXPECTED_PRODUCTION_BLOB, POSTAMBLE_MARKER, OUT } = require('./build_ib08_conformance.cjs');
+const { split, WRAP_OPEN, WRAP_FN_HEAD, WRAP_CLOSE } = require('../ib07/build_production_conformance.cjs');
+const h = require(path.resolve(__dirname, '../../host/ib07/item9_harness.cjs'));
+
+const results = [];
+const check = (name, ok, detail = '') => results.push({ name, pass: !!ok, detail: ok ? '' : String(detail).slice(0, 400) });
+
+// ---- static ------------------------------------------------------------------
+const derived = fs.readFileSync(OUT, 'utf8');
+const built = build();
+check('derived script matches a fresh build from the committed artifact', derived === built.text);
+check('committed production blob is the expected artifact',
+  execFileSync('git', ['-C', path.resolve(__dirname, '../../..'), 'rev-parse', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim() === EXPECTED_PRODUCTION_BLOB);
+check('derived script is LF-only', !derived.includes('\r'));
+try { new Function(derived); check('derived script parses', true); } catch (e) { check('derived script parses', false, e.message); }
+const wrapAt = derived.indexOf(WRAP_OPEN);
+const closeAt = derived.indexOf(WRAP_CLOSE);
+const markerAt = derived.indexOf(POSTAMBLE_MARKER);
+check('production body is byte-identical to the committed artifact inside the wrapper', derived.slice(wrapAt + WRAP_OPEN.length, closeAt) === built.body);
+check('production body appears exactly once; wrapper invoked once before the postamble', derived.split(built.body).length === 2 && derived.split('IB07P_PRODUCTION_BODY();').length === 2 && derived.indexOf('IB07P_PRODUCTION_BODY();') < markerAt);
+const wrapperSource = derived.slice(wrapAt + WRAP_OPEN.length - WRAP_FN_HEAD.length, closeAt + 1);
+check('engine toString of the wrapper reproduces it exactly', Function.prototype.toString.call((0, eval)(`(${wrapperSource})`)) === wrapperSource);
+const meta = split(derived).meta.split('\n');
+const orig = built.originalMeta.split('\n');
+check('metadata adds/removes only name/namespace/match/connect/update lines',
+  meta.filter((l) => !orig.includes(l)).every((l) => /^\/\/ @(name|namespace|match|connect)\s/.test(l)) && orig.filter((l) => !meta.includes(l)).every((l) => /^\/\/ @(name|namespace|match|connect|downloadURL|updateURL)\s/.test(l)));
+check('only e621.net and e926.net matched and connected; no update target',
+  meta.filter((l) => /@match\s/.test(l)).map((l) => l.split(/\s+/).pop()).join() === '*://e621.net/*,*://e926.net/*'
+  && meta.filter((l) => /@connect\s/.test(l)).map((l) => l.split(/\s+/).pop()).join() === 'e621.net,e926.net' && !meta.some((l) => /@(downloadURL|updateURL)/.test(l)));
+const postamble = derived.slice(markerAt);
+check('postamble makes no request, click, navigation, cookie, storage or settings write',
+  !/\bfetch\(|XMLHttpRequest|GM_xmlhttpRequest\(|GM_download\(|GM_setValue|\.click\(|location\.(assign|replace)|document\.cookie|localStorage|sessionStorage|settings\.set\(/.test(postamble));
+
+// ---- fixtures ----------------------------------------------------------------
+const M = 'https://static.example';
+const H = '0123456789abcdef0123456789abcdef';
+const U = (id) => ({ file: `${M}/data/${H}_${id}.png`, sample: `${M}/data/sample/${H}_${id}.jpg`, preview: `${M}/data/preview/${H}_${id}.jpg`, webp: `${M}/data/preview/${H}_${id}.webp` });
+function card(id, kind = 'ok') {
+  const u = U(id);
+  const ext = kind === 'video' ? 'webm' : 'png';
+  const s1 = kind === 'sizes' ? `<source srcset="${u.webp}" type="image/webp" sizes="100px">` : `<source srcset="${u.webp}" type="image/webp">`;
+  return `<article class="thumbnail" data-id="${id}" data-md5="${H}" data-file-ext="${ext}" data-file-url="${u.file}" data-sample-url="${u.sample}"
+    data-preview-url="${u.preview}" data-preview-webp="${u.webp}"><a href="/posts/${id}" class="thm-link"><picture>${s1}<source srcset="${u.preview}" type="image/jpeg"><img src="${u.preview}" alt=""></picture></a></article>`;
+}
+const listing = (anon) => `<!doctype html><html><head></head><body data-user-is-anonymous="${anon}" data-user-level="${anon === 'true' ? '0' : '20'}">
+  <section id="posts-container" class="posts-container">${[...Array.from({ length: 7 }, (_, i) => card(String(9001 + i))), card('9101', 'video'), card('9102', 'sizes')].join('')}</section></body></html>`;
+const RAW = ['9001', '9002', '9101', H, 'static.example', 'http'];
+const leaks = (t) => RAW.filter((r) => t.includes(r));
+
+const FAST = (text) => text.replace('const SETTLE_MS = 2500;', 'const SETTLE_MS = 0;');
+async function runScript({ url = 'https://e621.net/posts', anon = 'true', quality = 'sample', text = derived, steps = ['check'] }) {
+  const menu = {};
+  const c = h.load({ url, html: listing(anon), source: FAST(text), settings: { 'be:setting:media.thumbQuality': JSON.stringify(quality) }, setup: (w) => {
+    if (!w.crypto || !w.crypto.subtle) Object.defineProperty(w, 'crypto', { value: webcrypto, configurable: true });
+    if (!w.TextEncoder) w.TextEncoder = TextEncoder;
+    w.GM_registerMenuCommand = (name, fn) => { menu[name] = fn; return 0; };
+    w.innerWidth = 1600; w.innerHeight = 1000;
+    w.Element.prototype.getBoundingClientRect = function rect() { return { top: 10, bottom: 200, left: 0, right: 200, width: 200, height: 190 }; };
+    Object.defineProperty(w.HTMLImageElement.prototype, 'complete', { configurable: true, get: () => true });
+    Object.defineProperty(w.HTMLImageElement.prototype, 'currentSrc', { configurable: true, get() {
+      const p = this.parentElement;
+      if (p && p.localName === 'picture') for (const ch of p.children) { if (ch === this) break; if (ch.localName === 'source' && ch.getAttribute('srcset')) return new URL(ch.getAttribute('srcset').trim().split(/\s+/)[0], w.location.href).href; }
+      return this.getAttribute('src') ? new URL(this.getAttribute('src'), w.location.href).href : '';
+    } });
+  } });
+  await h.sleep(250);
+  const out = {};
+  const read = () => { const t = c.window.document.querySelector('#ib08p-result textarea')?.value || ''; try { return { t, j: JSON.parse(t) }; } catch { return { t, j: null }; } };
+  for (const step of steps) {
+    if (step === 'narrow') { c.window.innerWidth = 900; continue; }
+    const name = { check: 'IB08P: Check this page (current quality)', d1: 'IB08P: Dispose test step 1 (wide window)', d2: 'IB08P: Dispose test step 2 (after narrowing)' }[step];
+    await menu[name]();
+    out[step] = read();
+  }
+  out.requests = c.requests.length;
+  c.window.close();
+  return out;
+}
+const statusOf = (j) => Object.fromEntries((j?.checks || []).map((x) => [x.id, x.status]));
+const SCEN = [
+  ['e621 logged out, sample', { quality: 'sample' }],
+  ['e621 logged out, preview', { quality: 'preview' }],
+  ['e621 logged out, original', { quality: 'original' }],
+  ['e621 logged in, original saved (inert)', { anon: 'false', quality: 'original' }],
+  ['e926 logged out, sample', { url: 'https://e926.net/posts', quality: 'sample' }],
+  ['e926 logged out, preview', { url: 'https://e926.net/posts', quality: 'preview' }],
+  ['e926 logged out, original', { url: 'https://e926.net/posts', quality: 'original' }],
+  ['e926 logged in, sample saved (inert)', { url: 'https://e926.net/posts', anon: 'false', quality: 'sample' }],
+];
+const EXPECT_NA = { 'e621 logged in, original saved (inert)': ['P09'], 'e926 logged in, sample saved (inert)': ['P09'] };
+
+const mut = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`mutant pattern not unique: ${from.slice(0, 50)}`); return text.replace(from, to); };
+const W = "if (!owner.ownAttribute(p.webpSource, 'srcset', target)) return 'REFUSED_NATIVE_TOUCHED';";
+const PM = {
+  bodyAltered: (t) => mut(t, 'function e6RenditionAdmitted() {', 'function e6RenditionAdmitted() { void 0;'),
+  jpegAlsoWritten: (t) => mut(t, W, `${W} owner.ownAttribute(p.webpSource.nextElementSibling, 'srcset', target);`),
+  imgSrcWritten: (t) => mut(t, W, `${W} owner.ownAttribute(img, 'src', target);`),
+  loginGateRemoved: (t) => mut(t, "document.body?.getAttribute('data-user-is-anonymous') === 'true'", 'true'),
+  previewWrites: (t) => mut(t, "const target = quality === 'sample' ? p.sample : quality === 'original' ? p.file : null;", "const target = quality === 'sample' ? p.sample : quality === 'original' ? p.file : wrap.getAttribute('data-preview-url');"),
+  originalAsSample: (t) => mut(t, "const target = quality === 'sample' ? p.sample : quality === 'original' ? p.file : null;", "const target = quality === 'sample' || quality === 'original' ? p.sample : null;"),
+  clonesSource: (t) => mut(t, W, "{ const n = p.webpSource.cloneNode(true); n.setAttribute('srcset', target); p.webpSource.replaceWith(n); }"),
+  ownerBypassed: (t) => mut(t, W, "p.webpSource.setAttribute('srcset', target);"),
+  patternGateOff: (t) => mut(t, "if (s.hasAttribute('sizes') || s.hasAttribute('media')) return null;", ''),
+  request: (t) => mut(t, W, `${W} BE.net.request({ url: location.origin + '/posts.json' }, 1).catch(() => {});`),
+};
+const FAULTS = [
+  ['production body altered', 'e621 logged out, sample', PM.bodyAltered, ['P00']],
+  ['JPEG source also written', 'e621 logged out, sample', PM.jpegAlsoWritten, ['P06', 'P07']],
+  ['img src written', 'e926 logged out, sample', PM.imgSrcWritten, ['P06', 'P07']],
+  ['login gate removed', 'e621 logged in, original saved (inert)', PM.loginGateRemoved, ['P05', 'P06']],
+  ['login gate removed (e926)', 'e926 logged in, sample saved (inert)', PM.loginGateRemoved, ['P05', 'P06']],
+  ['preview writes the JPEG preview', 'e621 logged out, preview', PM.previewWrites, ['P06', 'P07']],
+  ['original mapped to sample', 'e926 logged out, original', PM.originalAsSample, ['P07', 'P09']],
+  ['source node cloned/replaced', 'e621 logged out, sample', PM.clonesSource, ['P08']],
+  ['sizes/media pattern check removed', 'e621 logged out, sample', PM.patternGateOff, ['P05', 'P06']],
+  ['request from rendition path', 'e621 logged out, sample', PM.request, ['P11']],
+];
+
+async function main() {
+  const scen = Object.fromEntries(SCEN);
+  for (const [name, opts] of SCEN) {
+    const r = await runScript(opts);
+    const st = statusOf(r.check.j);
+    const na = EXPECT_NA[name] || [];
+    const bad = Object.entries(st).filter(([id, s]) => (na.includes(id) ? s !== 'NOT_APPLICABLE' : s !== 'PASS'));
+    check(`${name}: every check PASS (${Object.keys(st).length} checks)`, Object.keys(st).length === 12 && bad.length === 0, JSON.stringify(bad) + ' ' + r.check.t.slice(0, 200));
+    check(`${name}: site identity`, r.check.j && r.check.j.site === new URL(opts.url || 'https://e621.net/posts').hostname);
+    check(`${name}: no leak`, leaks(r.check.t).length === 0, leaks(r.check.t).join(','));
+  }
+  for (const host of ['e621.net', 'e926.net']) {
+    const r = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'narrow', 'd2'] });
+    const st = statusOf(r.d2.j);
+    check(`${host} dispose test: D01–D09 and P00 PASS`, Object.keys(st).length === 10 && Object.values(st).every((s) => s === 'PASS'), JSON.stringify(st) + r.d2.t.slice(0, 200));
+    check(`${host} dispose test: no leak`, leaks(r.d1.t + r.d2.t).length === 0);
+    const r2 = await runScript({ url: `https://${host}/posts`, steps: ['check', 'd1', 'd2'] });
+    check(`${host} dispose test without narrowing: D08 FAIL`, statusOf(r2.d2.j).D08 === 'FAIL');
+    const r3 = await runScript({ url: `https://${host}/posts`, anon: 'false', steps: ['d1'] });
+    check(`${host} dispose test refused when logged in (no simulation, no dispose)`, r3.d1.j && /Needs a logged-out/.test(r3.d1.j.error || ''));
+  }
+  // Fault controls: production mutants inside the derived script.
+  for (const [name, scenario, fn, targets] of FAULTS) {
+    let text; try { text = fn(derived); } catch (e) { check(`fault ${name}: mutant applied`, false, e.message); continue; }
+    const r = await runScript({ ...scen[scenario], text });
+    const st = statusOf(r.check.j);
+    const flipped = targets.filter((id) => st[id] === 'FAIL');
+    check(`fault ${name}: caught by ${flipped.join('+') || 'nothing'}`, flipped.length > 0, JSON.stringify(st));
+  }
+  {
+    const r = await runScript({ quality: 'sample', steps: ['check', 'd1', 'narrow', 'd2'], text: PM.ownerBypassed(derived) });
+    const st = statusOf(r.d2.j);
+    check(`fault owner bypassed on apply (dispose cannot restore): caught by ${['D01', 'D02', 'D07'].filter((id) => st[id] === 'FAIL').join('+') || 'nothing'}`, ['D02', 'D07'].some((id) => st[id] === 'FAIL'), JSON.stringify(st));
+  }
+  {
+    const leaky = derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;')
+      .replace("return { probe: 'ib08p-rendition-conformance', site: SITE, command: 'check'", "return { leak: [...native.values()][0].sampleRaw, probe: 'ib08p-rendition-conformance', site: SITE, command: 'check'");
+    const leaky2 = derived.replace("const leaked = [...raw].some((v) => text.includes(v)) || /https?:\\/\\//i.test(text);", 'const leaked = false;')
+      .replace("production_body_identity: identity, counts, checks,", 'production_body_identity: identity, counts, checks, leak: [...native.values()][0].sampleRaw,');
+    const r = await runScript({ text: leaky2 });
+    check('fault postamble leak with guard disabled: caught by leak scan', leaky2 !== derived && leaks(r.check.t).length > 0);
+    const guarded = derived.replace('production_body_identity: identity, counts, checks,', 'production_body_identity: identity, counts, checks, leak: [...native.values()][0].sampleRaw,');
+    const g = await runScript({ text: guarded });
+    check('guard: a leaking postamble build is BLOCKED and leak-free', guarded !== derived && g.check.j && g.check.j.sanitationGuard === 'BLOCKED' && leaks(g.check.t).length === 0);
+    void leaky;
+  }
+
+  const passed = results.filter((x) => x.pass).length;
+  const summary = {
+    checkpoint: 'IB08', evidence_gate: 'G-RENDITION', stage: 'P-stage e621/e926 rendition production conformance package; local verification (not yet executed live)',
+    production_commit: COMMIT, production_source_blob: EXPECTED_PRODUCTION_BLOB, production_body_sha256: built.bodySha,
+    derived_script: path.basename(OUT), derived_script_sha256: crypto.createHash('sha256').update(derived).digest('hex'),
+    currentSrc_model: 'jsdom has no image selection; modelled as the first <source> with a srcset before the <img>, else img src',
+    checks: results.length, passed, failed: results.length - passed,
+    fault_controls: results.filter((x) => x.name.startsWith('fault ')).map((x) => ({ name: x.name, pass: x.pass })),
+    failures: results.filter((x) => !x.pass),
+  };
+  fs.writeFileSync(path.join(__dirname, 'IB08_CONFORMANCE_VERIFICATION.json'), JSON.stringify(summary, null, 2) + '\n');
+  for (const x of results) console.log(`${x.pass ? 'PASS' : 'FAIL'}  ${x.name}${x.pass ? '' : `  -- ${x.detail}`}`);
+  console.log(`\n${passed}/${results.length} checks passed`);
+  process.exitCode = passed === results.length ? 0 : 1;
+}
+main().catch((e) => { console.error(e); process.exitCode = 1; });

@@ -190,3 +190,60 @@ For each of the four observations below:
 | 4 | e926 | logged in to your own account on e926 | `https://e926.net/posts` |
 
 Check that each result shows `"version": "1.1.0"`, the right `site` and `declaredState`, and `route` = `posts-listing`. Log in and out only through the site's normal controls; the probe does nothing to your account. Afterwards, disable the probe and return the four sanitized JSON results. If any result still says `sanitationGuard: BLOCKED`, return it as it is: its `blockDiagnostics` holds only counts and is safe to send.
+
+---
+
+# IB08 P-stage production conformance (e621 / e926 rendition)
+
+**IB08 production conformance only.** `IB08_Rendition_Production_Conformance.user.js` is the committed production `Booru_Enhancer.user.js` (commit `b2b1d9f`, blob `a0f3041`), byte-for-byte, inside the IB07 wrapper, with a read-only postamble (`ib08p_postamble.js`).
+- It runs only on e621.net and e926.net, and has no update URL.
+- Check P00 proves in the browser that the executed body is the committed artifact.
+
+**How it checks production independently.** Production's gallery mounts asynchronously. Before that, the postamble records the native listing in memory, and it records every rendition-attribute write (`src`/`srcset`/`sizes`/`media`/`type`) and every node change inside a `picture`. Production's writes are judged against that native record, not against production's own report.
+
+**Output:** statuses, enums, booleans and counts only, behind a leak guard.
+
+**What the checks prove:**
+- **Check this page** (P00–P11):
+  - production identity, route, and that the recorder was installed before enhancement;
+  - the login marker;
+  - per-card provenance against the contract;
+  - exactly one write (WebP srcset) per owned card and none elsewhere;
+  - the final attributes;
+  - node identity;
+  - the displayed rendition on in-view cards;
+  - the saved quality value;
+  - no enhancer request.
+- **Dispose test** (D01–D09): after simulated native edit, move and replacements, production's own `gallery.dispose()` restores only what it owns, keeps native changes, and leaves no sample residue. The window is narrowed afterwards.
+
+Local verification: `node tests/browser/ib08/build_ib08_conformance.cjs --check` and `node tests/browser/ib08/verify_ib08_conformance.cjs`.
+
+## Operator steps (e621 first, then e926)
+
+Use Chrome with Tampermonkey. DevTools is not needed. Do not send screenshots, URLs, usernames or IDs.
+
+**Setup (once):**
+1. In Tampermonkey, **disable** the normal Booru Enhancer and every IB08 probe or experiment script.
+2. Tampermonkey → Create a new script → replace everything with the full contents of `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js` → Save. Enable it.
+
+**Changing the quality:** use Tampermonkey icon → **Booru Enhancer: Settings** (listed under the conformance script) → **Grid thumbnail quality**. After each change, close the panel and **reload** the page before running a check. The check measures writes from page load, so a reload is required.
+
+**For each run:** copy the result (it is already selected), label it (for example "e621 S"), and close the box. Each result must show `"production_body_identity": "MATCH_EXPECTED_ARTIFACT"` and the right `site`.
+
+**e621 runs**, in a maximized (wide) window, **logged out**, on `https://e621.net/posts` (no scrolling before a check):
+
+| Run | Setting | What to do |
+| --- | --- | --- |
+| **S** | Grid thumbnail quality = **Sample** | Reload, wait for thumbnails, then Tampermonkey → **IB08P: Check this page (current quality)**. |
+| **D** | still **Sample** | Reload. Run **IB08P: Dispose test step 1 (wide window)** and click Close. Make the **same window** clearly narrower (about half the screen) and wait about 5 seconds. Run **IB08P: Dispose test step 2 (after narrowing)**. Maximize the window again afterwards. |
+| **P** | set **Preview** | Reload, then **IB08P: Check this page (current quality)**. |
+| **O** | set **Original** | Reload, then **IB08P: Check this page**. This loads each post's full original image, so allow a little longer. |
+| **L** | leave **Original** | **Log in** to e621 with the site's normal controls. Reload `/posts`, then **IB08P: Check this page**. Expect `loginMarker: "FALSE"` and no rendition writes. Then log out again. |
+
+**If P09 fails with `"settled": false`** (images still loading), wait a few seconds and run **IB08P: Check this page** again without reloading. The check is read-only, and a repeat is valid. Report which attempt you returned.
+
+**e926 runs:** repeat S, D, P, O and L on `https://e926.net/posts`, logged out except for L.
+- The saved setting is shared, so set **Sample** again before e926 run S.
+- Do not reuse any e621 result.
+
+**Return** the ten sanitized results (e621 S, D, P, O, L; e926 S, D, P, O, L). If any result says `sanitationGuard: BLOCKED`, return it as it is. Afterwards, disable the conformance script and re-enable your normal enhancer if you use it.

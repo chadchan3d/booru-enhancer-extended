@@ -1,12 +1,12 @@
 # Ledger
 
 ## Current milestone
-**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). The P-stage design is recorded (§4) and **not implemented**. B2 is decided (`original` kept as a distinct rendition). B1 is OPEN: all four live runs of B1 probe 1.0.0 were blocked by a probe sanitation defect. Probe 1.1.0 repairs it; the four observations must be rerun.
+**IB08 — Reversible native rendition integration: PARTIAL — NOT COMPLETE.** **G-RENDITION E stage: PASS(scope)** (`docs/implementation/IB08_V9R_EVIDENCE.md` §3). B1 is resolved (`body[data-user-is-anonymous]`), and B2 is decided. **The P stage is implemented** (commit `b2b1d9f`) and locally qualified. **Live production conformance is pending.** IB08 is not closed.
 
 IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 
 ## Current state
-- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `32d0051fe73505984066a5b69766b5eafc242bb9` (commit `c551bb0`), unchanged by closeout.
+- Branch `implementation/ib00-baseline`. Production `Booru_Enhancer.user.js` blob `a0f3041c409a656f67fe23dc827b020b5cc399e6` (commit `b2b1d9f`, IB08 P stage). IB07 closed on blob `32d0051` (commit `c551bb0`).
 - IB07 PASS(scope):
   - Rule34: native listing identity (no listing Post) and logged-out image post;
   - e621 and e926 (independently): native listing Posts and logged-out image post;
@@ -29,7 +29,13 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
   - non-pattern cards stay native.
 
   Not covered: other routes, logged-in state, other media, DPRs, runtimes, hosts or patterns, and the `original` rendition. Danbooru row: EXCLUDED(scope). This is not production conformance and not an IB08 PASS.
-- Production is still pre-P (`Booru_Enhancer.user.js:4033-4051`). `applySiteThumbMedia` overwrites every `source` srcset and the `img` srcset/src with one URL. P-stage conflicts C1–C5 are recorded in the evidence record §4.1.
+- **IB08 P-stage contract in production** (evidence record §5):
+  - **Admission:** e621.net/e926.net `/posts` with `body[data-user-is-anonymous="true"]` and the proven two-source WebP/JPEG card pattern.
+  - **Writes:** a single owned write to the WebP source srcset. `sample` uses the card's native sample URL; `original` uses its native file URL; `preview` stays native.
+  - **Everything else stays native:** logged-in pages, other routes, non-pattern cards, video/GIF. `media.thumbQuality` stays stored.
+  - **Undo:** IB04 dispose.
+  - The B3 release note is in `CHANGELOG.md`.
+- Production-conformance package: `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js` (from `b2b1d9f`).
 
 ## Verified
 - IB08 live baseline, operator-relayed, e621 and e926 independently:
@@ -45,7 +51,12 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - IB08 local:
   - baseline probe verifier 56/56, 6/6 fault controls;
   - ownership experiment verifier 65/65, 14/14 fault controls, `currentSrc` modelled in jsdom;
-  - B1 login-state probe 1.1.0 verifier 59/59, 12/12 fault controls, synthetic fixtures; includes a regression reproducing the 1.0.0 live block.
+  - B1 login-state probe 1.1.0 verifier 59/59, 12/12 fault controls, synthetic fixtures; includes a regression reproducing the 1.0.0 live block;
+  - P-stage production assertions L1–L9 66/66, 19/19 production fault controls (`tests/host/ib08/rendition-result.json`);
+  - production-conformance package verifier 55/55, 13/13 fault controls.
+- IB08 B1 live, operator-relayed, e621 and e926 independently: `body[data-user-is-anonymous]` is `true` when logged out and `false` when logged in.
+  - `data-user-level` corroborates.
+  - `data-user-is-member` is rejected, because it differs between hosts when logged in.
 - Live exact-artifact conformance on `c551bb0`: 7/7 PASS, 0 failed checks, C00 matched on each.
   - Rule34 listing 42 cards and image post;
   - e621 listing 72/72 and image post;
@@ -58,15 +69,9 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - No endpoint strategy is reachable: the Gelbooru-family DAPI/HTML helpers and the legacy `normalizeE621` are uncalled, and the native producers contain no network call.
 
 ## Unresolved
-- **P stage not bounded yet:**
-  - **B1 OPEN:** probe 1.0.0 returned `sanitationGuard: BLOCKED` in all four live runs. This is a probe defect, not marker evidence.
-    - Cause: the guard also scanned the probe's own fixed `site` label, which an ordinary page value containing the site's short name matched as a substring.
-    - Repaired in 1.1.0.
-    - All four observations must be rerun: e621 logged out/in, e926 logged out/in.
-    - The acceptance rule is unchanged (evidence record §4.2). If no marker qualifies on each host independently, the result is NO RELIABLE NATIVE MARKER and IB08 stops for a decision.
-  - **B2 decided (option a):** `original` stays a distinct rendition using the card's native file URL, never mapped to `sample`. It needs its own live production-conformance row.
-  - **B3:** a release note is needed for cases that become native with the setting retained.
-- After implementation: the local L1–L9 and live per-host production conformance in evidence record §4.4, then the IB08 completion record.
+- **Live production conformance pending,** per host independently (README, P-stage section): runs S (sample), D (dispose then resize), P (preview), O (original, the B2 row) and L (logged in).
+- IB08 completion record only after that conformance is reviewed.
+- IB07 host suites pin the IB07 blob, so they now exit 1 on the pin alone. All their assertions and controls pass (L9). The historical results are not edited.
 - **Retained limitations (not blockers):**
   - Live request counting starts at the postamble. Synchronous pre-postamble startup requests are not counted live; the local item 9 T1/T2 suite is the startup evidence.
   - The earlier slot-provenance live runs stay POTENTIALLY CONTAMINATED / SUPERSEDED.
@@ -75,4 +80,4 @@ IB07 is complete, PASS(scope) (`docs/implementation/IB07_COMPLETION_RECORD.md`).
 - Parked: raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator reinstalls B1 probe 1.1.0, reruns the four observations (`tests/browser/ib08/README.md`, B1 section) and returns four sanitized JSON results. The results are then evaluated against the B1 acceptance rule. Only if a marker qualifies is the P-stage contract implemented in `applySiteThumbMedia`, followed by production conformance. Production stays unchanged until then. No IB08 completion record before conformance. Do not start IB09.
+The operator runs the IB08 production-conformance package on e621 and e926 (runs S, D, P, O, L each) and returns ten sanitized results. Review them, then decide on the IB08 completion record. Do not start IB09.

@@ -2,9 +2,9 @@
 
 **Checkpoint:** IB08 — Reversible native rendition integration (blueprint §3 IB08; gate row G-RENDITION, §5).
 
-**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3). The P stage is designed (§4) but not implemented. This file is not a completion record.
+**Status:** IB08 PARTIAL — NOT COMPLETE. **G-RENDITION E stage: PASS(scope)** for the exact observed pattern only (§3). B1 is resolved and B2 decided. The P stage is **implemented** (§5) and locally qualified. Live production conformance is pending. This file is not a completion record.
 
-**Production:** `Booru_Enhancer.user.js` blob `32d0051fe73505984066a5b69766b5eafc242bb9` (commit `c551bb0`). No IB08 step has changed it.
+**Production:** `Booru_Enhancer.user.js` blob `a0f3041c409a656f67fe23dc827b020b5cc399e6` (commit `b2b1d9f`), with the IB08 P-stage rendition contract. Before IB08: blob `32d0051` (commit `c551bb0`).
 
 ## 1. Native baseline (V9-R, live)
 
@@ -177,7 +177,7 @@ After the mutation, every card must keep the same picture, source and img nodes 
 
 This is an E-stage gate transition only. It does not claim production conformance, and it does not pass IB08.
 
-## 4. P-stage design against `applySiteThumbMedia` (not implemented)
+## 4. P-stage design against `applySiteThumbMedia` (implemented in §5)
 
 ### 4.1 Current production behavior (`Booru_Enhancer.user.js:4033-4051`, blob `32d0051`)
 
@@ -241,7 +241,7 @@ This is an E-stage gate transition only. It does not claim production conformanc
 
 **B1 — logged-out marker.** No native logged-in/logged-out marker for the e621/e926 listing is recorded (IB07 V1-N records contain none). Without one, activation cannot be limited to the proven logged-out state. This needs a sanitized V1-N observation of a native marker on both hosts, in both states, recorded as presence/absence only. If no reliable marker exists, logged-in activation needs its own evidence or stays native.
 
-*B1 status:* **OPEN.**
+*B1 status:* **RESOLVED** (see *B1 live result* below).
 
 *Probe 1.0.0 (`8b07a65`) — live failure:* all four live runs (e621 and e926, each logged out and logged in) returned `sanitationGuard: BLOCKED`. This is a probe failure, not evidence about markers.
 - **Root cause:** the guard matched page values against the whole output, including the probe's own fixed labels.
@@ -254,7 +254,16 @@ This is an E-stage gate transition only. It does not claim production conformanc
 - **Coarser output:** only login-relevant names are emitted (user/login/session/account/auth/csrf/level/current/signed). All other names are counted only.
 - **Diagnostics:** a blocked result carries value-free `blockDiagnostics` (source, section and mode counts).
 - **Local qualification:** 59/59 with 12/12 fault controls, including a regression reproducing the live failure with the 1.0.0 probe and a fault control that reintroduces the failure class.
-- **Live:** all four observations must be rerun with 1.1.0.
+- **Live:** all four observations were rerun with 1.1.0.
+
+*B1 live result (probe 1.1.0), operator-relayed:*
+- **Qualifying marker:** `body[data-user-is-anonymous]`, observed independently on e621 and on e926:
+  - logged out → `true`;
+  - logged in → `false`.
+  - It meets all three acceptance conditions.
+- **Corroborating, not used for admission:** `data-user-level` (0 logged out, nonzero logged in).
+- **Rejected:** `data-user-is-member`, because its logged-in behavior differs between e621 and e926.
+- **Production admission:** the rendition path requires `body[data-user-is-anonymous]` to be exactly `"true"`. The attribute absent or any other value stays native.
 
 *Acceptance rule, fixed before the live runs:* a marker is reliable only if all of these hold:
 1. it is present and readable, without cookies or requests, in all four observations;
@@ -319,9 +328,98 @@ Logged-out detection must be positive, meaning the logged-out class is required 
 
 Afterwards, a logged-in check shows no rendition writes (per B1).
 
+## 5. P-stage implementation (commit `b2b1d9f`)
+
+**Change:** `Booru_Enhancer.user.js`, blob `32d0051` → `a0f3041`.
+- `applySiteThumbMedia` is rewritten, with the helpers `e6RenditionAdmitted` and `e6RenditionPattern` beside it.
+- `enhanceThumbnail` records the returned provenance.
+- The gallery module exposes it read-only as `getThumbRendition(card)`.
+- `BE.ownership`, the CSS, the `media.thumbQuality` schema and every other call site are unchanged. The enrichment and pagination calls pass no owner and return `NATIVE_OUT_OF_SCOPE`.
+
+**Mutation contract as implemented:**
+
+**Admission** (all must hold, else `NATIVE_OUT_OF_SCOPE`):
+- the `e621` adapter is active;
+- the hostname is exactly `e621.net` or `e926.net`;
+- the path is `/posts`;
+- `body[data-user-is-anonymous]` is exactly `"true"`;
+- a card owner is present.
+
+**Pattern** (else `NATIVE_UNSUPPORTED`): the card is the native `article`, and all of these hold:
+- `data-file-ext` is `jpg`, `jpeg`, `png` or `webp`;
+- `data-preview-url`, `data-preview-webp` and a srcset-safe `data-sample-url` are present;
+- there is exactly one `img` and one `picture`;
+- the picture's children are exactly `source[type=image/webp]`, `source[type=image/jpeg]`, `img`;
+- both source srcsets are single-candidate, with no `sizes` or `media`;
+- the `img` has `src` and no `srcset`/`sizes`;
+- the WebP source equals the native WebP preview and differs from the JPEG source;
+- the sample differs from both sources.
+
+While the card owner holds the WebP srcset, the pattern is judged on the native value it replaced.
+
+**Writes:** only `owner.ownAttribute(webpSource, 'srcset', value)`.
+
+| Quality | Value written | Provenance |
+| --- | --- | --- |
+| `sample` | the card's `data-sample-url` string | `OWNED_SAMPLE` |
+| `original` | the card's `data-file-url` string | `OWNED_ORIGINAL` (no usable file: native, `NATIVE_UNSUPPORTED`) |
+| `preview` | nothing; only a value this owner wrote earlier is set back to the native one | `NATIVE_PREVIEW` |
+
+A write the owner refuses, because the site touched the attribute, reports `REFUSED_NATIVE_TOUCHED`.
+
+**Never:**
+- writing the JPEG source, `img src`/`srcset`/`sizes`, `media` or `type`;
+- node creation, cloning, movement or removal;
+- URL construction (URLs are parsed only for comparison);
+- a request, storage or cookie access;
+- writing `media.thumbQuality`.
+
+**Undo:** the card owner's IB04 `dispose`. The stored native value is released through `owner.cleanup`.
+
+**Local qualification** (`tests/host/ib08/rendition_assertions.cjs`, result `rendition-result.json`): **66/66**. The fixtures are synthetic.
+
+| Test | What it checks |
+| --- | --- |
+| L1 | Per host, independently: one owned WebP write per pattern card; JPEG source and `img` untouched; node identity kept; provenance |
+| L2 | `preview`: zero writes. preview → sample → preview switching restores through the owner; a natively touched attribute is refused |
+| L3 | `original`: file URL written; no usable file, video and GIF stay native |
+| L4 | 13 non-pattern shapes: zero writes, other enhancements kept |
+| L5 | dispose restores the control card, keeps a native edit, restores a moved source in its native order, and leaves replacements untouched; 5 dispose/init cycles |
+| L6 | logged in, marker absent, marker not exactly `true`, a non-`/posts` route and e926 logged in: all native |
+| L7 | an e621 subdomain, Rule34 and Gelbooru: zero writes |
+| L8 | no request or cookie access, and `media.thumbQuality` never written, including while inert |
+| L9 | IB07 suites: all assertions and controls pass (their exit code reflects only their pin on the IB07 blob). IB08 verifiers: 65/65, 56/56, 59/59 |
+
+**Production fault controls, 19/19 caught:**
+- also writes the JPEG source;
+- also writes `img src`;
+- adds `img srcset`;
+- clones the source;
+- writes outside the owner;
+- constructs a URL;
+- preview writes the JPEG preview;
+- original mapped to sample;
+- switch back to preview not restored;
+- login gate removed;
+- login gate on presence only;
+- route gate removed;
+- host gate removed;
+- three pattern-gate removals;
+- a request from the rendition path;
+- saved intent overwritten;
+- owner bypassed so dispose cannot restore.
+
+**Other suites:** IB01, IB02, IB03, IB05 and IB06 exit 0 on the new production.
+
+**Live production-conformance package:** `tests/browser/ib08/IB08_Rendition_Production_Conformance.user.js`.
+- Built from `b2b1d9f` by `build_ib08_conformance.cjs` (IB07 wrapper convention).
+- Production body SHA-256 `dac83443e6ab7105810da8d96d90959349d65d3ac40ff2814396153efa37ab45`.
+- Local verifier `verify_ib08_conformance.cjs`: **55/55**. Every check passes on e621 and e926 for logged-out sample/preview/original and for logged in. The dispose test passes on both hosts.
+- Fault controls, 13/13 caught: 11 production mutants and 2 postamble leak controls.
+- Operator steps are in `tests/browser/ib08/README.md` (P-stage section). The live runs are pending.
+
 ## Open for G-RENDITION / IB08
 
-- B1: four live login-state observations, evaluated against the acceptance rule in §4.2. B2 is decided (option a).
-- P-stage implementation and production conformance, local and live, on each host.
-- IB08 completion record only after production conformance.
+- Live production conformance on e621 and e926, independently: runs S (sample), D (dispose/resize), P (preview), O (original) and L (logged in) per host.
+- IB08 completion record only after that conformance is reviewed.
 - Danbooru rows: EXCLUDED(scope).
