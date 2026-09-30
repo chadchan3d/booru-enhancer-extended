@@ -1,19 +1,19 @@
 # Ledger
 
 ## Current milestone
-**IB09 — Still-image hover dwell and cost: PARTIAL — NOT COMPLETE. G-HOVER OPEN.**
+**IB09 — Still-image hover dwell and cost: PARTIAL — NOT COMPLETE. G-HOVER(e621/e926 qualified still-image class) PASS(scope)** (`IB09_E_CLOSEOUT.md`). E stage closed; P stage not started.
 
-E stage so far:
-- local baseline (`IB09_HOVER_BASELINE.md`);
-- V2 live cost pilot, accepted with a regular-Chrome cache limitation (`IB09_DWELL_PROTOTYPE.md` §1);
-- frozen decisions (§2): zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only). The earlier V3 acceptance is reopened (below);
-- isolated 200 ms dwell prototype, locally qualified (84/84);
-- held-out live check package (`IB09_LIVE_CHECK.md`, observer 1.3, 57/57);
-- live correctness sessions accepted: e621 A, e926 C, e926 D. The 200 ms upgrade gating and no-downgrade are qualified on them;
-- **V3 reopened** (`IB09_V3_REOPEN.md`): e926 D showed 38/80 reuse-initiated fetches (bytes unknown). Operator chose **B, dwell-gated overlay** (local 54/54);
-- **E closeout assessment** (`IB09_E_CLOSEOUT.md`): decisions frozen (B overlay; 200 ms; zero pre-dwell metadata/media; PREVIEW→native SAMPLE only, no downgrade; unsupported → thumbnail/View; video IB10). **G-HOVER held OPEN:** the blueprint item 9 throttled observation was never run.
+Frozen policy:
+- overlay B (dwell-gated);
+- 200 ms dwell;
+- no pre-dwell hover metadata request or media assignment;
+- displayed PREVIEW → native SAMPLE or SAMPLE|FILE alias only, and displayed SAMPLE/FILE → no upgrade (no downgrade);
+- unsupported and cost-inconclusive classes → thumbnail/View;
+- video IB10.
 
-Production is unchanged; 200 ms is an E-stage candidate, not a production constant.
+Scope: e621.net and e926.net independently, logged-out native `/posts`, IB08-qualified still card.
+
+Production is unchanged (`bbaf9ac`); the policy is implemented only in the test prototype.
 
 IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
@@ -30,6 +30,12 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - **Release note:** `CHANGELOG.md`, "Unreleased — e621/e926 grid thumbnail quality".
 
 ## Verified
+- **IB09 held-out live sessions** (operator-run; normal Chrome; same executed body; observer 1.1–1.3). Nothing before dwell, no downgrade and no stale install in every relayed session:
+  - e621 A: Preview / ordinary; 38 SAMPLE + 5 alias, 0 pure FILE; start 200–220 ms;
+  - **e621 B: Preview / THROTTLED** (Slow 4G, Disable cache): 80 generations, 34/34 eligible started once, at 200–220 ms (median 200); 32 SAMPLE + 2 alias, 0 pure FILE; 6/34 displayable before leave; displayable-after-dwell 0–1490 ms; cost 29 SIZE_UNAVAILABLE + 5 NO_ENTRY;
+  - e621 C and D, e926 A: run (figures not relayed);
+  - e926 C: Sample; 80 STILL, 0 upgrades;
+  - e926 D: Original; 0 downgrade. It reopened V3: 38/80 reuse-initiated fetches led to the decision for B.
 - **IB09 hover baseline** (`tests/host/ib09/hover_baseline.cjs`): 32/32 on production `bbaf9ac`, with a reusable fake-clock harness (`hover_harness.cjs`). It covers e621 and e926 × preview/sample/original × S1–S8; the results are identical on both hosts.
   - Zero network requests.
   - Metadata is a cache hit at pointer-enter.
@@ -67,19 +73,12 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - IB01–IB06 suites exit 0 on `bbaf9ac`.
 
 ## Unresolved
-- **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 (the t=0 current-rendition overlay) is reopened.
-- **IB09 live e621 A** (preview, ordinary; package 1.1): **accepted.** Nothing before dwell, and one upgrade per eligible dwell at 200–220 ms.
-  - Package defect: the 3 FILE targets were video posts (IB10 path, after dwell) counted in the still-image statistics. Corrected in observer 1.2.
-  - Still-image targets: 38 SAMPLE + 5 native SAMPLE|FILE alias, 0 pure FILE.
-  - The usefulness timing includes up to 3 video generations and is indicative only. No rerun.
-- **IB09 live e926 C** (sample, ordinary; package 1.2): **accepted.** 80 STILL generations, zero hover media before dwell, no upgrades, no stale install.
-  - `resourceTimingLoadsBeforeDwell` 6 was an observer defect: time-window matching of the card's sample/file with no causal provenance. Under Sample, the grid displays the sample, so grid loads and V3 reuse fetches were counted.
-  - Corrected in observer 1.3 (causal UPGRADE/REUSE/DISPLAY/OTHER attribution; verifier 57/57). No rerun.
-- **IB09 live e926 D** (original, ordinary; package 1.3): **accepted for correctness.** Nothing before dwell, no downgrade, no stale install.
-  - It reopened V3: `renditionReuseFetchesBeforeDwell` 38/80 with zero grid/unattributed loads, so the V3 overlay's reuse of the displayed FILE initiated fetches. Bytes are unknown.
-- **IB09 V3 decided: B.**
-- **IB09 sole E-stage blocker:** e621 B throttled held-out session (Preview; Slow 4G + Disable cache; package 1.3 unchanged). e926 B optional. The operator waived the other per-host correctness rows (e621 C/D, e926 A) by designating e926 D final; the throttled row is a blueprint requirement and is not waived.
-- **After G-HOVER PASS(scope):** the P-stage implementation (200 ms gating, ordering rule, overlay B), then live production conformance. G-HOVER OPEN.
+- **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 (the t=0 current-rendition overlay) is replaced by overlay B.
+- **IB09 P stage still needed:** production implementation of the frozen policy, then live production conformance on both hosts. The live sessions ran overlay A; B's pre-dwell zero is proven locally, and live confirmation comes from P conformance.
+- **IB09 E limitations carried:**
+  - e621 C/D and e926 A were run by the operator, but their figures are not relayed into the record;
+  - e926 B (optional) was not run, so throttled usefulness is observed on e621 only;
+  - transfer sizes are mostly browser-hidden (not counted as zero).
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
@@ -93,4 +92,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-The operator runs the e621 B throttled session (package 1.3, README "Dwell live check") and returns the labelled results. If they fit the frozen policy, G-HOVER → PASS(scope) as recorded in `IB09_E_CLOSEOUT.md` §3, then the IB09 P stage. No production change before that. Do not start IB10.
+IB09 P stage (one checkpoint transaction): implement the frozen hover policy in production within the G-HOVER scope. Then build a production-conformance package for a live run on both hosts. Do not start IB10.
