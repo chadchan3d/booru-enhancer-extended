@@ -10,7 +10,8 @@ E stage so far:
 - isolated 200 ms dwell prototype, locally qualified (84/84);
 - held-out live check package (`IB09_LIVE_CHECK.md`, observer 1.3, 57/57);
 - live correctness sessions accepted: e621 A, e926 C, e926 D. The 200 ms upgrade gating and no-downgrade are qualified on them;
-- **V3 reopened** (`IB09_V3_REOPEN.md`): e926 D showed 38/80 reuse-initiated fetches (bytes unknown). Recommendation: **B, dwell-gated overlay** (zero hover requests before dwell by construction; local 54/54). Awaiting the operator's decision.
+- **V3 reopened** (`IB09_V3_REOPEN.md`): e926 D showed 38/80 reuse-initiated fetches (bytes unknown). Operator chose **B, dwell-gated overlay** (local 54/54);
+- **E closeout assessment** (`IB09_E_CLOSEOUT.md`): decisions frozen (B overlay; 200 ms; zero pre-dwell metadata/media; PREVIEW→native SAMPLE only, no downgrade; unsupported → thumbnail/View; video IB10). **G-HOVER held OPEN:** the blueprint item 9 throttled observation was never run.
 
 Production is unchanged; 200 ms is an E-stage candidate, not a production constant.
 
@@ -76,13 +77,9 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - Corrected in observer 1.3 (causal UPGRADE/REUSE/DISPLAY/OTHER attribution; verifier 57/57). No rerun.
 - **IB09 live e926 D** (original, ordinary; package 1.3): **accepted for correctness.** Nothing before dwell, no downgrade, no stale install.
   - It reopened V3: `renditionReuseFetchesBeforeDwell` 38/80 with zero grid/unattributed loads, so the V3 overlay's reuse of the displayed FILE initiated fetches. Bytes are unknown.
-- **IB09 V3 decision pending:** A (current) / **B (recommended, dwell-gated overlay)** / C (canvas, needs a live check).
-- **IB09 still needed before a production proposal:**
-  - the operator's V3 decision;
-  - then the P-stage implementation of the 200 ms gating, the ordering rule and the chosen overlay design;
-  - then live production conformance.
-
-  The operator designated e926 D as the final required correctness session. G-HOVER OPEN.
+- **IB09 V3 decided: B.**
+- **IB09 sole E-stage blocker:** e621 B throttled held-out session (Preview; Slow 4G + Disable cache; package 1.3 unchanged). e926 B optional. The operator waived the other per-host correctness rows (e621 C/D, e926 A) by designating e926 D final; the throttled row is a blueprint requirement and is not waived.
+- **After G-HOVER PASS(scope):** the P-stage implementation (200 ms gating, ordering rule, overlay B), then live production conformance. G-HOVER OPEN.
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
@@ -96,4 +93,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Await the operator's V3 decision (recommended B, dwell-gated overlay). Then the IB09 P-stage implementation and live production conformance. No production change or G-HOVER PASS before that. Do not start IB10.
+The operator runs the e621 B throttled session (package 1.3, README "Dwell live check") and returns the labelled results. If they fit the frozen policy, G-HOVER → PASS(scope) as recorded in `IB09_E_CLOSEOUT.md` §3, then the IB09 P stage. No production change before that. Do not start IB10.
