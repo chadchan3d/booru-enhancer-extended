@@ -1,0 +1,3733 @@
+{
+  "checkpoint": "IB09",
+  "stage": "E-stage baseline characterization (no production change)",
+  "production_blob": "bbaf9ac63f5c0292018b974f00c7b30d8b478bb5",
+  "fixtures": "synthetic",
+  "clock": "fake (setTimeout/setInterval/requestAnimationFrame); t = ms since first pointer-enter",
+  "scenarios": {
+    "e621.net preview S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 40,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 150,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": 100,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": 80,
+        "gen2CompletedAt": 120,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 120,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 3,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net preview S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": null,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": null,
+        "gen2CompletedAt": null,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net sample S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 40,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 150,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": 100,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": 80,
+        "gen2CompletedAt": 120,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 120,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 3,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e621.net original S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 40,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 150,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": 100,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": 80,
+        "gen2CompletedAt": 120,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 120,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:PREVIEW",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 3,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net preview S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "PREVIEW"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": null,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": null,
+        "gen2CompletedAt": null,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 1,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net sample S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S1": {
+      "meta": {
+        "leaveAt": null
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 300,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 0,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S2": {
+      "meta": {
+        "leaveAt": 40
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 40,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S3": {
+      "meta": {
+        "leaveAt": 150
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 150,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S4": {
+      "meta": {
+        "leaveAt": 50,
+        "reenterAt": 100
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 100,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 100,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 100,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "100:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S5": {
+      "meta": {
+        "leaveAt": 30
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 2,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S6": {
+      "meta": {
+        "leaveAt": 50,
+        "staleCompletedAt": 100,
+        "visibleAfter": false
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S7": {
+      "meta": {
+        "leaveAt": 30,
+        "reenterAt": 30,
+        "gen1CompletedAt": 80,
+        "gen2CompletedAt": 120,
+        "childGenAfterStale": 2,
+        "childGenEnd": 2
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 30,
+            "gen": 1,
+            "active": false,
+            "path": "cancelPendingUpgrade",
+            "attached": false,
+            "inHover": false,
+            "slot": "CANCEL"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 30,
+            "gen": 2,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          },
+          {
+            "t": 30,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          },
+          {
+            "t": 120,
+            "kind": "img",
+            "assignedInGen": 2,
+            "currentGen": 2,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          },
+          {
+            "t": 30,
+            "name": "gallery.getCachedPost",
+            "gen": 2
+          }
+        ],
+        "network": 0,
+        "shows": 2,
+        "hides": 1
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 2,
+        "assignSlotsBeforeLeave": [
+          "showImmediateThumbnail:FILE",
+          "upgradeWhenReady:SAMPLE"
+        ],
+        "upgradeAssignsBeforeLeave": 1,
+        "cancelsAtLeave": 1,
+        "installsTotal": 3,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost",
+          "30:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    },
+    "e926.net original S8": {
+      "meta": {
+        "clickAt": 50,
+        "hoverVisibleAfterClick": true,
+        "viewerOpen": true
+      },
+      "timeline": {
+        "assigns": [
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "showImmediateThumbnail",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          },
+          {
+            "t": 0,
+            "gen": 1,
+            "active": true,
+            "path": "upgradeWhenReady",
+            "attached": false,
+            "inHover": false,
+            "slot": "SAMPLE"
+          },
+          {
+            "t": 50,
+            "gen": 1,
+            "active": true,
+            "path": "replaceMedia",
+            "attached": false,
+            "inHover": false,
+            "slot": "FILE"
+          }
+        ],
+        "installs": [
+          {
+            "t": 0,
+            "kind": "img",
+            "assignedInGen": 1,
+            "currentGen": 1,
+            "hoverActive": true
+          }
+        ],
+        "metadata": [
+          {
+            "t": 0,
+            "name": "gallery.getCachedPost",
+            "gen": 1
+          }
+        ],
+        "network": 0,
+        "shows": 1,
+        "hides": 0
+      },
+      "findings": {
+        "firstAssignT": 0,
+        "assignsBeforeLeave": 0,
+        "assignSlotsBeforeLeave": [],
+        "upgradeAssignsBeforeLeave": 0,
+        "cancelsAtLeave": 0,
+        "installsTotal": 1,
+        "staleInstalls": 0,
+        "metadataCalls": [
+          "0:gallery.getCachedPost"
+        ],
+        "network": 0
+      }
+    }
+  },
+  "checks": 32,
+  "passed": 32,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault immediate request on pointer-enter: caught",
+      "pass": true
+    },
+    {
+      "name": "fault immediate FILE source swap where baseline has none (sample quality): caught",
+      "pass": true
+    },
+    {
+      "name": "fault stale result applies after leave (hide invalidates nothing): caught",
+      "pass": true
+    },
+    {
+      "name": "fault stale gen-1 result applies during gen 2 (load guard removed): caught",
+      "pass": true
+    },
+    {
+      "name": "fault sweep cost moved to t=20 (inside a 40 ms sweep): caught",
+      "pass": true
+    },
+    {
+      "name": "negative control: a dwell-gated build has zero assignments in a 40 ms sweep, and still assigns on sustained hover",
+      "pass": true
+    },
+    {
+      "name": "fault incorrect native-slot classification: caught by the classifier self-test",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
