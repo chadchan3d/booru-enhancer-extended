@@ -3,7 +3,7 @@
 ## Current milestone
 **IB09 — Still-image hover dwell and cost: PARTIAL — NOT COMPLETE. G-HOVER OPEN.**
 
-The E-stage baseline characterization of current production hover is done, locally only (`docs/implementation/IB09_HOVER_BASELINE.md`). No dwell is chosen, and production is unchanged.
+The E-stage baseline characterization of current production hover is done, locally only (`docs/implementation/IB09_HOVER_BASELINE.md`). The V2 live hover-cost pilot probe is prepared and locally qualified (`docs/implementation/IB09_V2_PILOT.md`); the live runs are pending. No dwell is chosen, V3 is undecided, and production is unchanged.
 
 IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 
@@ -27,6 +27,10 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - `preview` and `original` assign a SAMPLE upgrade at t=0, including in a 40 ms sweep.
   - Stale generations cannot apply (three guards).
   - 7 fault and negative controls are caught.
+- **IB09 V2 pilot probe** (`tests/browser/ib09/IB09_V2_Hover_Cost_Probe.user.js`): verifier 39/39 on a synthetic browser model, 11/11 fault controls.
+  - Bounded to 16 cards and 32 image loads per host.
+  - Sizes hidden by the browser are never counted as zero; no "free" claim is made.
+  - Abort is inferred from a follow-up load.
 - **IB08 final live D rows on `bbaf9ac`,** operator-relayed, PASS on e621 and e926:
   - D01 67/67 and 70/70;
   - D10 (no re-init, owners, action bars or writes after dispose);
@@ -49,7 +53,7 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
   - V2: `original` starts a SAMPLE "upgrade" over a displayed FILE (slot-name choice, `Booru_Enhancer.user.js:3065`);
   - V5: a 40 ms sweep incurs V1/V2;
   - V3 (decision needed): the overlay shows the current rendition at t=0.
-  - Real browser cost (bytes, cache, abort effect) is unmeasured, pending the V2 pilot.
+  - Real browser cost (bytes, cache, abort effect) is unmeasured, pending the V2 pilot live runs (e621 and e926, separate Incognito windows).
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
@@ -62,4 +66,4 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 
 ## Next
-Await the next bounded IB09 assignment (recommended: the V2 pilot preparation). No dwell choice and no production change before G-HOVER E evidence.
+The operator runs the V2 pilot probe on e621 and on e926 (`tests/browser/ib09/README.md`) and returns two sanitized results. No dwell choice, V3 decision or production change before that evidence is reviewed. Do not start IB10.

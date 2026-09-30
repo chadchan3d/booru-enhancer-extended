@@ -1,0 +1,56 @@
+{
+  "checkpoint": "IB09",
+  "stage": "E stage: V2 hover-cost pilot probe, local qualification (synthetic browser model; not live evidence)",
+  "probe": "IB09_V2_Hover_Cost_Probe.user.js",
+  "probe_sha256_lf": "238f22bdee56d8e6d4243fa12bef9a643022c42e3168117badbacc9d80fe03f6",
+  "checks": 39,
+  "passed": 39,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault raw URL leakage: caught",
+      "pass": true
+    },
+    {
+      "name": "fault ID leakage: caught",
+      "pass": true
+    },
+    {
+      "name": "fault incorrect slot classification (SAMPLE mapped to the file): caught",
+      "pass": true
+    },
+    {
+      "name": "fault unavailable transfer size treated as zero: caught",
+      "pass": true
+    },
+    {
+      "name": "fault cache hit treated as proof of free future loads: caught",
+      "pass": true
+    },
+    {
+      "name": "fault completed and cancelled loads not distinguished: caught",
+      "pass": true
+    },
+    {
+      "name": "fault e926 relabeled as e621 (host mixing): caught",
+      "pass": true
+    },
+    {
+      "name": "fault unrelated resources mixed in (entries not matched by URL): caught",
+      "pass": true
+    },
+    {
+      "name": "fault unbounded sampling: caught",
+      "pass": true
+    },
+    {
+      "name": "fault page mutation (probe images inserted into cards): caught",
+      "pass": true
+    },
+    {
+      "name": "fault production-enhancer dependence (enhancer check removed): caught",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
