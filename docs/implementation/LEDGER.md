@@ -6,7 +6,7 @@
 E stage so far:
 - local baseline (`IB09_HOVER_BASELINE.md`);
 - V2 live cost pilot, accepted with a regular-Chrome cache limitation (`IB09_DWELL_PROTOTYPE.md` §1);
-- frozen decisions (§2): V3 accepted; zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only);
+- frozen decisions (§2): zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only). The earlier V3 acceptance is reopened (below);
 - isolated 200 ms dwell prototype, locally qualified (84/84);
 - held-out live check package (`IB09_LIVE_CHECK.md`, observer 1.3, 57/57);
 - live correctness sessions accepted: e621 A, e926 C, e926 D. The 200 ms upgrade gating and no-downgrade are qualified on them;
@@ -66,7 +66,7 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - IB01–IB06 suites exit 0 on `bbaf9ac`.
 
 ## Unresolved
-- **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 is accepted.
+- **IB09 invariant conflicts still in production** (not yet corrected): V1 (`preview` SAMPLE fetch at pointer-enter), V2 (`original` SAMPLE over FILE, `Booru_Enhancer.user.js:3065`), V5 (a 40 ms sweep incurs them). The prototype resolves them in test only. V3 (the t=0 current-rendition overlay) is reopened.
 - **IB09 live e621 A** (preview, ordinary; package 1.1): **accepted.** Nothing before dwell, and one upgrade per eligible dwell at 200–220 ms.
   - Package defect: the 3 FILE targets were video posts (IB10 path, after dwell) counted in the still-image statistics. Corrected in observer 1.2.
   - Still-image targets: 38 SAMPLE + 5 native SAMPLE|FILE alias, 0 pure FILE.
@@ -77,9 +77,12 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB09 live e926 D** (original, ordinary; package 1.3): **accepted for correctness.** Nothing before dwell, no downgrade, no stale install.
   - It reopened V3: `renditionReuseFetchesBeforeDwell` 38/80 with zero grid/unattributed loads, so the V3 overlay's reuse of the displayed FILE initiated fetches. Bytes are unknown.
 - **IB09 V3 decision pending:** A (current) / **B (recommended, dwell-gated overlay)** / C (canvas, needs a live check).
-- **IB09 still needed before a production proposal:** the held-out live sessions (README "Dwell live check"). These are A (preview, ordinary), C (sample) and D (original) on both hosts, and B (preview, Slow 4G with Disable cache) on e621, optionally on e926.
-  - Normal Chrome only (Tampermonkey cannot run in Incognito here). Cold cost is taken only from the B session's Disable-cache run.
-  - G-HOVER OPEN.
+- **IB09 still needed before a production proposal:**
+  - the operator's V3 decision;
+  - then the P-stage implementation of the 200 ms gating, the ordering rule and the chosen overlay design;
+  - then live production conformance.
+
+  The operator designated e926 D as the final required correctness session. G-HOVER OPEN.
 - **IB08 retained limitations (non-blocking; completion record):**
   - stale owned class tokens stay on site-touched cards after dispose (IB04 rule), with no presentation effect;
   - a site-rewritten container class would keep `be-gallery-grid` (not observed live; D11 detects it);
