@@ -4026,29 +4026,80 @@
 			return wrap;
 		}
 
-		// Single helper for enhancing one thumbnail — used for both the
-		// initial gallery render and dynamically-inserted (infinite scroll)
-		// thumbnails, per Requirement 17, so the two paths can never drift
-		// out of sync with each other.
-		function applySiteThumbMedia(img, wrap, owner) {
-			if (BE.adapters.active?.id !== 'e621' || !img || !wrap || !owner) return;
-			const previewUrl = wrap.dataset.previewUrl || img.dataset.previewUrl || img.dataset.bePreviewUrl || img.currentSrc || img.src || '';
-			const sampleUrl = wrap.dataset.sampleUrl || img.dataset.sampleUrl || img.dataset.beSampleUrl || '';
-			const originalUrl = wrap.dataset.fileUrl || img.dataset.fileUrl || img.dataset.beOriginalUrl || '';
-			const quality = BE.settings.get('media.thumbQuality') || 'sample';
-			let targetUrl = previewUrl;
-			if (quality === 'sample') targetUrl = sampleUrl || previewUrl;
-			else if (quality === 'original') targetUrl = guessMediaType(originalUrl) === 'video' ? (sampleUrl || previewUrl) : (originalUrl || sampleUrl || previewUrl);
-			if (!targetUrl || guessMediaType(targetUrl) === 'video') return;
+		// IB08 rendition contract (G-RENDITION PASS(scope)). The only admitted
+		// rendition change is one owned srcset on the native WebP <source> of an
+		// e621/e926 /posts listing card that matches the observed two-source
+		// WebP/JPEG pattern, on a logged-out page. The JPEG source, img src/srcset/
+		// sizes, media and type are never written, and no node is created, cloned,
+		// moved or removed. Everything else keeps its native rendition and
+		// media.thumbQuality stays stored but inert. Undo is the card owner's
+		// dispose (IB04 rules). Written values are the card's own native data-*
+		// strings; URLs are parsed only for comparison.
+		const E6_RENDITION_EXT = new Set(['jpg', 'jpeg', 'png', 'webp']);
+		const E6_SINGLE_CANDIDATE = /^[^\s,]+(?:\s+\d+(?:\.\d+)?[wx])?$/;
+		const E6_SRCSET_SAFE = /^[^\s,]+$/;
+		const e6NativeWebpSrcset = new WeakMap(); // WebP source -> native srcset while a card owner holds it
+		const thumbRenditionByWrap = new WeakMap(); // card -> provenance enum (in memory only)
 
-			// Keep the native responsive tree intact. Each source is temporarily
-			// pointed at the selected rendition and is restored through the owner.
-			const picture = img.closest('picture');
-			if (picture) {
-				for (const source of picture.querySelectorAll('source')) owner.ownAttribute(source, 'srcset', targetUrl);
+		function e6RenditionAdmitted() {
+			return BE.adapters.active?.id === 'e621'
+				&& (location.hostname === 'e621.net' || location.hostname === 'e926.net')
+				&& /^\/posts\/?$/.test(location.pathname)
+				&& document.body?.getAttribute('data-user-is-anonymous') === 'true';
+		}
+
+		function e6RenditionPattern(img, wrap) {
+			const sameUrl = (a, b) => { try { return !!a && !!b && new URL(a, location.href).href === new URL(b, location.href).href; } catch { return false; } };
+			const first = (srcset) => String(srcset || '').trim().split(/\s+/)[0];
+			if (wrap.localName !== 'article' || !wrap.getAttribute('data-id')) return null;
+			if (!E6_RENDITION_EXT.has(String(wrap.getAttribute('data-file-ext') || '').toLowerCase())) return null;
+			const preview = wrap.getAttribute('data-preview-url');
+			const previewWebp = wrap.getAttribute('data-preview-webp');
+			const sample = (wrap.getAttribute('data-sample-url') || '').trim();
+			const file = (wrap.getAttribute('data-file-url') || '').trim();
+			if (!preview || !previewWebp || !E6_SRCSET_SAFE.test(sample)) return null;
+			if (wrap.querySelectorAll('img').length !== 1 || wrap.querySelectorAll('picture').length !== 1) return null;
+			const picture = img.parentElement;
+			if (!picture || picture.localName !== 'picture' || !wrap.contains(picture)) return null;
+			const kids = picture.children;
+			if (kids.length !== 3 || kids[2] !== img) return null;
+			const [webpSource, jpegSource] = kids;
+			if (webpSource.localName !== 'source' || jpegSource.localName !== 'source') return null;
+			if (webpSource.getAttribute('type') !== 'image/webp' || jpegSource.getAttribute('type') !== 'image/jpeg') return null;
+			// While this owner holds the WebP srcset, the pattern is judged on the native value it replaced.
+			const nativeWebp = e6NativeWebpSrcset.has(webpSource) ? e6NativeWebpSrcset.get(webpSource) : webpSource.getAttribute('srcset');
+			const jpeg = jpegSource.getAttribute('srcset');
+			for (const [s, value] of [[webpSource, nativeWebp], [jpegSource, jpeg]]) {
+				if (s.hasAttribute('sizes') || s.hasAttribute('media')) return null;
+				if (!E6_SINGLE_CANDIDATE.test(String(value || '').trim())) return null;
 			}
-			owner.ownAttribute(img, 'srcset', targetUrl);
-			owner.ownAttribute(img, 'src', targetUrl);
+			if (!img.hasAttribute('src') || img.hasAttribute('srcset') || img.hasAttribute('sizes')) return null;
+			if (!sameUrl(first(nativeWebp), previewWebp) || sameUrl(first(nativeWebp), first(jpeg))) return null;
+			if (sameUrl(sample, first(nativeWebp)) || sameUrl(sample, first(jpeg))) return null;
+			return { webpSource, nativeWebp, sample, file: E6_SRCSET_SAFE.test(file) ? file : '' };
+		}
+
+		// Returns a provenance enum: NATIVE_OUT_OF_SCOPE, NATIVE_UNSUPPORTED,
+		// NATIVE_PREVIEW, OWNED_SAMPLE, OWNED_ORIGINAL or REFUSED_NATIVE_TOUCHED.
+		function applySiteThumbMedia(img, wrap, owner) {
+			if (!img || !wrap || !owner || !e6RenditionAdmitted()) return 'NATIVE_OUT_OF_SCOPE';
+			const p = e6RenditionPattern(img, wrap);
+			if (!p) return 'NATIVE_UNSUPPORTED';
+			const quality = BE.settings.get('media.thumbQuality') || 'sample';
+			const target = quality === 'sample' ? p.sample : quality === 'original' ? p.file : null;
+			if (!target) {
+				// preview (or an original with no usable native file): native. Only an
+				// earlier owned write by this owner is set back to the native value.
+				const outcome = quality === 'original' ? 'NATIVE_UNSUPPORTED' : 'NATIVE_PREVIEW';
+				if (!e6NativeWebpSrcset.has(p.webpSource)) return outcome;
+				return owner.ownAttribute(p.webpSource, 'srcset', p.nativeWebp) ? outcome : 'REFUSED_NATIVE_TOUCHED';
+			}
+			if (!e6NativeWebpSrcset.has(p.webpSource)) {
+				e6NativeWebpSrcset.set(p.webpSource, p.nativeWebp);
+				owner.cleanup(() => e6NativeWebpSrcset.delete(p.webpSource));
+			}
+			if (!owner.ownAttribute(p.webpSource, 'srcset', target)) return 'REFUSED_NATIVE_TOUCHED';
+			return quality === 'original' ? 'OWNED_ORIGINAL' : 'OWNED_SAMPLE';
 		}
 
 		function suppressHoverAttributes(owner, el) {
@@ -4085,7 +4136,7 @@
 			owner.ownClass(img, 'be-thumb-img', true);
 			const postId = BE.adapters.active.getThumbPostId(img);
 			if (postId) owner.ownAttribute(img, 'data-be-post-id', postId);
-			applySiteThumbMedia(img, wrap, owner);
+			thumbRenditionByWrap.set(wrap, applySiteThumbMedia(img, wrap, owner));
 			suppressNativeThumbHover(img, wrap);
 			return wrap;
 		}
@@ -4495,7 +4546,10 @@
 			resizeListenerAttached = false;
 		}
 
-		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll };
+		// IB08 provenance: which rendition a card shows (read-only, in memory).
+		const getThumbRendition = (wrap) => thumbRenditionByWrap.get(wrap) || null;
+
+		return { init, dispose, applyGridSettings, enhanceThumbnails, enrichThumbnails, enrichSinglePost, getCachedPost, setupInfiniteScroll, getThumbRendition };
 	})();
 
 	/* ============================================================ *

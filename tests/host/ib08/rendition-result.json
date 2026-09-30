@@ -1,0 +1,89 @@
+{
+  "checkpoint": "IB08",
+  "stage": "P (local production assertions L1–L9)",
+  "evidence_gate": "G-RENDITION",
+  "production_blob": "a0f3041c409a656f67fe23dc827b020b5cc399e6",
+  "fixtures": "synthetic, not live markup",
+  "checks": 66,
+  "passed": 66,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault also writes the JPEG source: caught (7 verdicts; e.g. L1 e621.net: one owned write per pattern card, WebP srcset =)",
+      "pass": true
+    },
+    {
+      "name": "fault also writes img src: caught (7 verdicts; e.g. L1 e621.net: one owned write per pattern card, WebP srcset =)",
+      "pass": true
+    },
+    {
+      "name": "fault adds img srcset: caught (9 verdicts; e.g. L1 e621.net: one owned write per pattern card, WebP srcset =)",
+      "pass": true
+    },
+    {
+      "name": "fault clones/replaces the source node: caught (15 verdicts; e.g. L1 e621.net: one owned write per pattern card, WebP srcset =)",
+      "pass": true
+    },
+    {
+      "name": "fault writes outside the owner (no native-touch refusal): caught (6 verdicts; e.g. L2: a natively touched attribute is refused, the native edit)",
+      "pass": true
+    },
+    {
+      "name": "fault constructs a URL: caught (5 verdicts; e.g. L1 e621.net: one owned write per pattern card, WebP srcset =)",
+      "pass": true
+    },
+    {
+      "name": "fault preview writes the JPEG preview (old behavior): caught (2 verdicts; e.g. L2: preview makes zero rendition writes, provenance NATIVE_P)",
+      "pass": true
+    },
+    {
+      "name": "fault original mapped to sample: caught (2 verdicts; e.g. L3: original writes the native file URL to the WebP srcset o)",
+      "pass": true
+    },
+    {
+      "name": "fault switch back to preview not restored: caught (1 verdicts; e.g. L2: sample -> preview restores the native WebP srcset throug)",
+      "pass": true
+    },
+    {
+      "name": "fault login gate removed: caught (5 verdicts; e.g. L6 logged in (data-user-is-anonymous=\"false\"): zero renditio)",
+      "pass": true
+    },
+    {
+      "name": "fault login gate on attribute presence only: caught (4 verdicts; e.g. L6 logged in (data-user-is-anonymous=\"false\"): zero renditio)",
+      "pass": true
+    },
+    {
+      "name": "fault route gate removed: caught (1 verdicts; e.g. L6 non-/posts route: zero rendition writes, NATIVE_OUT_OF_SC)",
+      "pass": true
+    },
+    {
+      "name": "fault host gate removed: caught (1 verdicts; e.g. L7 subdomain of e621.net (adapter active, host not admitted))",
+      "pass": true
+    },
+    {
+      "name": "fault pattern gate: source shape not checked: caught (2 verdicts; e.g. L4: every non-pattern shape makes zero rendition writes)",
+      "pass": true
+    },
+    {
+      "name": "fault pattern gate: sizes/media not checked: caught (2 verdicts; e.g. L4: every non-pattern shape makes zero rendition writes)",
+      "pass": true
+    },
+    {
+      "name": "fault pattern gate: media type not checked: caught (4 verdicts; e.g. L3: original writes the native file URL to the WebP srcset o)",
+      "pass": true
+    },
+    {
+      "name": "fault request from the rendition path: caught (2 verdicts; e.g. L8 e621.net: no request, cookie access or thumbQuality write)",
+      "pass": true
+    },
+    {
+      "name": "fault overwrites saved intent while inert: caught (9 verdicts; e.g. L8 e621.net: no request, cookie access or thumbQuality write)",
+      "pass": true
+    },
+    {
+      "name": "fault no dispose restore (owner bypassed on apply): caught (2 verdicts; e.g. L2: sample -> preview restores the native WebP srcset throug)",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

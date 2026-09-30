@@ -6,6 +6,24 @@
 - **rule34.xxx** is unaffected and remains supported.
 - Your stored preferences are kept. Settings are shared across all sites, and removing these sites does not erase or reset any saved value.
 
+## Unreleased — e621/e926 grid thumbnail quality
+
+**Grid thumbnail quality** now applies only where it has been tested to be safe and reversible: the e621 and e926 post listing (`/posts`) while you are **logged out**, on standard image thumbnails.
+
+On those thumbnails the site keeps its own WebP/JPEG image choice. The enhancer changes only the WebP image, and puts it back when it is turned off:
+- **Preview** leaves the site's thumbnail as it is.
+- **Sample** shows each post's sample image.
+- **Original** shows each post's original image file.
+
+The site's own thumbnail now stays in these cases, which were previously enhanced:
+- the **Preview** setting (it previously replaced the thumbnail with the JPEG preview);
+- **logged-in** e621 and e926 pages;
+- other e621/e926 pages, such as favorites and pools;
+- video, GIF and other non-image posts;
+- thumbnails that don't match the standard WebP/JPEG layout.
+
+Your saved **Grid thumbnail quality** choice is kept even where it currently has no effect, and it applies again wherever the thumbnail is supported.
+
 ## 1.2.7.3 — Rule34 loading and settings UX
 
 - Defer Rule34.xxx gallery metadata enrichment until hover/click instead of batch-fetching the full gallery at startup.
