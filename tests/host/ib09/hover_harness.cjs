@@ -80,12 +80,13 @@ function installFakeClock(w) {
 }
 
 // Build a session: production loaded, gallery enhanced, recorder attached. t=0 is set by enter().
-async function session({ host = 'e621.net', quality = 'sample', n = 3, source } = {}) {
+async function session({ host = 'e621.net', quality = 'sample', n = 3, source, extraSetup = null } = {}) {
   let clock = null;
   const rec = { assigns: [], installs: [], meta: [], shows: 0, hides: 0, t0: 0, pending: new Set(), elGen: new WeakMap(), elIndex: new WeakMap() };
   const settings = { 'be:setting:media.thumbQuality': JSON.stringify(quality) };
   const ctx = h.load({ ...listing(host, n), settings, source: source || h.productionSource(), setup: (w) => {
     clock = installFakeClock(w);
+    if (typeof extraSetup === 'function') extraSetup(w);
     const desc = Object.getOwnPropertyDescriptor(w.HTMLImageElement.prototype, 'src');
     Object.defineProperty(w.HTMLImageElement.prototype, 'src', { configurable: true, get() { return desc.get.call(this); },
       set(v) {

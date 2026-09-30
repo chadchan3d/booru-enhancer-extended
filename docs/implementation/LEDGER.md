@@ -8,7 +8,9 @@ E stage so far:
 - V2 live cost pilot, accepted with a regular-Chrome cache limitation (`IB09_DWELL_PROTOTYPE.md` §1);
 - frozen decisions (§2): V3 accepted; zero new hover media loads before dwell; no downgrade (PREVIEW→SAMPLE only);
 - isolated 200 ms dwell prototype, locally qualified (84/84);
-- held-out live check package prepared and qualified (`IB09_LIVE_CHECK.md`, 37/37); the live sessions are pending.
+- held-out live check package (`IB09_LIVE_CHECK.md`, observer 1.3, 57/57);
+- live correctness sessions accepted: e621 A, e926 C, e926 D. The 200 ms upgrade gating and no-downgrade are qualified on them;
+- **V3 reopened** (`IB09_V3_REOPEN.md`): e926 D showed 38/80 reuse-initiated fetches (bytes unknown). Recommendation: **B, dwell-gated overlay** (zero hover requests before dwell by construction; local 54/54). Awaiting the operator's decision.
 
 Production is unchanged; 200 ms is an E-stage candidate, not a production constant.
 
@@ -72,6 +74,9 @@ IB08 is COMPLETE, PASS(scope) (`docs/implementation/IB08_COMPLETION_RECORD.md`).
 - **IB09 live e926 C** (sample, ordinary; package 1.2): **accepted.** 80 STILL generations, zero hover media before dwell, no upgrades, no stale install.
   - `resourceTimingLoadsBeforeDwell` 6 was an observer defect: time-window matching of the card's sample/file with no causal provenance. Under Sample, the grid displays the sample, so grid loads and V3 reuse fetches were counted.
   - Corrected in observer 1.3 (causal UPGRADE/REUSE/DISPLAY/OTHER attribution; verifier 57/57). No rerun.
+- **IB09 live e926 D** (original, ordinary; package 1.3): **accepted for correctness.** Nothing before dwell, no downgrade, no stale install.
+  - It reopened V3: `renditionReuseFetchesBeforeDwell` 38/80 with zero grid/unattributed loads, so the V3 overlay's reuse of the displayed FILE initiated fetches. Bytes are unknown.
+- **IB09 V3 decision pending:** A (current) / **B (recommended, dwell-gated overlay)** / C (canvas, needs a live check).
 - **IB09 still needed before a production proposal:** the held-out live sessions (README "Dwell live check"). These are A (preview, ordinary), C (sample) and D (original) on both hosts, and B (preview, Slow 4G with Disable cache) on e621, optionally on e926.
   - Normal Chrome only (Tampermonkey cannot run in Incognito here). Cold cost is taken only from the B session's Disable-cache run.
   - G-HOVER OPEN.

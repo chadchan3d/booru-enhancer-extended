@@ -22,7 +22,7 @@ function mustReplace(src, from, to) {
   return src.replace(from, to);
 }
 
-function applyDwellPrototype(source, { dwellMs = 200 } = {}) {
+function applyDwellPrototype(source, { dwellMs = 200, overlay = 'immediate' } = {}) {
   let s = source.replace(/\r\n/g, '\n');
   s = mustReplace(s, '\t\tlet stateTimer = null;\n',
     `\t\tlet stateTimer = null;\n\t\tlet dwellTimer = null; // IB09 prototype: one dwell authority per hover generation\n\t\tconst HOVER_DWELL_MS = ${Number(dwellMs)};\n`);
@@ -106,7 +106,43 @@ function applyDwellPrototype(source, { dwellMs = 200 } = {}) {
 `;
   s = s.slice(0, start) + show + s.slice(end);
   s = mustReplace(s, '\t\tfunction hide() {\n\t\t\trequestToken++;\n', '\t\tfunction hide() {\n\t\t\tclearTimeout(dwellTimer);\n\t\t\tdwellTimer = null;\n\t\t\trequestToken++;\n');
-  return s;
+  return applyOverlayVariant(s, overlay);
+}
+
+// V3 alternatives (E-stage comparison only; the default 'immediate' output is unchanged):
+//   'immediate' (A) - current V3: new Image() assigned the displayed rendition at pointer-enter;
+//   'dwell'     (B) - no hover media at all before dwell: the displayed rendition is shown at dwell,
+//                     behind the same generation and viewer checks, then the eligible upgrade;
+//   'canvas'    (C) - zero-fetch immediate presentation: the already-decoded card image is painted
+//                     into a canvas (drawImage); no URL is assigned to any element, and the card's own
+//                     node is only read. Not complete, or no 2d context: nothing until dwell.
+function applyOverlayVariant(s, overlay) {
+  if (overlay === 'immediate') return s;
+  const ENTER = '\t\t\t// V3: instant overlay from the already-displayed card rendition (no new media source).\n\t\t\tshowImmediateThumbnail(img, token);\n';
+  if (overlay === 'dwell') {
+    s = mustReplace(s, ENTER, '\t\t\t// V3 variant B: no hover media before dwell; the overlay appears at dwell.\n');
+    return mustReplace(s, "\t\t\tif (BE.modules.viewer?.isOpen?.()) return; // the viewer took over before dwell: no hover upgrade\n",
+      "\t\t\tif (BE.modules.viewer?.isOpen?.()) return; // the viewer took over before dwell: no hover upgrade\n\t\t\tshowImmediateThumbnail(img, token); // variant B: displayed rendition, shown at dwell\n");
+  }
+  if (overlay === 'canvas') {
+    s = mustReplace(s, ENTER, '\t\t\t// V3 variant C: paint the already-decoded card image; no resource request.\n\t\t\tshowRenderedThumbnail(img, token);\n');
+    return mustReplace(s, '\t\tfunction directUpgradeFromDom(img) {\n', `\t\tfunction showRenderedThumbnail(sourceImg, token) {
+\t\t\tif (!sourceImg.complete || !sourceImg.naturalWidth) return; // nothing to paint without a request: wait for dwell
+\t\t\tconst box = targetBoxFor(sourceImg);
+\t\t\tconst scale = Math.min(2, window.devicePixelRatio || 1);
+\t\t\tconst canvas = document.createElement('canvas');
+\t\t\tcanvas.width = Math.round(box.width * scale);
+\t\t\tcanvas.height = Math.round(box.height * scale);
+\t\t\tconst ctx = canvas.getContext && canvas.getContext('2d');
+\t\t\tif (!ctx) return;
+\t\t\ttry { ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height); } catch { return; }
+\t\t\tinstallMedia(canvas, sourceImg, token);
+\t\t}
+
+\t\tfunction directUpgradeFromDom(img) {
+`);
+  }
+  throw new Error(`unknown overlay variant: ${overlay}`);
 }
 
 module.exports = { applyDwellPrototype, mustReplace };
