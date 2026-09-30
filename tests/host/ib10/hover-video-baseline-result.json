@@ -1,0 +1,2021 @@
+{
+  "checkpoint": "IB10",
+  "stage": "E-stage baseline characterization of the current hover-video lifecycle (no production change)",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
+  "fixtures": "synthetic video cards (webm; mp4 variant)",
+  "clock": "fake; t = ms since first pointer-enter",
+  "observations": {
+    "e621.net S1": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S2": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S3": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            100
+          ],
+          "loadsT": [
+            0,
+            100
+          ],
+          "pausesT": [
+            100,
+            150
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S4": {
+      "meta": {
+        "installed": true,
+        "playingAfterReady": true,
+        "hoverVisible": false,
+        "hoverChildren": 0
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S5": {
+      "meta": {
+        "maxHolding": 5
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 350,
+          "srcSets": [
+            {
+              "t": 350,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            350
+          ],
+          "pausesT": [
+            650
+          ],
+          "playsT": [
+            400
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 3,
+          "createdT": 700,
+          "srcSets": [
+            {
+              "t": 700,
+              "gen": 3,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            700
+          ],
+          "pausesT": [
+            1000
+          ],
+          "playsT": [
+            750
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 4,
+          "createdT": 1050,
+          "srcSets": [
+            {
+              "t": 1050,
+              "gen": 4,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            1050
+          ],
+          "pausesT": [
+            1350
+          ],
+          "playsT": [
+            1100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 5,
+          "createdT": 1400,
+          "srcSets": [
+            {
+              "t": 1400,
+              "gen": 5,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            1400
+          ],
+          "pausesT": [
+            1700
+          ],
+          "playsT": [
+            1450
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 350,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        },
+        {
+          "t": 700,
+          "name": "gallery.getCachedPost",
+          "gen": 3
+        },
+        {
+          "t": 1050,
+          "name": "gallery.getCachedPost",
+          "gen": 4
+        },
+        {
+          "t": 1400,
+          "name": "gallery.getCachedPost",
+          "gen": 5
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S6": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 60,
+          "srcSets": [
+            {
+              "t": 60,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            100
+          ],
+          "loadsT": [
+            60,
+            100
+          ],
+          "pausesT": [
+            100
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 3,
+          "createdT": 120,
+          "srcSets": [
+            {
+              "t": 120,
+              "gen": 3,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            160
+          ],
+          "loadsT": [
+            120,
+            160
+          ],
+          "pausesT": [
+            160
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 4,
+          "createdT": 180,
+          "srcSets": [
+            {
+              "t": 180,
+              "gen": 4,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            220
+          ],
+          "loadsT": [
+            180,
+            220
+          ],
+          "pausesT": [
+            220
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 5,
+          "createdT": 240,
+          "srcSets": [
+            {
+              "t": 240,
+              "gen": 5,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            280
+          ],
+          "loadsT": [
+            240,
+            280
+          ],
+          "pausesT": [
+            280
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 60,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        },
+        {
+          "t": 120,
+          "name": "gallery.getCachedPost",
+          "gen": 3
+        },
+        {
+          "t": 180,
+          "name": "gallery.getCachedPost",
+          "gen": 4
+        },
+        {
+          "t": 240,
+          "name": "gallery.getCachedPost",
+          "gen": 5
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S7": {
+      "meta": {
+        "g1Installed": false,
+        "g2Installed": true
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40,
+            80
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 60,
+          "srcSets": [
+            {
+              "t": 60,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            60
+          ],
+          "pausesT": [],
+          "playsT": [
+            100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": true,
+          "inHover": true,
+          "connected": true
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 60,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S8": {
+      "meta": {
+        "holdingWhileB": 2
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 300,
+          "srcSets": [
+            {
+              "t": 300,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            300
+          ],
+          "pausesT": [],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 300,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S9": {
+      "meta": {
+        "afterOpen": {
+          "viewerOpen": true,
+          "hoverVisible": true,
+          "hoverPlaying": true,
+          "hoverInstalled": true,
+          "viewerVideos": 1
+        },
+        "afterClose": {
+          "viewerOpen": false,
+          "hoverVisible": true,
+          "hoverPlaying": true
+        }
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            450
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S10": {
+      "meta": {
+        "viewerOpen": true,
+        "hoverInstalledDuringViewer": true,
+        "hoverPlayingDuringViewer": true,
+        "hoverVisible": true
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [],
+          "playsT": [
+            100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": true,
+          "inHover": true,
+          "connected": true
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S11": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e621.net S12": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            50
+          ],
+          "loadsT": [
+            0,
+            50
+          ],
+          "pausesT": [
+            50
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S1": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S2": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S3": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            100
+          ],
+          "loadsT": [
+            0,
+            100
+          ],
+          "pausesT": [
+            100,
+            150
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S4": {
+      "meta": {
+        "installed": true,
+        "playingAfterReady": true,
+        "hoverVisible": false,
+        "hoverChildren": 0
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S5": {
+      "meta": {
+        "maxHolding": 5
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 350,
+          "srcSets": [
+            {
+              "t": 350,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            350
+          ],
+          "pausesT": [
+            650
+          ],
+          "playsT": [
+            400
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 3,
+          "createdT": 700,
+          "srcSets": [
+            {
+              "t": 700,
+              "gen": 3,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            700
+          ],
+          "pausesT": [
+            1000
+          ],
+          "playsT": [
+            750
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 4,
+          "createdT": 1050,
+          "srcSets": [
+            {
+              "t": 1050,
+              "gen": 4,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            1050
+          ],
+          "pausesT": [
+            1350
+          ],
+          "playsT": [
+            1100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 5,
+          "createdT": 1400,
+          "srcSets": [
+            {
+              "t": 1400,
+              "gen": 5,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            1400
+          ],
+          "pausesT": [
+            1700
+          ],
+          "playsT": [
+            1450
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 350,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        },
+        {
+          "t": 700,
+          "name": "gallery.getCachedPost",
+          "gen": 3
+        },
+        {
+          "t": 1050,
+          "name": "gallery.getCachedPost",
+          "gen": 4
+        },
+        {
+          "t": 1400,
+          "name": "gallery.getCachedPost",
+          "gen": 5
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S6": {
+      "meta": {},
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 60,
+          "srcSets": [
+            {
+              "t": 60,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            100
+          ],
+          "loadsT": [
+            60,
+            100
+          ],
+          "pausesT": [
+            100
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 3,
+          "createdT": 120,
+          "srcSets": [
+            {
+              "t": 120,
+              "gen": 3,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            160
+          ],
+          "loadsT": [
+            120,
+            160
+          ],
+          "pausesT": [
+            160
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 4,
+          "createdT": 180,
+          "srcSets": [
+            {
+              "t": 180,
+              "gen": 4,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            220
+          ],
+          "loadsT": [
+            180,
+            220
+          ],
+          "pausesT": [
+            220
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 5,
+          "createdT": 240,
+          "srcSets": [
+            {
+              "t": 240,
+              "gen": 5,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            280
+          ],
+          "loadsT": [
+            240,
+            280
+          ],
+          "pausesT": [
+            280
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 60,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        },
+        {
+          "t": 120,
+          "name": "gallery.getCachedPost",
+          "gen": 3
+        },
+        {
+          "t": 180,
+          "name": "gallery.getCachedPost",
+          "gen": 4
+        },
+        {
+          "t": 240,
+          "name": "gallery.getCachedPost",
+          "gen": 5
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S7": {
+      "meta": {
+        "g1Installed": false,
+        "g2Installed": true
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            40
+          ],
+          "loadsT": [
+            0,
+            40
+          ],
+          "pausesT": [
+            40,
+            80
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 60,
+          "srcSets": [
+            {
+              "t": 60,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            60
+          ],
+          "pausesT": [],
+          "playsT": [
+            100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": true,
+          "inHover": true,
+          "connected": true
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 60,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S8": {
+      "meta": {
+        "holdingWhileB": 2
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        },
+        {
+          "gen": 2,
+          "createdT": 300,
+          "srcSets": [
+            {
+              "t": 300,
+              "gen": 2,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            300
+          ],
+          "pausesT": [],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        },
+        {
+          "t": 300,
+          "name": "gallery.getCachedPost",
+          "gen": 2
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S9": {
+      "meta": {
+        "afterOpen": {
+          "viewerOpen": true,
+          "hoverVisible": true,
+          "hoverPlaying": true,
+          "hoverInstalled": true,
+          "viewerVideos": 1
+        },
+        "afterClose": {
+          "viewerOpen": false,
+          "hoverVisible": true,
+          "hoverPlaying": true
+        }
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            450
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S10": {
+      "meta": {
+        "viewerOpen": true,
+        "hoverInstalledDuringViewer": true,
+        "hoverPlayingDuringViewer": true,
+        "hoverVisible": true
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [],
+          "playsT": [
+            100
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": true,
+          "inHover": true,
+          "connected": true
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S11": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [],
+          "loadsT": [
+            0
+          ],
+          "pausesT": [
+            300
+          ],
+          "playsT": [
+            50
+          ],
+          "mutedAtPlay": [
+            true
+          ],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": true,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    },
+    "e926.net S12": {
+      "meta": {
+        "hoverVisible": false
+      },
+      "videos": [
+        {
+          "gen": 1,
+          "createdT": 0,
+          "srcSets": [
+            {
+              "t": 0,
+              "gen": 1,
+              "slot": "FILE",
+              "mutedAtAssign": false
+            }
+          ],
+          "srcRemovedT": [
+            50
+          ],
+          "loadsT": [
+            0,
+            50
+          ],
+          "pausesT": [
+            50
+          ],
+          "playsT": [],
+          "mutedAtPlay": [],
+          "muted": true,
+          "defaultMuted": true,
+          "autoplay": true,
+          "loop": true,
+          "preload": "auto",
+          "playsInline": true,
+          "holdsSource": false,
+          "playing": false,
+          "inHover": false,
+          "connected": false
+        }
+      ],
+      "metadata": [
+        {
+          "t": 0,
+          "name": "gallery.getCachedPost",
+          "gen": 1
+        }
+      ],
+      "network": 0
+    }
+  },
+  "checks": 34,
+  "passed": 34,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "hover video not muted",
+      "caughtBy": "S1"
+    },
+    {
+      "name": "pending video not released on leave (src kept)",
+      "caughtBy": "S2"
+    },
+    {
+      "name": "stale readiness guard removed (old generation installs)",
+      "caughtBy": "S3"
+    },
+    {
+      "name": "installed video not paused on leave",
+      "caughtBy": "S4"
+    },
+    {
+      "name": "installed video not detached on leave",
+      "caughtBy": "S4"
+    },
+    {
+      "name": "positive control: leave releases the installed video (src removed + load)",
+      "caughtBy": "S4"
+    },
+    {
+      "name": "positive control: video cards dwell-gated (qualified class widened)",
+      "caughtBy": "S1"
+    }
+  ],
+  "failures": []
+}

@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB09 — Still-image hover dwell and cost: COMPLETE, PASS(scope)** (`IB09_COMPLETION_RECORD.md`). **IB10 is eligible and not started.**
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`); there is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -24,10 +24,18 @@
 
 ## Gates relevant to the next step
 - **G-VIDEO (class, cell): OPEN.** It must reach E → PASS before automatic hover-video integration (blueprint IB10 item 6).
+- **IB10 defects found in current production (not corrected):**
+  - D1: the video FILE source is assigned at pointer-enter, with no dwell;
+  - D2: an installed hover video is paused and detached on leave, dispose or viewer close, but keeps its `src` (bytes unknown);
+  - D3: detached source-holding elements accumulate (5 after five cycles; 2 on A→B);
+  - D4: the viewer takeover does not stop the hover video, and a hover video that becomes ready during the viewer is installed and played.
+- **IB10 facts that hold:** always muted at play; stale generations never install; pending elements are released on leave.
+- **IB10 measurable classes:** e621/e926 logged-out `/posts` video cards in TC, by container (webm/mp4) and `data-size` band. The original file is the only hover source; there is no cheaper-stream fact. Rule34 and Gelbooru video contexts are OPEN.
 - **G-HOVER:** its cost allowance is available for video evaluation (IB09 item 13). Video admission is not inherited.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 E baseline** on `22e843c` (`tests/host/ib10/hover_video_baseline.cjs`): 34/34 on e621 and e926, webm and mp4. 7/7 fault controls, including 2 positive controls (release on leave; dwell for video).
 - **IB09 live production conformance on `b9d133c`:** e621 P1/P2 and e926 P1/P2 all PASS, with the artifact identity matched. In the qualified class every session showed 0 before-dwell media, overlay, fetches and quick-pass work, and 0 downgrades and stale installs. Out-of-scope video and animated generations kept their previous behavior.
 - **Local on `22e843c`:**
   - IB09 P-stage 111/111 (11 fault controls); conformance verifier 30/30;
@@ -49,11 +57,8 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Next eligible checkpoint: IB10 — Muted hover-video lifecycle** (blueprint §3 IB10). It is not started.
+**Active checkpoint: IB10 — Muted hover-video lifecycle, E stage.**
 
-**One bounded next action (not executed):** open the IB10 E stage by declaring its §11 scope. Then run a local, no-production-change baseline of the existing hover-video path on `b9d133c`, using the IB09 fake-clock harness. It should record source assignment, play/pause and detach on:
-- leave before and after `loadeddata`;
-- five re-entries;
-- late play/readiness handlers.
+**One bounded next action (not executed):** prepare **V3-C**, the controlled hover-video byte experiment in TC. It is a local Range-capable server that logs request ranges and bytes, plus an e621-shaped `/posts` fixture running production `b9d133c` unchanged. It measures bytes up to 5 s after leave for five runs: leave before readiness; leave after `loadeddata`; five re-entries; A→B; viewer takeover. Each runs with and without Range.
 
-Report the findings before any G-VIDEO probe or production change.
+Test media must be supplied (one webm and one mp4 clip), because no encoder is available here. V3-L (live, observe-only) follows V3-C. No production change before G-VIDEO E evidence.
