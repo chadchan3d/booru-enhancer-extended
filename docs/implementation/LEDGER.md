@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. P stage not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. P stage not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator prepared and locally qualified** (`IB10_V3R.md`); no evidence collected yet. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -24,12 +24,8 @@
 
 ## Gates relevant to the next step
 - **G-VIDEO(class, cell): E → PASS(scope)** for e621 WebM and e926 MP4 (<50 MB) logged-out `/posts` video cards in TC. Other classes and cells stay OPEN.
-- **E-stage decisions recorded with the gate** (operator may revise before P):
-  - 200 ms dwell before any video source;
-  - release (pause, remove `src`, `load()`) on leave, dispose and viewer takeover;
-  - at most one source-holding hover video;
-  - no hover install while the viewer is open;
-  - muted; original-file source; no stream change or byte cap.
+- **Owner decisions settled:** 200 ms dwell before video media work; opening the viewer ends the hover preview; original-file source for IB10 (no rendition discovery).
+- **Open owner decision:** source retention / revisit policy. "At most one source-holding hover video" is a proposal only, not frozen. V3-R resolves whether release after readiness damages revisit speed.
 - **IB10 defects found in current production (not corrected):**
   - D1: the video FILE source is assigned at pointer-enter, with no dwell (live: 0–2 ms in all 202, including every pass under 200 ms);
   - D2 **CONFIRMED by transport**, reproduced live (after-ready elements hold their source 82/82: still loading after leave 38, already complete 25, browser-idle partial 19): after readiness, leave/dispose/viewer-close leaves the request streaming through +5 s (~1.06–1.15 MB/5 s throttled; under FAST the file completes after leave). Pending release aborts within ±1 ms;
@@ -41,6 +37,9 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 V3-R package** (`tests/browser/ib10/IB10_V3R_Revisit.user.js`): 53/53 local qualification (8/8 fault controls).
+  - AS-IS body = production; RELEASE = production + one test-only line in `hide()`.
+  - Behavior scope: RELEASE adds only removeSrc + load on installed videos at leave.
 - **IB10 V3-L live** (Chrome 154 + Tampermonkey 5.5.0; identity matched in all 4 sessions):
   - 202/202 usable;
   - before-ready: all released at leave;
@@ -88,11 +87,8 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage eligible for the admitted classes.**
+**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage waits for the retention/revisit decision.**
 
-**One bounded next action (not executed):** after the operator confirms the gate decisions, implement the minimal IB10 P change (`IB10_V3L.md` §9) in the hover module only, for e621 WebM and e926 MP4 under 50 MB on logged-out `/posts`:
-- 200 ms dwell before the video source;
-- release on hide (pause, remove `src`, `load()`);
-- end the hover on viewer takeover, with no install while the viewer is open.
+**One bounded next action (operator):** run V3-R per `tests/browser/ib10/README.md` ("IB10 V3-R revisit/cache experiment"): 16 cells, about 3–4 minutes, Chrome + Tampermonkey, the V3-C fixtures. Return `ib10-v3r-results.json`.
 
-Then port the IB10 baseline scenarios to production assertions, rerun V3-C on the new artifact, and run live conformance with the V3-L observer. Other classes stay unchanged.
+Then analyze it (`analyze_ib10_v3r.cjs`) and report the measured AS-IS vs RELEASE revisit differences, for the owner to decide the retention policy. No production change and no P implementation before that decision.

@@ -93,3 +93,43 @@ DOM state is never reported as proof that downloading stopped. Output is sanitiz
 7. **Return** all labelled JSON results, including any `sanitationGuard: BLOCKED` result as it is. Afterwards, disable the script.
 
 **Bandwidth warning:** every hover that lasts past readiness downloads the **whole original video**, and it keeps downloading after you leave (that is defect D2 being measured). Large originals can make this run hundreds of MB to several GB. Prefer smaller videos or more quick passes if bandwidth matters, and reload often.
+
+---
+
+# IB10 V3-R revisit/cache experiment (prepared; operator run pending)
+
+`IB10_V3R_Revisit.user.js` answers one question. After a ready, buffered hover video is properly released on leave, is a revisit to the same video still fast, and what is reused?
+
+It carries two bodies of production `b9d133c` and runs the one the cell names:
+- **AS-IS:** production byte for byte.
+- **RELEASE:** production plus one test-only line in `hide()` that releases an installed hover video (`removeAttribute('src')` + `load()`, the same mechanism production already uses for a pending one). This is never production code.
+
+**What it records:**
+- **Server:** every request for the cell's media: Range, `If-None-Match` / `If-Modified-Since` / `If-Range`, status, response range, bytes over time, and how it ended.
+- **Page:** the element timeline (source assignment, `loadedmetadata`, `loadeddata`, first frame, `canplay`/`playing`, buffered state, source cleanup).
+
+**Cells (16, each with its own cold URLs):**
+- variant: AS-IS or RELEASE;
+- cache: no-store or cacheable (`Cache-Control: public, max-age=3600`, a strong per-URL `ETag`, a fixed `Last-Modified`);
+- container: MP4 or WebM;
+- revisit gap: 0.5 s or 5 s.
+
+The transport is always Range-capable, throttled to 256 KiB/s for observability only.
+
+**Script per cell:**
+1. Hover A until `loadeddata`, then stay 1 s more.
+2. Leave A; 20 ms later, quick-pass B (60 ms).
+3. Re-enter A when the gap since leaving A has passed.
+4. Wait for the revisit's `loadeddata` and first frame, stay 3 s.
+5. Leave A, observe 1.5 s.
+
+**Local qualification:** `node tests/browser/ib10/build_ib10_v3r.cjs --check` and `node tests/browser/ib10/verify_ib10_v3r.cjs --media <fixture folder>`.
+
+## Operator steps (Chrome + Tampermonkey, normal profile; about 3–4 minutes)
+
+1. **Start the server:** `node tests/browser/ib10/v3r_server.cjs --media <fixture folder> --out <fixture folder>/ib10-v3r-results.json`. Use the same two V3-C fixtures. Expect "media SHA-256 verified; 16 cells".
+2. **Prepare Tampermonkey:** **disable** every other Booru Enhancer / IB script (including V3-C and V3-L), then install `IB10_V3R_Revisit.user.js`.
+3. **Run:** open `http://127.0.0.1:8792/v3r/start`. Keep the tab in front, the mouse outside the browser window, and DevTools closed.
+4. **Finish:** when the page says "IB10 V3-R complete", return `ib10-v3r-results.json`, then disable the script and stop the server (Ctrl+C).
+
+If a cell is disturbed (mouse over the page), reload `http://127.0.0.1:8792/v3r/start`. The analyzer keeps only clean runs and only requests from each run's own page.

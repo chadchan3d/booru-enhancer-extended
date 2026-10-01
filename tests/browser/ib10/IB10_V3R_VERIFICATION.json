@@ -1,0 +1,44 @@
+{
+  "checkpoint": "IB10",
+  "stage": "E-stage V3-R revisit/cache experiment, local qualification (no real browser)",
+  "production_commit": "b9d133c",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
+  "checks": 53,
+  "passed": 53,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault altered fixture: the server refuses to start",
+      "pass": true
+    },
+    {
+      "name": "fault RELEASE patch missing: caught (identity MISMATCH and no release at leave)",
+      "pass": true
+    },
+    {
+      "name": "fault variant swap (AS-IS cell runs the RELEASE body): caught (identity MISMATCH)",
+      "pass": true
+    },
+    {
+      "name": "fault gap scheduling wrong: caught (actual gap far from 5000 ms)",
+      "pass": true
+    },
+    {
+      "name": "fault cacheable arm emits no-store: caught by the cache-header assertion",
+      "pass": true
+    },
+    {
+      "name": "fault byte accounting wrong: caught by the accounting assertion",
+      "pass": true
+    },
+    {
+      "name": "fault Range ignored: caught by the exact-range assertion",
+      "pass": true
+    },
+    {
+      "name": "fault revisit classifier ignores re-fetched bytes: caught (RESTART reported as RESUME)",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
