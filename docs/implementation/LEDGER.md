@@ -46,6 +46,14 @@
   - IB07 exclusion and Gelbooru exit 0; IB07 `item9` and `pagecount` exit 1 on their IB07 blob pin only.
 
 ## Unresolved, parked, deferred
+- **IB10 V3-C limitations:**
+  - first-frame callbacks preceded `loadeddata`, so 5 of 6 first-frame cells were pending leaves;
+  - under FAST, readiness beat the 40 ms leave;
+  - RANGE viewer cells can't split hover from viewer bytes;
+  - the window is +5 s (later buffer-limit pausing is not observed);
+  - cache is excluded by design (no-store);
+  - TC only.
+- **IB10 fixtures:** externally supplied and not tracked. Committed once by mistake in `0a43e73`; removed in `1820c18` without a history rewrite. Their exact paths are in `.gitignore`.
 - **IB09 limitations:**
   - throttled usefulness is observed on e621 only;
   - transfer sizes are mostly browser-hidden;
