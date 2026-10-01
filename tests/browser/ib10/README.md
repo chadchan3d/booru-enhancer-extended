@@ -33,7 +33,9 @@
 - `node tests/browser/ib10/build_ib10_v3c.cjs --check`
 - `node tests/browser/ib10/verify_ib10_v3c.cjs --media <fixture folder>`
 
-## Fixtures (not committed)
+## Fixtures (externally supplied; intentionally not tracked)
+
+The two media fixtures come from the operator and are not tracked in the current tree. `.gitignore` excludes them if they are placed in this folder. They were committed once by mistake in `0a43e73` and removed in the next commit; history was not rewritten.
 
 | File | Bytes | SHA-256 |
 | --- | --- | --- |

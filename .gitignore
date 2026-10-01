@@ -2,3 +2,7 @@
 .claude/settings.local.json
 CLAUDE.local.md
 node_modules/
+
+# IB10 V3-C media fixtures: externally supplied, intentionally not tracked
+tests/browser/ib10/ib10_v3c_fixture.mp4
+tests/browser/ib10/ib10_v3c_fixture.webm
