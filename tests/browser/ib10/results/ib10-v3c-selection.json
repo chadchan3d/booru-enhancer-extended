@@ -1,0 +1,41 @@
+{
+ "entries": 56,
+ "dropped": [
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "mp4",
+   "transport": "RANGE",
+   "why": "contaminated (27 trusted pointer events)"
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "mp4",
+   "transport": "RANGE",
+   "why": "contaminated (261 trusted pointer events)"
+  }
+ ],
+ "kept": 54,
+ "expectedCells": 54,
+ "missing": [],
+ "duplicated": [],
+ "excludedEarlierAttemptRequests": [
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "mp4",
+   "transport": "RANGE",
+   "n": 1
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "mp4",
+   "transport": "RANGE",
+   "n": 3
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "mp4",
+   "transport": "RANGE",
+   "n": 1
+  }
+ ]
+}

@@ -1,0 +1,8598 @@
+{
+ "media": {
+  "mp4": {
+   "size": 3623853,
+   "sha256": "9ba765f0a3c0e8035f96de18bf9f364d750ff1e9698d80ffe579494ee308b45e"
+  },
+  "webm": {
+   "size": 3091428,
+   "sha256": "467649067aecd56d4d49ca9885eb87a6df5150af1bae6f565a1dba8b3eeb4a61"
+  }
+ },
+ "throttleBytesPerSecond": 262144,
+ "runs": [
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 238,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 238,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 288,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 288,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5294,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 288,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 239,
+      "srcSet": [
+       239
+      ],
+      "removeSrc": [
+       288
+      ],
+      "load": [
+       239,
+       288
+      ],
+      "pause": [
+       288
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": null,
+      "abortEv": 289,
+      "emptied": 281,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 6,
+      "card": "A",
+      "t0": 283,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 16384,
+      "end": "client-abort",
+      "tEnd": 289,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": 1
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [
+     1
+    ],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 135,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 135,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 643,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 643,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 643,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5645,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 643,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 136,
+      "srcSet": [
+       136
+      ],
+      "removeSrc": [],
+      "load": [
+       136
+      ],
+      "pause": [
+       643
+      ],
+      "play": [
+       "639"
+      ],
+      "loadeddata": 639,
+      "firstFrame": 380,
+      "abortEv": null,
+      "emptied": 141,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.43,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.96,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.53
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 7,
+      "card": "A",
+      "t0": 144,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1212416,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 5000,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 137,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 137,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 380,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 380,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 381,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5386,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 381,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 138,
+      "srcSet": [
+       139
+      ],
+      "removeSrc": [
+       380
+      ],
+      "load": [
+       139,
+       380
+      ],
+      "pause": [
+       380
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": 380,
+      "abortEv": 381,
+      "emptied": 141,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 8,
+      "card": "A",
+      "t0": 142,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 65536,
+      "end": "client-abort",
+      "tEnd": 380,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 65536,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 145,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 145,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 637,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 938,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1252,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1285,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1585,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1894,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1927,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2228,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2531,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2563,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2863,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3174,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 3196,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3497,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3798,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 8811,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 3798,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 147,
+      "srcSet": [
+       147
+      ],
+      "removeSrc": [],
+      "load": [
+       147
+      ],
+      "pause": [
+       939
+      ],
+      "play": [
+       "635"
+      ],
+      "loadeddata": 635,
+      "firstFrame": 390,
+      "abortEv": null,
+      "emptied": 152,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.71,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.29,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 1253,
+      "srcSet": [
+       1253
+      ],
+      "removeSrc": [],
+      "load": [
+       1253
+      ],
+      "pause": [
+       1585
+      ],
+      "play": [
+       "1274"
+      ],
+      "loadeddata": 1273,
+      "firstFrame": 1276,
+      "abortEv": null,
+      "emptied": 1253,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.71,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.29,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 1894,
+      "srcSet": [
+       1894
+      ],
+      "removeSrc": [],
+      "load": [
+       1894
+      ],
+      "pause": [
+       2228
+      ],
+      "play": [
+       "1917"
+      ],
+      "loadeddata": 1916,
+      "firstFrame": 1913,
+      "abortEv": null,
+      "emptied": 1895,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.71,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.29,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 2531,
+      "srcSet": [
+       2531
+      ],
+      "removeSrc": [],
+      "load": [
+       2531
+      ],
+      "pause": [
+       2863
+      ],
+      "play": [
+       "2556"
+      ],
+      "loadeddata": 2556,
+      "firstFrame": 2557,
+      "abortEv": null,
+      "emptied": 2531,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.71,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.29,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 3174,
+      "srcSet": [
+       3174
+      ],
+      "removeSrc": [],
+      "load": [
+       3174
+      ],
+      "pause": [
+       3497
+      ],
+      "play": [
+       "3196"
+      ],
+      "loadeddata": 3195,
+      "firstFrame": 3193,
+      "abortEv": null,
+      "emptied": 3175,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.71,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.29,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 9,
+      "card": "A",
+      "t0": 153,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1916928,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 835584,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 5012,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 127,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 127,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 646,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 646,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 647,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 1178,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 1479,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 1479,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 6487,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 1479,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 129,
+      "srcSet": [
+       129
+      ],
+      "removeSrc": [],
+      "load": [
+       129
+      ],
+      "pause": [
+       646
+      ],
+      "play": [
+       "640"
+      ],
+      "loadeddata": 639,
+      "firstFrame": 360,
+      "abortEv": null,
+      "emptied": 130,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.03,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.61,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "B",
+      "created": 647,
+      "srcSet": [
+       647
+      ],
+      "removeSrc": [],
+      "load": [
+       647
+      ],
+      "pause": [
+       1479
+      ],
+      "play": [
+       "1168"
+      ],
+      "loadeddata": 1168,
+      "firstFrame": 901,
+      "abortEv": null,
+      "emptied": 648,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.65,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.23,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 10,
+      "card": "A",
+      "t0": 135,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1392640,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 311296,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4977,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 11,
+      "card": "B",
+      "t0": 659,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4977,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 2,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2162688,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 146,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 146,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 196,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 198,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 198,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5198,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 198,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 147,
+      "srcSet": [
+       147
+      ],
+      "removeSrc": [],
+      "load": [
+       147
+      ],
+      "pause": [],
+      "play": [
+       "680"
+      ],
+      "loadeddata": 679,
+      "firstFrame": 402,
+      "abortEv": null,
+      "emptied": 149,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 3.74,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 3.74
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 12,
+      "card": "A",
+      "t0": 153,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1130496,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 1114112,
+      "lastWriteAfterCleanupMs": 4976,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1114112,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 124,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 124,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 667,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 968,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 971,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 971,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5972,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 971,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 125,
+      "srcSet": [
+       125
+      ],
+      "removeSrc": [],
+      "load": [
+       125
+      ],
+      "pause": [],
+      "play": [
+       "660"
+      ],
+      "loadeddata": 659,
+      "firstFrame": 368,
+      "abortEv": null,
+      "emptied": 126,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 4.29,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 3.69
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 13,
+      "card": "A",
+      "t0": 129,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1294336,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1097728,
+      "lastWriteAfterCleanupMs": 4962,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1097728,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 139,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 139,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 648,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 949,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 951,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1952,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1953,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1953,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6954,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6955,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11965,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6955,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 140,
+      "srcSet": [
+       140
+      ],
+      "removeSrc": [],
+      "load": [
+       140
+      ],
+      "pause": [
+       6954
+      ],
+      "play": [
+       "646"
+      ],
+      "loadeddata": 646,
+      "firstFrame": 374,
+      "abortEv": null,
+      "emptied": 148,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.36,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 8.63,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 7.27
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 14,
+      "card": "A",
+      "t0": 150,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 2605056,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1523712,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4994,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "mp4",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 157,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 157,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 670,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 971,
+     "what": "dispose"
+    },
+    {
+     "t": 972,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 5972,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 972,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 159,
+      "srcSet": [
+       159
+      ],
+      "removeSrc": [],
+      "load": [
+       159
+      ],
+      "pause": [
+       971
+      ],
+      "play": [
+       "666"
+      ],
+      "loadeddata": 666,
+      "firstFrame": 393,
+      "abortEv": null,
+      "emptied": 161,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.65,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.23,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 15,
+      "card": "A",
+      "t0": 163,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4968,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 195,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 196,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5208,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 196,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       148
+      ],
+      "removeSrc": [
+       195
+      ],
+      "load": [
+       148,
+       195
+      ],
+      "pause": [
+       195
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": null,
+      "abortEv": 196,
+      "emptied": 156,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 16,
+      "card": "A",
+      "t0": 157,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 16384,
+      "end": "client-abort",
+      "tEnd": 195,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 136,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 136,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 368,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 368,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 369,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5378,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 369,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 137,
+      "srcSet": [
+       137
+      ],
+      "removeSrc": [],
+      "load": [
+       138
+      ],
+      "pause": [
+       368
+      ],
+      "play": [
+       "357"
+      ],
+      "loadeddata": 356,
+      "firstFrame": 229,
+      "abortEv": null,
+      "emptied": 140,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.3,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.39,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.09
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 17,
+      "card": "A",
+      "t0": 144,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1130496,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 65536,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4992,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 139,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 139,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 229,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 229,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 230,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5242,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 230,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 140,
+      "srcSet": [
+       140
+      ],
+      "removeSrc": [
+       230
+      ],
+      "load": [
+       140,
+       230
+      ],
+      "pause": [
+       230
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": 227,
+      "abortEv": 230,
+      "emptied": 143,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 18,
+      "card": "A",
+      "t0": 144,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 32768,
+      "end": "client-abort",
+      "tEnd": 230,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 32768,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 141,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 141,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 356,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 657,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 965,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 988,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1289,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1594,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1615,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1917,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2218,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2240,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2541,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2842,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2865,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3165,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3479,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 8484,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 3479,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       142
+      ],
+      "removeSrc": [],
+      "load": [
+       142
+      ],
+      "pause": [
+       657
+      ],
+      "play": [
+       "355"
+      ],
+      "loadeddata": 355,
+      "firstFrame": 228,
+      "abortEv": null,
+      "emptied": 144,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "A",
+      "created": 966,
+      "srcSet": [
+       966
+      ],
+      "removeSrc": [],
+      "load": [
+       966
+      ],
+      "pause": [
+       1289
+      ],
+      "play": [
+       "983"
+      ],
+      "loadeddata": 983,
+      "firstFrame": 985,
+      "abortEv": null,
+      "emptied": 967,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "A",
+      "created": 1594,
+      "srcSet": [
+       1594
+      ],
+      "removeSrc": [],
+      "load": [
+       1594
+      ],
+      "pause": [
+       1917
+      ],
+      "play": [
+       "1611"
+      ],
+      "loadeddata": 1611,
+      "firstFrame": 1608,
+      "abortEv": null,
+      "emptied": 1595,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "A",
+      "created": 2218,
+      "srcSet": [
+       2218
+      ],
+      "removeSrc": [],
+      "load": [
+       2218
+      ],
+      "pause": [
+       2541
+      ],
+      "play": [
+       "2236"
+      ],
+      "loadeddata": 2236,
+      "firstFrame": 2237,
+      "abortEv": null,
+      "emptied": 2219,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "A",
+      "created": 2842,
+      "srcSet": [
+       2842
+      ],
+      "removeSrc": [],
+      "load": [
+       2842
+      ],
+      "pause": [
+       3165
+      ],
+      "play": [
+       "2858"
+      ],
+      "loadeddata": 2858,
+      "firstFrame": 2855,
+      "abortEv": null,
+      "emptied": 2843,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 19,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1851392,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 770048,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4989,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 155,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 155,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 375,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 375,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 375,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 597,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 897,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 898,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5906,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 898,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 156,
+      "srcSet": [
+       156
+      ],
+      "removeSrc": [],
+      "load": [
+       156
+      ],
+      "pause": [
+       375
+      ],
+      "play": [
+       "371"
+      ],
+      "loadeddata": 370,
+      "firstFrame": 243,
+      "abortEv": null,
+      "emptied": 158,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 0.7,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.9,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "B",
+      "created": 376,
+      "srcSet": [
+       376
+      ],
+      "removeSrc": [],
+      "load": [
+       376
+      ],
+      "pause": [
+       897
+      ],
+      "play": [
+       "593"
+      ],
+      "loadeddata": 592,
+      "firstFrame": 475,
+      "abortEv": null,
+      "emptied": 376,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.71,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.11
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 20,
+      "card": "A",
+      "t0": 160,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 180224,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 5008,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 21,
+      "card": "B",
+      "t0": 389,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1228800,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 5008,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 2,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2162688,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 148,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 148,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 197,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 199,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 199,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5200,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 199,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 149,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [],
+      "load": [
+       149
+      ],
+      "pause": [],
+      "play": [
+       "384"
+      ],
+      "loadeddata": 384,
+      "firstFrame": 255,
+      "abortEv": null,
+      "emptied": 152,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 4.47,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 4.47
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 22,
+      "card": "A",
+      "t0": 153,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1146880,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 1130496,
+      "lastWriteAfterCleanupMs": 5005,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1130496,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 142,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 142,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 375,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 675,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 677,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 677,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5677,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 677,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 143,
+      "srcSet": [
+       143
+      ],
+      "removeSrc": [],
+      "load": [
+       143
+      ],
+      "pause": [],
+      "play": [
+       "368"
+      ],
+      "loadeddata": 368,
+      "firstFrame": 241,
+      "abortEv": null,
+      "emptied": 146,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 5,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 4.4
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 23,
+      "card": "A",
+      "t0": 152,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1146880,
+      "lastWriteAfterCleanupMs": 4983,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1146880,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 140,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 140,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 372,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 673,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 675,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1676,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1677,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1677,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6689,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6690,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11696,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6690,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       142
+      ],
+      "removeSrc": [],
+      "load": [
+       142
+      ],
+      "pause": [
+       6689
+      ],
+      "play": [
+       "370"
+      ],
+      "loadeddata": 370,
+      "firstFrame": 229,
+      "abortEv": null,
+      "emptied": 143,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.34,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 9.74,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 8.4
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 24,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 2523136,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1441792,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 5006,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "webm",
+   "mode": "RANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 141,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 141,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 360,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 661,
+     "what": "dispose"
+    },
+    {
+     "t": 663,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 5666,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 663,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       143
+      ],
+      "removeSrc": [],
+      "load": [
+       143
+      ],
+      "pause": [
+       662
+      ],
+      "play": [
+       "354"
+      ],
+      "loadeddata": 354,
+      "firstFrame": 228,
+      "abortEv": null,
+      "emptied": 145,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.45,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.64,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.19
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 25,
+      "card": "A",
+      "t0": 148,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 1196032,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 114688,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 5005,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 142,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 142,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 198,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 198,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5202,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 198,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 143,
+      "srcSet": [
+       143
+      ],
+      "removeSrc": [
+       198
+      ],
+      "load": [
+       143,
+       198
+      ],
+      "pause": [
+       198
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": null,
+      "abortEv": 198,
+      "emptied": 145,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 26,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 16384,
+      "end": "client-abort",
+      "tEnd": 198,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 139,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 139,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 681,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 681,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 682,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5682,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 682,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 140,
+      "srcSet": [
+       140
+      ],
+      "removeSrc": [],
+      "load": [
+       140
+      ],
+      "pause": [
+       681
+      ],
+      "play": [
+       "680"
+      ],
+      "loadeddata": 680,
+      "firstFrame": 392,
+      "abortEv": null,
+      "emptied": 145,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.43,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.96,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.53
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 27,
+      "card": "A",
+      "t0": 149,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1212416,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4999,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1081344,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 130,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 130,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 395,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 395,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 396,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5400,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 396,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 132,
+      "srcSet": [
+       132
+      ],
+      "removeSrc": [
+       395
+      ],
+      "load": [
+       132,
+       395
+      ],
+      "pause": [
+       395
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": 391,
+      "abortEv": 396,
+      "emptied": 133,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 28,
+      "card": "A",
+      "t0": 142,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 65536,
+      "end": "client-abort",
+      "tEnd": 395,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 65536,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 141,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 141,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 665,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 965,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1277,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1814,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2116,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2427,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2965,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3267,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3580,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 4116,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 4416,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 4722,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 5250,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 5551,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 5865,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 10867,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 5865,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       142
+      ],
+      "removeSrc": [],
+      "load": [
+       142
+      ],
+      "pause": [
+       965
+      ],
+      "play": [
+       "653"
+      ],
+      "loadeddata": 652,
+      "firstFrame": 391,
+      "abortEv": null,
+      "emptied": 144,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.23,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.81,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 1277,
+      "srcSet": [
+       1278
+      ],
+      "removeSrc": [],
+      "load": [
+       1278
+      ],
+      "pause": [
+       2116
+      ],
+      "play": [
+       "1807"
+      ],
+      "loadeddata": 1806,
+      "firstFrame": 1526,
+      "abortEv": null,
+      "emptied": 1278,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.42,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 2427,
+      "srcSet": [
+       2427
+      ],
+      "removeSrc": [],
+      "load": [
+       2427
+      ],
+      "pause": [
+       3267
+      ],
+      "play": [
+       "2960"
+      ],
+      "loadeddata": 2960,
+      "firstFrame": 2667,
+      "abortEv": null,
+      "emptied": 2428,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.55,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.13,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "A",
+      "created": 3580,
+      "srcSet": [
+       3581
+      ],
+      "removeSrc": [],
+      "load": [
+       3581
+      ],
+      "pause": [
+       4416
+      ],
+      "play": [
+       "4113"
+      ],
+      "loadeddata": 4112,
+      "firstFrame": 3820,
+      "abortEv": null,
+      "emptied": 3581,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.74,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 5.26,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.52
+     },
+     {
+      "card": "A",
+      "created": 4722,
+      "srcSet": [
+       4722
+      ],
+      "removeSrc": [],
+      "load": [
+       4722
+      ],
+      "pause": [
+       5551
+      ],
+      "play": [
+       "5243"
+      ],
+      "loadeddata": 5242,
+      "firstFrame": 4961,
+      "abortEv": null,
+      "emptied": 4723,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.87,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.39,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.52
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 29,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 2359296,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1294336,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4985,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 30,
+      "card": "A",
+      "t0": 1281,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 2113536,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1048576,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4985,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 31,
+      "card": "A",
+      "t0": 2431,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1851392,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 786432,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4985,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 32,
+      "card": "A",
+      "t0": 3585,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1589248,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 524288,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4969,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 33,
+      "card": "A",
+      "t0": 4725,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1327104,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 262144,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4969,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 5,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 5324800,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 5
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 137,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 137,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 675,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 676,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 676,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 1176,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 1476,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 1477,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 6488,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 1477,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 139,
+      "srcSet": [
+       139
+      ],
+      "removeSrc": [],
+      "load": [
+       139
+      ],
+      "pause": [
+       676
+      ],
+      "play": [
+       "667"
+      ],
+      "loadeddata": 666,
+      "firstFrame": 393,
+      "abortEv": null,
+      "emptied": 149,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.03,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.61,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     },
+     {
+      "card": "B",
+      "created": 677,
+      "srcSet": [
+       677
+      ],
+      "removeSrc": [],
+      "load": [
+       677
+      ],
+      "pause": [
+       1476
+      ],
+      "play": [
+       "1167"
+      ],
+      "loadeddata": 1166,
+      "firstFrame": 890,
+      "abortEv": null,
+      "emptied": 677,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.65,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.23,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.58
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 34,
+      "card": "A",
+      "t0": 151,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1392640,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 311296,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4995,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 35,
+      "card": "B",
+      "t0": 680,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4995,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 2,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2162688,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 197,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 199,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 199,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5200,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 199,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       148
+      ],
+      "removeSrc": [],
+      "load": [
+       148
+      ],
+      "pause": [],
+      "play": [
+       "654"
+      ],
+      "loadeddata": 653,
+      "firstFrame": 391,
+      "abortEv": null,
+      "emptied": 157,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 3.8,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 3.8
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 36,
+      "card": "A",
+      "t0": 160,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1146880,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 1130496,
+      "lastWriteAfterCleanupMs": 4966,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 37,
+      "card": "A",
+      "t0": 202,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1146880,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": true,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 0,
+      "bytesInWindowAfterCleanup": 1146880,
+      "lastWriteAfterCleanupMs": 4998,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2277376,
+    "requestsStartedAfterCleanup": 1,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 148,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 148,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 668,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 968,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 971,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 971,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5972,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 971,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 150,
+      "srcSet": [
+       150
+      ],
+      "removeSrc": [],
+      "load": [
+       150
+      ],
+      "pause": [],
+      "play": [
+       "661"
+      ],
+      "loadeddata": 661,
+      "firstFrame": 402,
+      "abortEv": null,
+      "emptied": 153,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 4.45,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 3.85
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 38,
+      "card": "A",
+      "t0": 157,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1343488,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1146880,
+      "lastWriteAfterCleanupMs": 4964,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 39,
+      "card": "A",
+      "t0": 980,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1163264,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": true,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 0,
+      "bytesInWindowAfterCleanup": 1163264,
+      "lastWriteAfterCleanupMs": 4964,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2310144,
+    "requestsStartedAfterCleanup": 1,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 127,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 127,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 651,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 952,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 954,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1955,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1955,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1955,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6956,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6957,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11962,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6957,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 128,
+      "srcSet": [
+       128
+      ],
+      "removeSrc": [],
+      "load": [
+       128
+      ],
+      "pause": [
+       6956
+      ],
+      "play": [
+       "649"
+      ],
+      "loadeddata": 649,
+      "firstFrame": 374,
+      "abortEv": null,
+      "emptied": 130,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.41,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 8.63,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 7.22
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 40,
+      "card": "A",
+      "t0": 132,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 2605056,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1540096,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4972,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 41,
+      "card": "A",
+      "t0": 957,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 245760,
+      "end": "client-abort",
+      "tEnd": 1955,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 245760,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "mp4",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 138,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 138,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 702,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1002,
+     "what": "dispose"
+    },
+    {
+     "t": 1003,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 6003,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 1003,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 139,
+      "srcSet": [
+       139
+      ],
+      "removeSrc": [],
+      "load": [
+       139
+      ],
+      "pause": [
+       1002
+      ],
+      "play": [
+       "695"
+      ],
+      "loadeddata": 694,
+      "firstFrame": 408,
+      "abortEv": null,
+      "emptied": 144,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.65,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.18,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 3.53
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 42,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3623853,
+      "bytesSent": 1261568,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4969,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 194,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 195,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5207,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 195,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 149,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [
+       194
+      ],
+      "load": [
+       149,
+       194
+      ],
+      "pause": [
+       194
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": null,
+      "abortEv": 195,
+      "emptied": 166,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 43,
+      "card": "A",
+      "t0": 167,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 16384,
+      "end": "client-abort",
+      "tEnd": 194,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 138,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 138,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 355,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 355,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 355,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5370,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 355,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 140,
+      "srcSet": [
+       140
+      ],
+      "removeSrc": [],
+      "load": [
+       140
+      ],
+      "pause": [
+       355
+      ],
+      "play": [
+       "355"
+      ],
+      "loadeddata": 354,
+      "firstFrame": 243,
+      "abortEv": null,
+      "emptied": 149,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.3,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.39,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.09
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 44,
+      "card": "A",
+      "t0": 152,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1130496,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 65536,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 5019,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 248,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 249,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 249,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5260,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 249,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       148
+      ],
+      "removeSrc": [
+       249
+      ],
+      "load": [
+       148,
+       249
+      ],
+      "pause": [
+       249
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": 241,
+      "abortEv": 249,
+      "emptied": 153,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 45,
+      "card": "A",
+      "t0": 161,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 32768,
+      "end": "client-abort",
+      "tEnd": 249,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 32768,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 144,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 144,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 362,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 662,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 968,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1210,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1511,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1812,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2056,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2357,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2660,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2904,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3204,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3516,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 3724,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 4024,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 4336,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 9344,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 4336,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 147,
+      "srcSet": [
+       147
+      ],
+      "removeSrc": [],
+      "load": [
+       147
+      ],
+      "pause": [
+       662
+      ],
+      "play": [
+       "360"
+      ],
+      "loadeddata": 359,
+      "firstFrame": 247,
+      "abortEv": null,
+      "emptied": 149,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.69,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.96,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.27
+     },
+     {
+      "card": "A",
+      "created": 968,
+      "srcSet": [
+       968
+      ],
+      "removeSrc": [],
+      "load": [
+       968
+      ],
+      "pause": [
+       1511
+      ],
+      "play": [
+       "1201"
+      ],
+      "loadeddata": 1200,
+      "firstFrame": 1054,
+      "abortEv": null,
+      "emptied": 969,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.99,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 7.19,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "A",
+      "created": 1813,
+      "srcSet": [
+       1813
+      ],
+      "removeSrc": [],
+      "load": [
+       1813
+      ],
+      "pause": [
+       2357
+      ],
+      "play": [
+       "2048"
+      ],
+      "loadeddata": 2048,
+      "firstFrame": 1901,
+      "abortEv": null,
+      "emptied": 1814,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 2.23,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 6.49,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.26
+     },
+     {
+      "card": "A",
+      "created": 2661,
+      "srcSet": [
+       2661
+      ],
+      "removeSrc": [],
+      "load": [
+       2661
+      ],
+      "pause": [
+       3204
+      ],
+      "play": [
+       "2895"
+      ],
+      "loadeddata": 2894,
+      "firstFrame": 2749,
+      "abortEv": null,
+      "emptied": 2661,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 1.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 5.73,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.13
+     },
+     {
+      "card": "A",
+      "created": 3516,
+      "srcSet": [
+       3516
+      ],
+      "removeSrc": [],
+      "load": [
+       3516
+      ],
+      "pause": [
+       4024
+      ],
+      "play": [
+       "3723"
+      ],
+      "loadeddata": 3722,
+      "firstFrame": 3607,
+      "abortEv": null,
+      "emptied": 3517,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.83,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.96,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.13
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 46,
+      "card": "A",
+      "t0": 151,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 2048000,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 966656,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4975,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 47,
+      "card": "A",
+      "t0": 971,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1851392,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 786432,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 4975,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 48,
+      "card": "A",
+      "t0": 1817,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1671168,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 589824,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4992,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 49,
+      "card": "A",
+      "t0": 2664,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1474560,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 393216,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4975,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 50,
+      "card": "A",
+      "t0": 3520,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1277952,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 196608,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4975,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 5,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 5390336,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 5
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 146,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 146,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 359,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 359,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 359,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 604,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 904,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 905,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5908,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 905,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       148
+      ],
+      "removeSrc": [],
+      "load": [
+       148
+      ],
+      "pause": [
+       359
+      ],
+      "play": [
+       "354"
+      ],
+      "loadeddata": 354,
+      "firstFrame": 243,
+      "abortEv": null,
+      "emptied": 156,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.7,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.9,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.2
+     },
+     {
+      "card": "B",
+      "created": 360,
+      "srcSet": [
+       360
+      ],
+      "removeSrc": [],
+      "load": [
+       360
+      ],
+      "pause": [
+       904
+      ],
+      "play": [
+       "600"
+      ],
+      "loadeddata": 599,
+      "firstFrame": 455,
+      "abortEv": null,
+      "emptied": 360,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.71,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.11
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 51,
+      "card": "A",
+      "t0": 159,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1261568,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 180224,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4972,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 52,
+      "card": "B",
+      "t0": 366,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1212416,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1081344,
+      "lastWriteAfterCleanupMs": 4973,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 2,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2162688,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 148,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 148,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 191,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 194,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 194,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5195,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 194,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 149,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [],
+      "load": [
+       149
+      ],
+      "pause": [],
+      "play": [
+       "384"
+      ],
+      "loadeddata": 383,
+      "firstFrame": 247,
+      "abortEv": null,
+      "emptied": 158,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 4.47,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 4.47
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 53,
+      "card": "A",
+      "t0": 161,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1146880,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 16384,
+      "bytesInWindowAfterCleanup": 1130496,
+      "lastWriteAfterCleanupMs": 5004,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 54,
+      "card": "A",
+      "t0": 195,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1130496,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": true,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 0,
+      "bytesInWindowAfterCleanup": 1130496,
+      "lastWriteAfterCleanupMs": 5004,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2260992,
+    "requestsStartedAfterCleanup": 1,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 135,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 135,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 347,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 647,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 649,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 649,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5650,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 649,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 137,
+      "srcSet": [
+       137
+      ],
+      "removeSrc": [],
+      "load": [
+       137
+      ],
+      "pause": [],
+      "play": [
+       "342"
+      ],
+      "loadeddata": 341,
+      "firstFrame": 228,
+      "abortEv": null,
+      "emptied": 140,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 0.6,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 2,
+       "bufferedEnd": 4.87,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 4.27
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 55,
+      "card": "A",
+      "t0": 143,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1245184,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1114112,
+      "lastWriteAfterCleanupMs": 4970,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 56,
+      "card": "A",
+      "t0": 653,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1130496,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": true,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 0,
+      "bytesInWindowAfterCleanup": 1130496,
+      "lastWriteAfterCleanupMs": 4970,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2244608,
+    "requestsStartedAfterCleanup": 1,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 2
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 133,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 133,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 367,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 669,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 672,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1673,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1673,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1673,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6674,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6675,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11685,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6675,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 134,
+      "srcSet": [
+       134
+      ],
+      "removeSrc": [],
+      "load": [
+       134
+      ],
+      "pause": [
+       6674
+      ],
+      "play": [
+       "357"
+      ],
+      "loadeddata": 357,
+      "firstFrame": 230,
+      "abortEv": null,
+      "emptied": 136,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 1.47,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 9.8,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 8.33
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 57,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 2539520,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1458176,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 5010,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 58,
+      "card": "A",
+      "t0": 676,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 229376,
+      "end": "client-abort",
+      "tEnd": 1673,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 229376,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "webm",
+   "mode": "NORANGE",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 141,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 141,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 344,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 652,
+     "what": "dispose"
+    },
+    {
+     "t": 653,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 5654,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 653,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       142
+      ],
+      "removeSrc": [],
+      "load": [
+       142
+      ],
+      "pause": [
+       652
+      ],
+      "play": [
+       "342"
+      ],
+      "loadeddata": 342,
+      "firstFrame": 229,
+      "abortEv": null,
+      "emptied": 144,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 0.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.64,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 4.04
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 59,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 200,
+      "contentRange": null,
+      "length": 3091428,
+      "bytesSent": 1212416,
+      "end": "open-at-run-end",
+      "tEnd": null,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 131072,
+      "bytesInWindowAfterCleanup": 1064960,
+      "lastWriteAfterCleanupMs": 5005,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1064960,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 1
+   }
+  },
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 142,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 142,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 185,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 186,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5191,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 186,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 144,
+      "srcSet": [
+       144
+      ],
+      "removeSrc": [],
+      "load": [
+       144
+      ],
+      "pause": [
+       185
+      ],
+      "play": [
+       "184"
+      ],
+      "loadeddata": 184,
+      "firstFrame": 180,
+      "abortEv": null,
+      "emptied": 146,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 9.4
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 60,
+      "card": "A",
+      "t0": 149,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 324,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1048576,
+      "bytesInWindowAfterCleanup": 2575277,
+      "lastWriteAfterCleanupMs": 138,
+      "endAfterCleanupMs": 138
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2575277,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 143,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 143,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 202,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 202,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 202,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5215,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 202,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 144,
+      "srcSet": [
+       144
+      ],
+      "removeSrc": [],
+      "load": [
+       144
+      ],
+      "pause": [
+       202
+      ],
+      "play": [
+       "182"
+      ],
+      "loadeddata": 182,
+      "firstFrame": 180,
+      "abortEv": null,
+      "emptied": 146,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.6,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 9.4
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 61,
+      "card": "A",
+      "t0": 149,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 340,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1048576,
+      "bytesInWindowAfterCleanup": 2575277,
+      "lastWriteAfterCleanupMs": 138,
+      "endAfterCleanupMs": 138
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2575277,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 141,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 141,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 193,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 193,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 193,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5204,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 193,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 142,
+      "srcSet": [
+       142
+      ],
+      "removeSrc": [],
+      "load": [
+       142
+      ],
+      "pause": [
+       193
+      ],
+      "play": [
+       "172"
+      ],
+      "loadeddata": 171,
+      "firstFrame": 169,
+      "abortEv": null,
+      "emptied": 144,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.47,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 8.53
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 62,
+      "card": "A",
+      "t0": 146,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 323,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1310720,
+      "bytesInWindowAfterCleanup": 2313133,
+      "lastWriteAfterCleanupMs": 130,
+      "endAfterCleanupMs": 130
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2313133,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 144,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 144,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 211,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 513,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 828,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 850,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1150,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1456,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1488,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1789,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2097,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2119,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2423,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2736,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2760,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3060,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3374,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 8381,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 3374,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 145,
+      "srcSet": [
+       146
+      ],
+      "removeSrc": [],
+      "load": [
+       146
+      ],
+      "pause": [
+       513
+      ],
+      "play": [
+       "188"
+      ],
+      "loadeddata": 187,
+      "firstFrame": 184,
+      "abortEv": null,
+      "emptied": 150,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 828,
+      "srcSet": [
+       828
+      ],
+      "removeSrc": [],
+      "load": [
+       828
+      ],
+      "pause": [
+       1151
+      ],
+      "play": [
+       "846"
+      ],
+      "loadeddata": 845,
+      "firstFrame": 843,
+      "abortEv": null,
+      "emptied": 829,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 1456,
+      "srcSet": [
+       1457
+      ],
+      "removeSrc": [],
+      "load": [
+       1457
+      ],
+      "pause": [
+       1790
+      ],
+      "play": [
+       "1479"
+      ],
+      "loadeddata": 1478,
+      "firstFrame": 1476,
+      "abortEv": null,
+      "emptied": 1457,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 2097,
+      "srcSet": [
+       2097
+      ],
+      "removeSrc": [],
+      "load": [
+       2098
+      ],
+      "pause": [
+       2423
+      ],
+      "play": [
+       "2119"
+      ],
+      "loadeddata": 2118,
+      "firstFrame": 2118,
+      "abortEv": null,
+      "emptied": 2098,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 2736,
+      "srcSet": [
+       2736
+      ],
+      "removeSrc": [],
+      "load": [
+       2736
+      ],
+      "pause": [
+       3060
+      ],
+      "play": [
+       "2755"
+      ],
+      "loadeddata": 2754,
+      "firstFrame": 2755,
+      "abortEv": null,
+      "emptied": 2737,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 63,
+      "card": "A",
+      "t0": 152,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 355,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 203,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 203,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 204,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 236,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 537,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 537,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5544,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 537,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [],
+      "load": [
+       149
+      ],
+      "pause": [
+       203
+      ],
+      "play": [
+       "183"
+      ],
+      "loadeddata": 182,
+      "firstFrame": 183,
+      "abortEv": null,
+      "emptied": 151,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "B",
+      "created": 204,
+      "srcSet": [
+       204
+      ],
+      "removeSrc": [],
+      "load": [
+       204
+      ],
+      "pause": [
+       537
+      ],
+      "play": [
+       "230"
+      ],
+      "loadeddata": 229,
+      "firstFrame": 227,
+      "abortEv": null,
+      "emptied": 204,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 64,
+      "card": "A",
+      "t0": 154,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 324,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 65,
+      "card": "B",
+      "t0": 208,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 386,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 2,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 148,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 148,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 203,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 205,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 205,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5205,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 205,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 149,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [],
+      "load": [
+       149
+      ],
+      "pause": [],
+      "play": [
+       "184"
+      ],
+      "loadeddata": 183,
+      "firstFrame": 179,
+      "abortEv": null,
+      "emptied": 152,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 2.6,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 9.4
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 66,
+      "card": "A",
+      "t0": 154,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 354,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1048576,
+      "bytesInWindowAfterCleanup": 2575277,
+      "lastWriteAfterCleanupMs": 149,
+      "endAfterCleanupMs": 149
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2575277,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 128,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 128,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 192,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 492,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 495,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 495,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5496,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 495,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 130,
+      "srcSet": [
+       130
+      ],
+      "removeSrc": [],
+      "load": [
+       130
+      ],
+      "pause": [],
+      "play": [
+       "171"
+      ],
+      "loadeddata": 170,
+      "firstFrame": 167,
+      "abortEv": null,
+      "emptied": 132,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 67,
+      "card": "A",
+      "t0": 135,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 333,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 132,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 132,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 196,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 497,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 499,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1502,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1503,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1503,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6504,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6505,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11518,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6505,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 133,
+      "srcSet": [
+       133
+      ],
+      "removeSrc": [],
+      "load": [
+       133
+      ],
+      "pause": [
+       6504
+      ],
+      "play": [
+       "176"
+      ],
+      "loadeddata": 176,
+      "firstFrame": 172,
+      "abortEv": null,
+      "emptied": 135,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 68,
+      "card": "A",
+      "t0": 137,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 316,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "mp4",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 145,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 145,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 206,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 507,
+     "what": "dispose"
+    },
+    {
+     "t": 508,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 5523,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 508,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 146,
+      "srcSet": [
+       146
+      ],
+      "removeSrc": [],
+      "load": [
+       146
+      ],
+      "pause": [
+       507
+      ],
+      "play": [
+       "187"
+      ],
+      "loadeddata": 187,
+      "firstFrame": 206,
+      "abortEv": null,
+      "emptied": 155,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 69,
+      "card": "A",
+      "t0": 156,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3623852/3623853",
+      "length": 3623853,
+      "bytesSent": 3623853,
+      "end": "complete",
+      "tEnd": 353,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3623853,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_PENDING",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 128,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 128,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 188,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 188,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5202,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 188,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 130,
+      "srcSet": [
+       130
+      ],
+      "removeSrc": [],
+      "load": [
+       130
+      ],
+      "pause": [
+       188
+      ],
+      "play": [
+       "168"
+      ],
+      "loadeddata": 167,
+      "firstFrame": 163,
+      "abortEv": null,
+      "emptied": 138,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 4.07,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 7.94
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 70,
+      "card": "A",
+      "t0": 142,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 289,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1310720,
+      "bytesInWindowAfterCleanup": 1780708,
+      "lastWriteAfterCleanupMs": 101,
+      "endAfterCleanupMs": 101
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1780708,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_LOADEDDATA",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 149,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 149,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 223,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 223,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 223,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5233,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 223,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 150,
+      "srcSet": [
+       150
+      ],
+      "removeSrc": [],
+      "load": [
+       150
+      ],
+      "pause": [
+       223
+      ],
+      "play": [
+       "203"
+      ],
+      "loadeddata": 202,
+      "firstFrame": 199,
+      "abortEv": null,
+      "emptied": 155,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 3,
+       "bufferedEnd": 4.07,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 7.94
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 71,
+      "card": "A",
+      "t0": 165,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 325,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1310720,
+      "bytesInWindowAfterCleanup": 1780708,
+      "lastWriteAfterCleanupMs": 102,
+      "endAfterCleanupMs": 102
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 1780708,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "LEAVE_FIRST_FRAME",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 137,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 137,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 178,
+     "what": "ready:frame",
+     "card": "A"
+    },
+    {
+     "t": 178,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 178,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5194,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 178,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 0,
+    "elements": [
+     {
+      "card": "A",
+      "created": 139,
+      "srcSet": [
+       139
+      ],
+      "removeSrc": [
+       178
+      ],
+      "load": [
+       139,
+       178
+      ],
+      "pause": [
+       178
+      ],
+      "play": [],
+      "loadeddata": null,
+      "firstFrame": 171,
+      "abortEv": 178,
+      "emptied": 140,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 3,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 0,
+       "networkState": 0,
+       "readyState": 0,
+       "bufferedEnd": 0,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 72,
+      "card": "A",
+      "t0": 142,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 786432,
+      "end": "client-abort",
+      "tEnd": 179,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 786432,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": 1
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [
+     1
+    ],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "CYCLES_5",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 146,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 146,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 199,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 500,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 805,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 829,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1130,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 1432,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 1454,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 1755,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2070,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2092,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 2393,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 2695,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 2718,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 3019,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 3324,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 8330,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 3324,
+   "event": {
+    "hoverElements": 5,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 5,
+    "holdingSrcAtEnd": 5,
+    "elements": [
+     {
+      "card": "A",
+      "created": 147,
+      "srcSet": [
+       147
+      ],
+      "removeSrc": [],
+      "load": [
+       147
+      ],
+      "pause": [
+       500
+      ],
+      "play": [
+       "178"
+      ],
+      "loadeddata": 178,
+      "firstFrame": 175,
+      "abortEv": null,
+      "emptied": 152,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 805,
+      "srcSet": [
+       805
+      ],
+      "removeSrc": [],
+      "load": [
+       805
+      ],
+      "pause": [
+       1130
+      ],
+      "play": [
+       "824"
+      ],
+      "loadeddata": 823,
+      "firstFrame": 825,
+      "abortEv": null,
+      "emptied": 806,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 1433,
+      "srcSet": [
+       1433
+      ],
+      "removeSrc": [],
+      "load": [
+       1433
+      ],
+      "pause": [
+       1755
+      ],
+      "play": [
+       "1448"
+      ],
+      "loadeddata": 1448,
+      "firstFrame": 1449,
+      "abortEv": null,
+      "emptied": 1433,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 2071,
+      "srcSet": [
+       2071
+      ],
+      "removeSrc": [],
+      "load": [
+       2071
+      ],
+      "pause": [
+       2393
+      ],
+      "play": [
+       "2089"
+      ],
+      "loadeddata": 2088,
+      "firstFrame": 2085,
+      "abortEv": null,
+      "emptied": 2072,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "A",
+      "created": 2696,
+      "srcSet": [
+       2696
+      ],
+      "removeSrc": [],
+      "load": [
+       2696
+      ],
+      "pause": [
+       3019
+      ],
+      "play": [
+       "2714"
+      ],
+      "loadeddata": 2713,
+      "firstFrame": 2711,
+      "abortEv": null,
+      "emptied": 2697,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 73,
+      "card": "A",
+      "t0": 153,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 323,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "A_TO_B",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 157,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 157,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 219,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 219,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 220,
+     "what": "enter",
+     "card": "B"
+    },
+    {
+     "t": 252,
+     "what": "ready:loadeddata",
+     "card": "B"
+    },
+    {
+     "t": 554,
+     "what": "leave",
+     "card": "B"
+    },
+    {
+     "t": 554,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 5560,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 554,
+   "event": {
+    "hoverElements": 2,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 2,
+    "holdingSrcAtEnd": 2,
+    "elements": [
+     {
+      "card": "A",
+      "created": 158,
+      "srcSet": [
+       158
+      ],
+      "removeSrc": [],
+      "load": [
+       158
+      ],
+      "pause": [
+       219
+      ],
+      "play": [
+       "195"
+      ],
+      "loadeddata": 195,
+      "firstFrame": 196,
+      "abortEv": null,
+      "emptied": 167,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     },
+     {
+      "card": "B",
+      "created": 220,
+      "srcSet": [
+       220
+      ],
+      "removeSrc": [],
+      "load": [
+       220
+      ],
+      "pause": [
+       554
+      ],
+      "play": [
+       "244"
+      ],
+      "loadeddata": 243,
+      "firstFrame": 244,
+      "abortEv": null,
+      "emptied": 221,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 74,
+      "card": "A",
+      "t0": 170,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 335,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     },
+     {
+      "id": 75,
+      "card": "B",
+      "t0": 225,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 382,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 2,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_PENDING",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 207,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 209,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 209,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5210,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 209,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 148,
+      "srcSet": [
+       148
+      ],
+      "removeSrc": [],
+      "load": [
+       148
+      ],
+      "pause": [],
+      "play": [
+       "187"
+      ],
+      "loadeddata": 186,
+      "firstFrame": 184,
+      "abortEv": null,
+      "emptied": 150,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 2,
+       "readyState": 4,
+       "bufferedEnd": 3.05,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 8.96
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 76,
+      "card": "A",
+      "t0": 151,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 322,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": false,
+      "activeAtCleanup": true,
+      "bytesBeforeCleanup": 1048576,
+      "bytesInWindowAfterCleanup": 2042852,
+      "lastWriteAfterCleanupMs": 113,
+      "endAfterCleanupMs": 113
+     }
+    ],
+    "requestsActiveAtCleanup": 1,
+    "requestsCompleteBeforeCleanup": 0,
+    "bytesAfterCleanupWithin5s": 2042852,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_INSTALLED",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 130,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 130,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 193,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 494,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 496,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 496,
+     "what": "cleanup",
+     "kind": "takeover"
+    },
+    {
+     "t": 5498,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 496,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 131,
+      "srcSet": [
+       131
+      ],
+      "removeSrc": [],
+      "load": [
+       131
+      ],
+      "pause": [],
+      "play": [
+       "172"
+      ],
+      "loadeddata": 172,
+      "firstFrame": 168,
+      "abortEv": null,
+      "emptied": 133,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 0
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 77,
+      "card": "A",
+      "t0": 137,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 309,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "VIEWER_CLOSE",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 126,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 126,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 191,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 493,
+     "what": "click",
+     "card": "A"
+    },
+    {
+     "t": 495,
+     "what": "viewer",
+     "open": true
+    },
+    {
+     "t": 1497,
+     "what": "viewerClose"
+    },
+    {
+     "t": 1498,
+     "what": "viewer",
+     "open": false
+    },
+    {
+     "t": 1498,
+     "what": "cleanup",
+     "kind": "viewerClose"
+    },
+    {
+     "t": 6498,
+     "what": "leave",
+     "card": "A"
+    },
+    {
+     "t": 6499,
+     "what": "cleanup",
+     "kind": "leave"
+    },
+    {
+     "t": 11506,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 6499,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 1,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 127,
+      "srcSet": [
+       127
+      ],
+      "removeSrc": [],
+      "load": [
+       127
+      ],
+      "pause": [
+       6498
+      ],
+      "play": [
+       "171"
+      ],
+      "loadeddata": 170,
+      "firstFrame": 166,
+      "abortEv": null,
+      "emptied": 133,
+      "atCleanup": {
+       "connected": 1,
+       "inHover": 1,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 0
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 78,
+      "card": "A",
+      "t0": 136,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 307,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  },
+  {
+   "scenario": "DISPOSE",
+   "container": "webm",
+   "mode": "FAST",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "contaminated": false,
+   "error": null,
+   "marks": [
+    {
+     "t": 147,
+     "what": "start",
+     "enhanced": true,
+     "hoverSetting": true,
+     "viewerSetting": true
+    },
+    {
+     "t": 147,
+     "what": "enter",
+     "card": "A"
+    },
+    {
+     "t": 207,
+     "what": "ready:loadeddata",
+     "card": "A"
+    },
+    {
+     "t": 508,
+     "what": "dispose"
+    },
+    {
+     "t": 508,
+     "what": "cleanup",
+     "kind": "dispose"
+    },
+    {
+     "t": 5511,
+     "what": "windowEnd"
+    }
+   ],
+   "cleanupAt": 508,
+   "event": {
+    "hoverElements": 1,
+    "viewerElements": 0,
+    "maxHoldingSrcSimultaneously": 1,
+    "holdingSrcAtEnd": 1,
+    "elements": [
+     {
+      "card": "A",
+      "created": 149,
+      "srcSet": [
+       149
+      ],
+      "removeSrc": [],
+      "load": [
+       149
+      ],
+      "pause": [
+       508
+      ],
+      "play": [
+       "187"
+      ],
+      "loadeddata": 186,
+      "firstFrame": 205,
+      "abortEv": null,
+      "emptied": 159,
+      "atCleanup": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "atEnd": {
+       "connected": 0,
+       "inHover": 0,
+       "holdsSrc": 1,
+       "networkState": 1,
+       "readyState": 4,
+       "bufferedEnd": 12.01,
+       "paused": 1
+      },
+      "bufferedGrowthAfterCleanup": 0
+     }
+    ]
+   },
+   "transport": {
+    "requests": [
+     {
+      "id": 79,
+      "card": "A",
+      "t0": 163,
+      "range": "bytes=0-",
+      "status": 206,
+      "contentRange": "bytes 0-3091427/3091428",
+      "length": 3091428,
+      "bytesSent": 3091428,
+      "end": "complete",
+      "tEnd": 322,
+      "startedAfterCleanup": false,
+      "completeBeforeCleanup": true,
+      "activeAtCleanup": false,
+      "bytesBeforeCleanup": 3091428,
+      "bytesInWindowAfterCleanup": 0,
+      "lastWriteAfterCleanupMs": null,
+      "endAfterCleanupMs": null
+     }
+    ],
+    "requestsActiveAtCleanup": 0,
+    "requestsCompleteBeforeCleanup": 1,
+    "bytesAfterCleanupWithin5s": 0,
+    "requestsStartedAfterCleanup": 0,
+    "clientAbortsAfterCleanup": [],
+    "openAtRunEnd": 0
+   }
+  }
+ ]
+}

@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). The V3-C controlled experiment is prepared and locally qualified (`IB10_V3C.md`); its operator run is pending. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -26,16 +26,17 @@
 - **G-VIDEO (class, cell): OPEN.** It must reach E → PASS before automatic hover-video integration (blueprint IB10 item 6).
 - **IB10 defects found in current production (not corrected):**
   - D1: the video FILE source is assigned at pointer-enter, with no dwell;
-  - D2: an installed hover video is paused and detached on leave, dispose or viewer close, but keeps its `src` (bytes unknown);
-  - D3: detached source-holding elements accumulate (5 after five cycles; 2 on A→B);
-  - D4: the viewer takeover does not stop the hover video, and a hover video that becomes ready during the viewer is installed and played.
+  - D2 **CONFIRMED by transport**: after readiness, leave/dispose/viewer-close leaves the request streaming through +5 s (~1.06–1.15 MB/5 s throttled; under FAST the file completes after leave). Pending release aborts within ±1 ms;
+  - D3 **CONFIRMED, narrowed**: detached source-holding elements accumulate. Transfer multiplies when URLs differ (A→B: 2 streams) or without Range (5 concurrent streams); with Range, same-URL elements share one request;
+  - D4: the viewer takeover does not stop the hover video, and a hover video that becomes ready during the viewer is installed and played (V3-C controlled-confirmed; NORANGE adds a concurrent viewer stream).
 - **IB10 facts that hold:** always muted at play; stale generations never install; pending elements are released on leave.
 - **IB10 measurable classes:** e621/e926 logged-out `/posts` video cards in TC, by container (webm/mp4) and `data-size` band. The original file is the only hover source; there is no cheaper-stream fact. Rule34 and Gelbooru video contexts are OPEN.
 - **G-HOVER:** its cost allowance is available for video evaluation (IB09 item 13). Video admission is not inherited.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
-- **IB10 V3-C package** (`tests/browser/ib10/`): 29/29 local qualification (3/3 fault controls). The executed body equals production `22e843c` byte for byte. Fixture SHA-256 values (mp4 `9ba765f0…`, webm `46764906…`) are computed and pinned; operator confirmation is requested.
+- **IB10 V3-C** (`tests/browser/ib10/`): local qualification 29/29 (3/3 faults). The operator run in Chrome 154 + Tampermonkey 5.5.0 was identity-matched in all entries. Clean selection 54/54; evidence in `tests/browser/ib10/results/` (times rebased). Fixture SHA-256 matched the pinned values.
+  - The controlled portion of IB10 item 9 is satisfied for the original-file class in TC. Excluded: cached, lower-cost variants, other cells.
 - **IB10 E baseline** on `22e843c` (`tests/host/ib10/hover_video_baseline.cjs`): 34/34 on e621 and e926, webm and mp4. 7/7 fault controls, including 2 positive controls (release on leave; dwell for video).
 - **IB09 live production conformance on `b9d133c`:** e621 P1/P2 and e926 P1/P2 all PASS, with the artifact identity matched. In the qualified class every session showed 0 before-dwell media, overlay, fetches and quick-pass work, and 0 downgrades and stale installs. Out-of-scope video and animated generations kept their previous behavior.
 - **Local on `22e843c`:**
@@ -58,11 +59,14 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle, E stage (V3-C).**
+**Active checkpoint: IB10 — Muted hover-video lifecycle, E stage.**
 
-**One bounded next action (operator):**
-1. Confirm the two fixture SHA-256 values.
-2. Run V3-C: `tests/browser/ib10/README.md`; 54 runs, about 10 minutes; Chrome + Tampermonkey; tab in front; mouse off the page.
-3. Return `ib10-v3c-results.json`.
+**One bounded next action (not executed):** prepare **V3-L**, an observe-only live package on logged-out e621/e926 `/posts` with production unchanged. For the operator's real hovers on video cards it records:
+- class (container × `data-size` band);
+- readiness and first-frame times;
+- whether leave came before or after readiness;
+- the hover element's `src`, `networkState` and `buffered` at leave, +1 s and +5 s;
+- concurrent source-holding elements;
+- Resource Timing where visible.
 
-Then analyze it (`analyze_ib10_v3c.cjs`) and settle D2/D3 by transport evidence. Do not start V3-L, and make no production change before that.
+40 generations per host. G-VIDEO stays OPEN until that live-class evidence is reviewed. No production change.
