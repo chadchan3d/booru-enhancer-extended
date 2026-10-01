@@ -1,0 +1,313 @@
+{
+ "files": [
+  {
+   "site": "e621.net",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "version": "1.0.0",
+   "runtime": {
+    "browser": "Chromium 154; Google Chrome 154; Not A(Brand 99",
+    "manager": "Tampermonkey 5.5.0"
+   },
+   "sanitationGuard": null
+  },
+  {
+   "site": "e621.net",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "version": "1.0.0",
+   "runtime": {
+    "browser": "Chromium 154; Google Chrome 154; Not A(Brand 99",
+    "manager": "Tampermonkey 5.5.0"
+   },
+   "sanitationGuard": null
+  },
+  {
+   "site": "e621.net",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "version": "1.0.0",
+   "runtime": {
+    "browser": "Chromium 154; Google Chrome 154; Not A(Brand 99",
+    "manager": "Tampermonkey 5.5.0"
+   },
+   "sanitationGuard": null
+  },
+  {
+   "site": "e926.net",
+   "identity": "MATCH_EXPECTED_ARTIFACT",
+   "version": "1.0.0",
+   "runtime": {
+    "browser": "Chromium 154; Google Chrome 154; Not A(Brand 99",
+    "manager": "Tampermonkey 5.5.0"
+   },
+   "sanitationGuard": null
+  }
+ ],
+ "generations": 202,
+ "summary": {
+  "e621.net|webm": {
+   "generations": 158,
+   "status": {
+    "USABLE": 158
+   },
+   "excludedReasons": {},
+   "usable": 158,
+   "distinctCards": 67,
+   "repeatHovers": 91,
+   "afterReadyState": {
+    "GREW_AFTER_LEAVE": 25,
+    "GREW_AFTER_LEAVE_TO_FULL": 6,
+    "COMPLETE_AT_LEAVE": 15,
+    "IDLE_PARTIAL_NO_GROWTH": 16
+   },
+   "afterReadyStateFirstHover": {
+    "GREW_AFTER_LEAVE": 8,
+    "GREW_AFTER_LEAVE_TO_FULL": 5,
+    "IDLE_PARTIAL_NO_GROWTH": 7,
+    "COMPLETE_AT_LEAVE": 2
+   },
+   "loadeddataMsFirstHover": {
+    "n": 22,
+    "min": 20,
+    "median": 515,
+    "max": 1287
+   },
+   "loadeddataMsRepeatHover": {
+    "n": 40,
+    "min": 11,
+    "median": 33,
+    "max": 1889
+   },
+   "bufferedGrowthWhereGrewSeconds": {
+    "n": 31,
+    "min": 0.17,
+    "median": 8.48,
+    "max": 23.58
+   },
+   "networkStateLeaveP1P5": {
+    "2/2/2": 13,
+    "2/1/1": 6,
+    "1/1/1": 32,
+    "2/2/1": 11
+   },
+   "beforeReadyReleasedAtLeave": 96,
+   "quickPassesUnder200ms": 58,
+   "quickPassesUnder200msWithSource": 58,
+   "rtEntries": 188,
+   "rtEntriesWithSizes": 0,
+   "srcAssignMs": {
+    "n": 158,
+    "min": 0,
+    "median": 0,
+    "max": 2
+   },
+   "loadeddataMs": {
+    "n": 62,
+    "min": 11,
+    "median": 39,
+    "max": 1889
+   },
+   "firstFrameMs": {
+    "n": 68,
+    "min": 8,
+    "median": 35,
+    "max": 1379
+   },
+   "stayMs": {
+    "n": 158,
+    "min": 6,
+    "median": 290,
+    "max": 4201
+   },
+   "leave": {
+    "AFTER_READY": 62,
+    "BEFORE_READY": 96
+   },
+   "leaveBeforeReady": {
+    "n": 96,
+    "p5HoldsSrc": 0,
+    "p5Attached": 0,
+    "p5NetworkState": {
+     "0": 96
+    },
+    "bufferedGrowthLeaveToP5Seconds": {
+     "n": 96,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    "fullyBufferedAt5s": 0,
+    "rtCompleted": 87,
+    "rtSizesHidden": 87,
+    "rtNoEntry": 9
+   },
+   "leaveAfterReady": {
+    "n": 62,
+    "p5HoldsSrc": 62,
+    "p5Attached": 0,
+    "p5NetworkState": {
+     "1": 49,
+     "2": 13
+    },
+    "bufferedGrowthLeaveToP5Seconds": {
+     "n": 62,
+     "min": 0,
+     "median": 0,
+     "max": 23.58
+    },
+    "fullyBufferedAt5s": 21,
+    "rtCompleted": 16,
+    "rtSizesHidden": 16,
+    "rtNoEntry": 46
+   },
+   "maxHoldingHoverVideos": 29,
+   "mutedAtEveryPlay": true,
+   "dataSizeMB": {
+    "n": 158,
+    "min": 0.8,
+    "median": 12.1,
+    "max": 100
+   },
+   "firstHoverSizeBands": {
+    "20-50MB": 17,
+    "5-20MB": 22,
+    ">=50MB": 9,
+    "<5MB": 19
+   },
+   "firstHoverResolution": {
+    "<=720p": 11,
+    "1080p": 38,
+    ">1080p": 18
+   }
+  },
+  "e926.net|mp4": {
+   "generations": 44,
+   "status": {
+    "USABLE": 44
+   },
+   "excludedReasons": {},
+   "usable": 44,
+   "distinctCards": 19,
+   "repeatHovers": 25,
+   "afterReadyState": {
+    "COMPLETE_AT_LEAVE": 10,
+    "GREW_AFTER_LEAVE": 5,
+    "IDLE_PARTIAL_NO_GROWTH": 3,
+    "GREW_AFTER_LEAVE_TO_FULL": 2
+   },
+   "afterReadyStateFirstHover": {
+    "COMPLETE_AT_LEAVE": 2,
+    "GREW_AFTER_LEAVE": 2,
+    "GREW_AFTER_LEAVE_TO_FULL": 2
+   },
+   "loadeddataMsFirstHover": {
+    "n": 6,
+    "min": 75,
+    "median": 197,
+    "max": 398
+   },
+   "loadeddataMsRepeatHover": {
+    "n": 14,
+    "min": 18,
+    "median": 65,
+    "max": 152
+   },
+   "bufferedGrowthWhereGrewSeconds": {
+    "n": 7,
+    "min": 2.8,
+    "median": 11.05,
+    "max": 50.88
+   },
+   "networkStateLeaveP1P5": {
+    "1/1/1": 12,
+    "2/1/1": 7,
+    "2/2/1": 1
+   },
+   "beforeReadyReleasedAtLeave": 24,
+   "quickPassesUnder200ms": 26,
+   "quickPassesUnder200msWithSource": 26,
+   "rtEntries": 68,
+   "rtEntriesWithSizes": 0,
+   "srcAssignMs": {
+    "n": 44,
+    "min": 0,
+    "median": 0,
+    "max": 1
+   },
+   "loadeddataMs": {
+    "n": 20,
+    "min": 18,
+    "median": 77,
+    "max": 398
+   },
+   "firstFrameMs": {
+    "n": 20,
+    "min": 19,
+    "median": 73,
+    "max": 387
+   },
+   "stayMs": {
+    "n": 44,
+    "min": 4,
+    "median": 140,
+    "max": 4316
+   },
+   "leave": {
+    "AFTER_READY": 20,
+    "BEFORE_READY": 24
+   },
+   "leaveBeforeReady": {
+    "n": 24,
+    "p5HoldsSrc": 0,
+    "p5Attached": 0,
+    "p5NetworkState": {
+     "0": 24
+    },
+    "bufferedGrowthLeaveToP5Seconds": {
+     "n": 24,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    "fullyBufferedAt5s": 0,
+    "rtCompleted": 20,
+    "rtSizesHidden": 20,
+    "rtNoEntry": 4
+   },
+   "leaveAfterReady": {
+    "n": 20,
+    "p5HoldsSrc": 20,
+    "p5Attached": 0,
+    "p5NetworkState": {
+     "1": 20
+    },
+    "bufferedGrowthLeaveToP5Seconds": {
+     "n": 20,
+     "min": 0,
+     "median": 0,
+     "max": 50.88
+    },
+    "fullyBufferedAt5s": 12,
+    "rtCompleted": 16,
+    "rtSizesHidden": 16,
+    "rtNoEntry": 4
+   },
+   "maxHoldingHoverVideos": 31,
+   "mutedAtEveryPlay": true,
+   "dataSizeMB": {
+    "n": 44,
+    "min": 0.2,
+    "median": 5.3,
+    "max": 39.6
+   },
+   "firstHoverSizeBands": {
+    "<5MB": 9,
+    "5-20MB": 8,
+    "20-50MB": 2
+   },
+   "firstHoverResolution": {
+    "<=720p": 11,
+    "1080p": 7,
+    ">1080p": 1
+   }
+  }
+ }
+}
