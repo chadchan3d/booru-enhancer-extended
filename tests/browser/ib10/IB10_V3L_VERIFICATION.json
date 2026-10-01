@@ -1,0 +1,48 @@
+{
+  "checkpoint": "IB10",
+  "stage": "E-stage V3-L live observer, local qualification (simulated media; not live evidence)",
+  "production_commit": "b9d133c",
+  "production_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
+  "checks": 31,
+  "passed": 31,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault production artifact mismatch (tampered body): identity MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "fault accidental production-affecting mutation (pause wrapper also drops src): caught by the runtime observe-only equivalence",
+      "pass": true
+    },
+    {
+      "name": "fault host/route scope failure (route and login checks removed): caught (session recorded on a logged-in page)",
+      "pass": true
+    },
+    {
+      "name": "fault viewer takeover not recorded (open wrapper removed): caught (G6 no longer CONTAMINATED)",
+      "pass": true
+    },
+    {
+      "name": "fault missing leave sampling: caught (generations AMBIGUOUS: missing leave sample)",
+      "pass": true
+    },
+    {
+      "name": "fault missing readiness recording: caught (after-ready leaves misclassified BEFORE_READY / no loadeddata)",
+      "pass": true
+    },
+    {
+      "name": "fault missing +5 s observation: caught (AMBIGUOUS: missing p5 sample)",
+      "pass": true
+    },
+    {
+      "name": "fault missing +1 s observation: caught (AMBIGUOUS: missing p1 sample)",
+      "pass": true
+    },
+    {
+      "name": "fault accumulation not distinguished (count only the current generation): caught (leave counts are not 0,1,2,3,4,5)",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

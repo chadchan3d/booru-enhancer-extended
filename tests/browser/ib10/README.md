@@ -58,3 +58,38 @@ The two media fixtures come from the operator and are not tracked in the current
 6. **Return the results:** `ib10-v3c-results.json`. It contains no URLs or IDs, only card labels, times, byte counts and browser/manager brand versions. Then disable the script and stop the server (Ctrl+C).
 
 If the run stops partway, press Ctrl+C in the server terminal (it writes the runs completed so far) and return that file.
+
+---
+
+# IB10 V3-L live observer (prepared; operator run pending)
+
+`IB10_V3L_Live_Observer.user.js` is production `b9d133c` (blob `22e843c`) **unchanged**, wrapped by an observe-only recorder and observer. It runs only on e621.net and e926.net, logged out, on the `/posts` listing (search queries allowed), in the TC cell (Chrome + Tampermonkey).
+
+**What it records.** It records **your real hovers on video cards only** (mp4/webm/mov); it generates no events. Still and GIF cards are counted, not recorded. For each video-card hover generation:
+- **Card facts:** host, container, exact `data-size`, native `data-width` / `data-height`, card ordinal and repeat count, and whether production's hover source is the card's own file.
+- **Timeline:** enter, `src` assignment, readiness events, first presented frame, and leave (before or after readiness).
+- **Element samples:** the hover element's state (attached, holds `src`, `networkState`, `readyState`, buffered end) at leave, +1 s and +5 s, plus the number of hover `<video>` elements still holding a source.
+- **Resource Timing:** only what the browser exposes; hidden sizes are never read as zero.
+
+DOM state is never reported as proof that downloading stopped. Output is sanitized (no URLs, post IDs or hashes).
+
+**Local qualification:** `node tests/browser/ib10/build_ib10_v3l.cjs --check` and `node tests/browser/ib10/verify_ib10_v3l.cjs`.
+
+## Operator steps (normal Chrome, logged out, DevTools closed)
+
+1. **Prepare Tampermonkey:** **disable** the normal Booru Enhancer and every other IB script (including the V3-C script), then install `IB10_V3L_Live_Observer.user.js`. Hover preview must be on in its settings (the default).
+2. **Open a listing:** a logged-out `https://e621.net/posts` page with video cards. A native search such as `type:webm` or `type:mp4` is fine. Do not open the enlarged viewer during a session; clicking a card contaminates the hovers around it.
+3. **Start:** Tampermonkey → **IB10L: Start session (video hovers)**.
+4. **Hover naturally over video cards:**
+   - some quick passes;
+   - some rests of 1–3 s until the preview plays;
+   - moves from one card to the next.
+
+   Keep the tab in front. Don't click cards.
+5. **About every 10–15 video hovers:** **IB10L: Show results (ends the session)**, copy the JSON, label it (host plus a number), close the box, and **reload the page**.
+   - The reload also stops any downloads that hover videos left running (defect D2).
+   - Repeat until about 40 video hovers are recorded for the host, or stop earlier if the listing has too few video cards. Record that fact.
+6. **Repeat on e926:** steps 2–5 on `https://e926.net/posts`.
+7. **Return** all labelled JSON results, including any `sanitationGuard: BLOCKED` result as it is. Afterwards, disable the script.
+
+**Bandwidth warning:** every hover that lasts past readiness downloads the **whole original video**, and it keeps downloading after you leave (that is defect D2 being measured). Large originals can make this run hundreds of MB to several GB. Prefer smaller videos or more quick passes if bandwidth matters, and reload often.

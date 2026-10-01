@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE (E stage). G-VIDEO OPEN.** The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **The V3-L live observer is prepared and locally qualified** (`IB10_V3L.md`); its operator run is pending. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -35,6 +35,7 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 V3-L package** (`tests/browser/ib10/IB10_V3L_Live_Observer.user.js`): 31/31 local qualification (simulated media; 9/9 fault controls). The executed body equals production `22e843c`; observe-only both statically and at runtime; restricted to logged-out e621/e926 `/posts`.
 - **IB10 V3-C** (`tests/browser/ib10/`): local qualification 29/29 (3/3 faults). The operator run in Chrome 154 + Tampermonkey 5.5.0 was identity-matched in all entries. Clean selection 54/54; evidence in `tests/browser/ib10/results/` (times rebased). Fixture SHA-256 matched the pinned values.
   - The controlled portion of IB10 item 9 is satisfied for the original-file class in TC. Excluded: cached, lower-cost variants, other cells.
 - **IB10 E baseline** on `22e843c` (`tests/host/ib10/hover_video_baseline.cjs`): 34/34 on e621 and e926, webm and mp4. 7/7 fault controls, including 2 positive controls (release on leave; dwell for video).
@@ -53,6 +54,12 @@
   - the window is +5 s (later buffer-limit pausing is not observed);
   - cache is excluded by design (no-store);
   - TC only.
+- **IB10 V3-L limitations:**
+  - no live byte evidence (DOM/media proxy, validated only in V3-C);
+  - Resource Timing sizes mostly hidden;
+  - viewer contamination is conservative;
+  - exact `data-size` with dimensions could identify posts, so committing raw live results needs a decision;
+  - after-ready hovers download whole originals (bandwidth).
 - **IB10 fixtures:** externally supplied and not tracked. Committed once by mistake in `0a43e73`; removed in `1820c18` without a history rewrite. Their exact paths are in `.gitignore`.
 - **IB09 limitations:**
   - throttled usefulness is observed on e621 only;
@@ -69,12 +76,9 @@
 ## Next
 **Active checkpoint: IB10 — Muted hover-video lifecycle, E stage.**
 
-**One bounded next action (not executed):** prepare **V3-L**, an observe-only live package on logged-out e621/e926 `/posts` with production unchanged. For the operator's real hovers on video cards it records:
-- class (container × `data-size` band);
-- readiness and first-frame times;
-- whether leave came before or after readiness;
-- the hover element's `src`, `networkState` and `buffered` at leave, +1 s and +5 s;
-- concurrent source-holding elements;
-- Resource Timing where visible.
+**One bounded next action (operator):** run V3-L per `tests/browser/ib10/README.md` ("IB10 V3-L live observer"):
+- e621 and e926, logged out, in Chrome + Tampermonkey;
+- your real hovers on video cards, up to about 40 per host;
+- sessions of 10–15 hovers, each ended with Show results and a reload.
 
-40 generations per host. G-VIDEO stays OPEN until that live-class evidence is reviewed. No production change.
+Return the labelled JSON results. Then analyze them (`analyze_ib10_v3l.cjs`) and decide the representative live classes. G-VIDEO stays OPEN until then. No production change.
