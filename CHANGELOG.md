@@ -24,6 +24,22 @@ The site's own thumbnail now stays in these cases, which were previously enhance
 
 Your saved **Grid thumbnail quality** choice is kept even where it currently has no effect, and it applies again wherever the thumbnail is supported.
 
+## Unreleased — e621/e926 hover video previews
+
+On the e621 and e926 post listing (`/posts`) while **logged out**, the hover preview for these videos changes:
+- e621 WebM videos up to 100 MB;
+- e926 MP4 videos under 50 MB.
+
+**Before 200 ms:**
+- The thumbnail still appears immediately.
+- The video only starts loading once the pointer has rested on the thumbnail for **200 ms**. Sweeping across the grid no longer starts video downloads.
+
+**After the hover ends:**
+- When you move off the thumbnail, open the full viewer, or the gallery is closed, the preview video stops and stops downloading.
+- Returning to a video you just previewed still starts quickly, because the browser reuses what it already downloaded.
+
+Hover previews stay muted. Other videos, GIFs, logged-in pages and other sites keep their current behavior.
+
 ## Unreleased — e621/e926 hover preview timing
 
 On the e621 and e926 post listing (`/posts`) while **logged out**, the hover preview for still images now waits until the pointer rests on a thumbnail for **200 ms**. Moving the pointer across the grid no longer starts any image loads or post lookups.

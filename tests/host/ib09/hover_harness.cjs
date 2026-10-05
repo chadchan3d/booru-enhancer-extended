@@ -176,4 +176,14 @@ function timeline(s) {
   };
 }
 
-module.exports = { session, timeline, classifySlot, installFakeClock, eStageSource, U, card, listing, M };
+// Production source at a pinned commit, checked against its expected blob (for
+// suites whose evidence characterizes one specific artifact).
+function sourceAt(commit, expectedBlob) {
+  const { execFileSync } = require('child_process');
+  const repo = path.resolve(__dirname, '../../..');
+  const blob = execFileSync('git', ['-C', repo, 'rev-parse', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
+  if (blob !== expectedBlob) throw new Error(`production blob at ${commit} is not ${expectedBlob}`);
+  return execFileSync('git', ['-C', repo, 'show', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).replace(/\r\n/g, '\n');
+}
+
+module.exports = { session, timeline, classifySlot, installFakeClock, eStageSource, sourceAt, U, card, listing, M };

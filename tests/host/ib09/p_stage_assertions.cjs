@@ -17,7 +17,7 @@ const hh = require('./hover_harness.cjs');
 const { mustReplace } = require('./dwell_prototype.cjs');
 const h = require(path.resolve(__dirname, '../ib07/item9_harness.cjs'));
 
-const PROD = h.productionSource();
+const PROD = hh.sourceAt('b9d133c', '22e843cbe27662fc27d17149534b055d7a249dae'); // pinned: IB09 P-stage evidence on 22e843c (IB10 changed production later)
 const BASE = hh.eStageSource();
 const DWELL = 200;
 const results = [];

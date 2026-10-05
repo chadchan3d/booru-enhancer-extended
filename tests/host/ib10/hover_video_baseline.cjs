@@ -18,7 +18,7 @@ const hh = require('../ib09/hover_harness.cjs');
 const { mustReplace } = require('../ib09/dwell_prototype.cjs');
 const h = require(path.resolve(__dirname, '../ib07/item9_harness.cjs'));
 
-const PROD = h.productionSource();
+const PROD = hh.sourceAt('b9d133c', '22e843cbe27662fc27d17149534b055d7a249dae'); // pinned: IB10 E-stage evidence on 22e843c
 const EXPECTED_BLOB = '22e843cbe27662fc27d17149534b055d7a249dae';
 const results = [];
 const check = (name, ok, detail = '') => results.push({ name, pass: !!ok, detail: ok ? '' : String(detail).slice(0, 600) });

@@ -2877,6 +2877,8 @@
 		let pendingUpgradeMedia = null;
 		let stateTimer = null;
 		let dwellTimer = null;
+		let admittedVideoToken = 0; // IB10: generation of an admitted hover video (0 = none)
+		const releaseOnEnd = new WeakSet(); // IB10: admitted hover videos, released when their hover ends
 		// IB09 G-HOVER(e621/e926 qualified still-image class) PASS(scope): frozen dwell.
 		const HOVER_DWELL_MS = 200;
 
@@ -3105,8 +3107,49 @@
 			return showingPreview && same(resolved.url, wrap.dataset.sampleUrl) && !same(resolved.url, current);
 		}
 
+		// IB10 G-VIDEO(class, cell) E -> PASS(scope); owner decision V3-R Option A
+		// (immediate release). Admitted: a video card on a page the IB08 rendition
+		// contract admits (rendition fact NATIVE_UNSUPPORTED arises only there:
+		// logged-out e621/e926 /posts; still-pattern cards carry other values) whose
+		// native facts match a measured class: e621.net WebM up to 100 MB, or e926.net
+		// MP4 under 50 MB, with a numeric data-size and a data-file-url of the same
+		// container. These cards get the 200 ms dwell before video work and a hover
+		// video that is released when the hover ends; every other card keeps its
+		// existing hover path.
+		function hoverVideoAdmittedWrap(img) {
+			const wrap = img.closest('.be-thumb-wrap');
+			if (!wrap || BE.modules.gallery?.getThumbRendition?.(wrap) !== 'NATIVE_UNSUPPORTED') return null;
+			const host = location.hostname;
+			const cls = host === 'e621.net' ? { ext: 'webm', maxBytes: 100000000 } : (host === 'e926.net' ? { ext: 'mp4', maxBytes: 49999999 } : null);
+			const ext = String(wrap.getAttribute('data-file-ext') || '').toLowerCase();
+			const fileExt = (String(wrap.getAttribute('data-file-url') || '').split(/[?#]/)[0].split('.').pop() || '').toLowerCase();
+			const size = Number(wrap.getAttribute('data-size'));
+			if (!cls || ext !== cls.ext || fileExt !== ext || !Number.isFinite(size) || size <= 0 || size > cls.maxBytes) return null;
+			return wrap;
+		}
+
+		// Releases an admitted hover video: pause, remove every owned source path,
+		// reset. Browser-level media/HTTP caching is left alone.
+		function releaseHoverVideo(video) {
+			try { video.pause(); } catch { /* noop */ }
+			try {
+				for (const source of [...video.querySelectorAll('source')]) source.remove();
+				video.removeAttribute('src');
+				video.load();
+			} catch { /* noop */ }
+		}
+
 		function upgradeWhenReady(resolved, sourceImg, token) {
 			if (!resolved?.url || token !== requestToken) return;
+			const videoWrap = hoverVideoAdmittedWrap(sourceImg);
+			if (videoWrap) {
+				// Admitted class: only the card's own original file.
+				const same = (a, b) => { try { return !!a && !!b && new URL(a, location.href).href === new URL(b, location.href).href; } catch { return false; } };
+				if (!same(resolved.url, videoWrap.getAttribute('data-file-url'))) {
+					clearMediaState();
+					return;
+				}
+			}
 			const qualifiedWrap = hoverQualifiedWrap(sourceImg);
 			if (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {
 				clearMediaState();
@@ -3128,6 +3171,7 @@
 				showMediaState('Loading video…', token, 180);
 				const video = document.createElement('video');
 				pendingUpgradeMedia = video;
+				if (videoWrap) releaseOnEnd.add(video);
 				video.src = resolved.url;
 				video.autoplay = true;
 				video.muted = true;
@@ -3140,6 +3184,12 @@
 				const ready = () => {
 					if (token !== requestToken || activeUpgradeUrl !== resolved.url) {
 						try { video.pause(); } catch { /* noop */ }
+						return;
+					}
+					if (videoWrap && BE.modules.viewer?.isOpen?.()) {
+						// IB10: the viewer has taken over; an admitted hover never installs.
+						if (pendingUpgradeMedia === video) pendingUpgradeMedia = null;
+						releaseHoverVideo(video);
 						return;
 					}
 					clearMediaState();
@@ -3205,22 +3255,28 @@
 			clearTimeout(dwellTimer);
 			dwellTimer = null;
 
+			// IB10: an admitted video card keeps its current immediate thumbnail, but
+			// no video source or video network work starts before dwell.
+			const videoWrap = hoverVideoAdmittedWrap(img);
+			admittedVideoToken = videoWrap ? token : 0;
+			if (videoWrap) showImmediateThumbnail(img, token);
+
 			// IB09: a qualified card gets no hover work before dwell, not even the
 			// overlay; leave, re-entry and an open viewer cancel it.
-			if (hoverQualifiedWrap(img)) {
+			if (hoverQualifiedWrap(img) || videoWrap) {
 				dwellTimer = setTimeout(() => {
 					dwellTimer = null;
 					if (token !== requestToken || BE.modules.viewer?.isOpen?.()) return;
-					resolveHover(img, token);
+					resolveHover(img, token, !!videoWrap);
 				}, HOVER_DWELL_MS);
 				return;
 			}
 			return resolveHover(img, token);
 		}
 
-		async function resolveHover(img, token) {
+		async function resolveHover(img, token, thumbnailShown = false) {
 			// Instant response from the already-loaded grid thumbnail.
-			showImmediateThumbnail(img, token);
+			if (!thumbnailShown) showImmediateThumbnail(img, token);
 
 			// e621 exposes useful media URLs directly in the thumbnail markup.
 			// Rule34 generally does not, so it stays thumbnail-first and resolves
@@ -3269,13 +3325,21 @@
 			cancelPendingUpgrade();
 			if (!hoverEl) return;
 			stopCurrentMedia();
+			const ownedVideo = hoverEl.querySelector('video');
+			if (ownedVideo && releaseOnEnd.has(ownedVideo)) releaseHoverVideo(ownedVideo); // IB10 Option A
 			hoverEl.style.display = 'none';
 			hoverEl.innerHTML = '';
 			hoverEl.style.width = '';
 			hoverEl.style.height = '';
 		}
 
-		return { show, hide };
+		// IB10 owner decision: opening the viewer ends an admitted hover video
+		// preview, pending or installed. Other hovers are unchanged.
+		function endForViewer() {
+			if (admittedVideoToken && admittedVideoToken === requestToken) hide();
+		}
+
+		return { show, hide, endForViewer };
 	})();
 	/* ============================================================ *
 	 *  VIEWER
@@ -4269,6 +4333,7 @@
 			try { opened = openViewerForThumb(img, thumb) === true; }
 			catch (err) { BE.log.error('[Gallery] viewer takeover failed before open', err); }
 			if (!opened) return;
+			BE.modules.hover.endForViewer?.();
 			e.preventDefault();
 			e.stopPropagation();
 		}

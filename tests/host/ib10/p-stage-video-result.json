@@ -1,0 +1,53 @@
+{
+  "checkpoint": "IB10",
+  "stage": "P-stage production assertions (G-VIDEO(class, cell) PASS(scope); owner decision V3-R Option A)",
+  "production_blob": "4258ad7746c022606f222fc48924055912de4cfc",
+  "base_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
+  "fixtures": "synthetic",
+  "checks": 64,
+  "passed": 64,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault dwell bypassed for admitted video: caught",
+      "pass": true
+    },
+    {
+      "name": "fault cleanup omits source removal/reset: caught",
+      "pass": true
+    },
+    {
+      "name": "fault release not applied at hide: caught",
+      "pass": true
+    },
+    {
+      "name": "fault old generation installs after leave (stale guard removed): caught",
+      "pass": true
+    },
+    {
+      "name": "fault viewer takeover does not end the hover: caught",
+      "pass": true
+    },
+    {
+      "name": "fault viewer-open install guard removed: caught",
+      "pass": true
+    },
+    {
+      "name": "fault class broadened: size limit ignored: caught",
+      "pass": true
+    },
+    {
+      "name": "fault class broadened: container not checked: caught",
+      "pass": true
+    },
+    {
+      "name": "fault class broadened: page admission (rendition fact) not checked: caught",
+      "pass": true
+    },
+    {
+      "name": "fault muted removed from the hover video: caught",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
