@@ -139,3 +139,41 @@ Operator steps are in `tests/browser/ib10/README.md` ("IB10 P-stage conformance"
   - a single-file merge.
 - **Defect found and fixed:** an empty `--cells` was first read as "no selector" (it would have run all 54 cells). It is now refused.
 - **Unchanged:** production (`8324552` / `4258ad7`) and the P package (`IB10_P_Controlled.user.js` equals a fresh build).
+
+## 6. Controlled conformance complete; live evaluator correction (revision 1.1)
+
+**Controlled P conformance: 54/54 PASS.**
+- **Original run:** 45 clean, SHA-256 `27e90c6c…e175`.
+- **Recovery run:** 9 clean, SHA-256 `9eaf56dce39032f8ca07e713f0e96da4474f5856ddea03863695155ef94e7d48`.
+- **Merge:** `merge_ib10_p_controlled.cjs` gives 54 clean cells, every one passing C1–C5 with no failing cell.
+- Raw files are not committed.
+
+**Live evaluator audit.** Against the Blueprint invariant ("leaving … releases every owned source and prevents resurrection") and the browser evidence, two rules in `p_conformance_ib10.cjs` (live) were wrong. The controlled criteria are unchanged.
+
+1. **L3 at the leave sample required `networkState === 0`.** The leave sample is taken synchronously right after production's `hide()`, which calls `removeAttribute('src')` and `load()`.
+   - **The spec:** the HTML media load algorithm runs resource selection, which sets `NETWORK_NO_SOURCE` (3) synchronously and reaches `NETWORK_EMPTY` (0) only at the next stable state.
+   - **The controlled evidence:** in all 72 clean P-run releases, `abort` and `emptied` fired with `networkState` 3 within 1–2 ms. Every later sample was 0, the first one 16–31 ms after release.
+   - **Correction:** at leave, the element must still be detached with no source held, and `networkState` must be 0 or 3. At +1 s and +5 s, it must be detached, hold no source, and be 0. Byte termination remains proven by the controlled C5 gate.
+2. **The dwell rules used a 190 ms allowance**, a tolerance I had introduced myself. Production arms a 200 ms timer at enter, and a leave at exactly 200 ms can run before that timer task, so no video is the correct outcome. Corrected to the exact threshold:
+   - **No hover video:** passes only if the stay is ≤ 200 ms. A longer stay without a video FAILS (sustained hover, no preview).
+   - **A hover video:** its source must be at ≥ 200 ms. Both values are integer-ms readings of the same clock, and `round(a + d) ≥ round(a) + 200` whenever `d ≥ 200`, so a correct delay never reads below 200.
+   - **Host evidence now also requires** at least 3 sustained hovers that produced a preview, so an implementation that never creates videos cannot pass.
+
+**Verifier:** `verify_ib10_p_conformance.cjs` is **35/35**. New live fault controls (all caught):
+- source owned at leave;
+- attached at leave;
+- LOADING at leave;
+- NO_SOURCE at +1 s;
+- LOADING at +5 s;
+- source held at +5 s;
+- source at 199 ms;
+- a 600 ms hover with no video;
+- a 201 ms stay with no video;
+- an implementation that never creates videos;
+- unmuted play;
+- two concurrent source holders;
+- a quick pass creating a video before the dwell.
+
+The real-package live smoke still passes. Production, `IB10_P_Live_Observer.user.js` and `IB10_P_Controlled.user.js` are unchanged.
+
+**e621 live P result:** not yet available to this analysis. It was not found in Downloads, Desktop, Documents or the repository, so its SHA-256 and verdict are pending.

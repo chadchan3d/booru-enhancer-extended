@@ -3,8 +3,8 @@
   "stage": "P-stage conformance packages + evaluator, local qualification (no real browser)",
   "production_commit": "8324552",
   "production_blob": "4258ad7746c022606f222fc48924055912de4cfc",
-  "checks": 25,
-  "passed": 25,
+  "checks": 35,
+  "passed": 35,
   "failed": 0,
   "fault_controls": [
     {
@@ -36,15 +36,55 @@
       "pass": true
     },
     {
+      "name": "fault live: source still owned at the leave sample: caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: element still attached at the leave sample: caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: network still LOADING at the leave sample: caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: NETWORK_NO_SOURCE still present at +1 s (not EMPTY): caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: network still LOADING at +5 s: caught (L3)",
+      "pass": true
+    },
+    {
       "name": "fault live: source still held at +5 s: caught (L3)",
       "pass": true
     },
     {
-      "name": "fault live: quick pass created a hover video: caught (L1)",
+      "name": "fault live: source assigned before the dwell (199 ms): caught (L2)",
       "pass": true
     },
     {
-      "name": "fault live: source before dwell: caught (L2)",
+      "name": "fault live: sustained hover never produced a video (600 ms stay, none created): caught (L1)",
+      "pass": true
+    },
+    {
+      "name": "fault live: a 201 ms stay without a video (beyond the exact dwell): caught (L1)",
+      "pass": true
+    },
+    {
+      "name": "fault live: unmuted playback: caught (L4)",
+      "pass": true
+    },
+    {
+      "name": "fault live: two hover videos hold a source at once: caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: an implementation that never creates hover videos cannot pass (no sustained preview evidence)",
+      "pass": true
+    },
+    {
+      "name": "fault live: a quick pass created a video before the dwell: caught (L2)",
       "pass": true
     }
   ],

@@ -130,20 +130,35 @@ async function main() {
   const inc = evaluateControlled(doc(allCells().runs.slice(0, 50)));
   check('evaluator controlled: an incomplete run (50 of 54 cells) does not pass', !inc.pass && !inc.complete);
 
-  // ---- evaluator: synthetic live results ----
-  const gen = (host, container, stay, extra = {}) => ({ host, container, dataSize: 5000000, trigger: 'TRUSTED', leaveT: stay, viewerOpened: false, hoverElements: stay < 190 ? 0 : 1, cardOrdinal: 1, hoverOnCard: 1,
-    element: stay < 190 ? null : { srcMatchesCardFile: true, srcSetT: 200, srcRemovedT: [stay], calls: [[200, 'load', 'muted'], [320, 'play', 'muted'], [stay, 'pause', 'muted'], [stay, 'load', 'muted']], readiness: { loadeddata: 320 }, firstFrame: 330, events: [] },
-    samples: Object.fromEntries(['leave', 'p1', 'p5'].map((k) => [k, { t: 0, element: stay < 190 ? null : { attached: 0, inHover: 0, holdsSrc: 0, networkState: 0, readyState: 0, bufferedEnd: 0, duration: null, paused: 1 }, holdingHoverVideos: 0, viewerOpen: false, hidden: false }])), ...extra });
+  // ---- evaluator: synthetic live results (revision 1.1 criteria) ----
+  // A created hover video looks like the Chrome evidence: NETWORK_NO_SOURCE (3) right
+  // after cleanup at the leave sample, NETWORK_EMPTY (0) at +1 s and +5 s.
+  const elemAt = (k) => ({ attached: 0, inHover: 0, holdsSrc: 0, networkState: k === 'leave' ? 3 : 0, readyState: 0, bufferedEnd: 0, duration: null, paused: 1 });
+  const gen = (host, container, stay, video = stay > 200) => ({ host, container, dataSize: 5000000, trigger: 'TRUSTED', leaveT: stay, viewerOpened: false, hoverElements: video ? 1 : 0, cardOrdinal: 1, hoverOnCard: 1,
+    element: video ? { srcMatchesCardFile: true, srcSetT: 200, srcRemovedT: [stay], calls: [[200, 'load', 'muted'], [320, 'play', 'muted'], [stay, 'pause', 'muted'], [stay, 'load', 'muted']], readiness: { loadeddata: stay > 320 ? 320 : null }, firstFrame: stay > 330 ? 330 : null, events: [] } : null,
+    samples: Object.fromEntries(['leave', 'p1', 'p5'].map((k) => [k, { t: 0, element: video ? elemAt(k) : null, holdingHoverVideos: 0, viewerOpen: false, hidden: false }])) });
   const liveDoc = (site, gens) => ({ site, production_body_identity: 'MATCH_EXPECTED_ARTIFACT', runtime: {}, sessions: [{ generations: gens }] });
-  const set = (host, ext, mut = (x) => x) => [40, 60, 600, 900, 1200, 300, 2000, 700, 50, 1500].map((s) => mut(gen(host, ext, s)));
-  const okLive = evaluateLive([liveDoc('e621.net', set('e621.net', 'webm')), liveDoc('e926.net', set('e926.net', 'mp4'))]);
-  check('evaluator live: conforming sessions pass (10 usable per host; quick passes and rests)', okLive.pass, JSON.stringify(okLive.hosts));
-  const lf1 = evaluateLive([liveDoc('e621.net', set('e621.net', 'webm', (g) => (g.leaveT === 900 ? { ...g, samples: { ...g.samples, p5: { ...g.samples.p5, element: { ...g.samples.p5.element, holdsSrc: 1, networkState: 2 } } } } : g))), liveDoc('e926.net', set('e926.net', 'mp4'))]);
-  check('fault live: source still held at +5 s: caught (L3)', !lf1.pass && lf1.failures.some((x) => x.fails.some((f) => f.startsWith('L3'))));
-  const lf2 = evaluateLive([liveDoc('e621.net', set('e621.net', 'webm')), liveDoc('e926.net', set('e926.net', 'mp4', (g) => (g.leaveT === 40 ? { ...g, hoverElements: 1 } : g)))]);
-  check('fault live: quick pass created a hover video: caught (L1)', !lf2.pass && lf2.failures.some((x) => x.fails.some((f) => f.startsWith('L1'))));
-  const lf3 = evaluateLive([liveDoc('e621.net', set('e621.net', 'webm', (g) => (g.leaveT === 600 ? { ...g, element: { ...g.element, srcSetT: 3 } } : g))), liveDoc('e926.net', set('e926.net', 'mp4'))]);
-  check('fault live: source before dwell: caught (L2)', !lf3.pass);
+  const STAYS = [40, 60, 200, 600, 900, 1200, 300, 2000, 700, 50, 1500];
+  const set = (host, ext, mut = null) => STAYS.map((st) => (mut || ((x) => x))(gen(host, ext, st)));
+  const both = (e621mut, e926mut) => evaluateLive([liveDoc('e621.net', set('e621.net', 'webm', e621mut)), liveDoc('e926.net', set('e926.net', 'mp4', e926mut))]);
+  const okLive = both();
+  check('evaluator live: conforming sessions pass, including NETWORK_NO_SOURCE (3) at the synchronous leave sample and a no-video leave at exactly 200 ms', okLive.pass && okLive.hosts['e621.net'].quickPasses === 4 && okLive.hosts['e621.net'].sustainedWithPreview === 7, JSON.stringify(okLive.hosts));
+  const at = (stay, k, patch) => (g) => (g.leaveT === stay ? { ...g, samples: { ...g.samples, [k]: { ...g.samples[k], element: { ...g.samples[k].element, ...patch } } } } : g);
+  const lf = (name, res, prefix) => check(`fault live: ${name}: caught (${prefix})`, !res.pass && res.failures.some((x) => x.fails.some((f) => f.startsWith(prefix))), JSON.stringify(res.failures.slice(0, 2)));
+  lf('source still owned at the leave sample', both(at(900, 'leave', { holdsSrc: 1 })), 'L3');
+  lf('element still attached at the leave sample', both(at(900, 'leave', { attached: 1 })), 'L3');
+  lf('network still LOADING at the leave sample', both(at(900, 'leave', { networkState: 2 })), 'L3');
+  lf('NETWORK_NO_SOURCE still present at +1 s (not EMPTY)', both(at(600, 'p1', { networkState: 3 })), 'L3');
+  lf('network still LOADING at +5 s', both(null, at(1200, 'p5', { networkState: 2 })), 'L3');
+  lf('source still held at +5 s', both(at(700, 'p5', { holdsSrc: 1 })), 'L3');
+  lf('source assigned before the dwell (199 ms)', both((g) => (g.leaveT === 600 ? { ...g, element: { ...g.element, srcSetT: 199 } } : g)), 'L2');
+  lf('sustained hover never produced a video (600 ms stay, none created)', both((g) => (g.leaveT === 600 ? { ...gen('e621.net', 'webm', 600, false) } : g)), 'L1');
+  lf('a 201 ms stay without a video (beyond the exact dwell)', both((g) => (g.leaveT === 50 ? gen('e621.net', 'webm', 201, false) : g)), 'L1');
+  lf('unmuted playback', both(null, (g) => (g.leaveT === 900 ? { ...g, element: { ...g.element, calls: [[200, 'load', 'muted'], [320, 'play', 'UNMUTED']] } } : g)), 'L4');
+  lf('two hover videos hold a source at once', both((g) => (g.leaveT === 2000 ? { ...g, samples: { ...g.samples, p1: { ...g.samples.p1, holdingHoverVideos: 2 } } } : g)), 'L3');
+  const never = both((g) => (g.hoverElements ? gen('e621.net', 'webm', 150, false) : g));
+  check('fault live: an implementation that never creates hover videos cannot pass (no sustained preview evidence)', !never.pass && never.hosts['e621.net'].sustainedWithPreview === 0, JSON.stringify(never.hosts['e621.net']));
+  lf('a quick pass created a video before the dwell', both(null, (g) => (g.leaveT === 40 ? { ...gen('e926.net', 'mp4', 40, true), element: { ...gen('e926.net', 'mp4', 600).element, srcSetT: 10 } } : g)), 'L2');
   const lf4 = evaluateLive([liveDoc('e621.net', set('e621.net', 'webm').map((g) => ({ ...g, container: 'mp4' }))), liveDoc('e926.net', set('e926.net', 'mp4'))]);
   check('evaluator live: out-of-scope cards (e621 MP4) are not counted as admitted evidence, so the host lacks usable evidence and the run does not pass', !lf4.pass && lf4.hosts['e621.net'].usable === 0);
 

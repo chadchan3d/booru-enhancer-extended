@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. **P stage implemented and locally qualified** (`IB10_P_STAGE.md`): production `8324552`. Controlled conformance: 45/54 clean cells, all PASS; 9 cells lack a clean result (trusted pointer events), so the run is incomplete, not failed. The targeted 9-cell recovery is prepared. The live run has not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator run and analyzed** (`IB10_V3R.md` §10–§16): 16/16 cells; 3 flagged for trusted pointer events but structurally clean. Released revisits stayed as fast as AS-IS. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. **P stage implemented and locally qualified** (`IB10_P_STAGE.md`): production `8324552`. **Controlled conformance: 54/54 PASS** (original 45 + recovery 9). Live conformance: the evaluator was corrected (revision 1.1); the e621 result is pending analysis (file not yet located) and e926 has not been run. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator run and analyzed** (`IB10_V3R.md` §10–§16): 16/16 cells; 3 flagged for trusted pointer events but structurally clean. Released revisits stayed as fast as AS-IS. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -48,6 +48,11 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 P controlled conformance: 54/54 PASS** (original SHA-256 `27e90c6c…e175`, 45 clean; recovery `9eaf56dc…7d48`, 9 clean; merged C1–C5, no failing cell). Raw files are not committed.
+- **IB10 P live evaluator revision 1.1** (`IB10_P_STAGE.md` §6; verifier 35/35):
+  - leave sample: detached and source-free, `networkState` 0 or the spec's post-`load()` 3; +1 s/+5 s: 0;
+  - exact 200 ms dwell rules (no tolerance);
+  - ≥ 3 sustained previews required per host.
 - **IB10 P controlled, first run** (raw SHA-256 `27e90c6c…e175`, not committed): 55 entries, 10 rejected (trusted pointer), 45 clean, all PASS C1–C5. Missing: RANGE mp4 LEAVE_PENDING / LEAVE_LOADEDDATA / LEAVE_FIRST_FRAME, RANGE webm CYCLES_5, NORANGE mp4 LEAVE_FIRST_FRAME / CYCLES_5 / VIEWER_PENDING, NORANGE webm LEAVE_LOADEDDATA, FAST mp4 DISPOSE.
 - **IB10 P recovery tooling:** `v3c_server.cjs --cells` exact selector + `merge_ib10_p_controlled.cjs`. Local 23/23 (fault controls incl. malformed/unknown/duplicate/empty selectors, duplicate clean cells, contaminated recovery). Default 54-cell plan unchanged (V3-C 29/29); P package unchanged.
 - **IB10 P local** on `4258ad7`:
@@ -112,8 +117,10 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage locally qualified, browser conformance pending. Not complete. IB11 not started.**
+**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage: controlled conformance PASS, live conformance pending. Not complete. IB11 not started.**
 
-**One bounded next action (operator):** run the 9-cell controlled recovery in `tests/browser/ib10/README.md` §1a: `v3c_server.cjs --cells …` on port 8794, output `ib10-p-controlled-recovery.json`, pointer kept off the window, about 2 minutes.
+**One bounded next action (operator):**
+1. Supply the e621 live P result file, for analysis with the corrected evaluator: `node tests/browser/ib10/p_conformance_ib10.cjs live <e621.json>`.
+2. Run e926 live per `tests/browser/ib10/README.md` §2 (about 10 MP4 cards under 50 MB; at least 2 quick passes, at least 3 rests until playing).
 
-Then merge and evaluate: `merge_ib10_p_controlled.cjs <original> <recovery>`. The live run (README §2) follows only after the controlled set is complete and PASS. IB10 can close only if both pass.
+IB10 can close only if both live hosts pass.

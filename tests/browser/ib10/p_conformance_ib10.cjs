@@ -17,12 +17,25 @@
 //      Viewer cells: the viewer's own request may continue (viewer policy, IB11);
 //      there the hover element must be released at the click and never installed.
 // Live (IB10_P_Live_Observer.user.js), per usable generation on an admitted card
-// (e621 WebM <= 100 MB, e926 MP4 < 50 MB):
-//   L1 stay < 190 ms: no hover video created (dwell);
-//   L2 otherwise: one hover video, source >= 190 ms after enter, the card's file;
-//   L3 at leave, +1 s and +5 s: the hover video holds no source, is detached,
-//      networkState EMPTY; at most one hover video holds a source at any sample;
+// (e621 WebM <= 100 MB, e926 MP4 < 50 MB). Revision 1.1 (evaluator correction,
+// see IB10_P_STAGE.md section 6): the dwell rules use the exact 200 ms threshold
+// (no tolerance), and the leave sample accepts the HTML media load algorithm's
+// transient post-reset state.
+//   L1 no hover video created: the hover ended no later than the 200 ms dwell
+//      (stay <= 200; a leave at exactly 200 ms can run before the dwell timer task).
+//      A stay above 200 ms without a hover video FAILS (sustained hover, no preview);
+//   L2 a hover video was created: exactly one, its source assigned >= 200 ms after
+//      enter (both are integer-ms values, so a real >= 200 ms delay never reads
+//      below 200), and it is the card's own file;
+//   L3 at leave (sampled synchronously after production's cleanup): detached and
+//      no source held; networkState NETWORK_EMPTY (0) or NETWORK_NO_SOURCE (3),
+//      the state load() sets synchronously before the next stable state; at
+//      +1 s and +5 s: detached, no source, NETWORK_EMPTY (0). At most one hover
+//      video holds a source at any sample;
 //   L4 every play muted.
+//   Host evidence: >= 8 usable admitted generations, >= 2 quick passes, >= 3
+//   sustained hovers that produced a preview, >= 3 after-ready leaves.
+// Byte-level termination is proved by the controlled run (C5), not here.
 // Usage: node p_conformance_ib10.cjs controlled <results.json>
 //        node p_conformance_ib10.cjs live <result.json> [...]
 const fs = require('fs');
@@ -31,6 +44,9 @@ const { analyzeRun } = require('./analyze_ib10_v3c.cjs');
 const { classify } = require('./v3l_classify.js');
 
 const KIB = 1024;
+const DWELL_MS = 200;
+const NETWORK_EMPTY = 0;
+const NETWORK_NO_SOURCE = 3;
 function evaluateControlled(doc) {
   const { doc: clean, report } = select(doc);
   const runs = clean.runs.map((r) => ({ raw: r, a: analyzeRun(r) }));
@@ -86,23 +102,27 @@ function evaluateLive(docs) {
     const fails = [];
     const el = g.element;
     if (g.leaveT == null || !g.samples.leave || !g.samples.p1 || !g.samples.p5) { rows.push({ host: g.host, admitted: true, status: 'INCOMPLETE' }); continue; }
-    if (g.leaveT < 190) { if (g.hoverElements) fails.push(`L1 quick pass (${g.leaveT} ms) created a hover video`); }
+    if (!g.hoverElements) {
+      if (g.leaveT > DWELL_MS) fails.push(`L1 sustained hover (${g.leaveT} ms) produced no hover video`);
+    } else if (g.hoverElements !== 1 || !el) fails.push(`L2 ${g.hoverElements} hover videos in one generation`);
     else {
-      if (g.hoverElements !== 1 || !el) fails.push(`L2 ${g.hoverElements} hover video(s) after a ${g.leaveT} ms stay`);
-      else {
-        if (el.srcSetT == null || el.srcSetT < 190) fails.push(`L2 source at ${el.srcSetT} ms`);
-        if (el.srcMatchesCardFile !== true) fails.push('L2 source is not the card file');
-        if (el.calls.some((x) => x[1] === 'play' && x[2] !== 'muted')) fails.push('L4 unmuted play');
-        for (const k of ['leave', 'p1', 'p5']) { const e = g.samples[k].element; if (e && (e.holdsSrc || e.attached || e.networkState !== 0)) fails.push(`L3 at ${k}: holdsSrc ${e.holdsSrc}, attached ${e.attached}, networkState ${e.networkState}`); }
+      if (el.srcSetT == null || el.srcSetT < DWELL_MS) fails.push(`L2 source at ${el.srcSetT} ms (before the ${DWELL_MS} ms dwell)`);
+      if (el.srcMatchesCardFile !== true) fails.push('L2 source is not the card file');
+      if (el.calls.some((x) => x[1] === 'play' && x[2] !== 'muted')) fails.push('L4 unmuted play');
+      for (const k of ['leave', 'p1', 'p5']) {
+        const e = g.samples[k].element;
+        const okNetwork = k === 'leave' ? (e && (e.networkState === NETWORK_EMPTY || e.networkState === NETWORK_NO_SOURCE)) : (e && e.networkState === NETWORK_EMPTY);
+        if (!e || e.holdsSrc || e.attached || !okNetwork) fails.push(`L3 at ${k}: holdsSrc ${e && e.holdsSrc}, attached ${e && e.attached}, networkState ${e && e.networkState}`);
       }
     }
     for (const k of ['leave', 'p1', 'p5']) if (g.samples[k].holdingHoverVideos > 1) fails.push(`L3 ${g.samples[k].holdingHoverVideos} hover videos held a source at ${k}`);
-    rows.push({ host: g.host, admitted: true, status: fails.length ? 'FAIL' : 'PASS', stay: g.leaveT, afterReady: c.leave === 'AFTER_READY', fails });
+    rows.push({ host: g.host, admitted: true, status: fails.length ? 'FAIL' : 'PASS', stay: g.leaveT, video: !!g.hoverElements, afterReady: c.leave === 'AFTER_READY', fails });
   }
   const by = (host) => { const r = rows.filter((x) => x.host === host && x.admitted && (x.status === 'PASS' || x.status === 'FAIL'));
-    return { usable: r.length, pass: r.filter((x) => x.status === 'PASS').length, fail: r.filter((x) => x.status === 'FAIL').length, quickPasses: r.filter((x) => x.stay < 190).length, afterReady: r.filter((x) => x.afterReady).length }; };
+    return { usable: r.length, pass: r.filter((x) => x.status === 'PASS').length, fail: r.filter((x) => x.status === 'FAIL').length,
+      quickPasses: r.filter((x) => !x.video && x.stay <= DWELL_MS).length, sustainedWithPreview: r.filter((x) => x.video).length, afterReady: r.filter((x) => x.afterReady).length }; };
   const hosts = { 'e621.net': by('e621.net'), 'e926.net': by('e926.net') };
-  const pass = files.every((f) => f.identity === 'MATCH_EXPECTED_ARTIFACT' && !f.sanitationGuard) && Object.values(hosts).every((h) => h.fail === 0 && h.usable >= 8 && h.afterReady >= 3 && h.quickPasses >= 2);
+  const pass = files.every((f) => f.identity === 'MATCH_EXPECTED_ARTIFACT' && !f.sanitationGuard) && Object.values(hosts).every((h) => h.fail === 0 && h.usable >= 8 && h.afterReady >= 3 && h.quickPasses >= 2 && h.sustainedWithPreview >= 3);
   return { kind: 'live', files, hosts, pass, failures: rows.filter((x) => x.status === 'FAIL'), counts: rows.reduce((m, x) => { m[x.status] = (m[x.status] || 0) + 1; return m; }, {}) };
 }
 
