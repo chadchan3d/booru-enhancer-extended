@@ -25,7 +25,7 @@
 ## Gates relevant to the next step
 - **G-VIDEO(class, cell): E → PASS(scope)** for e621 WebM and e926 MP4 (<50 MB) logged-out `/posts` video cards in TC. Other classes and cells stay OPEN.
 - **Owner decisions settled:** 200 ms dwell before video media work; opening the viewer ends the hover preview; original-file source for IB10 (no rendition discovery).
-- **Open owner decision:** source retention / revisit policy (options A immediate release / B retain one completed idle prior hover / C broader bounded retention, in `IB10_V3R.md` §15). B and C would need a Blueprint change. V3-R evidence (Chrome 154 + Tampermonkey 5.5.0, localhost):
+- **Owner decision (settled): V3-R Option A, immediate release.** When an owned hover video ends, its media source is released (pause, remove `src`, reset). There is no custom hover-video cache and no retained completed or idle prior video. Chrome's ordinary shared-media and HTTP-cache behavior serve revisits naturally, and the browser cache is not purged. Basis, V3-R (Chrome 154 + Tampermonkey 5.5.0, localhost):
   - after releasing a ready, buffered hover, a revisit within 0.5–5 s was ready in 20–27 ms (AS-IS 20–28; cold 219–536);
   - the released transfer aborted 0–3 ms after leave;
   - the revisit resumed rather than restarted: no-store re-fetched 16 KiB from in-memory media data, cacheable resumed exactly with `If-Range`;
@@ -99,7 +99,7 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage waits for the retention/revisit decision.**
+**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage in progress (local qualification).**
 
 **One bounded next action (owner):** choose the source-retention policy from `IB10_V3R.md` §15:
 - **A:** immediate release (Blueprint-compatible as written);
