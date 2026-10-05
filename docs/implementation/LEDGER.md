@@ -41,7 +41,7 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
-- **IB10 V3-R run** (raw result SHA-256 `1ce9a65a…f1f4`, not committed; sanitized aggregate `tests/browser/ib10/results/ib10-v3r-aggregate.json`): identities, cells, accounting and cleanup all qualified.
+- **IB10 V3-R run** (raw result SHA-256 `1ce9a65a…d1f4`, not committed; sanitized aggregate `tests/browser/ib10/results/ib10-v3r-aggregate.json`): identities, cells, accounting and cleanup all qualified.
 - **IB10 V3-R package** (`tests/browser/ib10/IB10_V3R_Revisit.user.js`): 53/53 local qualification (8/8 fault controls).
   - AS-IS body = production; RELEASE = production + one test-only line in `hide()`.
   - Behavior scope: RELEASE adds only removeSrc + load on installed videos at leave.
@@ -84,7 +84,7 @@
   - one container per host as encountered (e621 MP4 and e926 WebM not observed; their absence is not shown);
   - e926 20–50 MB thin (2 cards);
   - D4 not exercised live.
-- **IB10 P trade-off to measure:** release drops element buffers; repeat-hover readiness (median 33–65 ms live vs 197–515 ms first) may then rely on the HTTP cache only.
+- **IB10 revisit trade-off:** answered in the controlled cell by V3-R. Release drops the element but not the shared media data or the HTTP cache; revisits within 0.5–5 s stayed as fast as AS-IS. Only the real-network round trip of the revisit's one new request is unmeasured.
 - **IB10 fixtures:** externally supplied and not tracked. Committed once by mistake in `0a43e73`; removed in `1820c18` without a history rewrite. Their exact paths are in `.gitignore`.
 - **IB09 limitations:**
   - throttled usefulness is observed on e621 only;
