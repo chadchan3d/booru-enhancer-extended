@@ -1,0 +1,117 @@
+'use strict';
+// IB10 P-stage conformance evaluator (approved behavior: G-VIDEO(class, cell)
+// PASS(scope); owner decision V3-R Option A). Turns operator results into
+// explicit PASS/FAIL per criterion. Element/DOM state and server bytes stay
+// separate; only the controlled run has byte evidence.
+//
+// Controlled (IB10_P_Controlled.user.js + v3c_server.cjs, all 54 V3-C cells):
+//   C1 identity MATCH_EXPECTED_ARTIFACT; clean selection 54/54 (select_clean);
+//   C2 dwell: every hover video's source >= 190 ms after its enter; a 40 ms pass
+//      (LEAVE_PENDING) creates no hover video and no media request;
+//   C3 every hover play muted;
+//   C4 at the end no hover video holds a source or is attached; at most one
+//      hover video holds a source at any sampled time;
+//   C5 transport (server): every request has completed or ended within 100 ms of
+//      the hover-ending event that followed it (leave / viewer click / dispose);
+//      nothing is still streaming at run end; <= 64 KiB after the last cleanup.
+//      Viewer cells: the viewer's own request may continue (viewer policy, IB11);
+//      there the hover element must be released at the click and never installed.
+// Live (IB10_P_Live_Observer.user.js), per usable generation on an admitted card
+// (e621 WebM <= 100 MB, e926 MP4 < 50 MB):
+//   L1 stay < 190 ms: no hover video created (dwell);
+//   L2 otherwise: one hover video, source >= 190 ms after enter, the card's file;
+//   L3 at leave, +1 s and +5 s: the hover video holds no source, is detached,
+//      networkState EMPTY; at most one hover video holds a source at any sample;
+//   L4 every play muted.
+// Usage: node p_conformance_ib10.cjs controlled <results.json>
+//        node p_conformance_ib10.cjs live <result.json> [...]
+const fs = require('fs');
+const { select } = require('./select_clean_ib10_v3c.cjs');
+const { analyzeRun } = require('./analyze_ib10_v3c.cjs');
+const { classify } = require('./v3l_classify.js');
+
+const KIB = 1024;
+function evaluateControlled(doc) {
+  const { doc: clean, report } = select(doc);
+  const runs = clean.runs.map((r) => ({ raw: r, a: analyzeRun(r) }));
+  const out = [];
+  for (const { raw, a } of runs) {
+    const fails = [];
+    const marks = a.marks;
+    const enters = marks.filter((m) => m.what === 'enter').map((m) => m.t);
+    const enders = marks.filter((m) => m.what === 'leave' || m.what === 'click' || m.what === 'dispose').map((m) => m.t);
+    const hover = (raw.client.videos || []).filter((v) => v.owner === 'hover');
+    if (a.identity !== 'MATCH_EXPECTED_ARTIFACT') fails.push(`C1 identity ${a.identity}`);
+    for (const v of hover) {
+      const src = v.calls.find((c) => c[1] === 'src');
+      const enter = enters.filter((t) => t <= v.created).pop();
+      if (!src || enter == null || src[0] - enter < 190) fails.push(`C2 source ${src ? src[0] - enter : 'none'} ms after enter`);
+      if (v.calls.some((c) => c[1] === 'play' && c[2] !== 'muted')) fails.push('C3 unmuted play');
+    }
+    if (a.scenario === 'LEAVE_PENDING' && (hover.length || a.transport.requests.length)) fails.push(`C2 40 ms pass created ${hover.length} hover video(s), ${a.transport.requests.length} request(s)`);
+    if (a.event.holdingSrcAtEnd) fails.push(`C4 ${a.event.holdingSrcAtEnd} hover video(s) hold a source at the end`);
+    if (a.event.elements.some((e) => e.atEnd && e.atEnd.connected)) fails.push('C4 hover video still attached at the end');
+    if (a.event.maxHoldingSrcSimultaneously > 1) fails.push(`C4 ${a.event.maxHoldingSrcSimultaneously} hover videos held a source at once`);
+    const viewerCell = a.scenario.startsWith('VIEWER_');
+    if (viewerCell) {
+      const click = marks.find((m) => m.what === 'click');
+      for (const v of hover) {
+        const rel = v.calls.find((c) => c[1] === 'removeSrc');
+        if (!rel || (click && rel[0] - click.t > 100)) fails.push('C5 hover video not released at the viewer click');
+      }
+    } else {
+      for (const q of a.transport.requests) {
+        const endT = q.tEnd;
+        const nextEnd = enders.filter((t) => t >= q.t0).shift();
+        if (q.end === 'open-at-run-end') fails.push(`C5 request still streaming at run end (card ${q.card})`);
+        else if (nextEnd != null && endT != null && endT > nextEnd + 100) fails.push(`C5 request ended ${endT - nextEnd} ms after the hover ended (${q.end})`);
+      }
+      if (a.transport.bytesAfterCleanupWithin5s > 64 * KIB) fails.push(`C5 ${a.transport.bytesAfterCleanupWithin5s} bytes after the last cleanup`);
+    }
+    out.push({ cell: `${a.mode} ${a.container} ${a.scenario}`, pass: fails.length === 0, fails,
+      transport: { requests: a.transport.requests.length, completeBeforeCleanup: a.transport.requestsCompleteBeforeCleanup, activeAtCleanup: a.transport.requestsActiveAtCleanup, bytesAfterCleanupWithin5s: a.transport.bytesAfterCleanupWithin5s, ends: a.transport.requests.map((q) => q.end) } });
+  }
+  const complete = report.missing.length === 0 && report.duplicated.length === 0 && report.kept === 54;
+  return { kind: 'controlled', selection: report, complete, pass: complete && out.every((x) => x.pass), cells: out };
+}
+
+const admitted = (g) => (g.host === 'e621.net' && g.container === 'webm' && g.dataSize > 0 && g.dataSize <= 100000000) || (g.host === 'e926.net' && g.container === 'mp4' && g.dataSize > 0 && g.dataSize < 50000000);
+function evaluateLive(docs) {
+  const rows = [];
+  const files = docs.map((d) => ({ site: d.site, identity: d.production_body_identity, runtime: d.runtime, sanitationGuard: d.sanitationGuard || null }));
+  for (const d of docs) for (const s of d.sessions || []) for (const g of s.generations) {
+    const c = classify(g);
+    if (c.status === 'CONTAMINATED') { rows.push({ host: g.host, admitted: admitted(g), status: 'CONTAMINATED', reasons: c.reasons }); continue; }
+    if (!admitted(g)) { rows.push({ host: g.host, admitted: false, status: 'OUT_OF_SCOPE' }); continue; }
+    const fails = [];
+    const el = g.element;
+    if (g.leaveT == null || !g.samples.leave || !g.samples.p1 || !g.samples.p5) { rows.push({ host: g.host, admitted: true, status: 'INCOMPLETE' }); continue; }
+    if (g.leaveT < 190) { if (g.hoverElements) fails.push(`L1 quick pass (${g.leaveT} ms) created a hover video`); }
+    else {
+      if (g.hoverElements !== 1 || !el) fails.push(`L2 ${g.hoverElements} hover video(s) after a ${g.leaveT} ms stay`);
+      else {
+        if (el.srcSetT == null || el.srcSetT < 190) fails.push(`L2 source at ${el.srcSetT} ms`);
+        if (el.srcMatchesCardFile !== true) fails.push('L2 source is not the card file');
+        if (el.calls.some((x) => x[1] === 'play' && x[2] !== 'muted')) fails.push('L4 unmuted play');
+        for (const k of ['leave', 'p1', 'p5']) { const e = g.samples[k].element; if (e && (e.holdsSrc || e.attached || e.networkState !== 0)) fails.push(`L3 at ${k}: holdsSrc ${e.holdsSrc}, attached ${e.attached}, networkState ${e.networkState}`); }
+      }
+    }
+    for (const k of ['leave', 'p1', 'p5']) if (g.samples[k].holdingHoverVideos > 1) fails.push(`L3 ${g.samples[k].holdingHoverVideos} hover videos held a source at ${k}`);
+    rows.push({ host: g.host, admitted: true, status: fails.length ? 'FAIL' : 'PASS', stay: g.leaveT, afterReady: c.leave === 'AFTER_READY', fails });
+  }
+  const by = (host) => { const r = rows.filter((x) => x.host === host && x.admitted && (x.status === 'PASS' || x.status === 'FAIL'));
+    return { usable: r.length, pass: r.filter((x) => x.status === 'PASS').length, fail: r.filter((x) => x.status === 'FAIL').length, quickPasses: r.filter((x) => x.stay < 190).length, afterReady: r.filter((x) => x.afterReady).length }; };
+  const hosts = { 'e621.net': by('e621.net'), 'e926.net': by('e926.net') };
+  const pass = files.every((f) => f.identity === 'MATCH_EXPECTED_ARTIFACT' && !f.sanitationGuard) && Object.values(hosts).every((h) => h.fail === 0 && h.usable >= 8 && h.afterReady >= 3 && h.quickPasses >= 2);
+  return { kind: 'live', files, hosts, pass, failures: rows.filter((x) => x.status === 'FAIL'), counts: rows.reduce((m, x) => { m[x.status] = (m[x.status] || 0) + 1; return m; }, {}) };
+}
+
+module.exports = { evaluateControlled, evaluateLive, admitted };
+
+if (require.main === module) {
+  const [mode, ...files] = process.argv.slice(2);
+  const docs = files.map((f) => JSON.parse(fs.readFileSync(f, 'utf8')));
+  const r = mode === 'controlled' ? evaluateControlled(docs[0]) : evaluateLive(docs);
+  console.log(JSON.stringify(r, null, 1));
+  process.exitCode = r.pass ? 0 : 1;
+}

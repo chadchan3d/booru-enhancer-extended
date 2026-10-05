@@ -133,3 +133,50 @@ The transport is always Range-capable, throttled to 256 KiB/s for observability 
 4. **Finish:** when the page says "IB10 V3-R complete", return `ib10-v3r-results.json`, then disable the script and stop the server (Ctrl+C).
 
 If a cell is disturbed (mouse over the page), reload `http://127.0.0.1:8792/v3r/start`. The analyzer keeps only clean runs and only requests from each run's own page.
+
+---
+
+# IB10 P-stage conformance (production `8324552`, blob `4258ad7`)
+
+These two packages run the **new IB10 production unchanged**, with no hooks. `node tests/browser/ib10/p_conformance_ib10.cjs` turns your results into PASS/FAIL.
+
+**Local qualification:** `node tests/browser/ib10/build_ib10_p_conformance.cjs --check` and `node tests/browser/ib10/verify_ib10_p_conformance.cjs`.
+
+## 1. Controlled run (local server; about 10 minutes)
+
+1. **Start the server:** `node tests/browser/ib10/v3c_server.cjs --media <fixture folder> --port 8794 --out <fixture folder>/ib10-p-controlled-results.json`. Use the same V3-C fixtures and the same server, on port 8794.
+2. **Prepare Tampermonkey:** disable every other Booru/IB script, then install `IB10_P_Controlled.user.js`.
+3. **Run:** open `http://127.0.0.1:8794/v3c/start`. Keep the tab in front, the mouse outside the browser window, and DevTools closed.
+4. **Finish:** when the page says "IB10 V3-C complete", return `ib10-p-controlled-results.json`, then disable the script and stop the server.
+
+There are 54 cells: 9 scenarios × MP4/WebM × Range / no-Range / FAST. MP4 runs present the page as e926.net and WebM runs as e621.net (test-only), so both are the admitted class.
+
+**Pass:**
+- identity matches in every cell;
+- 54 clean cells;
+- no hover video source within 190 ms of enter, and a 40 ms pass creates nothing;
+- every hover play muted;
+- no hover video holds a source at the end, and at most one ever holds one at a time;
+- every request has completed or ended within 100 ms of the leave, viewer click or dispose that followed it;
+- nothing is still streaming at run end;
+- at most 64 KiB after the last cleanup;
+- in viewer cells, the hover video is released at the click (the viewer's own playback is IB11 and is not judged).
+
+## 2. Live run (small; about 5 minutes per host; normal Chrome, logged out)
+
+1. **Prepare Tampermonkey:** disable every other Booru/IB script, then install `IB10_P_Live_Observer.user.js`.
+2. **e621:** on `https://e621.net/posts` (for example search `type:webm`), choose **IB10L: Start session (video hovers)**. Then hover **about 10 WebM video cards**:
+   - at least 2 quick passes;
+   - at least 3 rests until the preview plays, then move off.
+
+   Don't click cards. Then **IB10L: Show results**, copy, and label it "e621".
+3. **e926:** the same on `https://e926.net/posts` (for example `type:mp4`), on MP4 cards **under 50 MB**. Label it "e926".
+4. **Return** both JSON results.
+
+**Pass, per host:**
+- at least 8 usable admitted hovers, including at least 2 quick passes and at least 3 rests;
+- quick passes create no hover video;
+- otherwise the source is set at the 200 ms dwell, and it is the card's own file;
+- at leave, +1 s and +5 s the hover video holds no source, is detached, and its `networkState` is EMPTY;
+- at most one hover video holds a source at any sample;
+- every play muted.

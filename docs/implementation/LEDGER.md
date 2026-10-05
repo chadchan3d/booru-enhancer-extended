@@ -4,11 +4,11 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. P stage not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator run and analyzed** (`IB10_V3R.md` §10–§16): 16/16 cells; 3 flagged for trusted pointer events but structurally clean. Released revisits stayed as fast as AS-IS. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. **P stage implemented and locally qualified** (`IB10_P_STAGE.md`): production `8324552`; browser conformance pending. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator run and analyzed** (`IB10_V3R.md` §10–§16): 16/16 cells; 3 flagged for trusted pointer events but structurally clean. Released revisits stayed as fast as AS-IS. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
-- Production `Booru_Enhancer.user.js`: commit `b9d133c`, blob `22e843cbe27662fc27d17149534b055d7a249dae`, production body SHA-256 `6df35f16…f992`.
+- Production `Booru_Enhancer.user.js`: commit `8324552`, blob `4258ad7746c022606f222fc48924055912de4cfc`, production body SHA-256 `7a0a2b49…bb3a` (IB10 P). The previous artifact, `b9d133c` / `22e843c`, is the IB09 and IB10 E-stage artifact.
 - `main` is the untouched published baseline. `origin/implementation/ib01-harness` exists as a separate branch; its PR state is not verified here.
 
 ## Completed checkpoints (records in `docs/implementation/`)
@@ -30,7 +30,14 @@
   - the released transfer aborted 0–3 ms after leave;
   - the revisit resumed rather than restarted: no-store re-fetched 16 KiB from in-memory media data, cacheable resumed exactly with `If-Range`;
   - AS-IS kept the abandoned transfer streaming (~0.1 MB per 0.5 s, ~1.1 MB per 5 s at the test rate).
-- **IB10 defects found in current production (not corrected):**
+- **IB10 P change (local qualification only)** applies to the admitted class: IB08 rendition fact `NATIVE_UNSUPPORTED` (logged-out e621/e926 `/posts`) + e621 WebM ≤ 100,000,000 B or e926 MP4 ≤ 49,999,999 B + same-container `data-file-url` + numeric `data-size`.
+  - The 200 ms dwell before video work, with the immediate thumbnail kept.
+  - Immediate release on hide: pause, remove `src` and `<source>`, `load()`.
+  - Opening the viewer ends the hover, and nothing installs while the viewer is open.
+  - Original-file source only.
+  - Out-of-scope cards are identical to `b9d133c`.
+  - Support claim: TC only (production has no runtime-cell identity; not cell-gated, as in IB04–IB09).
+- **IB10 defects in the previous artifact `b9d133c`** (corrected for the admitted class by `8324552`, pending browser conformance; unchanged outside it):
   - D1: the video FILE source is assigned at pointer-enter, with no dwell (live: 0–2 ms in all 202, including every pass under 200 ms);
   - D2 **CONFIRMED by transport**, reproduced live (after-ready elements hold their source 82/82: still loading after leave 38, already complete 25, browser-idle partial 19): after readiness, leave/dispose/viewer-close leaves the request streaming through +5 s (~1.06–1.15 MB/5 s throttled; under FAST the file completes after leave). Pending release aborts within ±1 ms;
   - D3 **CONFIRMED, narrowed**, reproduced live (up to 29 / 31 holding elements at once): detached source-holding elements accumulate. Transfer multiplies when URLs differ (A→B: 2 streams) or without Range (5 concurrent streams); with Range, same-URL elements share one request;
@@ -41,6 +48,10 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 P local** on `4258ad7`:
+  - `p_stage_video_assertions.cjs` 64/64 (10 fault controls), covering admitted behavior, class boundaries, out-of-scope identity to `b9d133c`, and IB09 still identity;
+  - conformance packages and evaluator 25/25 (10 faults);
+  - regressions as in `IB10_P_STAGE.md` §3; the V3-R verifier is 52/53 by design (its E-stage working-tree pin).
 - **IB10 V3-R run** (raw result SHA-256 `1ce9a65a…d1f4`, not committed; sanitized aggregate `tests/browser/ib10/results/ib10-v3r-aggregate.json`): identities, cells, accounting and cleanup all qualified.
 - **IB10 V3-R package** (`tests/browser/ib10/IB10_V3R_Revisit.user.js`): 53/53 local qualification (8/8 fault controls).
   - AS-IS body = production; RELEASE = production + one test-only line in `hide()`.
@@ -99,11 +110,10 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage in progress (local qualification).**
+**Active checkpoint: IB10 — Muted hover-video lifecycle; P stage locally qualified, browser conformance pending. Not complete. IB11 not started.**
 
-**One bounded next action (owner):** choose the source-retention policy from `IB10_V3R.md` §15:
-- **A:** immediate release (Blueprint-compatible as written);
-- **B:** retain one completed idle prior hover (needs a Blueprint change);
-- **C:** broader bounded retention (needs a Blueprint change).
+**One bounded next action (operator):** run the IB10 P conformance in `tests/browser/ib10/README.md` ("IB10 P-stage conformance"):
+1. the controlled run (54 cells, about 10 minutes; server on port 8794; `IB10_P_Controlled.user.js`);
+2. the small live run (about 10 admitted hovers each on e621 WebM and e926 MP4 under 50 MB; `IB10_P_Live_Observer.user.js`).
 
-No rerun is required for that choice; the full-buffer and longer-retention probes are optional. After the decision, the IB10 P stage may begin within G-VIDEO PASS(scope). No production change before then.
+Return the JSON results (not to be committed). They are evaluated with `p_conformance_ib10.cjs`. IB10 can be closed only if both pass.

@@ -1,0 +1,52 @@
+{
+  "checkpoint": "IB10",
+  "stage": "P-stage conformance packages + evaluator, local qualification (no real browser)",
+  "production_commit": "8324552",
+  "production_blob": "4258ad7746c022606f222fc48924055912de4cfc",
+  "checks": 25,
+  "passed": 25,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault abandoned transfer keeps streaming after leave: caught (C5)",
+      "pass": true
+    },
+    {
+      "name": "fault dwell bypassed (source 10 ms after enter): caught (C2)",
+      "pass": true
+    },
+    {
+      "name": "fault release omitted (source still held at the end): caught (C4)",
+      "pass": true
+    },
+    {
+      "name": "fault viewer takeover does not release the hover: caught (C5 viewer)",
+      "pass": true
+    },
+    {
+      "name": "fault artifact mismatch: caught (C1)",
+      "pass": true
+    },
+    {
+      "name": "fault audible hover: caught (C3)",
+      "pass": true
+    },
+    {
+      "name": "fault 40 ms pass starts video work: caught (C2)",
+      "pass": true
+    },
+    {
+      "name": "fault live: source still held at +5 s: caught (L3)",
+      "pass": true
+    },
+    {
+      "name": "fault live: quick pass created a hover video: caught (L1)",
+      "pass": true
+    },
+    {
+      "name": "fault live: source before dwell: caught (L2)",
+      "pass": true
+    }
+  ],
+  "failures": []
+}
