@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. P stage not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator prepared and locally qualified** (`IB10_V3R.md`); no evidence collected yet. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
+**IB10 — Muted hover-video lifecycle: PARTIAL — NOT COMPLETE. G-VIDEO(class, cell) E → PASS(scope)** (`IB10_V3L.md` §8): TC; logged-out `/posts`; e621 WebM (0.8–100 MB observed) and e926 MP4 (<50 MB); original-file source. P stage not started. The local baseline is characterized (`IB10_HOVER_VIDEO_BASELINE.md`). **V3-C controlled run complete and analyzed** (`IB10_V3C.md`): 54/54 clean cells, after dropping 2 contaminated attempts. **V3-L live run complete and analyzed**: 202/202 usable (e621 158 WebM, e926 44 MP4). **V3-R revisit/cache discriminator run and analyzed** (`IB10_V3R.md` §10–§16): 16/16 cells; 3 flagged for trusted pointer events but structurally clean. Released revisits stayed as fast as AS-IS. There is no production change. IB09 is COMPLETE, PASS(scope) (`IB09_COMPLETION_RECORD.md`).
 
 ## Current state
 - Branch `implementation/ib00-baseline`. The working tree is clean, and HEAD equals `origin/implementation/ib00-baseline`.
@@ -25,7 +25,11 @@
 ## Gates relevant to the next step
 - **G-VIDEO(class, cell): E → PASS(scope)** for e621 WebM and e926 MP4 (<50 MB) logged-out `/posts` video cards in TC. Other classes and cells stay OPEN.
 - **Owner decisions settled:** 200 ms dwell before video media work; opening the viewer ends the hover preview; original-file source for IB10 (no rendition discovery).
-- **Open owner decision:** source retention / revisit policy. "At most one source-holding hover video" is a proposal only, not frozen. V3-R resolves whether release after readiness damages revisit speed.
+- **Open owner decision:** source retention / revisit policy (options A immediate release / B retain one completed idle prior hover / C broader bounded retention, in `IB10_V3R.md` §15). B and C would need a Blueprint change. V3-R evidence (Chrome 154 + Tampermonkey 5.5.0, localhost):
+  - after releasing a ready, buffered hover, a revisit within 0.5–5 s was ready in 20–27 ms (AS-IS 20–28; cold 219–536);
+  - the released transfer aborted 0–3 ms after leave;
+  - the revisit resumed rather than restarted: no-store re-fetched 16 KiB from in-memory media data, cacheable resumed exactly with `If-Range`;
+  - AS-IS kept the abandoned transfer streaming (~0.1 MB per 0.5 s, ~1.1 MB per 5 s at the test rate).
 - **IB10 defects found in current production (not corrected):**
   - D1: the video FILE source is assigned at pointer-enter, with no dwell (live: 0–2 ms in all 202, including every pass under 200 ms);
   - D2 **CONFIRMED by transport**, reproduced live (after-ready elements hold their source 82/82: still loading after leave 38, already complete 25, browser-idle partial 19): after readiness, leave/dispose/viewer-close leaves the request streaming through +5 s (~1.06–1.15 MB/5 s throttled; under FAST the file completes after leave). Pending release aborts within ±1 ms;
@@ -37,6 +41,7 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB10 V3-R run** (raw result SHA-256 `1ce9a65a…f1f4`, not committed; sanitized aggregate `tests/browser/ib10/results/ib10-v3r-aggregate.json`): identities, cells, accounting and cleanup all qualified.
 - **IB10 V3-R package** (`tests/browser/ib10/IB10_V3R_Revisit.user.js`): 53/53 local qualification (8/8 fault controls).
   - AS-IS body = production; RELEASE = production + one test-only line in `hide()`.
   - Behavior scope: RELEASE adds only removeSrc + load on installed videos at leave.
@@ -66,6 +71,13 @@
   - the window is +5 s (later buffer-limit pausing is not observed);
   - cache is excluded by design (no-store);
   - TC only.
+- **IB10 V3-R limitations:**
+  - trusted pointer events in 3 cells (no extra hover work; conclusions hold on clean cells: 5 pairs, 7/8 RELEASE);
+  - localhost (a released revisit needs one new request, so the real-network round-trip cost is unmeasured);
+  - partial buffer only (full-buffer FAST deferred);
+  - in-memory retention beyond 5 s or under many videos is untested;
+  - the cacheable arm says nothing about e621/e926's real headers;
+  - TC only.
 - **IB10 V3-L limitations:**
   - live evidence is DOM/media state, not bytes (byte proof is V3-C only);
   - all 256 Resource Timing entries hid their sizes, and entries also appear for aborted loads;
@@ -89,6 +101,9 @@
 ## Next
 **Active checkpoint: IB10 — Muted hover-video lifecycle; P stage waits for the retention/revisit decision.**
 
-**One bounded next action (operator):** run V3-R per `tests/browser/ib10/README.md` ("IB10 V3-R revisit/cache experiment"): 16 cells, about 3–4 minutes, Chrome + Tampermonkey, the V3-C fixtures. Return `ib10-v3r-results.json`.
+**One bounded next action (owner):** choose the source-retention policy from `IB10_V3R.md` §15:
+- **A:** immediate release (Blueprint-compatible as written);
+- **B:** retain one completed idle prior hover (needs a Blueprint change);
+- **C:** broader bounded retention (needs a Blueprint change).
 
-Then analyze it (`analyze_ib10_v3r.cjs`) and report the measured AS-IS vs RELEASE revisit differences, for the owner to decide the retention policy. No production change and no P implementation before that decision.
+No rerun is required for that choice; the full-buffer and longer-retention probes are optional. After the decision, the IB10 P stage may begin within G-VIDEO PASS(scope). No production change before then.
