@@ -1,0 +1,69 @@
+{
+  "checkpoint": "IB10",
+  "stage": "P controlled conformance: targeted cell recovery (selector + merge), local qualification",
+  "recoveryCells": [
+    "RANGE/mp4/LEAVE_PENDING",
+    "RANGE/mp4/LEAVE_LOADEDDATA",
+    "RANGE/mp4/LEAVE_FIRST_FRAME",
+    "RANGE/webm/CYCLES_5",
+    "NORANGE/mp4/LEAVE_FIRST_FRAME",
+    "NORANGE/mp4/CYCLES_5",
+    "NORANGE/mp4/VIEWER_PENDING",
+    "NORANGE/webm/LEAVE_LOADEDDATA",
+    "FAST/mp4/DISPOSE"
+  ],
+  "checks": 23,
+  "passed": 23,
+  "failed": 0,
+  "fault_controls": [
+    {
+      "name": "fault unknown transport refused",
+      "pass": true
+    },
+    {
+      "name": "fault unknown container refused",
+      "pass": true
+    },
+    {
+      "name": "fault unknown scenario refused",
+      "pass": true
+    },
+    {
+      "name": "fault malformed item refused (missing part / wrong separator / lower-case transport)",
+      "pass": true
+    },
+    {
+      "name": "fault duplicate cell refused",
+      "pass": true
+    },
+    {
+      "name": "fault empty selector refused",
+      "pass": true
+    },
+    {
+      "name": "fault --only combined with --cells refused",
+      "pass": true
+    },
+    {
+      "name": "fault recovery missing a cell: merged set incomplete, not PASS",
+      "pass": true
+    },
+    {
+      "name": "fault recovery re-supplies a cell already clean in the original: merge refused",
+      "pass": true
+    },
+    {
+      "name": "fault media identity differs between files: merge refused",
+      "pass": true
+    },
+    {
+      "name": "fault a recovered cell fails the criteria (transfer still streaming): merged result not PASS",
+      "pass": true
+    },
+    {
+      "name": "fault recovery cells contaminated by trusted pointer events are still rejected (rule not weakened)",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

@@ -13,7 +13,12 @@
 //     (complete / client-abort / open-at-run-end);
 //   - per run: the client's recorded events (posted by the package) and the
 //     server requests for that run's token; the next run URL is returned.
-// Usage: node v3c_server.cjs --media <dir> [--port 8790] [--out <file>] [--only <scenario,...>]
+// Exact cell selection (test-only recovery of specific cells): --cells takes
+// TRANSPORT/container/SCENARIO items, comma-separated. Every item must name a
+// known cell, at most once; anything else is refused. The selected cells run in
+// the canonical full-plan order. Without --cells (and --only) the full 54-cell
+// plan is unchanged.
+// Usage: node v3c_server.cjs --media <dir> [--port 8790] [--out <file>] [--only <scenario,...> | --cells <T/c/S,...>]
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -44,7 +49,26 @@ function verifyMedia(dir) {
   return out;
 }
 
-function plan(only) {
+function parseCells(spec) {
+  const items = String(spec == null ? '' : spec).split(',').map((x) => x.trim()).filter(Boolean);
+  if (!items.length) throw new Error('--cells is empty');
+  const seen = new Set();
+  for (const it of items) {
+    const m = /^(RANGE|NORANGE|FAST)\/(mp4|webm)\/([A-Z0-9_]+)$/.exec(it);
+    if (!m || !SCENARIOS.includes(m[3])) throw new Error(`unknown cell: ${it}`);
+    const key = `${m[1]}|${m[2]}|${m[3]}`;
+    if (seen.has(key)) throw new Error(`duplicate cell: ${it}`);
+    seen.add(key);
+  }
+  return seen;
+}
+
+function plan(only, cells = null) {
+  if (cells !== null && cells !== undefined) { // any provided selector is validated, even an empty one
+    if (only && only.length) throw new Error('--only and --cells cannot be combined');
+    const want = parseCells(cells);
+    return plan(null).filter((r) => want.has(`${r.transport}|${r.container}|${r.scenario}`));
+  }
   const runs = [];
   const scen = only && only.length ? SCENARIOS.filter((s) => only.includes(s)) : SCENARIOS;
   for (const transport of TRANSPORTS) for (const container of CONTAINERS) for (const scenario of scen) {
@@ -64,9 +88,9 @@ function page(run, port) {
 </body></html>`;
 }
 
-function createServer({ mediaDir, port = 8790, out = null, only = null, log = console.log }) {
+function createServer({ mediaDir, port = 8790, out = null, only = null, cells = null, log = console.log }) {
   const media = verifyMedia(mediaDir);
-  const runs = plan(only);
+  const runs = plan(only, cells);
   for (const r of runs) r.size = media[r.container].size;
   const byToken = new Map(runs.map((r) => [r.token, r]));
   const requests = []; // all media requests
@@ -163,7 +187,7 @@ function createServer({ mediaDir, port = 8790, out = null, only = null, log = co
   return { server, runs, media, requests, results, finalize, listen: () => new Promise((r) => server.listen(port, '127.0.0.1', r)) };
 }
 
-module.exports = { createServer, MEDIA, SCENARIOS, TRANSPORTS, CONTAINERS, THROTTLE_BPS, page, plan, verifyMedia };
+module.exports = { createServer, MEDIA, SCENARIOS, TRANSPORTS, CONTAINERS, THROTTLE_BPS, page, plan, parseCells, verifyMedia };
 
 if (require.main === module) {
   const arg = (k, d = null) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
@@ -172,8 +196,9 @@ if (require.main === module) {
   const port = Number(arg('--port', '8790'));
   const out = arg('--out', path.join(process.cwd(), 'ib10-v3c-results.json'));
   const only = arg('--only') ? arg('--only').split(',') : null;
+  const cells = process.argv.includes('--cells') ? (arg('--cells') || '') : null;
   let s;
-  try { s = createServer({ mediaDir, port, out, only }); } catch (e) { console.error(`IB10 V3-C refused: ${e.message}`); process.exit(1); }
+  try { s = createServer({ mediaDir, port, out, only, cells }); } catch (e) { console.error(`IB10 V3-C refused: ${e.message}`); process.exit(1); }
   s.listen().then(() => console.log(`IB10 V3-C: media SHA-256 verified; ${s.runs.length} runs. Open http://127.0.0.1:${port}/v3c/start in the Tampermonkey Chrome profile.`));
   s.server.on('v3c-done', () => console.log('IB10 V3-C: all runs complete.'));
   process.on('SIGINT', () => { s.finalize(); s.server.close(() => process.exit(0)); });

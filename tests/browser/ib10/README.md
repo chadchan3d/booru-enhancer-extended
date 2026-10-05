@@ -180,3 +180,25 @@ There are 54 cells: 9 scenarios × MP4/WebM × Range / no-Range / FAST. MP4 runs
 - at leave, +1 s and +5 s the hover video holds no source, is detached, and its `networkState` is EMPTY;
 - at most one hover video holds a source at any sample;
 - every play muted.
+
+## 1a. Controlled run: targeted recovery of the 9 contaminated cells (about 2 minutes)
+
+The first controlled run gave 45 clean cells, all PASS. Nine cells had no clean result because real pointer events were counted (the cleanliness rule is unchanged). Only those nine are rerun.
+
+1. **Start the server** with the exact cell list:
+   ```
+   node tests/browser/ib10/v3c_server.cjs --media <fixture folder> --port 8794 --out <fixture folder>/ib10-p-controlled-recovery.json --cells RANGE/mp4/LEAVE_PENDING,RANGE/mp4/LEAVE_LOADEDDATA,RANGE/mp4/LEAVE_FIRST_FRAME,RANGE/webm/CYCLES_5,NORANGE/mp4/LEAVE_FIRST_FRAME,NORANGE/mp4/CYCLES_5,NORANGE/mp4/VIEWER_PENDING,NORANGE/webm/LEAVE_LOADEDDATA,FAST/mp4/DISPOSE
+   ```
+   It should print "media SHA-256 verified; 9 runs".
+2. **Run:** in the same Tampermonkey profile with **`IB10_P_Controlled.user.js`** (unchanged), open `http://127.0.0.1:8794/v3c/start`.
+   - **Move the mouse pointer off the browser window entirely** (for example onto the taskbar or another screen) and don't touch the mouse or trackpad until the page says "IB10 V3-C complete".
+   - Keep the tab in front and DevTools closed.
+3. **Return** `ib10-p-controlled-recovery.json`. Don't commit it.
+
+**Merge and evaluate** (original plus recovery, with the unchanged criteria):
+```
+node tests/browser/ib10/merge_ib10_p_controlled.cjs <folder>/ib10-p-controlled-results.json <folder>/ib10-p-controlled-recovery.json --out <folder>/ib10-p-controlled-merged-evaluation.json
+```
+It exits 0 only for 54 clean cells, each passing C1–C5.
+- A cell clean in both files, or a media mismatch, is refused.
+- If a recovery cell is contaminated again, rerun just the missing cell(s) with `--cells` to a new file, and pass that file as another argument.

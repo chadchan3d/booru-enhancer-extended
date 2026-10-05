@@ -110,3 +110,32 @@ The evaluator is `p_conformance_ib10.cjs`, with explicit criteria C1–C5 (contr
 2. **Small live run:** about 10 admitted hovers per host, on e621 WebM and e926 MP4 under 50 MB.
 
 Operator steps are in `tests/browser/ib10/README.md` ("IB10 P-stage conformance"). Raw results are not to be committed.
+
+## 5. Controlled run: first result and targeted recovery
+
+**First operator run:**
+- **File:** `ib10-p-controlled-results.json`, SHA-256 `27e90c6c5b023f0e49146cf129b1d8878e52ae8e08c666acc02b79fd572fe175`. Not committed.
+- **Selection:** 55 entries; 10 rejected by the unchanged rule (trusted pointer events > 0); **45 clean cells, all PASS** C1–C5, every identity `MATCH_EXPECTED_ARTIFACT`.
+- **Missing:** nine cells have no clean result.
+  - RANGE: mp4 `LEAVE_PENDING`, mp4 `LEAVE_LOADEDDATA`, mp4 `LEAVE_FIRST_FRAME`, webm `CYCLES_5`;
+  - NORANGE: mp4 `LEAVE_FIRST_FRAME`, mp4 `CYCLES_5`, mp4 `VIEWER_PENDING`, webm `LEAVE_LOADEDDATA`;
+  - FAST: mp4 `DISPOSE`.
+- **Status:** controlled conformance is **incomplete, not failed**.
+
+**Recovery mechanism (test-only):**
+- **`v3c_server.cjs --cells`:** an exact `TRANSPORT/container/SCENARIO` selector. Unknown, malformed, duplicate or empty selectors are refused, as is combining it with `--only`. The selected cells run in canonical order. Without it, the full 54-cell plan is unchanged (V3-C verifier 29/29).
+  - V3-C checksum list: only the `v3c_server.cjs` line changed (`27e82d0a…` → `3b2e539e…`).
+- **`merge_ib10_p_controlled.cjs`:** clean results per file come from the unchanged selector. A cell clean in more than one file is refused, as is a media mismatch. The unchanged `evaluateControlled` criteria are applied to the merged 54-cell set.
+- **Local verifier:** `verify_ib10_p_recovery.cjs`, **23/23**. Fault controls (all caught):
+  - unknown transport, container or scenario;
+  - malformed, duplicate or empty selector;
+  - `--only` combined with `--cells`;
+  - a bad CLI selector, refused before listening;
+  - recovery missing a cell;
+  - a duplicate clean cell;
+  - media mismatch;
+  - a failing recovered cell;
+  - contaminated recovery (the rule is not weakened);
+  - a single-file merge.
+- **Defect found and fixed:** an empty `--cells` was first read as "no selector" (it would have run all 54 cells). It is now refused.
+- **Unchanged:** production (`8324552` / `4258ad7`) and the P package (`IB10_P_Controlled.user.js` equals a fresh build).
