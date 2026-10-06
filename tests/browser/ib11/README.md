@@ -34,4 +34,31 @@ These are the IB10 fixtures `ib10_v3c_fixture.mp4` and `ib10_v3c_fixture.webm` (
 6. **Finish:** the last page shows "all pages complete" and the server prints "all pages complete". Return `ib11-gplay-results.json`. It contains no URLs or IDs, only cell labels, times, states and browser/manager brand versions.
 7. **Clean up:** disable the script and stop the server with Ctrl+C. If a run stops partway, Ctrl+C writes the pages completed so far; return that file.
 
-**Evaluate:** `node tests/browser/ib11/gplay_evaluate.cjs <ib11-gplay-results.json>` (revision 1.0). The raw results file is not committed; only its SHA-256 and the verdict are recorded.
+**Evaluate:** `node tests/browser/ib11/gplay_evaluate.cjs <ib11-gplay-results.json> [--recovery <ib11-gplay-recovery.json>]` (now revision 1.1). The raw results files are not committed (`.gitignore`); only their SHA-256 values and the verdict are recorded.
+
+---
+
+# Targeted DELIB recovery (IB11-E1): only U-mp4-DELIB and U-webm-DELIB
+
+In the first run, both DELIB cells timed out at the Unmute prompt (no click). Those two cells are re-run alone. The 30 other cells of the first run (raw SHA-256 `13888dd9…0048`, unchanged) are kept.
+
+`IB11_GPLAY_Recovery.user.js` is the same evidence package (production `4d793a2` body unchanged, same recorder) with runner-only patches:
+- **Hard-to-miss prompts:** a large yellow panel in the middle of the screen, and the tab title reads "ACTION NEEDED".
+- **No silent advance:** if you don't click within 3 minutes, the page shows **INVALID** and does not advance. Reload it (F5) to retry. An INVALID attempt is never evidence.
+- **Playback first:** the Unmute prompt appears only after the video is actually playing.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_gplay_recovery.cjs --check`
+- `node tests/browser/ib11/verify_ib11_gplay_recovery.cjs --media <fixture folder>` (28/28)
+
+## Operator steps (about 1 minute)
+
+1. **Start the server in recovery mode:** `node tests/browser/ib11/gplay_server.cjs --media <fixture folder> --recovery --out <fixture folder>/ib11-gplay-recovery.json`. It prints "2 pages (RECOVERY …)".
+2. **Prepare Tampermonkey:** disable every other script, **including `IB11_GPLAY_Controlled.user.js`**. Install and enable `IB11_GPLAY_Recovery.user.js`. Sound on.
+3. **Open** `http://127.0.0.1:8796/gplay/start`. On each of the two pages:
+   - click **Start**;
+   - wait until the video is playing;
+   - click the big **Unmute** button.
+4. **Finish:** the server prints "all pages complete". Return `ib11-gplay-recovery.json`.
+
+**Evaluate both files together:** `node tests/browser/ib11/gplay_evaluate.cjs <ib11-gplay-results.json> --recovery <ib11-gplay-recovery.json>`.

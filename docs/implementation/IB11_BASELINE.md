@@ -4,7 +4,7 @@
 
 **Invariant (Blueprint §3 IB11 item 2):** "The viewer shows the selected target's usable placeholder, preserves transformations/preferences and offers native recovery when loading or playback fails."
 
-**Status:** **IB11 — PARTIAL, E-stage evidence OPEN.** G-PLAY is **OPEN**: no controlled or browser playback evidence has run. IB12 is not started.
+**Status:** **IB11 — PARTIAL, E-stage evidence OPEN.** G-PLAY is **OPEN / PARTIAL**. The first controlled browser run gave 30/32 cells PASS under evaluator revision 1.1. Two DELIB cells are missing operator evidence, and their targeted recovery is prepared (§9). IB12 is not started.
 
 ## 1. Source identity and gate check
 
@@ -227,3 +227,84 @@ Within item 3's allowed scope, and subject to G-PLAY E for anything that touches
 - **G-PLAY(TC): OPEN.** No controlled or browser playback evidence has passed. The jsdom simulator smoke qualifies the tooling only.
 - G-OWN(viewer), G-SETTINGS and G-HOST / G-REQUEST: unchanged (PASS for the active TC path, per the Ledger).
 - IB11: PARTIAL, E-stage. IB12 not started.
+
+## 9. IB11-E1: first controlled G-PLAY run, evaluator correction (revision 1.1), targeted DELIB recovery
+
+**Raw run (operator, TC: Chrome 154 + Tampermonkey 5.5.0):** `ib11-gplay-results.json`.
+- SHA-256 `13888dd91061da37d939085172e175222552ec93ad5d56dc1ee118d96c630048`, verified.
+- The file is not committed (`.gitignore`) and is never modified.
+- All 4 pages report `MATCH_EXPECTED_ARTIFACT`. The arm U Start clicks were trusted.
+
+**Revision 1.0 (as committed at `b1dbaa9`):** reproduced exactly.
+- Complete, no page failures; **28 PASS / 4 FAIL**.
+- Failing cells: N-mp4-LOOPF, N-webm-LOOPF, U-mp4-DELIB, U-webm-DELIB.
+
+**LOOPF: an evaluator defect, not a product failure.** In both cells (loop=false), the genuine `ended` came before the close: MP4 at seek + 1064 ms (16733); WebM at seek + 1066 ms (16594).
+- **MP4:** Escape at 19671. Production's cleanup ran at once: pause, `removeSrc`, `load()`. Then `abort`, `emptied` and a `currentTime` reset to 0 followed at 19672.
+- **WebM:** the same pattern, with Escape at 19530 and the reset at 19531.
+- **The defect:** the recorder logs a backwards time jump as "wrap". Revision 1.0 counted every wrap after the near-end seek, so the reset caused by cleanup was read as looping.
+- **Same artifact on LOOPT:** both LOOPT cells show this reset wrap after close too. Under 1.0, a cleanup reset alone could have satisfied loop=true. Here they also had a genuine pre-close wrap (MP4 22096, WebM 21945).
+
+**Correction: revision 1.1.**
+- **LOOP rule:** LOOP is judged only while the tested media is live. It counts events after the near-end seek and before the close/reset boundary. The boundary is the first of: the cell's Escape, a production `removeSrc` on that video, or an `abort`/`emptied` on it.
+- **Genuine detection is unchanged:** loop=false needs a pre-boundary `ended` and no wrap; loop=true needs a pre-boundary wrap and no `ended`.
+- **Also new in 1.1:** DELIB requires actual playback of A before the Unmute, and there is an explicit recovery merge.
+
+**Re-evaluation of the same raw file under 1.1:** complete, no page failures, **30 PASS / 2 FAIL**.
+- N-mp4-LOOPF and N-webm-LOOPF now PASS (boundary ≈ 4002 ms after the seek; ended 1, wrap 0).
+- Both LOOPT cells still PASS on their genuine wrap (wrap 1, ended 0).
+- The only failures are U-mp4-DELIB and U-webm-DELIB.
+
+**Capability table (actual browser behavior; preferences preserved in every cell):**
+
+| Cell | N-mp4 | N-webm | U-mp4 | U-webm |
+| --- | --- | --- | --- | --- |
+| PREF (muted autoplay) | PLAYED | PLAYED | — | — |
+| UNMUTED (autoplay, mute off) | BLOCKED | PLAYED | PLAYED | PLAYED |
+| NOAUTO | IDLE | IDLE | — | — |
+| LOOPF / LOOPT | PLAYED / PLAYED | PLAYED / PLAYED | — | — |
+| RVOFF / RVON | PLAYED / PLAYED | PLAYED / PLAYED | — | — |
+| PLAYREJ / PLAYAPI (`updatePost` `play()`) | BLOCKED (NotAllowedError) | PLAYED (resolved) | PLAYED | PLAYED |
+| FAIL | ERROR (+ native link) | ERROR (+ native link) | — | — |
+| CLOSEPEND | CLOSED_BEFORE_READY | CLOSED_BEFORE_READY | — | — |
+| CLOSEPLAY / STALE | PLAYED / PLAYED | PLAYED / PLAYED | — | — |
+| RETRY | PLAYED (blocked → trusted Space → resolved) | PLAYED | — | — |
+| DELIB | — | — | PLAYED; no Unmute (prompt timeout) | PLAYED; no Unmute (prompt timeout) |
+
+**Reading the table:**
+- **Arm N without activation:** unmuted autoplay of the MP4 fixture was blocked, and its programmatic `play()` was rejected with NotAllowedError. The same cells on the WebM page played; the WebM page ran after the MP4 page's trusted Space retry.
+- **No support claim:** the evaluator makes no general autoplay-support claim from this. It records what each cell did, and a blocked capability counts only with the tested fallback (RETRY passed).
+
+**DELIB: missing evidence, not a product result.** Both cells played A (trusted Start), but `promptInputs` was 0. The `unmute` mark is untrusted, exactly 120 s after playback began: the evidence runner's prompt timed out and the cell continued. No inference is drawn from those cells.
+
+**Targeted recovery (prepared; operator pending).** Only U-mp4-DELIB and U-webm-DELIB are re-run.
+- **Package:** `IB11_GPLAY_Recovery.user.js` (SHA-256 `199cbb19…fb58`). It is the evidence package with 5 declared runner-only patches:
+  - a large centered prompt with an "ACTION NEEDED" tab title;
+  - a 3-minute prompt timeout that makes the attempt INVALID: no cell, error posted, no advance;
+  - playback required before the Unmute prompt;
+  - the failed cell is dropped from an errored attempt;
+  - no navigation on error.
+- **Unchanged:** the evidence-run package `IB11_GPLAY_Controlled.user.js` and `gplay_postamble.js` stay byte-identical (`3c613d11…078a`).
+- **Server:** `gplay_server.cjs --recovery`. It keeps INVALID attempts with attempt numbers, refuses a second valid attempt for a page (409), and finishes only with one valid attempt per page.
+- **Merge:** `gplay_evaluate.cjs <original> --recovery <recovery>` (revision 1.1). It accepts only the two recovery cells, each from exactly one valid attempt (identity MATCH, trusted Start, no error). It rejects ambiguous, foreign, missing and wrong-probe recoveries. It records both files' SHA-256 values and lists every replaced cell with its original and recovery status. The original document is never modified.
+- **What a recovered DELIB cell must show:**
+  - trusted Start;
+  - A actually played;
+  - a trusted Unmute while the prompt was active;
+  - A unmuted, with no production re-mute;
+  - navigation to B;
+  - B starting muted (the stored preference) at A's remembered volume;
+  - normal release.
+
+**Local qualification:**
+- `verify_ib11_gplay.cjs` **37/37**. That is the previous 28 plus:
+  - the simulator now models Chrome's release reset and reproduces the artifact;
+  - revision 1.0 (read from git `b1dbaa9`) fails both LOOPF cells on it, and 1.1 passes them;
+  - 7 LOOP controls: loop=false with a genuine ended plus cleanup resets passes; loop=false with a pre-close wrap fails; loop=false without ended fails; loop=true with a pre-close ended fails; loop=true without a pre-close wrap fails; loop=true whose only wrap is the cleanup reset fails; and the same when the boundary is a `removeSrc` without Escape.
+- `verify_ib11_gplay_recovery.cjs --media <fixtures>` **28/28**:
+  - **static:** recovery = evidence package + exactly the declared patches; evidence package unchanged; plan;
+  - **server:** INVALID kept and no advance; valid advances; duplicate refused; finishes correctly;
+  - **smoke:** an unanswered original gives 30/2; the recovery smoke passes; the merge passes 32/32 with provenance and an untouched original;
+  - **faults (all caught):** timeout → INVALID, not evidence; no playback → INVALID; ambiguous, foreign, missing, wrong-probe, identity and untrusted-Start recoveries rejected; untrusted Unmute rejected; no playback before the Unmute rejected; and three production mutants in the recovery package (re-mute after unmute; mute preference ignored; remembered volume lost).
+
+**Gate statement.** **G-PLAY(TC): OPEN (PARTIAL).** 30 of 32 cells pass on real Chrome evidence under revision 1.1. G-PLAY E cannot pass until both DELIB recovery cells pass and the merged evaluation passes. No production change.

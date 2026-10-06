@@ -2,9 +2,9 @@
  "probe": "ib11-gplay-verification",
  "commit": "4d793a2",
  "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
- "evaluatorRevision": "1.0",
- "passed": 28,
- "total": 28,
+ "evaluatorRevision": "1.1",
+ "passed": 37,
+ "total": 37,
  "smokeCapabilityTable": {
   "N-mp4": {
    "PREF": "PLAYED",
@@ -79,7 +79,7 @@
    "detail": ""
   },
   {
-   "name": "smoke: all 4 pages ran end to end; identity MATCH; evaluator revision 1.0 PASS on simulated media",
+   "name": "smoke: all 4 pages ran end to end; identity MATCH; evaluator revision 1.1 PASS on simulated media",
    "pass": true,
    "detail": ""
   },
@@ -185,6 +185,51 @@
   },
   {
    "name": "fault evidence: arm U Start click not trusted: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the simulator reproduces the first-run artifact: a reset \"wrap\" (with abort/emptied) right after the close of a loop=false cell, after a genuine ended",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "revision 1.0 (git b1dbaa9) fails both LOOPF cells on that artifact; revision 1.1 passes them",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=false + genuine ended before close + later cleanup reset wraps: passes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=false + a genuine pre-close wrap: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=false without ended: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=true with a pre-close ended: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=true without a pre-close wrap: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=true whose only wrap is the cleanup reset (cannot satisfy loop=true): caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "LOOP control: loop=true whose wrap coincides with a production removeSrc (reset boundary without Escape): caught",
    "pass": true,
    "detail": ""
   }

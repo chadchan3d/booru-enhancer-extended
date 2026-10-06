@@ -11,7 +11,13 @@
 //     3 s before headers (a load that is still pending at close).
 // Output: sanitized JSON (no paths, URLs or IDs; cell labels, times, states,
 // browser/manager brand versions).
-// Usage: node gplay_server.cjs --media <dir> [--port 8796] [--out <file>]
+// Recovery mode (--recovery): serves only the arm U pages with only the DELIB
+// cell (U-mp4-DELIB, U-webm-DELIB) for IB11_GPLAY_Recovery.user.js. Every posted
+// attempt is kept; an attempt that reports an error (e.g. a prompt timeout) is
+// INVALID, is not evidence, and its page may be retried by reloading it. The
+// run finishes only when each page has one valid attempt; a second valid
+// attempt for a page is refused (no ambiguous replacement evidence).
+// Usage: node gplay_server.cjs --media <dir> [--port 8796] [--out <file>] [--recovery]
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -46,12 +52,13 @@ const U_CELLS = [
 ];
 const ARMS = { N: N_CELLS, U: U_CELLS };
 const CONTAINERS = ['mp4', 'webm'];
+const RECOVERY_CELLS = ['U-mp4-DELIB', 'U-webm-DELIB'];
 
-function plan() {
+function plan({ recovery = false } = {}) {
   const pages = [];
-  for (const arm of ['N', 'U']) for (const container of CONTAINERS) {
-    pages.push({ token: crypto.randomBytes(8).toString('hex'), id: `${arm}-${container}`, arm, container,
-      cells: ARMS[arm].map(([name, kind, prefs, storedVolume, cards]) => ({ id: `${arm}-${container}-${name}`, name, kind, prefs, storedVolume, cards: cards.map((c) => `${arm}-${container}-${name}-${c}`) })) });
+  for (const arm of recovery ? ['U'] : ['N', 'U']) for (const container of CONTAINERS) {
+    const cells = ARMS[arm].map(([name, kind, prefs, storedVolume, cards]) => ({ id: `${arm}-${container}-${name}`, name, kind, prefs, storedVolume, cards: cards.map((c) => `${arm}-${container}-${name}-${c}`) }));
+    pages.push({ token: crypto.randomBytes(8).toString('hex'), id: `${arm}-${container}`, arm, container, recovery, cells: recovery ? cells.filter((c) => RECOVERY_CELLS.includes(c.id)) : cells });
   }
   return pages;
 }
@@ -65,17 +72,18 @@ function page(pg, port, sizes) {
   };
   return `<!doctype html><html><head><meta charset="utf-8"><title>IB11 G-PLAY</title></head><body data-user-is-anonymous="true">
 <section id="posts-container">${pg.cells.flatMap((c) => c.cards).map(card).join('')}</section>
-<script type="application/json" id="ib11g-run">${JSON.stringify({ token: pg.token, page: pg.id, arm: pg.arm, container: pg.container, cells: pg.cells, port })}</script>
+<script type="application/json" id="ib11g-run">${JSON.stringify({ token: pg.token, page: pg.id, arm: pg.arm, container: pg.container, recovery: !!pg.recovery, cells: pg.cells, port })}</script>
 </body></html>`;
 }
 
-function createServer({ mediaDir, port = PORT, out = null, log = console.log }) {
+function createServer({ mediaDir, port = PORT, out = null, recovery = false, log = console.log }) {
   const media = verifyMedia(mediaDir);
-  const pages = plan();
+  const pages = plan({ recovery });
   const byToken = new Map(pages.map((p) => [p.token, p]));
   const sizes = Object.fromEntries(Object.entries(media).map(([k, m]) => [k, m.size]));
   const requests = [];
   const results = [];
+  const lastPost = new Map(); // page -> server time of its last posted attempt
   function serveMedia(req, res, pg, label) {
     const rec = { page: pg.id, label, t0: Date.now(), range: req.headers.range ? 'range' : null, status: 0, bytesSent: 0, tEnd: null, end: null };
     requests.push(rec);
@@ -127,11 +135,14 @@ function createServer({ mediaDir, port = PORT, out = null, log = console.log }) 
         const pg = client && byToken.get(client.token);
         if (!pg) { res.writeHead(400, { 'Cache-Control': 'no-store' }); return res.end('{}'); }
         delete client.token;
-        results.push({ page: pg.id, client, requests: requests.filter((r) => r.page === pg.id).map(({ page: _p, ...r }) => ({ ...r, end: r.end || 'open-at-page-end' })) });
+        const valid = (r) => r.page === pg.id && !r.client.error;
+        if (recovery && !client.error && results.some(valid)) { log(`IB11 G-PLAY recovery ${pg.id}: a second valid attempt was refused`); res.writeHead(409, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ next: null, refused: 'already-recorded' })); }
+        results.push({ page: pg.id, attempt: results.filter((r) => r.page === pg.id).length + 1, client, requests: requests.filter((r) => r.page === pg.id && r.t0 >= (lastPost.get(pg.id) || 0)).map(({ page: _p, ...r }) => ({ ...r, end: r.end || 'open-at-page-end' })) });
+        lastPost.set(pg.id, Date.now());
         const idx = pages.indexOf(pg);
-        const next = pages[idx + 1] ? `/posts?page=${pages[idx + 1].token}` : '/gplay/done';
-        log(`IB11 G-PLAY page ${idx + 1}/${pages.length} ${pg.id}: ${(client.cells || []).length} cell(s)`);
-        if (!pages[idx + 1]) finalize();
+        const next = client.error && recovery ? null : (pages[idx + 1] ? `/posts?page=${pages[idx + 1].token}` : '/gplay/done');
+        log(`IB11 G-PLAY ${recovery ? 'recovery ' : ''}page ${idx + 1}/${pages.length} ${pg.id}: ${(client.cells || []).length} cell(s)${client.error ? ` INVALID (${client.error}); reload the page to retry` : ''}`);
+        if (recovery ? pages.every((p) => results.some((r) => r.page === p.id && !r.client.error)) : !pages[idx + 1]) finalize();
         res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         return res.end(JSON.stringify({ next }));
       });
@@ -141,24 +152,25 @@ function createServer({ mediaDir, port = PORT, out = null, log = console.log }) 
     res.writeHead(404, { 'Cache-Control': 'no-store' }); return res.end();
   });
   function finalize() {
-    const doc = { probe: 'ib11-gplay-controlled', version: '1.0.0', media: Object.fromEntries(Object.entries(media).map(([k, m]) => [k, { size: m.size, sha256: m.sha256 }])), pages: results };
+    const doc = { probe: recovery ? 'ib11-gplay-recovery' : 'ib11-gplay-controlled', version: '1.0.0', recoveryCells: recovery ? RECOVERY_CELLS : undefined, media: Object.fromEntries(Object.entries(media).map(([k, m]) => [k, { size: m.size, sha256: m.sha256 }])), pages: results };
     if (out) { fs.writeFileSync(out, `${JSON.stringify(doc, null, 1)}\n`); log(`IB11 G-PLAY results written: ${path.basename(out)}`); }
     server.emit('gplay-done', doc);
   }
   return { server, pages, media, requests, results, finalize, listen: () => new Promise((r) => server.listen(port, '127.0.0.1', r)) };
 }
 
-module.exports = { createServer, plan, page, PORT, PEND_MS, N_CELLS, U_CELLS, CONTAINERS };
+module.exports = { createServer, plan, page, PORT, PEND_MS, N_CELLS, U_CELLS, CONTAINERS, RECOVERY_CELLS };
 
 if (require.main === module) {
   const arg = (k, d = null) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
   const mediaDir = arg('--media');
   if (!mediaDir) { console.error('usage: node gplay_server.cjs --media <dir> [--port 8796] [--out <file>]'); process.exit(2); }
   const port = Number(arg('--port', String(PORT)));
-  const out = arg('--out', path.join(process.cwd(), 'ib11-gplay-results.json'));
+  const recovery = process.argv.includes('--recovery');
+  const out = arg('--out', path.join(process.cwd(), recovery ? 'ib11-gplay-recovery.json' : 'ib11-gplay-results.json'));
   let s;
-  try { s = createServer({ mediaDir, port, out }); } catch (e) { console.error(`IB11 G-PLAY refused: ${e.message}`); process.exit(1); }
-  s.listen().then(() => console.log(`IB11 G-PLAY: media SHA-256 verified; ${s.pages.length} pages. Open http://127.0.0.1:${port}/gplay/start in the Tampermonkey Chrome profile.`));
+  try { s = createServer({ mediaDir, port, out, recovery }); } catch (e) { console.error(`IB11 G-PLAY refused: ${e.message}`); process.exit(1); }
+  s.listen().then(() => console.log(`IB11 G-PLAY: media SHA-256 verified; ${s.pages.length} pages${recovery ? ' (RECOVERY: U-mp4-DELIB, U-webm-DELIB only)' : ''}. Open http://127.0.0.1:${port}/gplay/start in the Tampermonkey Chrome profile.`));
   s.server.on('gplay-done', () => console.log('IB11 G-PLAY: all pages complete.'));
   process.on('SIGINT', () => { s.finalize(); s.server.close(() => process.exit(0)); });
 }

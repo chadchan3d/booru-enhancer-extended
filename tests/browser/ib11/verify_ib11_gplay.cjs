@@ -3,10 +3,10 @@
 // browser; the browser run belongs to the operator):
 //   1. static: package current; executed body = committed production 4d793a2
 //      body byte for byte; @match scope; server plan and media verification;
-//   2. smoke (jsdom, fake clock, a media SIMULATOR modelling an autoplay policy:
-//      muted autoplay allowed, unmuted only after user activation; loop/ended;
-//      404; a pending load): all 4 pages run end to end and the evaluator
-//      passes. The simulator is not browser evidence; it only proves the
+//   2. smoke (jsdom, fake clock, the media SIMULATOR in gplay_sim.cjs: muted
+//      autoplay allowed, unmuted only after user activation; loop/ended; 404; a
+//      pending load; Chrome's position reset when a video is released): all 4
+//      pages run end to end and the evaluator passes. The simulator is not browser evidence; it only proves the
 //      runner/recorder/evaluator chain works and is fault-sensitive;
 //   3. fault controls: production-mutant packages (identity forced to MATCH so
 //      a behavioral criterion, not identity, must catch them) and evidence /
@@ -14,15 +14,12 @@
 // Usage: node verify_ib11_gplay.cjs
 const fs = require('fs');
 const path = require('path');
-const { webcrypto } = require('crypto');
-const { TextEncoder } = require('util');
 const { execFileSync } = require('child_process');
 const b = require('./build_ib11_gplay.cjs');
 const srv = require('./gplay_server.cjs');
 const { evaluate, REVISION } = require('./gplay_evaluate.cjs');
 const { split } = require('../ib07/build_production_conformance.cjs');
 const { mustReplace } = require('../../host/ib09/dwell_prototype.cjs');
-const hh = require('../../host/ib09/hover_harness.cjs');
 const h = require(path.resolve(__dirname, '../../host/ib07/item9_harness.cjs'));
 
 const results = [];
@@ -43,71 +40,16 @@ check('plan: 4 pages (N/U x MP4/WebM); arm N 13 cells ending with RETRY; arm U 3
 let refused = false; try { srv.createServer({ mediaDir: path.join(__dirname, 'no-such-dir') }); } catch { refused = true; }
 check('server refuses to start without the pinned media fixtures', refused);
 
-// ---- 2. smoke ----
-const DURATION = 12;
-function mediaSim(w, clock, env) {
-  const MP = w.HTMLMediaElement.prototype;
-  const st = (el) => (el.__sim = el.__sim || { playing: false, ct: 0, timer: null, gen: 0 });
-  const fire = (el, n) => el.dispatchEvent(new w.Event(n));
-  const stop = (el) => { const s = st(el); s.playing = false; if (s.timer) { w.clearInterval(s.timer); s.timer = null; } };
-  const allowed = (el) => el.muted || env.activation;
-  const start = (el) => { const s = st(el); if (s.playing) return; s.playing = true; fire(el, 'play'); fire(el, 'playing');
-    s.timer = w.setInterval(() => { if (!s.playing) return; s.ct += 0.25; if (s.ct >= DURATION) { if (el.loop) { s.ct = 0; fire(el, 'timeupdate'); } else { s.ct = DURATION; stop(el); fire(el, 'timeupdate'); fire(el, 'pause'); fire(el, 'ended'); return; } } fire(el, 'timeupdate'); }, 250); };
-  Object.defineProperty(MP, 'paused', { configurable: true, get() { return !st(this).playing; } });
-  Object.defineProperty(MP, 'duration', { configurable: true, get() { return this.hasAttribute('src') ? DURATION : NaN; } });
-  Object.defineProperty(MP, 'currentTime', { configurable: true, get() { return st(this).ct; }, set(v) { st(this).ct = Number(v); fire(this, 'timeupdate'); } });
-  const sd = Object.getOwnPropertyDescriptor(MP, 'src');
-  Object.defineProperty(MP, 'src', { configurable: true, get() { return sd.get.call(this); }, set(v) {
-    sd.set.call(this, v); const el = this; const s = st(el); stop(el); s.ct = 0; const g = ++s.gen; const u = String(v);
-    const delay = /-PEND\./.test(u) ? 3000 : 60;
-    w.setTimeout(() => { if (s.gen !== g || !el.hasAttribute('src')) return; if (/-FAIL\./.test(u)) { fire(el, 'error'); return; } fire(el, 'loadedmetadata'); fire(el, 'loadeddata'); fire(el, 'canplay'); if (el.autoplay && allowed(el)) start(el); }, delay);
-  } });
-  const md = Object.getOwnPropertyDescriptor(MP, 'muted');
-  Object.defineProperty(MP, 'muted', { configurable: true, get() { return md.get.call(this); }, set(v) { md.set.call(this, v); if (!v && st(this).playing && !env.activation) { stop(this); fire(this, 'pause'); } } });
-  const ra = w.Element.prototype.removeAttribute;
-  w.Element.prototype.removeAttribute = function (n) { if (this instanceof w.HTMLMediaElement && n === 'src') { const s = st(this); s.gen++; stop(this); } return ra.call(this, n); };
-  MP.play = function () { const el = this; if (!el.hasAttribute('src')) return Promise.reject(new w.DOMException('no src', 'NotSupportedError'));
-    if (!allowed(el)) return Promise.reject(new w.DOMException('blocked', 'NotAllowedError'));
-    const g = st(el).gen; return new Promise((res, rej) => w.setTimeout(() => { if (st(el).gen !== g || !el.hasAttribute('src')) { rej(new w.DOMException('aborted', 'AbortError')); return; } start(el); res(); }, 60)); };
-  MP.pause = function () { if (st(this).playing) { stop(this); fire(this, 'pause'); } };
-  MP.load = function () { if (!this.hasAttribute('src')) { stop(this); fire(this, 'emptied'); } };
-  Object.defineProperty(w.navigator, 'userActivation', { configurable: true, value: { get hasBeenActive() { return env.activation; }, get isActive() { return env.activation; } } });
+// ---- 2. smoke (shared simulator: gplay_sim.cjs) ----
+const { smoke: smokeRun, clone, cellOf } = require('./gplay_sim.cjs');
+const smoke = async (source, opts = {}) => (await smokeRun(source, opts)).doc;
+// Revision 1.0 of the evaluator, read from git (b1dbaa9), to show the LOOP defect and its correction.
+function evaluatorAt(commit) {
+  const Module = require('module');
+  const text = execFileSync('git', ['-C', REPO, 'show', `${commit}:tests/browser/ib11/gplay_evaluate.cjs`], { encoding: 'utf8' });
+  const m = new Module(path.join(__dirname, `gplay_evaluate@${commit}.cjs`), module); m.filename = m.id; m.paths = Module._nodeModulePaths(__dirname); m._compile(text, m.filename);
+  return m.exports;
 }
-async function runPage(pg, source) {
-  let clock = null; let posted = null; const env = { activation: false };
-  const c = h.load({ url: `http://127.0.0.1:${srv.PORT}/posts?page=${pg.token}`, html: srv.page(pg, srv.PORT, { mp4: 3623853, webm: 3091428 }), source, settings: {}, setup: (w) => {
-    clock = hh.installFakeClock(w); w.performance.now = () => clock.now();
-    if (!w.crypto || !w.crypto.subtle) Object.defineProperty(w, 'crypto', { value: webcrypto, configurable: true });
-    if (!w.TextEncoder) w.TextEncoder = TextEncoder;
-    if (!w.PointerEvent) w.PointerEvent = w.MouseEvent;
-    w.GM_info = { scriptHandler: 'jsdom-sim', version: '0' };
-    mediaSim(w, clock, env);
-    w.fetch = async (u, o) => { if (String(u) === '/gplay/result') { posted = JSON.parse(o.body); return { json: async () => ({ next: null }) }; } return new Promise(() => {}); };
-  } });
-  const w = c.window;
-  for (let i = 0; i < 3000 && !posted; i++) {
-    await h.sleep(0); await clock.advance(100);
-    const btn = w.document.querySelector('#ib11g-panel button'); const msg = w.document.querySelector('#ib11g-panel div')?.textContent || '';
-    if (btn && btn.style.display !== 'none') { env.activation = true; btn.click(); }
-    else if (/SPACE/.test(msg) && !w.__spaced) { w.__spaced = true; env.activation = true; w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })); }
-  }
-  w.close();
-  return posted;
-}
-// jsdom events are untrusted; the operator's prompt inputs are real. Mark the
-// prompt inputs trusted (never the cells' synthetic clicks/keys).
-const trustPrompts = (cl) => { if (!cl) return cl; if (cl.start) cl.start.trusted = true; for (const c of cl.cells) for (const m of c.marks) if (m.what === 'retry-key' || m.what === 'unmute') m.trusted = true; return cl; };
-async function smoke(source, { forceIdentity = false } = {}) {
-  const pages = [];
-  for (const pg of srv.plan()) {
-    const cl = trustPrompts(await runPage(pg, source));
-    if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
-    pages.push({ page: pg.id, client: cl, requests: [] });
-  }
-  return { probe: 'ib11-gplay-controlled', pages };
-}
-const clone = (x) => JSON.parse(JSON.stringify(x));
-const cellOf = (doc, id) => doc.pages.flatMap((p) => p.client.cells).find((c) => c.id === id);
 
 async function main() {
   const doc = await smoke(PKG);
@@ -146,6 +88,24 @@ async function main() {
   ef('a page is missing', (d) => { d.pages.pop(); });
   ef('retry press not trusted', (d) => { cellOf(d, 'N-mp4-RETRY').marks.forEach((m) => { if (m.what === 'retry-key') m.trusted = false; }); }, 'RETRY');
   ef('arm U Start click not trusted', (d) => { d.pages[2].client.start.trusted = false; });
+
+  // ---- 3c. LOOP close/reset boundary (revision 1.1) ----
+  const loopf = cellOf(doc, 'N-mp4-LOOPF'); const la = loopf.videos[0]; const esc = loopf.marks.find((m) => m.what === 'key' && m.key === 'Escape').t;
+  const seek = loopf.marks.find((m) => m.what === 'seek-near-end').t;
+  check('the simulator reproduces the first-run artifact: a reset "wrap" (with abort/emptied) right after the close of a loop=false cell, after a genuine ended', la.ev.some((e) => e[1] === 'wrap' && e[0] >= esc) && la.ev.some((e) => e[1] === 'emptied' && e[0] >= esc) && la.ev.some((e) => e[1] === 'ended' && e[0] > seek && e[0] < esc), JSON.stringify(la.ev.filter((e) => e[0] > seek)));
+  const old = evaluatorAt('b1dbaa9');
+  const r10 = old.evaluate(clone(doc)); const r11 = evaluate(clone(doc));
+  const st = (rr, id) => rr.pages.flatMap((p) => p.cells).find((c) => c.id === id).status;
+  check('revision 1.0 (git b1dbaa9) fails both LOOPF cells on that artifact; revision 1.1 passes them', old.REVISION === '1.0' && st(r10, 'N-mp4-LOOPF') === 'FAIL' && st(r10, 'N-webm-LOOPF') === 'FAIL' && st(r11, 'N-mp4-LOOPF') === 'PASS' && st(r11, 'N-webm-LOOPF') === 'PASS', JSON.stringify([st(r10, 'N-mp4-LOOPF'), st(r11, 'N-mp4-LOOPF')]));
+  const lf = (name, id, mutate, expectPass) => { const d = clone(doc); const c = cellOf(d, id); mutate(c, c.videos[0], c.marks.find((m) => m.what === 'seek-near-end').t, c.marks.find((m) => m.what === 'key' && m.key === 'Escape').t); const rr = evaluate(d); const s1 = st(rr, id);
+    check(`LOOP control: ${name}: ${expectPass ? 'passes' : 'caught'}`, expectPass ? s1 === 'PASS' : (s1 === 'FAIL' && rr.failures.find((x) => x.id === id).fails.some((x) => x.startsWith('LOOP'))), JSON.stringify(rr.failures.filter((x) => x.id === id))); };
+  lf('loop=false + genuine ended before close + later cleanup reset wraps', 'N-webm-LOOPF', (c, v, ts, tc) => { v.ev.push([tc + 1, 'wrap', 1, 0], [tc + 2, 'wrap', 1, 0]); }, true);
+  lf('loop=false + a genuine pre-close wrap', 'N-mp4-LOOPF', (c, v, ts, tc) => { v.ev.push([ts + 500, 'wrap', 1, 0]); }, false);
+  lf('loop=false without ended', 'N-mp4-LOOPF', (c, v) => { v.ev = v.ev.filter((e) => e[1] !== 'ended'); }, false);
+  lf('loop=true with a pre-close ended', 'N-mp4-LOOPT', (c, v, ts) => { v.ev.push([ts + 900, 'ended', 1, 12]); }, false);
+  lf('loop=true without a pre-close wrap', 'N-webm-LOOPT', (c, v, ts, tc) => { v.ev = v.ev.filter((e) => !(e[1] === 'wrap' && e[0] < tc)); }, false);
+  lf('loop=true whose only wrap is the cleanup reset (cannot satisfy loop=true)', 'N-mp4-LOOPT', (c, v, ts, tc) => { v.ev = v.ev.filter((e) => !(e[1] === 'wrap' && e[0] < tc)); v.ev.push([tc + 1, 'wrap', 1, 0]); }, false);
+  lf('loop=true whose wrap coincides with a production removeSrc (reset boundary without Escape)', 'N-webm-LOOPT', (c, v, ts, tc) => { v.ev = v.ev.filter((e) => !(e[1] === 'wrap' && e[0] < tc)); c.marks = c.marks.filter((m) => m.what !== 'key'); v.calls.push([ts + 700, 'removeSrc']); v.ev.push([ts + 701, 'wrap', 1, 0]); }, false);
 
   const passed = results.filter((x) => x.pass).length;
   for (const x of results) console.log(`${x.pass ? 'PASS' : 'FAIL'}  ${x.name}${x.pass ? '' : `  -- ${x.detail}`}`);

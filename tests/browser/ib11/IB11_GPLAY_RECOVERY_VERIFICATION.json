@@ -1,0 +1,154 @@
+{
+ "probe": "ib11-gplay-recovery-verification",
+ "commit": "4d793a2",
+ "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "evaluatorRevision": "1.1",
+ "recoveryCells": [
+  "U-mp4-DELIB",
+  "U-webm-DELIB"
+ ],
+ "passed": 28,
+ "total": 28,
+ "results": [
+  {
+   "name": "recovery package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-run package is unchanged (fresh build, SHA-256 3c613d11...)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recovery executes the committed production body byte for byte, with the same recorder",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recovery runner = evidence runner + exactly the 5 declared patches (prompt visibility, timeout -> INVALID, playback required, no advance on error)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "distinct name/namespace; same local-only scope",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recovery plan: only U-mp4-DELIB and U-webm-DELIB (one cell per page, same preferences)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: an INVALID attempt is kept and does not advance (next null)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: a valid attempt advances to the next recovery page",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: a second valid attempt for the same page is refused (409)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: finishes only with one valid attempt per page; the file keeps the INVALID attempt with attempt numbers",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "revision 1.1: an original run whose DELIB prompts were never answered evaluates 30 PASS / 2 FAIL, failing only the two DELIB cells for the missing trusted Unmute",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recovery smoke: both pages valid, each with its DELIB cell; the prompt was the large centered panel with an ACTION NEEDED tab title",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "merge: original + recovery evaluate PASS 32/32; both DELIB cells replaced (FAIL -> PASS) with the recovery hash and page; no merge problem",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "merge leaves the original document unchanged and marks every cell with its source",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: Unmute never clicked -> PROMPT_TIMEOUT; the attempt carries no DELIB cell; the panel says INVALID and the page does not advance",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: a timed-out recovery is not evidence (merge fails: no valid attempt; listed as INVALID attempts)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: no playback before the prompt -> DELIB_NOT_PLAYING; INVALID, not evidence",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: two valid attempts for one cell (ambiguous): rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: a cell outside the recovery set: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: one recovery cell missing: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: wrong probe: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery identity mismatch: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery Start not trusted: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery Unmute not trusted: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: A never played before the Unmute: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production (recovery package): production re-mutes A after the deliberate unmute: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production (recovery package): B ignores the stored mute preference: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production (recovery package): B loses the remembered volume: caught",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}
