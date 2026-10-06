@@ -3,7 +3,7 @@
 **Checkpoint:** IB10 — Muted hover-video lifecycle (blueprint §3 IB10, item 3 "P", items 2, 7–11).
 - **Gate:** G-VIDEO(class, cell) E → PASS(scope) (`IB10_V3L.md` §8).
 - **Owner decisions:** 200 ms dwell; viewer opening ends the hover; original-file source; **V3-R Option A, immediate release** (recorded in the Ledger before this change, commit `5e00884`).
-- **Status: PARTIAL — NOT COMPLETE.** Local qualification is done. Browser conformance (controlled and live) is prepared and pending with the operator. IB11 not started.
+- **Status:** superseded by `IB10_COMPLETION_RECORD.md`. IB10 is COMPLETE, PASS(scope); controlled 54/54 and live 203/203 PASS (§7). IB11 not started.
 
 ## 1. Gate check before editing
 - **Repository:** clean at `b158e72` = origin.
@@ -177,3 +177,24 @@ Operator steps are in `tests/browser/ib10/README.md` ("IB10 P-stage conformance"
 The real-package live smoke still passes. Production, `IB10_P_Live_Observer.user.js` and `IB10_P_Controlled.user.js` are unchanged.
 
 **e621 live P result:** not yet available to this analysis. It was not found in Downloads, Desktop, Documents or the repository, so its SHA-256 and verdict are pending.
+
+## 7. Live conformance result (final)
+
+**e621** (raw `ib10-p-live-e621.json`, SHA-256 `ef0c37b23b27188dac135690c814280ea80fe0e1c85425ccf807472e831b0b70`, not committed):
+- 84 WebM generations, all admitted, **84/84 PASS**;
+- 57 quick passes, 27 sustained previews, 9 after ready.
+
+**e926** (raw `ib10-p-live-e926.json`, SHA-256 `3d31f6814183fdbf1f239f1d6e6519db3089953c08659df9c07a0d40d8ebb7f1`, not committed):
+- 120 MP4 generations: 119 admitted, **119/119 PASS**; 1 OUT_OF_SCOPE (79,810,863 B);
+- 90 quick passes, 29 sustained previews, 14 after ready.
+
+**Run conditions (both files):** identity `MATCH_EXPECTED_ARTIFACT`; Chrome 154 + Tampermonkey 5.5.0; every trigger trusted; no viewer opens.
+
+**Command:** `node tests/browser/ib10/p_conformance_ib10.cjs live <e621> <e926>` (revision 1.1). It exits 0 with 203 PASS, 0 FAIL, 1 OUT_OF_SCOPE, overall PASS.
+
+**Checked directly against the raw generations:**
+- created previews set their source at 200–217 ms (e621) and 201–215 ms (e926), always the card file;
+- every one was detached and source-free at leave (`networkState` 3), +1 s and +5 s (`networkState` 0);
+- 23/23 plays muted;
+- at most one source-holding hover at any sample;
+- no-video generations all ended at ≤ 200 ms.
