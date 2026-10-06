@@ -4,7 +4,7 @@
 
 **Invariant (Blueprint §3 IB11 item 2):** "The viewer shows the selected target's usable placeholder, preserves transformations/preferences and offers native recovery when loading or playback fails."
 
-**Status:** **IB11 — PARTIAL, E-stage evidence OPEN.** G-PLAY is **OPEN / PARTIAL**. The first controlled browser run gave 30/32 cells PASS under evaluator revision 1.1. Two DELIB cells are missing operator evidence, and their targeted recovery is prepared (§9). IB12 is not started.
+**Status:** **IB11 — PARTIAL, E stage.** **G-PLAY(TC): E → PASS(scope)** (§10): the original run merged with the targeted DELIB recovery gives 32/32 under evaluator revision 1.1. The remaining IB11 browser evidence (keyboard, focus, native link, visual V-D4/V-D6/V-D7) is still OPEN. No production change. IB12 is not started.
 
 ## 1. Source identity and gate check
 
@@ -103,7 +103,7 @@
 | --- | --- | --- | --- |
 | V-D1 | A late same-ID metadata update erases the failure state and native link (C3). | "offers native recovery when loading … fails"; item 10 "no blank uncommunicated failure". | Yes. In scope: "local … failed … states"; "native link". |
 | V-D4 | Fit ignores rotation (E5). | §6 "Fit/zoom/pan/rotate/flip … Keep behavior"; item 9 "all transforms across replacement/resize"; item 10 "no … invalid transform". | Yes, if it is confirmed visually in a browser (the transform matrix is a source fact; the visual overflow needs a browser screenshot). |
-| V-D5 | Viewer keys act on Ctrl/Meta/Alt chords, including Favorite on Ctrl+F (G2). | §6 "Fit/zoom/pan/rotate/flip/key navigation: keep"; AGENTS forbids unintended favorite mutation. Not a named IB11 scope item. | Owner decision. The fix is a narrow key filter; it may belong in IB11 (keybinds, item 8) or IB14. |
+| V-D5 | Viewer keys act on Ctrl/Meta/Alt chords, including Favorite on Ctrl+F (G2). | §6 "Fit/zoom/pan/rotate/flip/key navigation: keep"; AGENTS forbids unintended favorite mutation. | **Owner decision (IB11-E2): yes, in IB11.** A narrow viewer-key modifier guard; see §10. |
 | V-D6a/b | A synchronous media-build failure leaves the overlay shown (takeover) or a blank viewer (navigation) (A5, A6). | Item 9 "Synchronous open throws before cancellation"; item 10 "no blank uncommunicated failure"; "safe shell takeover". | Yes. In scope: "safe shell takeover and native link". |
 | V-D7 | No staged placeholder for images: the original loads directly with no loading state (B1). | Invariant "shows the selected target's usable placeholder"; item 3 "Stage target thumbnail/sample before ready upgrade". | Yes. This is exactly item 3's allowed scope. |
 
@@ -308,3 +308,89 @@ Within item 3's allowed scope, and subject to G-PLAY E for anything that touches
   - **faults (all caught):** timeout → INVALID, not evidence; no playback → INVALID; ambiguous, foreign, missing, wrong-probe, identity and untrusted-Start recoveries rejected; untrusted Unmute rejected; no playback before the Unmute rejected; and three production mutants in the recovery package (re-mute after unmute; mute preference ignored; remembered volume lost).
 
 **Gate statement.** **G-PLAY(TC): OPEN (PARTIAL).** 30 of 32 cells pass on real Chrome evidence under revision 1.1. G-PLAY E cannot pass until both DELIB recovery cells pass and the merged evaluation passes. No production change.
+
+## 10. IB11-E2: DELIB recovery ingested; G-PLAY(TC) E → PASS(scope)
+
+**Repository at ingestion:**
+- `e2ec05e` = origin, clean;
+- production `4d793a2` / blob `002bdfd`, body SHA-256 `00915584…e945`, unchanged;
+- `gplay_evaluate.cjs` unchanged since `e2ec05e` (revision 1.1).
+
+**Raw evidence.** Neither file is committed (`.gitignore`), and neither was modified.
+
+| File | SHA-256 | Verified |
+| --- | --- | --- |
+| Original run `ib11-gplay-results.json` | `13888dd91061da37d939085172e175222552ec93ad5d56dc1ee118d96c630048` | yes |
+| DELIB recovery `ib11-gplay-recovery.json` | `ebd4f57ce2ecf3d93037ebbbe28104fed0ae83b4a203827a2e7b32bc91485a90` | yes |
+
+**Recovery review (raw file, independently of the evaluator):**
+- **The file:** probe `ib11-gplay-recovery`, recovery cells exactly U-mp4-DELIB and U-webm-DELIB. Two pages, one attempt each (attempt 1). Identity `MATCH_EXPECTED_ARTIFACT`, trusted Start, no page error. Chrome 154 + Tampermonkey 5.5.0.
+- **Inputs:** each cell had `trustedOutsidePrompt` 0 and `promptInputs` 2 (the pointerdown and click on Unmute).
+- **U-mp4-DELIB:**
+  - A played from 1981 (before the Unmute at 3754).
+  - The Unmute was trusted. The harness wrote muted=0 at 3735, and `volumechange` reported muted 0 at 3754.
+  - There are no production `muted` writes. A kept playing unmuted until navigation (maxTime 3.63 s) and ended muted 0.
+  - ArrowRight at 5756 created B at 5757. B was assigned muted=true and defaultMuted=true at volume 0.37 (A's volume), and B played.
+  - At the cell end both A and B are detached, hold no source, and are paused.
+- **U-webm-DELIB:** the same pattern. A played from 1322; Unmute at 2546 (trusted; harness write at 2522); no production remute; maxTime 3.14 s; B created at 4551, muted at 0.37; both released.
+
+**Official merged evaluation:** `node tests/browser/ib11/gplay_evaluate.cjs "tests/browser/ib10/ib11-gplay-results.json" --recovery "tests/browser/ib10/ib11-gplay-recovery.json"`.
+- **Exit 0.** Revision 1.1, `complete: true`, no missing pages, no page failures.
+- **Merge:** no problems and no invalid attempts. It replaced exactly U-mp4-DELIB and U-webm-DELIB, each FAIL → PASS from recovery attempt 1, with the recovery hash recorded.
+- **Result:** **32/32 PASS** (30 from the original, 2 from the recovery). `pass: true`, with both file hashes in the provenance.
+
+**Gate decision: G-PLAY(TC), E → PASS(scope).**
+- **Scope:** only the measured TC cell (Chrome 154 + Tampermonkey 5.5.0) and the controlled local MP4/WebM fixtures of this evidence.
+- **Not claimed:** autoplay support in general, other browsers or managers, live sites, or other media.
+
+**Measured capabilities and limitations:**
+- **Preferences:** autoplay, loop, mute (muted and defaultMuted), remember-volume and the stored volume are assigned exactly as saved. There is no forced remute anywhere.
+- **autoplay=false:** stays IDLE, with no production `play()` (both containers).
+- **Muted autoplay:** played without user activation (N-mp4 PREF).
+- **Unmuted autoplay without activation (MP4 only):** BLOCKED. The metadata-update `play()` was rejected with **NotAllowedError**. Nothing reported it as playback; native controls stayed available.
+- **Play fallback:** after the block, a trusted **Space** press (production `togglePlayPause`) resolved `play()` and played (N-mp4 RETRY).
+- **WebM unmuted playback and the WebM `updatePost` `play()` resolved, but with user activation already present.** The N-webm page recorded `navigator.userActivation.hasBeenActive = true` before every cell. Chrome carried activation from the previous page's trusted Space press across the same-origin navigation, so N-webm was not a no-activation measurement. WebM RETRY was therefore NOT_BLOCKED and the fallback was not exercised on WebM. **Limitation:** no-activation behavior and the blocked → Play fallback are evidenced for MP4 only; nothing indicates that WebM differs from MP4.
+- **Arm U (activation by the trusted Start):** unmuted autoplay and the `updatePost` `play()` played and resolved on both containers.
+- **Loop:** loop=true wraps and loop=false ends (revision 1.1 LOOP rule). **Remember-volume:** on, the volume is restored and stored; off, the volume is 1 and nothing is stored.
+- **Deliberate unmute:** it persists for the current media (no production remute). The next target starts according to the saved mute preference (muted) at the remembered volume.
+- **Failure and cleanup:** a media failure shows the failed state with a native post link. Close during a pending load or while playing, and stale-target replacement, release the old media (no playback after close; detached, no source, paused).
+
+**Owner decision recorded (IB11-E2): V-D5 belongs in IB11.**
+- Viewer Ctrl/Meta/Alt chords must not trigger ordinary viewer commands. In particular, Ctrl+F must not invoke Favorite and Ctrl+D must not invoke the viewer download.
+- The eventual repair is a narrow viewer-key modifier guard that preserves normal unmodified viewer keybinds and browser shortcuts.
+- This authorizes eventual IB11 P scope only; no production edit is made here.
+- No other §4 finding is decided.
+
+**Remaining IB11 E-stage browser evidence (still OPEN).** These must be resolved before the P repair scope is frozen.
+
+| Area | Open question |
+| --- | --- |
+| Keyboard | G3 (Space while the native video control has focus: single or double toggle); real modifier chords (V-D5; the browser default is suppressed today). |
+| Focus | F1/F2 with real mouse and keyboard origins: what has focus after open; return on Escape and on ✕; Tab order behind the overlay. |
+| Native link | C1: a real click on "Open native post" after a real failure navigates to the native post. |
+| Visual | V-D4 (rotated fit overflow on a real resize); V-D6a (overlay left shown during the real native navigation after a synchronous takeover failure) and V-D6b (blank viewer after in-viewer navigation); V-D7 (blank stage while a large original loads on a slow transport). |
+
+**Proposed next probe (IB11-E3 "V-VIEW"; specification only, not built in this step).** The same pattern as G-PLAY:
+- production `4d793a2` unchanged inside an observe-only recorder and runner;
+- the local server on its own port, serving a generated image (a plain PNG made on the server, so no third-party content);
+- a throttled "original" transport, a 404, a native post page that records arrival, and the G-PLAY video fixtures;
+- results in the same sanitized JSON shape, plus real layout measurements: `getBoundingClientRect` of the media and stage, `complete`, `naturalWidth`, the overlay display state and `document.activeElement` descriptors.
+- Favorite and download are stubbed **in the test page only**, so no account or download action can occur.
+
+Automated cells (no operator input):
+- **V-D7:** open an image card whose original is throttled; sample the stage at 300 / 1000 / 3000 ms (rendered area, state text).
+- **V-D4:** open a 2000×1000 image; rotate via the toolbar; send a resize; measure the rendered box against the stage.
+- **V-D6b:** in-viewer ArrowRight onto a video while the test store holds volume 1.5; measure the stage and any message.
+- **V-D1:** a real 404, then a same-ID update; record the state and link before and after.
+- **V-D5:** synthetic Ctrl/Meta chords; record which viewer command ran (stubs) and `defaultPrevented`.
+
+Operator actions (about 6 in total, roughly 3 minutes):
+1. **V-D6a:** with volume 1.5 stored, the operator clicks a video card. The page records the overlay state until `pagehide`; the native post page records its arrival.
+2. **C1:** after a real failure, the operator clicks "Open native post"; the native page records the arrival.
+3. **Focus (mouse):** the operator clicks a card, then presses Escape; `activeElement` is recorded at each step.
+4. **Focus (keyboard):** the operator tabs to a card link and presses Enter, then clicks ✕.
+5. **G3:** the operator clicks the video's native play/pause control, then presses Space once; play/pause transitions are counted.
+
+Every prompt uses the large-panel / INVALID-on-timeout pattern from the recovery package, and evaluation would be by explicit criteria with fault controls.
+
+**Status:** IB11 PARTIAL, E stage. G-PLAY(TC) PASS(scope); the other IB11 browser evidence is OPEN. No production change; no P work; IB12 not started.
