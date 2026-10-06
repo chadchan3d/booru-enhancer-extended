@@ -3149,6 +3149,11 @@
 					clearMediaState();
 					return;
 				}
+			} else if (resolved.mediaType === 'video' || guessMediaType(resolved.url) === 'video') {
+				// IB10 Blueprint item 3 / 11 (poster/View fallback): video outside the admitted
+				// G-VIDEO class gets no automatic hover video. The thumbnail stays; View remains.
+				clearMediaState();
+				return;
 			}
 			const qualifiedWrap = hoverQualifiedWrap(sourceImg);
 			if (qualifiedWrap && !qualifiedUpgradeAllowed(sourceImg, qualifiedWrap, resolved)) {

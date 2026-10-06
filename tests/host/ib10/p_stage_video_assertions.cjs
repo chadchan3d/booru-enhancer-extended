@@ -10,8 +10,11 @@
 //     pause, remove every owned source path (src and <source>), load() reset;
 //   - no late readiness/play resurrection; no install while the viewer is open;
 //   - no source-bearing prior hover element survives.
-//   Everything else (other containers/sizes/hosts/routes/contexts, GIF, still
-//   cards) behaves exactly as the previous production artifact b9d133c.
+//   Video outside the admitted class (other containers/sizes/routes/contexts,
+//   missing facts, other hosts where production recognizes video) falls back to
+//   the thumbnail + View (Blueprint IB10 item 3 "Poster fallback elsewhere",
+//   item 11 "poster/View"): no hover <video>, no video source; View still opens.
+//   Non-video paths (GIF, IB09 still cards) behave exactly as b9d133c.
 // Readiness and late events are fired by the test; nothing fetches.
 // t = ms since the first pointer-enter. Requires `npm install` in tests/host/ib07.
 const fs = require('fs');
@@ -176,20 +179,63 @@ async function identical(opts) {
   }
   return out;
 }
-const OUT_OF_SCOPE = {
+const EXCLUDED_VIDEO = {
   'e621 MP4': { host: 'e621.net', ext: 'mp4' },
   'e926 WebM': { host: 'e926.net', ext: 'webm' },
   'e926 MP4 exactly 50 MB': { host: 'e926.net', ext: 'mp4', size: 50 * MB },
   'e926 MP4 60 MB': { host: 'e926.net', ext: 'mp4', size: 60 * MB },
   'e621 WebM over 100 MB': { host: 'e621.net', ext: 'webm', size: 100 * MB + 1 },
   'e621 MOV': { host: 'e621.net', ext: 'mov' },
-  'e621 GIF': { host: 'e621.net', ext: 'gif' },
   'e621 WebM without data-size': { host: 'e621.net', ext: 'webm', sizeAttr: false },
   'e621 WebM with a non-WebM file URL': { host: 'e621.net', ext: 'webm', fileExt: 'mp4' },
   'e621 WebM on a logged-in page': { host: 'e621.net', ext: 'webm', loggedIn: true },
   'e621 WebM on a non-/posts route': { host: 'e621.net', ext: 'webm', route: '/favorites' },
   'e926 MP4 on a non-/posts route': { host: 'e926.net', ext: 'mp4', route: '/pools/1' },
+  'e926 MP4 on a logged-in page': { host: 'e926.net', ext: 'mp4', loggedIn: true },
 };
+
+// Fallback (thumbnail + View) for a recognized video card outside the admitted class.
+// Non-vacuous: b9d133c created and played a hover video for the same input.
+const FALLBACK_SEQ = {
+  sweep40: S.sweep(40),
+  sustained: async (a) => { await a.enter(0); await a.wait(600); await a.ready(a.last()); await a.wait(300); await a.leave(0); await a.wait(300); },
+  cycles: async (a) => { for (let k = 0; k < 3; k++) { await a.enter(0); await a.wait(300); await a.ready(a.last()); await a.wait(200); await a.leave(0); await a.wait(100); } },
+};
+const VIEW_SEQ = async (a) => { await a.enter(0); await a.wait(300); await a.click(0); await a.wait(300); return { viewerOpen: a.viewerOpen() }; };
+async function fallback(opts, source = PROD) {
+  const out = { ok: true, detail: [] };
+  for (const [n, seq] of Object.entries(FALLBACK_SEQ)) {
+    const r = await run({ ...opts, source, seq }); const base = await run({ ...opts, source: BASE, seq });
+    const ok = r.snap.length === 0 && !r.log.some((x) => x[2] === 'src' || x[2] === 'play') && r.thumbs.length > 0 && r.thumbs[0][0] === 0 && r.network === 0;
+    const vacuous = base.snap.length === 0;
+    if (!ok || vacuous) { out.ok = false; out.detail.push({ n, hoverVideos: r.snap.length, log: r.log.slice(0, 4), thumbs: r.thumbs.slice(0, 2), baseHoverVideos: base.snap.length }); }
+  }
+  // View stays reachable; the viewer's own media is unchanged from b9d133c (viewer untouched).
+  const v = await run({ ...opts, source, seq: VIEW_SEQ }); const vb = await run({ ...opts, source: BASE, seq: VIEW_SEQ });
+  if (!v.meta.viewerOpen || v.snap.length !== 0 || v.viewers !== vb.viewers) { out.ok = false; out.detail.push({ view: v.meta, hoverVideos: v.snap.length, viewerVideos: v.viewers, baseViewerVideos: vb.viewers }); }
+  return out;
+}
+const NON_VIDEO_IDENTICAL = { 'e621 GIF': { host: 'e621.net', ext: 'gif' }, 'e926 GIF': { host: 'e926.net', ext: 'gif' } };
+
+// Rule34 (gelbooru family): production recognizes video from the enriched post's
+// original URL (img.dataset.beOriginalUrl, written by the gallery's enrichment).
+async function rule34Video(source) {
+  const fx = require(path.resolve(__dirname, '../ib07/item9_fixtures.cjs')).rule34Listing();
+  let clock = null; const vids = [];
+  const c = h.load({ url: fx.url, html: fx.html, source, settings: {}, setup: (w) => {
+    clock = hh.installFakeClock(w); w.performance.now = () => clock.now();
+    const ce = w.document.createElement.bind(w.document);
+    w.document.createElement = (t, ...a) => { const el = ce(t, ...a); if (String(t).toLowerCase() === 'video') vids.push(String(new Error().stack).includes('upgradeWhenReady') ? 'hover' : 'other'); return el; };
+  } });
+  const w = c.window; await h.sleep(20); await clock.advance(400);
+  const wrap = w.document.querySelector('.be-thumb-wrap'); const img = wrap && wrap.querySelector('img');
+  if (!img) { w.close(); return { wrapped: false, hoverVideos: 0 }; }
+  img.dataset.beOriginalUrl = 'https://static.example/images/0123456789abcdef.mp4';
+  img.dispatchEvent(new w.MouseEvent('pointerover', { bubbles: true })); await clock.advance(400);
+  const overlayImg = !!w.document.querySelector('#be-hover-preview img');
+  w.close();
+  return { wrapped: true, hoverVideos: vids.filter((x) => x === 'hover').length, overlayImg };
+}
 
 async function main() {
   check('production differs from b9d133c (IB10 P change present); hover module exports endForViewer', h.gitBlobId(PROD) !== '22e843cbe27662fc27d17149534b055d7a249dae' && /return \{ show, hide, endForViewer \};/.test(PROD));
@@ -201,15 +247,16 @@ async function main() {
   const fresh = await run({ host: 'e621.net', seq: S.sweep(40) });
   check('admitted quick pass is fault-sensitive input: b9d133c would have assigned the video at 0 ms', firstSrc(await run({ source: BASE, host: 'e621.net', seq: S.sweep(40) })) === 0 && firstSrc(fresh) === null);
 
-  for (const [name, o] of Object.entries(OUT_OF_SCOPE)) {
+  for (const [name, o] of Object.entries(EXCLUDED_VIDEO)) {
+    const r = await fallback(o);
+    check(`excluded video ${name}: poster/View fallback (no hover video, no video source or play; thumbnail at enter; View opens the viewer) where b9d133c auto-played`, r.ok, JSON.stringify(r.detail));
+  }
+  for (const [name, o] of Object.entries(NON_VIDEO_IDENTICAL)) {
     const r = await identical(o);
-    check(`out of scope ${name}: hover behavior identical to b9d133c (40 ms sweep, ready+leave, cycles)`, r.every((x) => x[1]), JSON.stringify(r));
+    check(`non-video ${name}: hover behavior identical to b9d133c (40 ms sweep, ready+leave, cycles)`, r.every((x) => x[1]), JSON.stringify(r));
   }
-  // Rule34 / Gelbooru-family contexts: no e621 rendition fact can exist there.
-  for (const host of ['rule34.xxx', 'gelbooru.com']) {
-    const r = await identical({ host, ext: 'mp4' });
-    check(`out of scope ${host} video context: hover behavior identical to b9d133c`, r.every((x) => x[1]), JSON.stringify(r));
-  }
+  const r34 = await rule34Video(PROD); const r34b = await rule34Video(BASE);
+  check('excluded video on another host (Rule34, video recognized from the enriched original URL): no hover video, thumbnail overlay shown; b9d133c created one', r34.wrapped && r34.hoverVideos === 0 && r34.overlayImg && r34b.hoverVideos === 1, JSON.stringify([r34, r34b]));
   // IB09 still-image class unchanged (shared show/hide path)
   // IB09 still-image class (shared show/hide/dwell path): identical to b9d133c across the IB09 sequences.
   const STILL_SEQ = {
@@ -241,9 +288,11 @@ async function main() {
       async (src) => (await run({ source: src, host: 'e621.net', seq: S.leavePending })).meta.installedAfter === true],
     ['viewer takeover does not end the hover', m('\t\t\tif (!opened) return;\n\t\t\tBE.modules.hover.endForViewer?.();\n', '\t\t\tif (!opened) return;\n'), async (src) => { const r = await run({ source: src, host: 'e621.net', seq: S.viewerInstalled }); return r.snap[0].holds || r.meta.installedAfter; }],
     ['viewer-open install guard removed', m("\t\t\t\t\tif (videoWrap && BE.modules.viewer?.isOpen?.()) {", "\t\t\t\t\tif (false) {"), async (src) => (await run({ source: src, host: 'e621.net', seq: S.viewerDirectPending })).meta.installedAfter === true],
-    ['class broadened: size limit ignored', m('size > cls.maxBytes) return null;', 'false) return null;'), async (src) => !(await identical({ source: src, host: 'e926.net', ext: 'mp4', size: 60 * MB })).every((x) => x[1])],
-    ['class broadened: container not checked', m('if (!cls || ext !== cls.ext || fileExt !== ext ||', 'if (!cls ||'), async (src) => !(await identical({ source: src, host: 'e621.net', ext: 'mp4' })).every((x) => x[1])],
-    ['class broadened: page admission (rendition fact) not checked', m("\t\t\tif (!wrap || BE.modules.gallery?.getThumbRendition?.(wrap) !== 'NATIVE_UNSUPPORTED') return null;", '\t\t\tif (!wrap) return null;'), async (src) => !(await identical({ source: src, host: 'e621.net', ext: 'webm', loggedIn: true })).every((x) => x[1])],
+    ['class broadened: size limit ignored', m('size > cls.maxBytes) return null;', 'false) return null;'), async (src) => !(await fallback({ host: 'e926.net', ext: 'mp4', size: 60 * MB }, src)).ok],
+    ['class broadened: container not checked', m('if (!cls || ext !== cls.ext || fileExt !== ext ||', 'if (!cls ||'), async (src) => !(await fallback({ host: 'e621.net', ext: 'mp4' }, src)).ok],
+    ['class broadened: page admission (rendition fact) not checked', m("\t\t\tif (!wrap || BE.modules.gallery?.getThumbRendition?.(wrap) !== 'NATIVE_UNSUPPORTED') return null;", '\t\t\tif (!wrap) return null;'), async (src) => !(await fallback({ host: 'e621.net', ext: 'webm', loggedIn: true }, src)).ok],
+    ['poster/View fallback removed (old automatic hover video restored for excluded video)', m("\t\t\t} else if (resolved.mediaType === 'video' || guessMediaType(resolved.url) === 'video') {", "\t\t\t} else if (false) {"), async (src) => !(await fallback({ host: 'e926.net', ext: 'webm' }, src)).ok && (await rule34Video(src)).hoverVideos === 1],
+    ['fallback applied to the admitted class too (admission branch disabled)', m('\t\t\tif (videoWrap) {\n\t\t\t\t// Admitted class', '\t\t\tif (false) {\n\t\t\t\t// Admitted class'), async (src) => firstSrc(await run({ source: src, host: 'e621.net', seq: S.sweep(250) })) !== 200],
     ['muted removed from the hover video', m('\t\t\t\tvideo.muted = true;\n\t\t\t\tvideo.defaultMuted = true;\n', ''), async (src) => (await run({ source: src, host: 'e621.net', seq: S.sustained })).log.some((x) => x[2] === 'play' && x[3] === 'AUDIBLE')],
   ];
   for (const [name, src, caught] of faults) check(`fault ${name}: caught`, await caught(src));

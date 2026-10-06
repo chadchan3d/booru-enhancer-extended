@@ -1,11 +1,11 @@
 {
   "checkpoint": "IB10",
   "stage": "P-stage production assertions (G-VIDEO(class, cell) PASS(scope); owner decision V3-R Option A)",
-  "production_blob": "4258ad7746c022606f222fc48924055912de4cfc",
+  "production_blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
   "base_blob": "22e843cbe27662fc27d17149534b055d7a249dae",
   "fixtures": "synthetic",
-  "checks": 64,
-  "passed": 64,
+  "checks": 67,
+  "passed": 67,
   "failed": 0,
   "fault_controls": [
     {
@@ -42,6 +42,14 @@
     },
     {
       "name": "fault class broadened: page admission (rendition fact) not checked: caught",
+      "pass": true
+    },
+    {
+      "name": "fault poster/View fallback removed (old automatic hover video restored for excluded video): caught",
+      "pass": true
+    },
+    {
+      "name": "fault fallback applied to the admitted class too (admission branch disabled): caught",
       "pass": true
     },
     {
