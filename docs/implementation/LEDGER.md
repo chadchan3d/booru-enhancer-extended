@@ -15,7 +15,7 @@
   - **G3 preflight: COMPLETE** in real Chrome (SHA-256 `9e434c09…8f07`): native-only single toggle.
 - **E4 (§14):** the full revision-1.2 run (`ff2fce48…1599`) gave evidence PASS for 9 MAIN cells, which are kept. NATIVE timed out because the visible fallback link is not clickable (`pointer-events: none` inherited; a likely product defect), and there is no TAKEOVER attempt.
   - A NATIVE + VD6A recovery (revision 1.3) is prepared, to be merged at evaluation time. The operator recovery run is pending.
-- The keyboard, focus, native-link and visual V-D4/V-D6/V-D7 evidence stays OPEN until that run is evaluated.
+- Keyboard, focus and visual V-D4/V-D6b/V-D7 evidence is in hand from real Chrome; only NATIVE and VD6A stay OPEN until the recovery is evaluated.
 - No production change and no P work.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -31,7 +31,7 @@
 
 ## Current state
 - Branch `implementation/ib00-baseline`, pushed to `origin/implementation/ib00-baseline`.
-- Production `Booru_Enhancer.user.js`: commit `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`, production body SHA-256 `00915584…e945`. Unchanged through IB11-E0 to E3.
+- Production `Booru_Enhancer.user.js`: commit `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`, production body SHA-256 `00915584…e945`. Unchanged through IB11-E0 to E4.
 - **Previous artifacts:**
   - `8324552` / `4258ad7`: IB10 P;
   - `b9d133c` / `22e843c`: IB09.
