@@ -3,7 +3,7 @@
 **Checkpoint:** IB10 — Muted hover-video lifecycle (blueprint §3 IB10, item 3 "P", items 2, 7–11).
 - **Gate:** G-VIDEO(class, cell) E → PASS(scope) (`IB10_V3L.md` §8).
 - **Owner decisions:** 200 ms dwell; viewer opening ends the hover; original-file source; **V3-R Option A, immediate release** (recorded in the Ledger before this change, commit `5e00884`).
-- **Status:** superseded by `IB10_COMPLETION_RECORD.md`. IB10 is COMPLETE, PASS(scope); controlled 54/54 and live 203/203 PASS (§7). IB11 not started.
+- **Status:** **PARTIAL — REOPENED FOR BLUEPRINT CONFORMANCE** (§8). The completion recorded at `8a4d6d8` (`IB10_COMPLETION_RECORD.md`) is reopened, because the poster/View fallback for unqualified video was not implemented. The poster/View fallback is in production `4d793a2` and qualified locally; the targeted browser conformance is pending with the operator. §1–§7 are kept as historical evidence. IB11 not started.
 
 ## 1. Gate check before editing
 - **Repository:** clean at `b158e72` = origin.
@@ -198,3 +198,103 @@ The real-package live smoke still passes. Production, `IB10_P_Live_Observer.user
 - 23/23 plays muted;
 - at most one source-holding hover at any sample;
 - no-video generations all ended at ≤ 200 ms.
+
+## 8. Reopen: poster/View fallback for unqualified video (Blueprint conformance)
+
+**Gate.** The owner chose **B — enforce the Blueprint** (Ledger `2ee86be`). The Blueprint text that applies:
+- §3 IB10 item 3: "P: fix current hover-video pause/detach/reset …; keep a bounded active hover element count. **Poster fallback elsewhere.**"
+- item 11: "Disable automatic video only for failing class/cell; cheaper validated sample **or poster/View**."
+- the G-VIDEO row: "otherwise poster/View".
+
+At `8324552`, only the admitted class got the P behavior. Every other recognized video card kept the pre-IB10 automatic hover video, with D1–D4 (`IB10_HOVER_VIDEO_BASELINE.md`). §1–§7 and the completion record called that retention an owner decision or owner instruction. **That wording was wrong.** The owner had set the admitted class for the P change; the owner had not decided to keep automatic video for unqualified classes. The retention was a departure from the Blueprint.
+
+**The departure in the code (`8324552`).** In `upgradeWhenReady` (now `Booru_Enhancer.user.js:3142`), the admission check `hoverVideoAdmittedWrap(sourceImg)` (`:3119`) was used only to constrain admitted cards. A recognized video without that admission fell through to the generic video branch (now `:3172`, `isVideo` → `document.createElement('video')` at `:3177`): it was created at once, with `autoplay`, a `src` and `preload = 'auto'`, and was never registered for release. Production recognizes video on these paths:
+- e621/e926 cards (`directUpgradeFromDom`, `:3045`);
+- the post-cache path (`mediaFromPost`, `:3078`);
+- Rule34 / Gelbooru-family original URLs from the gallery's enrichment (`img.dataset.beOriginalUrl`, `:4428`).
+
+**The correction (`4d793a2`).** One narrow decision in the same function, directly after the admitted branch (`:3152`–`:3157`, 5 lines added):
+
+```js
+} else if (resolved.mediaType === 'video' || guessMediaType(resolved.url) === 'video') {
+	clearMediaState();
+	return;
+}
+```
+
+- It uses exactly the predicate that the generic video branch already used (`:3172`). No media type, URL, size or rendition is inferred anew.
+- A video card that is not admitted returns before any `<video>` exists. The thumbnail overlay shown at enter stays. The View path (the gallery click → viewer) is untouched.
+- An admitted card never reaches the new branch, because it is the `else` of `if (videoWrap)`.
+- Non-video resolves (stills, GIF) don't match the predicate and are unchanged.
+
+**Production artifact:**
+- commit `4d793a2ce24454a2f08816887dfedca5d307bfcc`;
+- blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`;
+- production body SHA-256 `009155841b194df21a4e1d22bd3f40b5d63e2f58cfa5485b06fd4e66bd64e945`.
+
+**Local qualification.** `tests/host/ib10/p_stage_video_assertions.cjs` (revised) gives **67/67**, with 12 fault controls.
+- **Admitted classes, unchanged:**
+  - immediate thumbnail;
+  - source at the 200 ms dwell;
+  - muted;
+  - immediate release on leave, dispose and viewer;
+  - no stale resurrection;
+  - at most one source holder;
+  - class boundaries (100,000,000 B WebM; 49,999,999 B MP4).
+- **Excluded video, poster/View fallback.** In each case: no hover `<video>`, no `src` or `play`, thumbnail at enter, no network, and the View click opens the viewer with the same viewer media as `b9d133c`. Each case is non-vacuous: `b9d133c` auto-played the same input. The 12 inputs:
+  - e621 MP4;
+  - e926 WebM;
+  - e926 MP4 at exactly 50 MB and at 60 MB;
+  - e621 WebM over 100 MB;
+  - e621 MOV;
+  - WebM without `data-size`;
+  - WebM with a non-WebM file URL;
+  - logged-in e621 WebM and e926 MP4;
+  - non-`/posts` routes on both hosts.
+- **Another host:** a Rule34 card recognized as video from its enriched original URL gets no hover video and keeps the thumbnail overlay (`b9d133c` created one).
+- **Unchanged:** e621/e926 GIF behave identically to `b9d133c`. The IB09 still-image class is identical to `b9d133c` for 7 sequences × 3 qualities.
+- **Fault controls (all caught):**
+  - the fallback removed (old automatic hover video restored for an excluded class);
+  - the fallback applied to the admitted class;
+  - the size limit, container check or page admission ignored (class broadened);
+  - dwell bypass;
+  - no source removal;
+  - no release at hide;
+  - stale-guard removal;
+  - no viewer takeover;
+  - the viewer-open guard removed;
+  - unmuted.
+
+**Regressions on `4d793a2`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only (`fail: []`, `failed: []`, `controlFailures: []`) |
+| IB08 | 66/66, 24/24, 12/12, 14/14; browser packages 90/90, 59/59, 56/56, 65/65 |
+| IB09 | baseline 32/32, prototype 84/84, alternatives 54/54, P-stage 111/111; browser conformance 30/30, live package 57/57, V2 probe 39/39 |
+| IB10 E | baseline 34/34; V3-C 29/29; V3-L 31/31; V3-R 52/53 (its E-stage working-tree pin only, superseded by design) |
+| IB10 P (`8324552` packages) | conformance verifier 34/35 and recovery verifier 22/23. Each failure is only its working-tree pin to `4258ad7`, superseded by this change. The pinned packages are still equal to a fresh build. |
+
+Historical result files that these runs rewrote were restored unedited.
+
+**Targeted browser conformance (prepared; operator pending).**
+- **Package:** `tests/browser/ib10/IB10_PF_Live_Observer.user.js`, built by `build_ib10_pf_conformance.cjs` from `4d793a2`. Its body is byte-identical to the production body. It is the same V3-L observer as `IB10_P_Live_Observer.user.js`, under a distinct script name and namespace. The `8324552` packages are unchanged.
+- **Evaluator:** `p_conformance_ib10.cjs targeted`, **revision 1.2**. Revisions 1.1 `live` and `controlled` are unchanged.
+  - **T0:** artifact identity matches; no sanitation block.
+  - **Positive, per host:** admitted generations pass L1–L4; ≥ 4 usable, ≥ 1 quick pass, ≥ 2 sustained hovers with a preview.
+  - **Negative:** every excluded video-card generation, whatever its trigger or viewer state, must satisfy N1 (no hover video created) and N2 (no hover video holds a source at leave, +1 s or +5 s). Evidence per host: ≥ 3 trusted sustained (> 200 ms) hovers of the required class — e621 MP4 on e621, e926 WebM on e926. Other excluded classes (e926 MP4 ≥ 50 MB, e621 WebM > 100 MB, MOV) are reported per class and are not required.
+  - **V1 View:** per host, ≥ 1 excluded card opened in the viewer, finalized, with no hover video.
+- **Verifier:** `verify_ib10_pf_conformance.cjs`, **25/25**.
+  - Static: identity, scope, distinct name, old packages unchanged.
+  - jsdom smoke on both hosts: admitted, excluded and View paths; evaluator PASS.
+  - Fault package: the same session on the `8324552` package fails N1 on both hosts.
+  - 13 evaluator fault controls.
+- **Checksums:** `IB10_PF_SHA256SUMS.txt`. Package SHA-256 `58074ab1e2ab03991f01ee2d7eb5ee5314ea6b0e5bac05f9e8ed6899a7416ebe`.
+- **Operator steps:** `tests/browser/ib10/README.md`, "IB10 PF targeted conformance".
+
+**Status.** IB10 stays **PARTIAL**.
+- The admitted classes keep their G-VIDEO PASS(scope) from §7.
+- The unqualified video classes now fall back to the poster/View path, but their G-VIDEO stays **OPEN**. The fallback is not a qualification.
+- IB10 is not complete until the targeted browser conformance passes.
+- IB11 is not started.

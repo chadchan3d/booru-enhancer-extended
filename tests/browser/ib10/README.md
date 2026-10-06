@@ -202,3 +202,42 @@ node tests/browser/ib10/merge_ib10_p_controlled.cjs <folder>/ib10-p-controlled-r
 It exits 0 only for 54 clean cells, each passing C1–C5.
 - A cell clean in both files, or a media mismatch, is refused.
 - If a recovery cell is contaminated again, rerun just the missing cell(s) with `--cells` to a new file, and pass that file as another argument.
+
+---
+
+# IB10 PF targeted conformance: poster/View fallback (production `4d793a2`, blob `002bdfd`)
+
+`IB10_PF_Live_Observer.user.js` is production `4d793a2` **unchanged** inside the same observe-only V3-L observer, under its own script name. It checks two things:
+- admitted video cards keep the qualified hover video;
+- excluded video cards get **no** hover video, and View still opens.
+
+**Local qualification:**
+- `node tests/browser/ib10/build_ib10_pf_conformance.cjs --check`
+- `node tests/browser/ib10/verify_ib10_pf_conformance.cjs` (25/25)
+
+## Operator steps (about 5–8 minutes per host; normal Chrome, logged out, DevTools closed)
+
+1. **Prepare Tampermonkey:** disable every other Booru/IB script, including `IB10_P_Live_Observer.user.js`. Then install `IB10_PF_Live_Observer.user.js`. Hover preview must be on (the default).
+2. **e621** (`https://e621.net/posts`): choose **IB10L: Start session (video hovers)**.
+   - **Positive:** for example search `type:webm`, then hover **4–6 WebM cards**: at least 1 quick pass, and at least 2 rests until the preview plays, then move off.
+   - **Negative:** search `type:mp4`, then rest on **at least 3 MP4 cards** for about 1–2 s each, then move off. Expected: the thumbnail enlarges, but no video plays.
+   - **View:** while resting on one MP4 card, **click it**. The viewer must open. Close it.
+   - Then **IB10L: Show results**, copy the JSON, and label it "e621".
+3. **e926** (`https://e926.net/posts`): start a new session.
+   - **Positive:** `type:mp4`, **4–6 MP4 cards under 50 MB** (the size is in the card's tooltip or info): at least 1 quick pass and at least 2 rests with a playing preview.
+   - **Negative:** `type:webm`, rest on **at least 3 WebM cards** (no video should play).
+   - **If available:** an **MP4 of 50 MB or more** (for example `type:mp4 filesize:>50MB`). Rest on it; no video should play.
+   - **View:** click one WebM card while resting on it. The viewer must open. Close it.
+   - Then **Show results** and label it "e926".
+4. **Return** both JSON results, and note anything that played on a negative card.
+
+**Evaluate:** `node tests/browser/ib10/p_conformance_ib10.cjs targeted <e621.json> <e926.json>` (revision 1.2).
+
+**Pass, per host:**
+- identity matches;
+- admitted hovers pass L1–L4 (≥ 4 usable, ≥ 1 quick pass, ≥ 2 with a preview);
+- every excluded video card has no hover video and no source holder at leave, +1 s and +5 s;
+- ≥ 3 trusted sustained hovers of the required negative class (e621 MP4; e926 WebM);
+- ≥ 1 excluded card opened in the viewer with no hover video.
+
+The raw JSON stays with the operator. Only its SHA-256 and the evaluator's verdict are committed.

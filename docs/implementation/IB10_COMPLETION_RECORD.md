@@ -2,7 +2,14 @@
 
 **Checkpoint:** IB10 — Muted hover-video lifecycle (blueprint §3 IB10)
 
-**Outcome:** **PASS(scope)** (see Scope and Outcome)
+**Outcome:** **PASS(scope)** as recorded at `8a4d6d8`. **REOPENED — PARTIAL** (Ledger `2ee86be`; `IB10_P_STAGE.md` §8).
+
+> **Reopen and correction (2026-10-05).** This record is kept as historical evidence.
+> - **Why reopened:** the Blueprint's "Poster fallback elsewhere" (§3 IB10 item 3; item 11 and the G-VIDEO row "poster/View") was not implemented at `8324552`. Unqualified video cards still auto-played.
+> - **Correction:** this record said that keeping the old automatic hover video outside the admitted class was an owner decision or owner instruction. **That was not an owner decision.** The owner chose Blueprint enforcement.
+> - **Fix:** production `4d793a2` (blob `002bdfd`) applies the poster/View fallback to every recognized video card outside the admitted class.
+> - **Unchanged:** the admitted-class evidence and gate rows below stand.
+> - **Pending:** IB10 completes only after the targeted browser conformance (`IB10_P_STAGE.md` §8) passes.
 
 **Evidence gate owned (§5):** G-VIDEO (class, cell)
 
@@ -69,7 +76,7 @@ The fields follow the blueprint §11 "Required checkpoint completion record". De
 - **Viewer:** opening the viewer ends the hover preview.
 - **Source:** the original file stays the IB10 hover source (no rendition discovery).
 - **Retention: V3-R Option A, immediate release** (Ledger, commit `5e00884`). No retained or cached prior hover; the browser's own media/HTTP caching is left alone. Basis: V3-R released revisits were ready in 20–27 ms (AS-IS 20–28 ms), and the released transfer aborted 0–3 ms after leave.
-- **Out-of-scope classes** retain their previous behavior (owner instruction for the P stage).
+- **Out-of-scope classes** retained their previous behavior at `8324552`. *Corrected:* this was not an owner instruction. It departed from the Blueprint and was corrected at `4d793a2` (poster/View fallback).
 
 ## Change
 
@@ -127,7 +134,7 @@ No release, detachment, mute or ownership requirement was weakened.
 - **Viewer:** autoplay, mute and loop are unchanged; the viewer itself is unchanged. Only the hover ends when the viewer opens.
 - **Native media and deliberate View:** reachable as before.
 - **IB09 still-image class:** identical to `b9d133c` (7 sequences × 3 qualities).
-- **Out-of-scope classes:** identical to `b9d133c`.
+- **Out-of-scope classes:** identical to `b9d133c` at `8324552`. Superseded at `4d793a2`: excluded video classes fall back to poster/View; GIF and the IB09 still class remain identical.
 - **Accepted behavior change** (CHANGELOG): admitted video previews start after a 200 ms rest instead of at enter, and stop downloading when the hover ends.
 
 ## Evidence
@@ -150,7 +157,7 @@ No donor code was copied or translated. All changes are original to this reposit
 
 ## Retained limitations (non-blocking)
 
-- **Outside the admitted class,** the pre-IB10 hover-video path remains, including defects D1–D4 (no dwell; source kept after leave; accumulation; viewer takeover). This is by owner decision. The Blueprint's "poster fallback elsewhere" (item 3) and "disable automatic video for a failing class" (item 11) are therefore **not applied** to unadmitted video classes. Those classes are unqualified, not failed, and remain OPEN.
+- **Outside the admitted class** (as recorded at `8324552`), the pre-IB10 hover-video path remained, including D1–D4. *Corrected:* this record called that an owner decision; it was not. It was the unimplemented Blueprint poster/View fallback, and it is the reason this checkpoint was reopened. Fixed at `4d793a2`. The unqualified classes stay OPEN for G-VIDEO.
 - **Cached transfers:** the controlled runs used no-store, so cached transfers were exercised only by V3-R's cacheable arm. Nothing is claimed about e621/e926's real cache headers.
 - **Live coverage:** one container per host as encountered (e621 MP4 and e926 WebM not observed). The e926 20–50 MB band is thin. Live viewer takeover was not exercised.
 - **Runtime:** TC only. Versions are Chrome 154 + Tampermonkey 5.5.0.
@@ -162,7 +169,7 @@ No donor code was copied or translated. All changes are original to this reposit
 | --- | --- | --- |
 | G-VIDEO e621 logged-out `/posts` WebM ≤ 100 MB, TC | OPEN → E PASS(scope) | **PASS(scope)** (E stage and production conformance) |
 | G-VIDEO e926 logged-out `/posts` MP4 < 50 MB, TC | OPEN → E PASS(scope) | **PASS(scope)**, independently |
-| G-VIDEO other containers, sizes, hosts, routes, logged-in pages, GIF/animated, other cells | OPEN | OPEN (previous path; no inferred PASS) |
+| G-VIDEO other containers, sizes, hosts, routes, logged-in pages, GIF/animated, other cells | OPEN | OPEN. Previous path at `8324552`; poster/View fallback for video from `4d793a2`. No inferred PASS. |
 
 **Invalidated dependents:** none. IB08 and IB09 were requalified on `4258ad7` (IB09 P suite pinned to its artifact; IB09 behavior identity checked in the IB10 suite).
 
@@ -170,7 +177,7 @@ No donor code was copied or translated. All changes are original to this reposit
 
 ## Outcome
 
-**IB10 PASS(scope)** for the Scope above.
+**IB10 PASS(scope)** for the Scope above, as recorded at `8a4d6d8`. *Now reopened: PARTIAL* (see the note at the top).
 
 §3 IB10 item 10 acceptance:
 - **No stale reattachment:** local suite (late readiness/play never revives a released or older generation), plus controlled cells (no hover video attached at the end; viewer cells never install after takeover). The live observer does not track installs, so no live claim is made for this item.
@@ -180,4 +187,4 @@ No donor code was copied or translated. All changes are original to this reposit
 - **DOM removal not taken as byte proof:** byte proof is the controlled server log.
 - **Both controlled lifecycle and representative live eligibility are recorded.**
 
-**Next eligible checkpoint (blueprint sequence):** IB11 — Existing viewer hardening. It is not started.
+**Next eligible checkpoint (blueprint sequence):** IB11 — Existing viewer hardening. It is not started. *Since the reopen, IB10 itself is the active step:* the targeted browser conformance of the poster/View fallback.

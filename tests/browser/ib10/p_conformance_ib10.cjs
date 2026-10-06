@@ -36,8 +36,24 @@
 //   Host evidence: >= 8 usable admitted generations, >= 2 quick passes, >= 3
 //   sustained hovers that produced a preview, >= 3 after-ready leaves.
 // Byte-level termination is proved by the controlled run (C5), not here.
+// Targeted (revision 1.2, IB10 reopen: poster/View fallback; IB10_P_STAGE.md
+// section 8), on IB10_PF_Live_Observer.user.js. Revision 1.1 is unchanged.
+//   T0 identity MATCH_EXPECTED_ARTIFACT, no sanitation block;
+//   positive: admitted generations judged by L1-L4; per host >= 4 usable,
+//      >= 1 quick pass, >= 2 sustained hovers that produced a preview;
+//   negative (every recorded video-card generation outside the admitted class,
+//      whatever its trigger or viewer state):
+//   N1 production created no hover video (hoverElements 0, no element record);
+//   N2 no hover video holds a source at leave, +1 s or +5 s;
+//      evidence per host: >= 3 trusted sustained (stay > 200 ms) excluded hovers
+//      with all samples, of the required class (e621 MP4; e926 WebM). e926 MP4
+//      >= 50 MB and other classes are reported, not required;
+//   V1 View reachable: per host >= 1 excluded generation in which the viewer
+//      opened (the operator clicked the card), all samples taken and no hover
+//      video (hoverElements measured 0).
 // Usage: node p_conformance_ib10.cjs controlled <results.json>
 //        node p_conformance_ib10.cjs live <result.json> [...]
+//        node p_conformance_ib10.cjs targeted <e621.json> <e926.json>
 const fs = require('fs');
 const { select } = require('./select_clean_ib10_v3c.cjs');
 const { analyzeRun } = require('./analyze_ib10_v3c.cjs');
@@ -126,12 +142,47 @@ function evaluateLive(docs) {
   return { kind: 'live', files, hosts, pass, failures: rows.filter((x) => x.status === 'FAIL'), counts: rows.reduce((m, x) => { m[x.status] = (m[x.status] || 0) + 1; return m; }, {}) };
 }
 
-module.exports = { evaluateControlled, evaluateLive, admitted };
+const REVISION_TARGETED = '1.2';
+const REQUIRED_NEGATIVE = { 'e621.net': 'mp4', 'e926.net': 'webm' };
+const excludedClass = (g) => (g.host === 'e926.net' && g.container === 'mp4' && g.dataSize >= 50000000 ? 'e926 MP4 >= 50 MB'
+  : `${g.host === 'e621.net' ? 'e621' : 'e926'} ${String(g.container).toUpperCase()}${g.dataSize ? '' : ' (no data-size)'}${g.host === 'e621.net' && g.container === 'webm' && g.dataSize > 100000000 ? ' > 100 MB' : ''}`);
+function evaluateTargeted(docs) {
+  const live = evaluateLive(docs);
+  const neg = [];
+  for (const d of docs) for (const s of d.sessions || []) for (const g of s.generations) {
+    if (admitted(g)) continue;
+    const fails = [];
+    if (g.hoverElements || g.element) fails.push(`N1 ${g.hoverElements} hover video(s) created for an excluded card`);
+    for (const k of ['leave', 'p1', 'p5']) { const x = (g.samples || {})[k]; if (x && (x.holdingHoverVideos || x.element)) fails.push(`N2 hover video state at ${k} (holding ${x.holdingHoverVideos})`); }
+    const complete = g.leaveT != null && ['leave', 'p1', 'p5'].every((k) => (g.samples || {})[k]);
+    const clean = g.trigger === 'TRUSTED' && !g.viewerOpened && !['leave', 'p1', 'p5'].some((k) => (g.samples || {})[k] && (g.samples[k].viewerOpen || g.samples[k].hidden));
+    neg.push({ host: g.host, cls: excludedClass(g), container: g.container, status: fails.length ? 'FAIL' : 'PASS', fails,
+      sustained: clean && complete && g.leaveT > DWELL_MS, view: !!g.viewerOpened && g.trigger === 'TRUSTED' && complete && g.hoverElements === 0 });
+  }
+  const hosts = {};
+  for (const host of ['e621.net', 'e926.net']) {
+    const n = neg.filter((x) => x.host === host);
+    const classes = {};
+    for (const x of n) { const c = (classes[x.cls] = classes[x.cls] || { generations: 0, sustained: 0, view: 0, fail: 0 }); c.generations++; if (x.sustained) c.sustained++; if (x.view) c.view++; if (x.status === 'FAIL') c.fail++; }
+    const requiredSustained = n.filter((x) => x.sustained && x.container === REQUIRED_NEGATIVE[host]).length;
+    const p = live.hosts[host];
+    const positiveOk = p.fail === 0 && p.usable >= 4 && p.quickPasses >= 1 && p.sustainedWithPreview >= 2;
+    const negativeOk = n.every((x) => x.status === 'PASS') && requiredSustained >= 3;
+    const viewOk = n.some((x) => x.view && x.status === 'PASS');
+    hosts[host] = { positive: p, positiveOk, negative: { required: `${host === 'e621.net' ? 'e621' : 'e926'} ${REQUIRED_NEGATIVE[host].toUpperCase()}`, requiredSustained, classes }, negativeOk, viewOk };
+  }
+  const identityOk = live.files.every((f) => f.identity === 'MATCH_EXPECTED_ARTIFACT' && !f.sanitationGuard);
+  const pass = identityOk && Object.values(hosts).every((x) => x.positiveOk && x.negativeOk && x.viewOk);
+  return { kind: 'targeted', revision: REVISION_TARGETED, files: live.files, identityOk, hosts, pass,
+    failures: live.failures.concat(neg.filter((x) => x.status === 'FAIL')), counts: live.counts };
+}
+
+module.exports = { evaluateControlled, evaluateLive, evaluateTargeted, admitted, REVISION_TARGETED };
 
 if (require.main === module) {
   const [mode, ...files] = process.argv.slice(2);
   const docs = files.map((f) => JSON.parse(fs.readFileSync(f, 'utf8')));
-  const r = mode === 'controlled' ? evaluateControlled(docs[0]) : evaluateLive(docs);
+  const r = mode === 'controlled' ? evaluateControlled(docs[0]) : (mode === 'targeted' ? evaluateTargeted(docs) : evaluateLive(docs));
   console.log(JSON.stringify(r, null, 1));
   process.exitCode = r.pass ? 0 : 1;
 }

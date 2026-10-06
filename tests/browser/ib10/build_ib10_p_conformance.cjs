@@ -34,10 +34,10 @@ const HOST_SHIM_FROM = "  get hostname() { return 'e621.net'; },\n  get host() {
 const HOST_SHIM_TO = "  get hostname() { return IB10P_HOST; },\n  get host() { return IB10P_HOST; },\n";
 const HOST_SELECT = "var IB10P_HOST = (function () { try { return JSON.parse(document.getElementById('ib10c-run').textContent).container === 'mp4' ? 'e926.net' : 'e621.net'; } catch (e) { return 'e621.net'; } })(); // IB10 P: MP4 runs as e926, WebM runs as e621\n";
 
-function productionSource() {
-  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
-  if (blob !== EXPECTED_PRODUCTION_BLOB) throw new Error('production blob at COMMIT is not the expected artifact');
-  return execFileSync('git', ['-C', REPO, 'show', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+function productionSource(commit = COMMIT, expectedBlob = EXPECTED_PRODUCTION_BLOB) {
+  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
+  if (blob !== expectedBlob) throw new Error('production blob at COMMIT is not the expected artifact');
+  return execFileSync('git', ['-C', REPO, 'show', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 }
 function meta(m, name, ns, matches) {
   const out = [];
@@ -50,8 +50,8 @@ function meta(m, name, ns, matches) {
   return out.join('\n');
 }
 
-function build({ bodyTransform = null } = {}) {
-  const source = productionSource();
+function build({ bodyTransform = null, commit = COMMIT, expectedBlob = EXPECTED_PRODUCTION_BLOB } = {}) {
+  const source = productionSource(commit, expectedBlob);
   if (source.includes('\r')) throw new Error('production blob is not LF');
   const { meta: m, body: prodBody } = split(source);
   const body = bodyTransform ? bodyTransform(prodBody) : prodBody;
@@ -64,7 +64,7 @@ function build({ bodyTransform = null } = {}) {
   return { controlled, live, prodBody, expected };
 }
 
-module.exports = { build, COMMIT, EXPECTED_PRODUCTION_BLOB, PORT, OUT_CONTROLLED, OUT_LIVE, C_WRAP_OPEN, C_WRAP_CLOSE, L_WRAP_OPEN, L_WRAP_CLOSE };
+module.exports = { build, meta, COMMIT, EXPECTED_PRODUCTION_BLOB, PORT, OUT_CONTROLLED, OUT_LIVE, C_WRAP_OPEN, C_WRAP_CLOSE, L_WRAP_OPEN, L_WRAP_CLOSE };
 
 if (require.main === module) {
   const { controlled, live } = build();

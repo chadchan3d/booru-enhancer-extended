@@ -1,0 +1,135 @@
+{
+ "probe": "ib10-pf-conformance-verification",
+ "pfCommit": "4d793a2",
+ "pfBlob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "evaluatorRevision": "1.2",
+ "passed": 25,
+ "total": 25,
+ "results": [
+  {
+   "name": "PF package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "production at the PF commit is the expected blob and equals the working tree",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the PF package executes the committed corrected production body byte for byte (no hooks)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the executed body contains the poster/View fallback; the 8324552 body does not",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: matches only e621.net and e926.net",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "distinct script name and namespace from the 8324552 live package (installs side by side, never replaces it)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the 8324552 evidence packages are unchanged (still equal a fresh pinned build)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "PF smoke e621.net: identity MATCH; viewer opened from an excluded card; excluded cards created no hover video; admitted card did",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "PF smoke e926.net: identity MATCH; viewer opened from an excluded card; excluded cards created no hover video; admitted card did",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "PF smoke: targeted evaluator revision 1.2 passes both hosts (positive, negative, View)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault package: the same session on the 8324552 package (old automatic hover video for excluded cards) fails N1 on both hosts",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator targeted: a conforming synthetic result passes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: excluded e621 MP4 hover created a video (old automatic path): caught (N1)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: excluded e926 WebM: a hover video still holds a source at +5 s: caught (N2)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: excluded hover with a video under a synthetic trigger is still a failure: caught (N1)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: e926 MP4 >= 50 MB auto-played: caught (N1)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: required negative class missing (e621 has only WebM > 100 MB negatives): caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: only two sustained required negatives: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: untrusted negatives are not counted as evidence: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: no View evidence (no excluded card opened in the viewer): caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: View evidence without its samples (unfinalized) is not counted: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: admitted sustained hover without a preview (fallback applied to the admitted class): caught (L1)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: admitted source before the dwell: caught (L2)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: artifact identity mismatch: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault targeted: sanitation guard blocked a result: caught",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}
