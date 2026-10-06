@@ -86,7 +86,7 @@ It characterizes the remaining IB11 viewer behavior:
 
 **Local qualification:**
 - `node tests/browser/ib11/build_ib11_vview.cjs --check`
-- `node tests/browser/ib11/verify_ib11_vview.cjs --media <fixture folder>` (45/45)
+- `node tests/browser/ib11/verify_ib11_vview.cjs --media <fixture folder>` (54/54)
 
 ## Operator runbook (Chrome + Tampermonkey, normal profile; about 4 minutes)
 
@@ -103,7 +103,7 @@ It characterizes the remaining IB11 viewer behavior:
 | 2 | Press F11 again | Press **F11** (back to normal). |
 | 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
 | 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
-| 5 | Click the play/pause button at the bottom-left of the video once | **Click** that button once. |
+| 5 | Click the play/pause button at the bottom-left of the video once | **Click the video's own play/pause button** (bottom-left of the video's control bar) once, **not the picture**. If the panel then does not ask for Space, the run continues by itself; that is recorded. |
 | 6 | Press the Space bar once | Press **Space** once. |
 | 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
 | 8 | Press Escape once | Press **Esc**. |
@@ -120,6 +120,7 @@ It characterizes the remaining IB11 viewer behavior:
 
 **After:**
 - **Done:** the server prints "all pages complete". Return **`ib11-vview-results.json`**. Do not open DevTools or the JSON during the run.
+- **Start a fresh run:** if you have a results file from the first V-VIEW attempt (stalled at the video step), do not reuse it. Start the server with a new `--out` file and run the whole sequence again with the rebuilt package.
 - **If the panel ever shows INVALID:** press **F5** to retry that page. An INVALID attempt is never evidence.
 
-**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json>` (revision 1.0). It reports evidence (PASS/FAIL/INVALID) and the product finding separately for every cell.
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json>` (revision 1.1). It reports evidence (PASS/FAIL/INVALID) and the product finding separately for every cell.

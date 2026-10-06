@@ -169,15 +169,37 @@
       await openCard('G3');
       await waitFor(() => { const m = stageMedia(); return !!m && m.tagName === 'VIDEO' && V.rec(m) && V.rec(m).ev.some((x) => x[1] === 'playing'); }, 10000);
       const v = stageMedia(); const rv = V.rec(v);
-      prompt('Click the play/pause button at the bottom-left of the video once.');
-      const ck = await expectEvent(['pointerdown'], (e) => !!v && (e.target === v || v.contains(e.target)), PROMPT_TIMEOUT_MS, 'video control');
-      endPrompt(); await sleep(900);
+      // [rev 1.1] Chrome's native controls live in a closed UA shadow tree:
+      // their pointer input does not reach page listeners. The native action is
+      // observed through its consequences instead: a play/pause transition on
+      // this video during the prompt, not caused by production, and then the
+      // focus. A page-visible pointerdown on the video surface just before the
+      // transition means the click hit the video, not the control.
+      const surface = [];
+      const onSurface = (e) => { if (e.isTrusted && v && (e.target === v || v.contains(e.target))) surface.push(V.t()); };
+      window.addEventListener('pointerdown', onSurface, true);
+      const t0 = V.t(); const pausedAtPrompt = v ? v.paused : null;
+      prompt('Click the play/pause button at the bottom-left of the video once.', 'Use the video\'s own play/pause button, not the picture.');
+      const tr = await new Promise((resolve, reject) => {
+        const done = (x, err) => { v.removeEventListener('play', h); v.removeEventListener('pause', h); clearTimeout(tm); if (err) reject(err); else resolve(x); };
+        const h = (e) => done({ type: e.type, trusted: e.isTrusted, t: V.t(), wall: Date.now() });
+        v.addEventListener('play', h); v.addEventListener('pause', h);
+        const tm = setTimeout(() => done(null, new Error('PROMPT_TIMEOUT G3 native control transition')), PROMPT_TIMEOUT_MS);
+      });
+      endPrompt(); await sleep(600);
+      window.removeEventListener('pointerdown', onSurface, true);
+      const control = { ...tr, pausedBefore: pausedAtPrompt, pausedAfter: v.paused,
+        productionCallsDuringPrompt: V.calls.filter((c) => rv && c[1] === rv.i && c[0] >= t0 && c[0] <= tr.t + 50).map((c) => c[3]),
+        surfacePointerBeforeTransition: surface.some((x) => x >= tr.t - 1000 && x <= tr.t), focusAfter: desc(document.activeElement) };
+      const premise = !!control.focusAfter && control.focusAfter.tag === 'VIDEO';
+      const r = { card: 'G3', revision: '1.1', control, premise };
+      if (!premise) { closeViewer(); return r; }  // cell INVALID (no Space prompt); focus is never invented
       const pausedBefore = v.paused; const activeAtPrompt = desc(document.activeElement);
       prompt('Press the Space bar once.');
       const sp = await expectEvent(['keydown'], (e) => e.key === ' ' || e.code === 'Space', PROMPT_TIMEOUT_MS, 'Space');
       await sleep(1500);
-      const r = { card: 'G3', click: strip(ck), clickTargetIsVideo: !!ck.e && ck.e.target === v, pausedBefore, activeAtPrompt, space: { ...strip(sp), defaultPrevented: sp.e.defaultPrevented },
-        pausedAfter: v.paused, events: rv ? rv.ev.filter((x) => x[0] >= sp.t && (x[1] === 'play' || x[1] === 'pause')) : [], prodCalls: V.calls.filter((c) => c[0] >= sp.t && rv && c[1] === rv.i) };
+      Object.assign(r, { pausedBefore, activeAtPrompt, space: { ...strip(sp), defaultPrevented: sp.e.defaultPrevented },
+        pausedAfter: v.paused, events: rv ? rv.ev.filter((x) => x[0] >= sp.t && (x[1] === 'play' || x[1] === 'pause')) : [], prodCalls: V.calls.filter((c) => c[0] >= sp.t && rv && c[1] === rv.i) });
       endPrompt(); closeViewer(); return r;
     },
     async FOCUS_M() {

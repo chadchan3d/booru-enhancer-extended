@@ -80,6 +80,7 @@ async function main() {
   check(`smoke: both pages valid; evaluator revision ${REVISION}: evidence PASS on all 11 cells`, r.evidencePass && r.counts.PASS === 11, JSON.stringify({ problems: r.problems, bad: r.cells.filter((c) => c.evidence !== 'PASS') }));
   const want = { VD7: 'DEFECT_CONFIRMED', VD6B: 'DEFECT_CONFIRMED', VD1: 'DEFECT_CONFIRMED', VD5SYN: 'CONTROL_ONLY', VD4: 'DEFECT_CONFIRMED', VD5: 'DEFECT_CONFIRMED', G3: 'BEHAVIOR_OK', FOCUS_M: 'OBSERVED', FOCUS_K: 'OBSERVED', NATIVE: 'BEHAVIOR_OK', VD6A: 'DEFECT_CONFIRMED' };
   check('smoke findings = the source-characterized current behavior (V-D7/V-D4/V-D6b/V-D1/V-D5/V-D6a confirmed; single Space toggle; native link navigates)', Object.entries(want).every(([k, v]) => r.findings[k] === v), JSON.stringify(r.findings));
+  { const g = cellOf(doc, 'G3'); check('G3 premise observed through consequences: trusted-path transition, focus on the video, no production call, no surface click, then one Space', cellR(r, 'G3').evidence === 'PASS' && g.premise && g.control.focusAfter.tag === 'VIDEO' && g.control.pausedBefore !== g.control.pausedAfter && !g.control.productionCallsDuringPrompt.length && !g.control.surfacePointerBeforeTransition && g.space, JSON.stringify(g)); }
   check('evidence and product finding are separate: confirmed defects still have evidence PASS', ['VD7', 'VD4', 'VD6B', 'VD1', 'VD5', 'VD6A'].every((k) => cellR(r, k).evidence === 'PASS' && cellR(r, k).finding.code === 'DEFECT_CONFIRMED'));
   check('V-D6a separates "overlay left shown" from "native recovery blocked"', /overlay left shown/.test(cellR(r, 'VD6A').finding.detail.summary) && cellR(r, 'VD6A').finding.detail.destinationArrived === true);
 
@@ -100,7 +101,14 @@ async function main() {
   ef('original already complete at the early sample', 'VD7', (d, c) => { c.samples[0].media.complete = true; }, 'INVALID');
   ef('V-D6b seam did not throw', 'VD6B', (d, c) => { c.seam = []; }, 'INVALID');
   ef('V-D6a seam did not throw', 'VD6A', (d, c) => { c.seam = []; }, 'INVALID');
-  ef('G3 premise: the native control was not focused at Space', 'G3', (d, c) => { c.space.active = { tag: 'BODY' }; }, 'INVALID');
+  ef('G3 premise: the video was not focused at Space', 'G3', (d, c) => { c.space.active = { tag: 'BODY' }; }, 'INVALID');
+  // G3 native-control premise (revision 1.1)
+  ef('G3: synthetic (untrusted) play/pause transition offered as the native-control action', 'G3', (d, c) => { c.control.trusted = false; }, 'INVALID');
+  ef('G3: native-control transition without video focus', 'G3', (d, c) => { c.control.focusAfter = { tag: 'BODY' }; c.premise = false; }, 'INVALID');
+  ef('G3: transition caused by production, not the native control', 'G3', (d, c) => { c.control.productionCallsDuringPrompt = ['togglePlayPause']; }, 'INVALID');
+  ef('G3: click on the video surface instead of the native control', 'G3', (d, c) => { c.control.surfacePointerBeforeTransition = true; }, 'INVALID');
+  ef('G3: no effective native transition', 'G3', (d, c) => { c.control.pausedAfter = c.control.pausedBefore; }, 'INVALID');
+  ef('G3: no transition recorded at all', 'G3', (d, c) => { delete c.control; }, 'INVALID');
   ef('trusted input outside a prompt during an automatic cell', 'VD1', (d, c) => { c.outsideTrusted = 1; }, 'INVALID');
   { const d = clone(doc); d.pages.push(clone(d.pages[0])); d.pages[d.pages.length - 1].attempt = 2; const rr = evaluate(d); check('fault: ambiguous duplicate valid attempts: rejected', !rr.evidencePass && rr.problems.some((x) => /AMBIGUOUS/.test(x)) && rr.cells.filter((c) => ['VD7', 'NATIVE'].includes(c.id)).every((c) => c.evidence === 'INVALID'), JSON.stringify(rr.problems)); }
   { const d = clone(doc); const c = cellOf(d, 'VD5'); c.chords.forEach((x) => { x.fav = 0; x.dl = 0; }); const rr = evaluate(d); check('fault: Favorite/Download stubs not invoked -> finding DEFECT_NOT_REPRODUCED (distinguishable; evidence still valid)', cellR(rr, 'VD5').finding.code === 'DEFECT_NOT_REPRODUCED' && cellR(rr, 'VD5').evidence === 'PASS'); }
@@ -113,8 +121,12 @@ async function main() {
     check('fault: wrong production artifact -> identity MISMATCH rejected', !rr.evidencePass && rr.problems.some((x) => /identity MISMATCH/.test(x)), JSON.stringify(rr.problems)); }
   { const { doc: d, uis } = await smoke(PKG, { skip: ['Escape'] }); const rr = evaluate(d);
     check('fault: missing prompt action (Escape never pressed) -> PROMPT_TIMEOUT, MAIN attempt INVALID, panel says INVALID', !rr.evidencePass && rr.invalidAttempts.some((x) => x.page === 'MAIN' && /PROMPT_TIMEOUT/.test(x.error)) && /INVALID/.test(uis[0].msg) && /INVALID/.test(uis[0].title), JSON.stringify({ inv: rr.invalidAttempts, ui: uis[0] })); }
-  { const { doc: d } = await smoke(mut('\t\t\tif (fn) { e.preventDefault(); fn(); }', '\t\t\tif (fn) { fn(); }'), { forceIdentity: true }); const rr = evaluate(d);
-    check('fault: production no longer suppresses the native Space -> double toggle detected (G3 DEFECT_CONFIRMED, double)', cellR(rr, 'G3').finding.code === 'DEFECT_CONFIRMED' && cellR(rr, 'G3').finding.detail.kind === 'double', JSON.stringify(cellR(rr, 'G3'))); }
+  { const { doc: d } = await smoke(mut('\t\t\tif (fn) { e.preventDefault(); fn(); }', '\t\t\tif (fn) { fn(); }'), { forceIdentity: true }); const rr = evaluate(d); const g = cellR(rr, 'G3');
+    check('fault: production no longer suppresses the native Space -> double toggle detected, with production handler and native default reported separately', g.finding.code === 'DEFECT_CONFIRMED' && g.finding.detail.kind === 'double' && g.finding.detail.productionHandler === true && g.finding.detail.defaultPrevented === false && cellR(r, 'G3').finding.detail.productionHandler === true && cellR(r, 'G3').finding.detail.defaultPrevented === true, JSON.stringify(g)); }
+  { const { doc: d } = await smoke(PKG, { nativeControl: 'nofocus' }); const rr = evaluate(d); const g = cellR(rr, 'G3'); const raw = cellOf(d, 'G3');
+    check('browser model: the native control toggles but does not focus the video -> G3 INVALID (premise), no Space prompt, the rest of the page stays valid', g.evidence === 'INVALID' && g.reasons.some((x) => /did not focus the video/.test(x)) && !raw.space && rr.cells.filter((c) => c.id !== 'G3').every((c) => c.evidence === 'PASS'), JSON.stringify({ g, others: rr.cells.filter((c) => c.evidence !== 'PASS').map((c) => c.id) })); }
+  { const { doc: d } = await smoke(PKG, { skip: ['play/pause button'] }); const rr = evaluate(d);
+    check('browser model: no native-control transition -> PROMPT_TIMEOUT G3, MAIN attempt INVALID', !rr.evidencePass && rr.invalidAttempts.some((x) => x.page === 'MAIN' && /PROMPT_TIMEOUT G3/.test(x.error)), JSON.stringify(rr.invalidAttempts)); }
 
   // ---- 5. repair probes (test copies only; each flips one finding) ----
   const probe = async (name, id, from, to, code) => { const { doc: d } = await smoke(mut(from, to), { forceIdentity: true }); const rr = evaluate(d); const c = cellR(rr, id);

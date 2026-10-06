@@ -68,14 +68,17 @@ function makeDriver(w, env, pageId, arrivals, skip) {
   const art = (role) => doc.querySelector(`article[data-vview-role="${role}"]`);
   const navigate = (card) => { w.setTimeout(() => { arrivals.push({ page: pageId, card, wall: Date.now(), attempt: 1 }); w.dispatchEvent(new w.Event('pagehide')); }, 300); };
   const video = () => doc.querySelector('.be-viewer-stage video');
-  const toggle = (v) => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
+  // Native (UA) toggle: uses the simulator's media functions captured before the
+  // package loaded, so it never passes through page-level play()/pause() wrappers
+  // - like Chrome's native controls, which do not call page JavaScript.
+  const toggle = (v) => { if (v.paused) w.__uaPlay.call(v).catch(() => {}); else w.__uaPause.call(v); };
   const focusables = () => [...doc.querySelectorAll('a[href], button')].filter((x) => x.isConnected);
   const RULES = [
     ['F11 once', () => { env.vw = 1920; env.vh = 1080; w.dispatchEvent(new w.Event('resize')); }],
     ['F11 again', () => { env.vw = 1600; env.vh = 900; w.dispatchEvent(new w.Event('resize')); }],
     ['Ctrl+F', () => K(doc.activeElement, 'f', { ctrlKey: true })],
     ['Ctrl+D', () => K(doc.activeElement, 'd', { ctrlKey: true })],
-    ['play/pause button', () => { const v = video(); if (!v) return; pdown(v); click(v); toggle(v); v.setAttribute('tabindex', '-1'); v.focus(); }],
+    ['play/pause button', () => { const v = video(); if (!v) return; if (env.nativeControl === 'surface') { pdown(v); click(v); } toggle(v); if (env.nativeControl !== 'nofocus') { v.setAttribute('tabindex', '-1'); v.focus(); } }],
     ['Space bar', () => { const a = doc.activeElement; const e = K(a, ' '); if (!e.defaultPrevented && a && a.tagName === 'VIDEO') w.setTimeout(() => toggle(a), 120); }], // native default after dispatch
     ['PINK', () => { const im = art('FOCUS_M').querySelector('img'); pdown(im); click(im); }],
     ['Escape', () => K(doc.activeElement, 'Escape')],
@@ -96,8 +99,8 @@ function makeDriver(w, env, pageId, arrivals, skip) {
   };
 }
 
-async function runPage(pg, source, { skip = [], maxMs = 300000 } = {}) {
-  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000 };
+async function runPage(pg, source, { skip = [], maxMs = 300000, nativeControl = 'focus' } = {}) {
+  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000, nativeControl };
   const arrivals = []; const requests = [];
   const sizes = { webm: 3091428, thumb: 269, wide: 11362, slow: 3842038 };
   const c = h.load({ url: `http://127.0.0.1:${srv.PORT}/posts?page=${pg.token}`, html: srv.page(pg, srv.PORT, sizes), source, settings: {}, setup: (w) => {
@@ -107,6 +110,7 @@ async function runPage(pg, source, { skip = [], maxMs = 300000 } = {}) {
     if (!w.PointerEvent) w.PointerEvent = w.MouseEvent;
     w.GM_info = { scriptHandler: 'jsdom-sim', version: '0' };
     mediaSim(w, clock, env); layout(w, env); images(w, env, pg.id, requests);
+    w.__uaPlay = w.HTMLMediaElement.prototype.play; w.__uaPause = w.HTMLMediaElement.prototype.pause;
     w.fetch = async (u, o) => { if (String(u) === '/vview/result') { posted = JSON.parse(o.body); return { json: async () => ({}) }; } return new Promise(() => {}); };
     w.navigator.sendBeacon = (u, blob) => { blob.text().then((t) => { posted = JSON.parse(t); }); return true; };
   } });
@@ -125,17 +129,17 @@ function trustOperator(client) {
   const c = client.cells;
   if (c.VD4) { T(c.VD4.resize1); T(c.VD4.resize2); }
   if (c.VD5) (c.VD5.chords || []).forEach(T);
-  if (c.G3) { T(c.G3.click); T(c.G3.space); }
+  if (c.G3) { T(c.G3.control); T(c.G3.space); }
   if (c.FOCUS_M) { T(c.FOCUS_M.pointer); T(c.FOCUS_M.click); T(c.FOCUS_M.escape); }
   if (c.FOCUS_K) { T(c.FOCUS_K.enter); (c.FOCUS_K.tabs || []).forEach(T); T(c.FOCUS_K.closeClick); }
   if (c.NATIVE) T(c.NATIVE.click);
   if (c.VD6A) T(c.VD6A.click);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
   for (const pg of srv.plan()) {
-    const r = await runPage(pg, source, { skip });
+    const r = await runPage(pg, source, { skip, nativeControl });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });

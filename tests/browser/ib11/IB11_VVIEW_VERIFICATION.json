@@ -2,9 +2,9 @@
  "probe": "ib11-vview-verification",
  "commit": "4d793a2",
  "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
- "evaluatorRevision": "1.0",
- "passed": 45,
- "total": 45,
+ "evaluatorRevision": "1.1",
+ "passed": 54,
+ "total": 54,
  "smokeFindings": {
   "VD7": "DEFECT_CONFIRMED",
   "VD6B": "DEFECT_CONFIRMED",
@@ -80,12 +80,17 @@
    "detail": ""
   },
   {
-   "name": "smoke: both pages valid; evaluator revision 1.0: evidence PASS on all 11 cells",
+   "name": "smoke: both pages valid; evaluator revision 1.1: evidence PASS on all 11 cells",
    "pass": true,
    "detail": ""
   },
   {
    "name": "smoke findings = the source-characterized current behavior (V-D7/V-D4/V-D6b/V-D1/V-D5/V-D6a confirmed; single Space toggle; native link navigates)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "G3 premise observed through consequences: trusted-path transition, focus on the video, no production call, no surface click, then one Space",
    "pass": true,
    "detail": ""
   },
@@ -170,7 +175,37 @@
    "detail": ""
   },
   {
-   "name": "fault: G3 premise: the native control was not focused at Space: INVALID",
+   "name": "fault: G3 premise: the video was not focused at Space: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: synthetic (untrusted) play/pause transition offered as the native-control action: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: native-control transition without video focus: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: transition caused by production, not the native control: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: click on the video surface instead of the native control: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: no effective native transition: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: no transition recorded at all: INVALID",
    "pass": true,
    "detail": ""
   },
@@ -210,7 +245,17 @@
    "detail": ""
   },
   {
-   "name": "fault: production no longer suppresses the native Space -> double toggle detected (G3 DEFECT_CONFIRMED, double)",
+   "name": "fault: production no longer suppresses the native Space -> double toggle detected, with production handler and native default reported separately",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "browser model: the native control toggles but does not focus the video -> G3 INVALID (premise), no Space prompt, the rest of the page stays valid",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "browser model: no native-control transition -> PROMPT_TIMEOUT G3, MAIN attempt INVALID",
    "pass": true,
    "detail": ""
   },

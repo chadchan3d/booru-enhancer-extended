@@ -490,7 +490,7 @@ Every prompt uses the large-panel / INVALID-on-timeout pattern from the recovery
 | 2 | Press F11 again | Press **F11** (back to normal). |
 | 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
 | 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
-| 5 | Click the play/pause button at the bottom-left of the video once | **Click** that button once. |
+| 5 | Click the play/pause button at the bottom-left of the video once | **Click the video's own play/pause button** (bottom-left of the video's control bar) once, **not the picture**. If the panel then does not ask for Space, the run continues by itself; that is recorded. |
 | 6 | Press the Space bar once | Press **Space** once. |
 | 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
 | 8 | Press Escape once | Press **Esc**. |
@@ -516,3 +516,52 @@ Every prompt uses the large-panel / INVALID-on-timeout pattern from the recovery
 - **G3:** the premise requires the click on the native control to focus the `<video>`. If Chrome does not do that, the cell reports INVALID with the focused element, and the premise needs a different approach.
 
 **Remaining after the future run:** evaluate it; record the raw SHA-256 (the file is not committed); settle the P repair scope from the confirmed findings and the owner decisions; then IB11 P. G-PLAY(TC) PASS(scope) is unchanged.
+
+## 12. IB11-E3 correction: G3 native-control premise (V-VIEW package revision 1.1)
+
+**First real V-VIEW attempt: probe defect, no qualifying browser result.** The operator's first run stalled at the G3 prompt "Click the play/pause button at the bottom-left of the video once". The operator clicked Chrome's native play/pause control repeatedly; the harness never advanced.
+- This is a tooling failure, not product evidence.
+- The attempt produced no valid page result. Under the evaluator's rules an attempt with an error, or with no posted result, is never evidence.
+- None of its earlier cells is used.
+
+**Root cause.** Revision 1.0 waited for a page-level capture `pointerdown` whose target was the `<video>`. Chrome's native media controls are user-agent controls in a closed shadow tree. Pointer input on them is handled inside the browser and does not reach page listeners in that form. The premise was therefore unobservable.
+
+**Correction (package and evaluator revision 1.1).** G3 now observes the native action through its consequences, which the page *can* see:
+1. **The prompt** (unchanged in substance) asks for the video's own play/pause button, not the picture.
+2. **During the prompt**, the runner waits for a real `play` or `pause` transition on the current video, listening on the element. It records `isTrusted`, the paused state before and after, and the transition time.
+3. **The transition must not be caused by page JavaScript:** any recorded `play()`/`pause()` call on that video during the prompt (production's `togglePlayPause` or anything else) disqualifies it. Native controls do not call page JavaScript.
+4. **Surface-click guard:** a page-visible trusted `pointerdown` on the video surface within 1 s before the transition marks a surface click, not the native control. G3 does not become "click anywhere on the video".
+5. **Focus premise:** after the transition settles (600 ms), `document.activeElement` must be the video.
+   - If the native action did not focus the video, the cell is recorded **INVALID** (premise not met) without a Space prompt; focus is never invented.
+   - The rest of the page continues.
+6. **Unchanged post-Space measurement:** then one trusted Space with focus on the video, then production's `togglePlayPause` calls, media `play`/`pause` events, paused state before and after, and the effective-toggle count.
+
+**Evaluator G3 (revision 1.1).** Evidence requires:
+- a recorded transition that is trusted;
+- no JS play/pause call during the prompt;
+- no surface click;
+- an effective transition (paused state changed);
+- focus on the video afterwards (premise);
+- a trusted Space with the video focused.
+
+The finding is unchanged: one effective toggle = BEHAVIOR_OK; zero or two = DEFECT_CONFIRMED, reported with whether production's handler ran and `defaultPrevented`.
+
+**Simulator.** The jsdom browser model now makes the native control toggle playback through the simulator's own media functions (never through page-level wrappers, like Chrome's UA controls) and focus the video, with no page-visible pointer event. A `nofocus` variant toggles without focusing.
+
+**Local qualification: `verify_ib11_vview.cjs --media <fixtures>` 54/54** (previously 45). New G3 controls:
+- **Eligible premise:** native-control transition plus video focus. The full smoke reports G3 evidence PASS: trusted transition, focus on the video, no JS call, no surface click, then one Space.
+- **Transition without video focus → INVALID:** by result mutation, and by the `nofocus` browser model. That run gives G3 INVALID with no Space prompt while every other cell stays PASS.
+- **No transition → PROMPT_TIMEOUT G3:** the MAIN attempt is INVALID; also no transition recorded at all → INVALID.
+- **Synthetic (untrusted) media transition → INVALID.**
+- **Transition caused by production → INVALID; surface click → INVALID; no effective transition → INVALID.**
+- **One Space / one effective toggle is distinguished from a double toggle.**
+- **Production handler and native default reported separately:** in the current package G3 shows productionHandler true and defaultPrevented true (single). In the production mutant without `preventDefault`, it shows productionHandler true, defaultPrevented false, and a double toggle.
+
+All 45 earlier checks still pass.
+
+**Package:** `IB11_VVIEW_Controlled.user.js`, SHA-256 `1662c9039aac4bf05ed99e8759b0ed3f8c588b0dc8b5dc577722720cb992592d` (previous `b7bd9ce9…bd8f`). The production body is unchanged and byte-identical to `4d793a2` (`00915584…e945`).
+
+**Run guidance:** the whole V-VIEW run (about 4 minutes) is restarted with the rebuilt package and a fresh results file. No recovery mode is used, because:
+- the first attempt produced no valid page result;
+- its earlier cells were recorded by the previous runner revision, inside an attempt that is not evidence;
+- splicing them in would add a provenance merge for no saving of real value.

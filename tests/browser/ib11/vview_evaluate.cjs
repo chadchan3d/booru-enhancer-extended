@@ -1,5 +1,5 @@
 'use strict';
-// IB11 V-VIEW evaluator (revision 1.0). A CHARACTERIZATION probe: for every
+// IB11 V-VIEW evaluator (revision 1.1; 1.0 differs only in G3, see below). A CHARACTERIZATION probe: for every
 // cell it reports two separate things:
 //   evidence  PASS | FAIL | INVALID - did the probe validly and unambiguously
 //             observe what the cell is designed to observe (trusted operator
@@ -33,9 +33,15 @@
 //        DEFECT_CONFIRMED if the Favorite / Download stub ran; records
 //        defaultPrevented (browser shortcut suppressed); DEFECT_NOT_REPRODUCED
 //        if neither ran.
-//   G3   E: trusted pointerdown on the video and trusted Space; focus at Space
-//        is the video (premise). F: BEHAVIOR_OK for exactly one effective
-//        toggle; DEFECT_CONFIRMED for zero or two (double toggle).
+//   G3   [1.1] E: the native-control action is observed through its
+//        consequences (Chrome's controls are a closed UA shadow tree, so the
+//        1.0 pointerdown premise was unobservable): a TRUSTED play/pause
+//        transition on the video during the prompt, not caused by production,
+//        not preceded by a page-visible click on the video surface, after which
+//        the video has focus (premise; never invented). Then a trusted Space
+//        with focus on the video. F: BEHAVIOR_OK for exactly one effective
+//        toggle; DEFECT_CONFIRMED for zero or two (double toggle); records
+//        whether production's handler ran and defaultPrevented.
 //   FOCUS_M / FOCUS_K  E: trusted inputs, an invoking element in the target
 //        card, viewer opened and closed, descriptors present. F: OBSERVED
 //        (focus after open, Tab targets, return to the invoker).
@@ -50,7 +56,7 @@
 // Usage: node vview_evaluate.cjs <ib11-vview-results.json>
 const fs = require('fs');
 
-const REVISION = '1.0';
+const REVISION = '1.1';
 const MAIN_CELLS = ['VD7', 'VD6B', 'VD1', 'VD5SYN', 'VD4', 'VD5', 'G3', 'FOCUS_M', 'FOCUS_K', 'NATIVE'];
 const TAKEOVER_CELLS = ['VD6A'];
 const dimsOk = (b) => !!b && b.w > 0 && b.h > 0;
@@ -133,9 +139,15 @@ function evalCell(id, c, ctx) {
       break;
     }
     case 'G3': {
-      if (!isTrusted(c.click) || !c.clickTargetIsVideo) inv('no trusted click on the video control');
+      const k = c.control || {};
+      if (!c.control) { inv('no native-control transition recorded'); break; }
+      if (k.trusted !== true) inv('the play/pause transition is not trusted (synthetic media events are not native-control evidence)');
+      if ((k.productionCallsDuringPrompt || []).length) inv('the transition was caused by production, not the native control');
+      if (k.surfacePointerBeforeTransition) inv('the click hit the video surface, not the native control');
+      if (k.pausedBefore === k.pausedAfter) inv('no effective native-control transition');
+      if (!k.focusAfter || k.focusAfter.tag !== 'VIDEO' || !c.premise) { inv(`premise not met: the native-control action did not focus the video (${k.focusAfter && k.focusAfter.tag})`); break; }
       if (!c.space || !isTrusted(c.space)) inv('Space not trusted');
-      if (!c.space || !c.space.active || c.space.active.tag !== 'VIDEO') inv(`premise not met: the native video control was not focused at Space (${c.space && c.space.active && c.space.active.tag})`);
+      if (!c.space || !c.space.active || c.space.active.tag !== 'VIDEO') inv(`premise not met: the video was not focused at Space (${c.space && c.space.active && c.space.active.tag})`);
       const toggles = (c.events || []).length; const effective = c.pausedBefore !== c.pausedAfter;
       finding = { code: toggles === 1 && effective ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { toggles, effective, kind: toggles === 0 ? 'no toggle' : (toggles === 1 ? 'single' : 'double'), productionHandler: (c.prodCalls || []).some((x) => x[3] === 'togglePlayPause'), defaultPrevented: c.space && c.space.defaultPrevented } };
       break;
