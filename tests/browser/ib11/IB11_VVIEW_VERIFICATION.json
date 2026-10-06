@@ -1,0 +1,248 @@
+{
+ "probe": "ib11-vview-verification",
+ "commit": "4d793a2",
+ "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "evaluatorRevision": "1.0",
+ "passed": 45,
+ "total": 45,
+ "smokeFindings": {
+  "VD7": "DEFECT_CONFIRMED",
+  "VD6B": "DEFECT_CONFIRMED",
+  "VD1": "DEFECT_CONFIRMED",
+  "VD5SYN": "CONTROL_ONLY",
+  "VD4": "DEFECT_CONFIRMED",
+  "VD5": "DEFECT_CONFIRMED",
+  "G3": "BEHAVIOR_OK",
+  "FOCUS_M": "OBSERVED",
+  "FOCUS_K": "OBSERVED",
+  "NATIVE": "BEHAVIOR_OK",
+  "VD6A": "DEFECT_CONFIRMED"
+ },
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "production at the pinned commit is blob 002bdfd and equals the working tree",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the package executes the committed production body byte for byte (no hooks)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: matches only the local V-VIEW server; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "plan: MAIN starts with FOCUS_K (one Tab), VD6B_A is directly followed by VD6B_B, TAKEOVER has only VD6A; native links are the e621 /posts/<id> route",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "generated fixtures are deterministic plain PNGs (thumb 160x80, wide 2000x1000, slow 1600x800 noise > 3 MB)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server refuses to start without the pinned media fixture",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server: MAIN page served with the run config",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server: slow original holds its first byte >= 1.4 s",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server: failure route answers 404",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server: /posts/<id> records the native arrival (page + card) and forwards to the next page",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server: an INVALID attempt is kept with its attempt number",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: both pages valid; evaluator revision 1.0: evidence PASS on all 11 cells",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke findings = the source-characterized current behavior (V-D7/V-D4/V-D6b/V-D1/V-D5/V-D6a confirmed; single Space toggle; native link navigates)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evidence and product finding are separate: confirmed defects still have evidence PASS",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "V-D6a separates \"overlay left shown\" from \"native recovery blocked\"",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: untrusted operator input (Enter on the blue card): INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: synthetic modifier input offered as the trusted Ctrl+F: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: untrusted F11 resize: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: programmatic native-link click: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: wrong fixture route (early media not the slow original): FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: fixture route never requested (404 route missing): FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: navigation never reaches the native destination: FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: takeover page left but no destination arrival: FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: focus evidence with no invoking element: FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: visual measurement with zero stage dimensions: FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: visual measurement missing (no media box): FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: original already complete at the early sample: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: V-D6b seam did not throw: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: V-D6a seam did not throw: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3 premise: the native control was not focused at Space: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: trusted input outside a prompt during an automatic cell: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: ambiguous duplicate valid attempts: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: Favorite/Download stubs not invoked -> finding DEFECT_NOT_REPRODUCED (distinguishable; evidence still valid)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: a Space with two effective toggles is distinguished from one (double -> DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: wrong result type rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: wrong production artifact -> identity MISMATCH rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: missing prompt action (Escape never pressed) -> PROMPT_TIMEOUT, MAIN attempt INVALID, panel says INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: production no longer suppresses the native Space -> double toggle detected (G3 DEFECT_CONFIRMED, double)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: a staged preview placeholder while the original loads (V-D7): VD7 finding -> BEHAVIOR_OK",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: fit uses the rotated box (V-D4): VD4 finding -> BEHAVIOR_OK",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: build failure shows the failed state (V-D6b): VD6B finding -> BEHAVIOR_OK",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: same-URL update keeps the failed state (V-D1): VD1 finding -> BEHAVIOR_OK",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: viewer-key modifier guard (V-D5): VD5 finding -> DEFECT_NOT_REPRODUCED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "repair probe: safe takeover shows the failure with a native link (V-D6a): VD6A finding -> BEHAVIOR_OK",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

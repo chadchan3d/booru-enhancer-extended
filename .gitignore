@@ -12,3 +12,6 @@ tests/browser/ib10/ib11-gplay-results.json
 tests/browser/ib10/ib11-gplay-recovery.json
 tests/browser/ib11/ib11-gplay-results.json
 tests/browser/ib11/ib11-gplay-recovery.json
+# IB11 V-VIEW raw operator results (record SHA-256 only)
+tests/browser/ib10/ib11-vview-results.json
+tests/browser/ib11/ib11-vview-results.json

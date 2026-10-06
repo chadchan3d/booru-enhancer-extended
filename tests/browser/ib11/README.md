@@ -62,3 +62,64 @@ In the first run, both DELIB cells timed out at the Unmute prompt (no click). Th
 4. **Finish:** the server prints "all pages complete". Return `ib11-gplay-recovery.json`.
 
 **Evaluate both files together:** `node tests/browser/ib11/gplay_evaluate.cjs <ib11-gplay-results.json> --recovery <ib11-gplay-recovery.json>`.
+
+---
+
+# IB11 V-VIEW browser-evidence probe (IB11-E3; operator run pending)
+
+`IB11_VVIEW_Controlled.user.js` contains production `4d793a2` (blob `002bdfd`) **unchanged**, wrapped by an observe-only recorder (`vview_preamble.js`) and a page runner (`vview_postamble.js`). It runs only on `http://127.0.0.1:8797/*`.
+
+It characterizes the remaining IB11 viewer behavior:
+- V-D7 (placeholder while loading);
+- V-D4 (rotated fit after a real resize);
+- V-D6a/b (synchronous media-build failure);
+- V-D1 (failure state after a same-ID update);
+- V-D5 (real Ctrl+F / Ctrl+D);
+- Space with the native video control focused (G3);
+- focus from mouse and keyboard origins;
+- the native link after a real failure.
+
+**Fixture details:**
+- Favorite and Download are **stubbed in this test page only**, so no account action or download happens.
+- Preferences live in this test script's own storage.
+- Images are generated plain PNGs. The video card uses the IB10 WebM fixture.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_vview.cjs --check`
+- `node tests/browser/ib11/verify_ib11_vview.cjs --media <fixture folder>` (45/45)
+
+## Operator runbook (Chrome + Tampermonkey, normal profile; about 4 minutes)
+
+**Before:**
+1. Start the server: `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --out <fixture folder>/ib11-vview-results.json`. It must print "media SHA-256 verified; 2 pages".
+2. In Tampermonkey, **disable** every other script (including the G-PLAY scripts) and install **`IB11_VVIEW_Controlled.user.js`**.
+3. Use a normal (not full-screen) window. Open `http://127.0.0.1:8797/vview/start`.
+
+**Page 1 (MAIN).** First, **hands off for about 30 seconds** while the panel at the top says "running automatic checks". Then answer each yellow instruction exactly once. When input is needed, the tab title reads ">>> ACTION NEEDED <<<".
+
+| # | Instruction shown | What you do |
+| --- | --- | --- |
+| 1 | Press F11 once | Press **F11** (the page goes full screen). Wait. |
+| 2 | Press F11 again | Press **F11** (back to normal). |
+| 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
+| 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
+| 5 | Click the play/pause button at the bottom-left of the video once | **Click** that button once. |
+| 6 | Press the Space bar once | Press **Space** once. |
+| 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
+| 8 | Press Escape once | Press **Esc**. |
+| 9 | Press Tab until the BLUE-outlined card is focused, then press Enter | Press **Tab** (usually once) until the panel says "✓ … press Enter now", then press **Enter**. |
+| 10–12 | Press Tab once (1 of 3), (2 of 3), (3 of 3) | Press **Tab** once for each. |
+| 13 | Click the ✕ (Close) button … | **Click ✕**, the last button of the toolbar at the bottom. |
+| 14 | Click the underlined "Open native post" link … | **Click** the link. The page changes to "Native post page reached", then continues by itself. |
+
+**Page 2 (TAKEOVER):**
+
+| # | Instruction shown | What you do |
+| --- | --- | --- |
+| 15 | Click the ORANGE-outlined video card once | **Click** it. The page changes to "Native post page reached", then to the done page. |
+
+**After:**
+- **Done:** the server prints "all pages complete". Return **`ib11-vview-results.json`**. Do not open DevTools or the JSON during the run.
+- **If the panel ever shows INVALID:** press **F5** to retry that page. An INVALID attempt is never evidence.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json>` (revision 1.0). It reports evidence (PASS/FAIL/INVALID) and the product finding separately for every cell.

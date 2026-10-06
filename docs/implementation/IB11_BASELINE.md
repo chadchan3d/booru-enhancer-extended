@@ -4,7 +4,7 @@
 
 **Invariant (Blueprint §3 IB11 item 2):** "The viewer shows the selected target's usable placeholder, preserves transformations/preferences and offers native recovery when loading or playback fails."
 
-**Status:** **IB11 — PARTIAL, E stage.** **G-PLAY(TC): E → PASS(scope)** (§10): the original run merged with the targeted DELIB recovery gives 32/32 under evaluator revision 1.1. The remaining IB11 browser evidence (keyboard, focus, native link, visual V-D4/V-D6/V-D7) is still OPEN. No production change. IB12 is not started.
+**Status:** **IB11 — PARTIAL, E stage.** **G-PLAY(TC): E → PASS(scope)** (§10). The remaining IB11 browser evidence (keyboard, focus, native link, visual V-D4/V-D6/V-D7) is OPEN; its probe, V-VIEW, is built and locally qualified (§11) and awaits the operator run. No production change. IB12 is not started.
 
 ## 1. Source identity and gate check
 
@@ -394,3 +394,125 @@ Operator actions (about 6 in total, roughly 3 minutes):
 Every prompt uses the large-panel / INVALID-on-timeout pattern from the recovery package, and evaluation would be by explicit criteria with fault controls.
 
 **Status:** IB11 PARTIAL, E stage. G-PLAY(TC) PASS(scope); the other IB11 browser evidence is OPEN. No production change; no P work; IB12 not started.
+
+## 11. IB11-E3: V-VIEW browser-evidence probe (built, locally qualified; operator run pending)
+
+**Synchronization:**
+- `dddc3dd` = origin, clean;
+- production `4d793a2` / blob `002bdfd` / body `00915584…e945`;
+- G-PLAY(TC) PASS(scope); IB11 PARTIAL at the E stage; IB12 not started.
+
+**Package:** `tests/browser/ib11/IB11_VVIEW_Controlled.user.js` (SHA-256 `b7bd9ce93f1d0883a92a927dd0909ac637ab93fc553edb1d27531367ea19bd8f`).
+- **Build:** `build_ib11_vview.cjs` from `4d793a2`. The executed body is byte-identical to the production body (SHA-256 `00915584…e945`), checked by the verifier. No hooks; a test-only location shim (`e621.net`).
+- **Scope:** only `http://127.0.0.1:8797/*`.
+- **Recorder:** `vview_preamble.js` (observe-only).
+  - It records viewer `<img>`/`<video>` events and `play()`/`pause()` callers.
+  - It records the synchronous-failure **seam**: an exception from a media `volume` assignment is recorded (name; whether `buildMedia` was on the stack) and **rethrown unchanged**.
+  - Why a seam probe is needed: the V-D6a throw is caught by production's gallery, so no window error would show it.
+- **Runner:** `vview_postamble.js`.
+  - Prompt discipline: a large yellow top panel; the tab title "ACTION NEEDED"; each prompt records `isTrusted`; a 3-minute timeout makes the page INVALID (posted, not advancing, F5 to retry); trusted input outside a prompt is counted against the running cell.
+  - **Favorite and Download are replaced by recording stubs in the test page only.**
+- **Server:** `vview_server.cjs`.
+  - Generated deterministic plain PNGs: thumb 160×80; wide 2000×1000; slow 1600×800 noise of 3,842,038 B, with its first byte held 1.5 s and then streamed at 512 KiB/s (about 8.8 s).
+  - A 404 route; the IB10 WebM fixture.
+  - The e621 native route `/posts/<id>` as the controlled destination: it records the arrival (page and card), then forwards.
+  - Attempts are kept with numbers.
+
+**Cells:**
+
+| Cell | Drive | Evidence (PASS requires) | Product finding |
+| --- | --- | --- | --- |
+| VD7 | open the slow-original card; sample at 300 / 1000 / 3000 ms; wait for completion | open; nonzero stage; early media = the slow original route, **not complete at 300 ms**; completes later at 1600×800; route requested | DEFECT_CONFIRMED if no visible staged placeholder at 300 and 1000 ms (detail: original's visible area, loading text) |
+| VD4 | fit-both; open the 2000×1000 image; toolbar rotate; **two real F11 resizes** (trusted `resize`) | trusted resizes; complete at 2000×1000; unrotated fit inside the stage; `rotate(90deg)`; nonzero boxes | DEFECT_CONFIRMED if the rotated media box exceeds the stage after either real resize |
+| VD6B | open an image, arm stored volume 1.5, ArrowRight onto the video card | valid start; seam threw from `buildMedia`; selection moved to the failing target | DEFECT_CONFIRMED if open with no media, no state, no link |
+| VD1 | real 404 → failure state, then `updatePost` with the same post | real failure (error event, 404, state + link) | DEFECT_CONFIRMED if state and link are erased |
+| VD5SYN | synthetic Ctrl+F / Ctrl+D | control only | CONTROL_ONLY |
+| VD5 | **trusted Ctrl+F, Ctrl+D** with the viewer open | both trusted, ctrlKey, right key (synthetic is INVALID) | per chord: Favorite/Download stub invoked, `defaultPrevented` (browser shortcut suppressed) |
+| G3 | **click the native play/pause control, then Space** | trusted click on the video, trusted Space; focus at Space = video (premise) | one effective toggle = BEHAVIOR_OK; zero or two = DEFECT_CONFIRMED (records production handler and `defaultPrevented`) |
+| FOCUS_M | **mouse click** on the pink card, **Esc** | trusted inputs; invoker in the card; opened/closed; descriptors | OBSERVED (focus before, after open, before close, after close; returned to invoker) |
+| FOCUS_K | **Tab → Enter** on the blue card, **Tab ×3**, **click ✕** | same, plus 3 trusted Tabs | OBSERVED (plus whether Tab leaves the overlay) |
+| NATIVE | real 404 → **click "Open native post"** | link visible (nonzero box); trusted click; page left; destination arrival recorded | BEHAVIOR_OK if native recovery navigated |
+| VD6A | page 2: armed seam, **ordinary click** on the video card | trusted click; seam threw; overlay state recorded; a page exit without arrival is a FAIL | separates "overlay left shown (blank) while native navigation proceeds", "native recovery blocked", and BEHAVIOR_OK (failure shown with a native link, or no overlay) |
+
+**Evidence versus finding.** The probe characterizes; it does not require conformance.
+- Evidence PASS means the cell validly and unambiguously observed what it is designed to observe.
+- The product finding is reported separately: DEFECT_CONFIRMED, DEFECT_NOT_REPRODUCED, BEHAVIOR_OK, OBSERVED, or CONTROL_ONLY.
+- A confirmed defect has evidence PASS.
+- Page rules:
+  - exactly one valid attempt per page (more is AMBIGUOUS, a FAIL);
+  - INVALID attempts are listed, never used;
+  - identity must match.
+
+**Local qualification: `verify_ib11_vview.cjs --media <fixtures>` 45/45** (`IB11_VVIEW_VERIFICATION.json`; `IB11_VVIEW_SHA256SUMS.txt`).
+- **Static:** package current; body byte-identical with hash; local-only scope; plan (FOCUS_K first, VD6B_A then VD6B_B, `/posts/<id>` links); deterministic fixtures; refusal without fixtures.
+- **Server (real HTTP):** page served; slow first byte ≥ 1.4 s; 404; `/posts/<id>` records the arrival and forwards; INVALID attempts kept.
+- **Smoke** (jsdom + `vview_sim.cjs`, which simulates images, layout, video, focus, navigation and operator input; **not browser evidence**):
+  - both pages valid; evidence PASS on all 11 cells;
+  - findings equal the source-characterized behavior: V-D7, V-D4, V-D6b, V-D1, V-D5 and V-D6a DEFECT_CONFIRMED; single Space toggle; native link navigates; V-D6a "overlay left shown; native recovery not blocked".
+- **Evidence and evaluator faults (all caught):**
+  - untrusted Enter; synthetic Ctrl+F; untrusted F11 resize; programmatic native-link click;
+  - wrong fixture route; route never requested;
+  - no native arrival (MAIN and TAKEOVER);
+  - no invoking element;
+  - zero or missing dimensions (two cells);
+  - original complete at the early sample;
+  - seam did not throw (V-D6b, V-D6a);
+  - G3 premise not met; trusted input outside a prompt;
+  - ambiguous duplicate attempts;
+  - stubs not invoked → DEFECT_NOT_REPRODUCED (distinguishable);
+  - a double toggle distinguished from a single one;
+  - wrong result type.
+- **Package faults (all caught):**
+  - wrong production artifact → MISMATCH;
+  - missing prompt action → PROMPT_TIMEOUT, INVALID panel and title;
+  - production not suppressing the native Space → a double toggle detected.
+- **Repair probes** (candidate production changes applied to test copies only; not chosen fixes). Each flips its finding:
+  - a staged preview placeholder (V-D7 → BEHAVIOR_OK);
+  - a rotation-aware fit (V-D4 → BEHAVIOR_OK);
+  - a build failure shown as the failed state (V-D6b → BEHAVIOR_OK);
+  - same-URL update keeps the failure (V-D1 → BEHAVIOR_OK);
+  - a viewer-key modifier guard (V-D5 → DEFECT_NOT_REPRODUCED);
+  - safe takeover with a native link (V-D6a → BEHAVIOR_OK).
+
+**Operator runbook** (Chrome + Tampermonkey, normal profile; about 4 minutes)
+
+
+**Before:**
+1. Start the server: `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --out <fixture folder>/ib11-vview-results.json`. It must print "media SHA-256 verified; 2 pages".
+2. In Tampermonkey, **disable** every other script (including the G-PLAY scripts) and install **`IB11_VVIEW_Controlled.user.js`**.
+3. Use a normal (not full-screen) window. Open `http://127.0.0.1:8797/vview/start`.
+
+**Page 1 (MAIN).** First, **hands off for about 30 seconds** while the panel at the top says "running automatic checks". Then answer each yellow instruction exactly once. When input is needed, the tab title reads ">>> ACTION NEEDED <<<".
+
+| # | Instruction shown | What you do |
+| --- | --- | --- |
+| 1 | Press F11 once | Press **F11** (the page goes full screen). Wait. |
+| 2 | Press F11 again | Press **F11** (back to normal). |
+| 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
+| 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
+| 5 | Click the play/pause button at the bottom-left of the video once | **Click** that button once. |
+| 6 | Press the Space bar once | Press **Space** once. |
+| 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
+| 8 | Press Escape once | Press **Esc**. |
+| 9 | Press Tab until the BLUE-outlined card is focused, then press Enter | Press **Tab** (usually once) until the panel says "✓ … press Enter now", then press **Enter**. |
+| 10–12 | Press Tab once (1 of 3), (2 of 3), (3 of 3) | Press **Tab** once for each. |
+| 13 | Click the ✕ (Close) button … | **Click ✕**, the last button of the toolbar at the bottom. |
+| 14 | Click the underlined "Open native post" link … | **Click** the link. The page changes to "Native post page reached", then continues by itself. |
+
+**Page 2 (TAKEOVER):**
+
+| # | Instruction shown | What you do |
+| --- | --- | --- |
+| 15 | Click the ORANGE-outlined video card once | **Click** it. The page changes to "Native post page reached", then to the done page. |
+
+**After:**
+- **Done:** the server prints "all pages complete". Return **`ib11-vview-results.json`**. Do not open DevTools or the JSON during the run.
+- **If the panel ever shows INVALID:** press **F5** to retry that page. An INVALID attempt is never evidence.
+
+**Known limits of the probe:**
+- **V-D4:** the real resize comes from F11 (fullscreen in/out). The window is not resized by script.
+- **V-D6a:** the overlay is measured right after the click dispatch and at page exit. The visual duration until the next page commits is the browser's.
+- **VD5:** a recorded `defaultPrevented` = true means production suppressed the browser shortcut; the probe does not inspect browser chrome.
+- **G3:** the premise requires the click on the native control to focus the `<video>`. If Chrome does not do that, the cell reports INVALID with the focused element, and the premise needs a different approach.
+
+**Remaining after the future run:** evaluate it; record the raw SHA-256 (the file is not committed); settle the P repair scope from the confirmed findings and the owner decisions; then IB11 P. G-PLAY(TC) PASS(scope) is unchanged.

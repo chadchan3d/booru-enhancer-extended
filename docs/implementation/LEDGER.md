@@ -7,9 +7,9 @@
 **IB11 — Existing viewer hardening: PARTIAL, E stage.**
 - E0: viewer characterization and G-PLAY tooling.
 - E1: first G-PLAY run; evaluator revision 1.1; DELIB recovery tooling.
-- E2: recovery ingested.
-- **G-PLAY(TC): E → PASS(scope)** (`IB11_BASELINE.md` §10).
-- The remaining IB11 browser evidence (keyboard, focus, native link, visual V-D4/V-D6/V-D7) is OPEN.
+- E2: recovery ingested; **G-PLAY(TC): E → PASS(scope)**.
+- **E3: the V-VIEW browser-evidence probe is built and locally qualified** (`IB11_BASELINE.md` §11). The operator run is pending.
+- The keyboard, focus, native-link and visual V-D4/V-D6/V-D7 evidence stays OPEN until that run is evaluated.
 - No production change and no P work.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -25,7 +25,7 @@
 
 ## Current state
 - Branch `implementation/ib00-baseline`, pushed to `origin/implementation/ib00-baseline`.
-- Production `Booru_Enhancer.user.js`: commit `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`, production body SHA-256 `00915584…e945`. Unchanged through IB11-E0, E1 and E2.
+- Production `Booru_Enhancer.user.js`: commit `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`, production body SHA-256 `00915584…e945`. Unchanged through IB11-E0 to E3.
 - **Previous artifacts:**
   - `8324552` / `4258ad7`: IB10 P;
   - `b9d133c` / `22e843c`: IB09.
@@ -55,21 +55,27 @@
 ## Gates relevant to the next step
 - **G-PLAY(TC): PASS(scope)** at the E stage. Chrome 154 + Tampermonkey 5.5.0; controlled local MP4/WebM fixtures only; no general autoplay claim.
   - Preferences are assigned exactly as saved, with no forced remute. autoplay=false stays idle. loop true/false work. Remember-volume works.
-  - A deliberate unmute persists for the current media, and the next target starts muted per the saved preference at the remembered volume.
-  - MP4 without activation: unmuted autoplay is blocked and the metadata-update `play()` is rejected with NotAllowedError. A trusted Space press is a working Play fallback.
-  - WebM unmuted autoplay and its `updatePost` `play()` resolved, but **with page activation already present.** Chrome carried activation across the same-origin navigation, so no-activation behavior and the fallback are evidenced for MP4 only.
+  - A deliberate unmute persists for the current media; the next target starts muted per the saved preference.
+  - MP4 without activation: unmuted autoplay is blocked and the `updatePost` `play()` is rejected with NotAllowedError; a trusted Space press is a working Play fallback.
+  - WebM unmuted playback was measured with page activation already present (Chrome carried activation across the same-origin navigation), so the no-activation and fallback paths are evidenced for MP4 only.
   - Failure state with native link, and close/stale cleanup, pass.
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
-- **G-PLAY merged evaluation** (`gplay_evaluate.cjs` revision 1.1; exit 0; 32/32 PASS; complete; no page failures; no merge problems):
-  - original run (30 cells): raw `ib11-gplay-results.json`, SHA-256 `13888dd9…0048`;
-  - DELIB recovery (2 cells): raw `ib11-gplay-recovery.json`, SHA-256 `ebd4f57c…5a90`;
-  - replaced exactly U-mp4-DELIB and U-webm-DELIB (FAIL → PASS, attempt 1);
-  - the raw files are not committed and were not modified.
-- **First-run history:** revision 1.0 gave 28/4. The LOOPF failures were an evaluator defect (cleanup reset read as a loop wrap), corrected in 1.1. The DELIB failures were a prompt timeout, recovered at E2.
+- **IB11-E3 V-VIEW tooling** (local; not browser evidence):
+  - `verify_ib11_vview.cjs --media` **45/45**, covering:
+    - static checks, including body byte-identity with `00915584…e945`;
+    - server routes over real HTTP;
+    - a jsdom simulator smoke: evidence PASS on all 11 cells, with the source-characterized findings;
+    - 20 evidence/evaluator faults and 3 package faults;
+    - 6 repair probes, each flipping its defect finding.
+  - Package SHA-256 `b7bd9ce9…bd8f`; evaluator revision 1.0.
+- **G-PLAY merged evaluation** (`gplay_evaluate.cjs` revision 1.1; exit 0; 32/32 PASS):
+  - original raw `ib11-gplay-results.json` SHA-256 `13888dd9…0048`;
+  - recovery raw `ib11-gplay-recovery.json` SHA-256 `ebd4f57c…5a90`;
+  - the raw files are not committed.
 - **IB11 local tooling:**
   - viewer characterization 38/38 (46/46 fault controls);
   - `verify_ib11_gplay.cjs` 37/37;
@@ -79,12 +85,11 @@
 - **IB09 live production conformance on `b9d133c`:** all four sessions PASS.
 
 ## Unresolved, parked, deferred
-- **IB11 open browser evidence (must be resolved before freezing P scope):**
-  - keyboard: Space with the native control focused (G3); real modifier chords;
-  - focus: mouse and keyboard origins, open/Escape/✕ return;
+- **IB11 open browser evidence (V-VIEW run pending; must be resolved before freezing P scope):**
+  - keyboard: Space with the native control focused (G3); real Ctrl+F / Ctrl+D (V-D5);
+  - focus: mouse and keyboard origins, Tab behind the overlay, return on Escape and ✕;
   - native link: a real click after a real failure;
-  - visual: V-D4 (rotated fit), V-D6a/b, V-D7.
-  - The next probe "V-VIEW" is specified in `IB11_BASELINE.md` §10 but not yet built: about 5 automated cells and about 6 operator actions (~3 minutes).
+  - visual: V-D4 (real resize), V-D6a/b, V-D7.
 - **IB11 observed defects (E0; not fixed):**
   - V-D1: a late same-ID update erases the failure state and native link;
   - V-D4: fit ignores rotation;
@@ -92,7 +97,7 @@
   - V-D6a/b: a synchronous build failure leaves the overlay shown, or a blank viewer;
   - V-D7: no staged image placeholder.
 - **IB11 findings needing owner judgment:** `IB11_BASELINE.md` §4. The R8 pack text is not in the repository (UNVERIFIED).
-- **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured (activation carried over).
+- **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured.
 - **IB10 limitations (non-blocking):**
   - unqualified video classes stay OPEN (fallback only);
   - the e926 MP4 ≥ 50 MB fallback is local-only;
@@ -100,11 +105,11 @@
   - the e926 20–50 MB band is thin;
   - TC only.
 - **IB09 / IB08 limitations:** as recorded in their completion records.
-- **Fixtures and raw files:** the IB10 fixtures are externally supplied and not tracked; the G-PLAY raw results are not tracked (`.gitignore`).
+- **Fixtures and raw files:** the IB10 fixtures are externally supplied and not tracked; the G-PLAY and V-VIEW raw results are not tracked (`.gitignore`).
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 - **Deferred:**
   - IB12 pagination, IB13 downloads, IB14 favorites/actions, IB16/IB17 Pixiv, IB18 other runtime cells;
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active: IB11, E stage.** Build and locally qualify the V-VIEW browser probe (`IB11_BASELINE.md` §10). Then the operator runs it (about 3 minutes). No IB11 P change until that evidence is in and the P repair scope is frozen. Do not start IB12.
+**Active: IB11, E stage.** The operator runs V-VIEW (`tests/browser/ib11/README.md`, "IB11 V-VIEW"; about 4 minutes; 15 prompted inputs) and returns `ib11-vview-results.json`. It is evaluated with `vview_evaluate.cjs` (revision 1.0). No IB11 P change before that evidence is in and the P repair scope is frozen. Do not start IB12.
