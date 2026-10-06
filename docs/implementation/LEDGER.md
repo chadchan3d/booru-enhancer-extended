@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** (`IB10_COMPLETION_RECORD.md`). G-VIDEO(class, cell) PASS(scope), from the E stage and production conformance.
+**IB10 — Muted hover-video lifecycle: PARTIAL — REOPENED FOR BLUEPRINT CONFORMANCE.** The owner chose Blueprint enforcement (option B). The completion recorded at `8a4d6d8` is reopened, because the Blueprint's "Poster fallback elsewhere" (IB10 item 3; item 11 "poster/View") was not implemented: unqualified video cards still auto-played. Earlier evidence and the admitted-class G-VIDEO PASS(scope) are retained (`IB10_COMPLETION_RECORD.md`, historical).
 - **Scope:**
   - TC only (Chrome 154 + Tampermonkey 5.5.0);
   - logged-out native `/posts`;
@@ -80,4 +80,4 @@ All other classes and cells keep their previous path and remain OPEN or deferred
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**IB10 checkpoint handoff.** IB10 is COMPLETE, PASS(scope). The next eligible checkpoint in the blueprint sequence is **IB11 — Existing viewer hardening**. It is not started and not assigned here.
+**Active: IB10 reopened.** Implement the poster/View fallback for unqualified video cards (production), qualify it locally, and prepare a small targeted browser conformance. Do not start IB11.
