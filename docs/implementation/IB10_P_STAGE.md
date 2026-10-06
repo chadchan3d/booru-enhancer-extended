@@ -3,7 +3,11 @@
 **Checkpoint:** IB10 — Muted hover-video lifecycle (blueprint §3 IB10, item 3 "P", items 2, 7–11).
 - **Gate:** G-VIDEO(class, cell) E → PASS(scope) (`IB10_V3L.md` §8).
 - **Owner decisions:** 200 ms dwell; viewer opening ends the hover; original-file source; **V3-R Option A, immediate release** (recorded in the Ledger before this change, commit `5e00884`).
-- **Status:** **PARTIAL — REOPENED FOR BLUEPRINT CONFORMANCE** (§8). The completion recorded at `8a4d6d8` (`IB10_COMPLETION_RECORD.md`) is reopened, because the poster/View fallback for unqualified video was not implemented. The poster/View fallback is in production `4d793a2` and qualified locally; the targeted browser conformance is pending with the operator. §1–§7 are kept as historical evidence. IB11 not started.
+- **Status:** **COMPLETE — PASS(scope)** at production `4d793a2` (§9).
+  - §1–§7 record the first closure at `8a4d6d8` (production `8324552`) as historical evidence.
+  - §8 records the reopen for Blueprint conformance and the poster/View fallback.
+  - §9 records the targeted browser conformance and the closure.
+  - IB11 not started.
 
 ## 1. Gate check before editing
 - **Repository:** clean at `b158e72` = origin.
@@ -293,8 +297,71 @@ Historical result files that these runs rewrote were restored unedited.
 - **Checksums:** `IB10_PF_SHA256SUMS.txt`. Package SHA-256 `58074ab1e2ab03991f01ee2d7eb5ee5314ea6b0e5bac05f9e8ed6899a7416ebe`.
 - **Operator steps:** `tests/browser/ib10/README.md`, "IB10 PF targeted conformance".
 
-**Status.** IB10 stays **PARTIAL**.
+**Status at §8 (superseded by §9).** IB10 stayed **PARTIAL**.
 - The admitted classes keep their G-VIDEO PASS(scope) from §7.
 - The unqualified video classes now fall back to the poster/View path, but their G-VIDEO stays **OPEN**. The fallback is not a qualification.
 - IB10 is not complete until the targeted browser conformance passes.
 - IB11 is not started.
+
+## 9. Targeted PF browser conformance and closure
+
+**Repository state at ingestion:**
+- `41f0295` = origin, working tree clean;
+- production `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`;
+- `p_conformance_ib10.cjs` and production are unchanged since `41f0295` (`git diff --quiet`).
+
+**Raw operator files (TC: Chrome 154 + Tampermonkey 5.5.0). Not committed; SHA-256 verified equal to the operator's values:**
+
+| File | SHA-256 |
+| --- | --- |
+| e621 positive | `655e83ca979ad1b70fff0b370e4b7926a177da53dd9e9900cced07b8bfeec922` |
+| e621 negative | `786e296e70e4da117323b38e62736789a00f708c267d87908254863129a26c71` |
+| e926 positive | `149c10ba42171882fd1a3b01e4434502a61018dfd16bf6e1c8395b6874ac0061` |
+| e926 negative | `489ee7d05ba9761f1f7a3e8fe870e4ff58f5a59676adc78831b8b3a267f2faa8` |
+
+**Evaluator:** `node tests/browser/ib10/p_conformance_ib10.cjs targeted <e621 positive> <e621 negative> <e926 positive> <e926 negative>` (revision 1.2, one invocation). **Exit 0, `pass: true`.**
+- **T0:** all four files report `MATCH_EXPECTED_ARTIFACT`, with no sanitation block.
+- **Counts:** 114 PASS, 0 FAIL, 26 OUT_OF_SCOPE (excluded generations, judged by N1/N2/V1), 9 CONTAMINATED.
+- The 9 CONTAMINATED generations are all deliberate View clicks on excluded cards (the V3-L classifier marks viewer opens). None is an admitted generation.
+
+| Host | Positive (admitted) | Negative (required class) | View |
+| --- | --- | --- | --- |
+| e621 | WebM: 84 usable, 84 PASS, 0 FAIL; 63 quick passes, 21 sustained previews, 16 after ready | MP4: 21 generations, 0 N1/N2 failures, 14 trusted sustained | 4 |
+| e926 | MP4 < 50 MB: 30 usable, 30 PASS, 0 FAIL; 17 quick passes, 13 sustained previews, 12 after ready | WebM: 14 generations, 0 N1/N2 failures, 8 trusted sustained | 5 |
+
+**Independent reading of the raw files (agrees with the evaluator):**
+- Admitted sources set at 201–214 ms (e621) and 200–214 ms (e926).
+- All 28 plays muted.
+- At most one source-holding hover at any sample; 0 in the negative sessions.
+- Excluded generations: 0 hover `<video>` elements in total.
+- No e926 MP4 ≥ 50 MB was encountered (optional class; not evidenced live).
+
+**Closure review against Blueprint §3 IB10:**
+- **The reopened defect is resolved.** Admitted e621 WebM and e926 MP4 keep the qualified automatic muted hover video (live, both hosts). Every other recognized video class falls back to thumbnail + deliberate View (locally for 12 inputs plus Rule34; live for e621 MP4 and e926 WebM).
+- **Excluded classes are not qualified.** Their G-VIDEO stays OPEN.
+- **History is kept.** `8a4d6d8` is kept as the first closure, now marked reopened. The owner's choice is recorded as Blueprint enforcement (option B). No record still claims that keeping D1–D4 outside the class was an owner decision (`grep`: the remaining mentions are corrections).
+- **Acceptance (unchanged from §7):**
+  - 200 ms dwell;
+  - always muted;
+  - immediate source release;
+  - no stale resurrection (local and controlled);
+  - viewer takeover (local and controlled);
+  - bounded ownership;
+  - controlled Range / no-Range / FAST with +5 s transport;
+  - representative live eligibility.
+- **Forbidden items: none in the IB10 production diff** `b9d133c..4d793a2`, which is 75 lines added and 5 removed:
+  - no native scheduler;
+  - no guessed URL or rendition (the IB08 rendition fact is read only);
+  - no byte or duration cap on transfers (`maxBytes` is the admission bound read from `data-size`);
+  - no archive work;
+  - no viewer mute coupling.
+
+**Outcome:** **IB10 COMPLETE — PASS(scope)**.
+- **Automatic-video scope:**
+  - TC only;
+  - logged-out native `/posts`;
+  - e621 WebM ≤ 100,000,000 B and e926 MP4 < 50,000,000 B;
+  - numeric `data-size` and a same-container `data-file-url`;
+  - original-file source.
+- **All other video classes:** poster/View fallback; their G-VIDEO stays OPEN.
+- IB11 not started.
