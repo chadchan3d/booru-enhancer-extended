@@ -1,5 +1,5 @@
 'use strict';
-// IB11 V-VIEW evaluator (revision 1.1; 1.0 differs only in G3, see below). A CHARACTERIZATION probe: for every
+// IB11 V-VIEW evaluator (revision 1.2; 1.0/1.1 differ only in G3, see below). A CHARACTERIZATION probe: for every
 // cell it reports two separate things:
 //   evidence  PASS | FAIL | INVALID - did the probe validly and unambiguously
 //             observe what the cell is designed to observe (trusted operator
@@ -33,15 +33,25 @@
 //        DEFECT_CONFIRMED if the Favorite / Download stub ran; records
 //        defaultPrevented (browser shortcut suppressed); DEFECT_NOT_REPRODUCED
 //        if neither ran.
-//   G3   [1.1] E: the native-control action is observed through its
-//        consequences (Chrome's controls are a closed UA shadow tree, so the
-//        1.0 pointerdown premise was unobservable): a TRUSTED play/pause
-//        transition on the video during the prompt, not caused by production,
-//        not preceded by a page-visible click on the video surface, after which
-//        the video has focus (premise; never invented). Then a trusted Space
-//        with focus on the video. F: BEHAVIOR_OK for exactly one effective
-//        toggle; DEFECT_CONFIRMED for zero or two (double toggle); records
-//        whether production's handler ran and defaultPrevented.
+//   G3   [1.1] native-control premise, observed through consequences
+//        (Chrome's controls are a closed UA shadow tree): a TRUSTED play/pause
+//        transition on the video during the click prompt, not caused by page
+//        JavaScript, not preceded by a page-visible click on the video surface,
+//        after which the video has focus (never invented).
+//        [1.2] Space: the focused native control may consume Space before the
+//        page sees it (observed in real Chrome), so a DOM keydown is NOT
+//        required; it is recorded as supplemental (keyVisible). E: the video is
+//        focused before and after the Space prompt; a play/pause transition
+//        occurs in the bounded prompt window (60 s) - or, if none, a visible
+//        Space shows the press happened (then the finding is "no toggle");
+//        no page JavaScript other than production's key handler
+//        (togglePlayPause) touched play()/pause() before the first transition.
+//        Without any transition and without a visible key the result is
+//        INCONCLUSIVE (INVALID). Media events' isTrusted is not used as proof of
+//        cause. F (descriptive): native-only single | production-handled single
+//        (default suppressed) -> BEHAVIOR_OK; double toggle (two transitions or
+//        back to the starting state) | no toggle -> DEFECT_CONFIRMED; with the
+//        paths implicated (production handler ran, key visible, defaultPrevented).
 //   FOCUS_M / FOCUS_K  E: trusted inputs, an invoking element in the target
 //        card, viewer opened and closed, descriptors present. F: OBSERVED
 //        (focus after open, Tab targets, return to the invoker).
@@ -54,9 +64,10 @@
 //        "native recovery blocked" (no navigation and no communicated failure);
 //        a failure shown in the viewer with a native link is BEHAVIOR_OK.
 // Usage: node vview_evaluate.cjs <ib11-vview-results.json>
+//        node vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>
 const fs = require('fs');
 
-const REVISION = '1.1';
+const REVISION = '1.2';
 const MAIN_CELLS = ['VD7', 'VD6B', 'VD1', 'VD5SYN', 'VD4', 'VD5', 'G3', 'FOCUS_M', 'FOCUS_K', 'NATIVE'];
 const TAKEOVER_CELLS = ['VD6A'];
 const dimsOk = (b) => !!b && b.w > 0 && b.h > 0;
@@ -146,10 +157,24 @@ function evalCell(id, c, ctx) {
       if (k.surfacePointerBeforeTransition) inv('the click hit the video surface, not the native control');
       if (k.pausedBefore === k.pausedAfter) inv('no effective native-control transition');
       if (!k.focusAfter || k.focusAfter.tag !== 'VIDEO' || !c.premise) { inv(`premise not met: the native-control action did not focus the video (${k.focusAfter && k.focusAfter.tag})`); break; }
-      if (!c.space || !isTrusted(c.space)) inv('Space not trusted');
-      if (!c.space || !c.space.active || c.space.active.tag !== 'VIDEO') inv(`premise not met: the video was not focused at Space (${c.space && c.space.active && c.space.active.tag})`);
-      const toggles = (c.events || []).length; const effective = c.pausedBefore !== c.pausedAfter;
-      finding = { code: toggles === 1 && effective ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { toggles, effective, kind: toggles === 0 ? 'no toggle' : (toggles === 1 ? 'single' : 'double'), productionHandler: (c.prodCalls || []).some((x) => x[3] === 'togglePlayPause'), defaultPrevented: c.space && c.space.defaultPrevented } };
+      const sp = c.space;
+      if (!sp) { inv('no Space observation recorded'); break; }
+      if (!sp.focusBefore || sp.focusBefore.tag !== 'VIDEO') inv(`video not focused before Space (${sp.focusBefore && sp.focusBefore.tag})`);
+      if (!sp.focusAfter || sp.focusAfter.tag !== 'VIDEO') inv(`focus lost during the Space action (${sp.focusAfter && sp.focusAfter.tag})`);
+      const tFirst = sp.firstTransition ? sp.firstTransition.t : Infinity;
+      const foreign = (sp.jsCalls || []).filter((x) => x.t <= tFirst && x.caller !== 'togglePlayPause');
+      if (foreign.length) inv('page JavaScript other than the production key handler called play()/pause() before the first transition');
+      const keyVisible = !!sp.keyVisible;
+      if (!sp.firstTransition && !keyVisible) inv('INCONCLUSIVE: no media consequence and no visible key in the Space window');
+      if (keyVisible && (sp.keys || []).some((x) => x.trusted === false)) inv('a visible Space event is not trusted');
+      const n = (sp.transitions || []).length; const effective = sp.pausedBefore !== sp.pausedAfter;
+      const prod = (sp.jsCalls || []).some((x) => x.caller === 'togglePlayPause');
+      const dp = (sp.keys || []).some((x) => x.type === 'keydown' && x.defaultPrevented);
+      let kind; let code;
+      if (n === 0) { kind = 'no toggle'; code = 'DEFECT_CONFIRMED'; }
+      else if (n === 1 && effective) { kind = prod ? 'production-handled single (default suppressed)' : 'native-only single'; code = 'BEHAVIOR_OK'; if (prod && keyVisible && !dp) kind = 'production-handled single (default not suppressed)'; }
+      else { kind = 'double toggle'; code = 'DEFECT_CONFIRMED'; }
+      finding = { code, detail: { kind, transitions: n, effective, productionHandler: prod, keyVisible, defaultPrevented: keyVisible ? dp : null, nativeImplicated: n >= 2 || (n === 1 && !prod) } };
       break;
     }
     case 'FOCUS_M': case 'FOCUS_K': {
@@ -228,10 +253,28 @@ function evaluate(doc) {
     findings: Object.fromEntries(cells.map((c) => [c.id, c.finding ? c.finding.code : null])), cells };
 }
 
-module.exports = { evaluate, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// G3 preflight (evidence-tool qualification only; never replaces the V-VIEW G3
+// cell): one page (G3PRE), one valid attempt, identity MATCH, and the G3 cell's
+// evidence PASS -> "G3 PREFLIGHT COMPLETE"; anything else -> "INVALID".
+function evaluatePreflight(doc) {
+  if (!doc || doc.probe !== 'ib11-vview-g3-preflight') return { kind: 'g3-preflight', revision: REVISION, verdict: 'INVALID', problems: ['not an ib11-vview-g3-preflight result'] };
+  const all = (doc.pages || []).filter((p) => p.page === 'G3PRE');
+  const valid = all.filter((p) => p.client && !p.client.error);
+  const problems = [];
+  if (valid.length !== 1) problems.push(valid.length ? `AMBIGUOUS: ${valid.length} valid attempts` : 'no valid attempt');
+  const p = valid[0];
+  if (p && p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') problems.push(`identity ${p.client.identity}`);
+  const cell = p ? evalCell('G3', p.client.cells && p.client.cells.G3, { page: 'G3PRE', fixtures: doc.fixtures || {}, requests: doc.requests || [], arrivals: [] }) : null;
+  const verdict = !problems.length && cell && cell.evidence === 'PASS' ? 'G3 PREFLIGHT COMPLETE' : 'INVALID';
+  return { kind: 'g3-preflight', revision: REVISION, verdict, problems, runtime: p ? p.client.runtime : null, cell };
+}
+
+module.exports = { evaluate, evaluatePreflight, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
-  const r = evaluate(JSON.parse(fs.readFileSync(process.argv[2], 'utf8')));
+  const pre = process.argv[2] === '--preflight';
+  const doc = JSON.parse(fs.readFileSync(process.argv[pre ? 3 : 2], 'utf8'));
+  const r = pre ? evaluatePreflight(doc) : evaluate(doc);
   console.log(JSON.stringify(r, null, 1));
-  process.exitCode = r.evidencePass ? 0 : 1;
+  process.exitCode = (pre ? r.verdict === 'G3 PREFLIGHT COMPLETE' : r.evidencePass) ? 0 : 1;
 }

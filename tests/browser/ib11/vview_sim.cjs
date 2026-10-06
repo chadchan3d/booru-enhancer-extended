@@ -79,7 +79,11 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     ['Ctrl+F', () => K(doc.activeElement, 'f', { ctrlKey: true })],
     ['Ctrl+D', () => K(doc.activeElement, 'd', { ctrlKey: true })],
     ['play/pause button', () => { const v = video(); if (!v) return; if (env.nativeControl === 'surface') { pdown(v); click(v); } toggle(v); if (env.nativeControl !== 'nofocus') { v.setAttribute('tabindex', '-1'); v.focus(); } }],
-    ['Space bar', () => { const a = doc.activeElement; const e = K(a, ' '); if (!e.defaultPrevented && a && a.tagName === 'VIDEO') w.setTimeout(() => toggle(a), 120); }], // native default after dispatch
+    // Space models: 'native' (default; as observed in real Chrome) - the focused
+    // native control consumes Space, no page-visible key event, UA toggle;
+    // 'page' - keydown reaches the page, the native default toggles after
+    // dispatch unless prevented; 'none' - nothing happens.
+    ['Space bar', () => { const a = doc.activeElement; if (env.spaceMode === 'none') return; if (env.spaceMode === 'native' && a && a.tagName === 'VIDEO') { toggle(a); return; } const e = K(a, ' '); if (!e.defaultPrevented && a && a.tagName === 'VIDEO') w.setTimeout(() => toggle(a), 120); }],
     ['PINK', () => { const im = art('FOCUS_M').querySelector('img'); pdown(im); click(im); }],
     ['Escape', () => K(doc.activeElement, 'Escape')],
     ['BLUE', () => { const l = art('FOCUS_K').querySelector('a'); l.focus(); w.setTimeout(() => { K(l, 'Enter'); click(l); }, 50); }],
@@ -99,8 +103,8 @@ function makeDriver(w, env, pageId, arrivals, skip) {
   };
 }
 
-async function runPage(pg, source, { skip = [], maxMs = 300000, nativeControl = 'focus' } = {}) {
-  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000, nativeControl };
+async function runPage(pg, source, { skip = [], maxMs = 300000, nativeControl = 'focus', spaceMode = 'native' } = {}) {
+  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000, nativeControl, spaceMode };
   const arrivals = []; const requests = [];
   const sizes = { webm: 3091428, thumb: 269, wide: 11362, slow: 3842038 };
   const c = h.load({ url: `http://127.0.0.1:${srv.PORT}/posts?page=${pg.token}`, html: srv.page(pg, srv.PORT, sizes), source, settings: {}, setup: (w) => {
@@ -129,22 +133,22 @@ function trustOperator(client) {
   const c = client.cells;
   if (c.VD4) { T(c.VD4.resize1); T(c.VD4.resize2); }
   if (c.VD5) (c.VD5.chords || []).forEach(T);
-  if (c.G3) { T(c.G3.control); T(c.G3.space); }
+  if (c.G3) { T(c.G3.control); if (c.G3.space) (c.G3.space.keys || []).forEach(T); }
   if (c.FOCUS_M) { T(c.FOCUS_M.pointer); T(c.FOCUS_M.click); T(c.FOCUS_M.escape); }
   if (c.FOCUS_K) { T(c.FOCUS_K.enter); (c.FOCUS_K.tabs || []).forEach(T); T(c.FOCUS_K.closeClick); }
   if (c.NATIVE) T(c.NATIVE.click);
   if (c.VD6A) T(c.VD6A.click);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan()) {
-    const r = await runPage(pg, source, { skip, nativeControl });
+  for (const pg of srv.plan({ preflight })) {
+    const r = await runPage(pg, source, { skip, nativeControl, spaceMode, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: 'ib11-vview', version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview', version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

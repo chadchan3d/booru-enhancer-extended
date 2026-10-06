@@ -2,9 +2,9 @@
  "probe": "ib11-vview-verification",
  "commit": "4d793a2",
  "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
- "evaluatorRevision": "1.1",
- "passed": 54,
- "total": 54,
+ "evaluatorRevision": "1.2",
+ "passed": 66,
+ "total": 66,
  "smokeFindings": {
   "VD7": "DEFECT_CONFIRMED",
   "VD6B": "DEFECT_CONFIRMED",
@@ -80,7 +80,7 @@
    "detail": ""
   },
   {
-   "name": "smoke: both pages valid; evaluator revision 1.1: evidence PASS on all 11 cells",
+   "name": "smoke: both pages valid; evaluator revision 1.2: evidence PASS on all 11 cells",
    "pass": true,
    "detail": ""
   },
@@ -90,7 +90,7 @@
    "detail": ""
   },
   {
-   "name": "G3 premise observed through consequences: trusted-path transition, focus on the video, no production call, no surface click, then one Space",
+   "name": "G3 (rev 1.2, Chrome-like native Space): premise via the native-control transition + focus; Space observed through its bounded media consequence with NO page-visible key event; native-only single toggle",
    "pass": true,
    "detail": ""
   },
@@ -175,7 +175,32 @@
    "detail": ""
   },
   {
-   "name": "fault: G3 premise: the video was not focused at Space: INVALID",
+   "name": "fault: G3: video not focused before Space: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: focus lost during the Space action: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: non-handler page JavaScript called pause() before the first transition (not attributed to native behavior): INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: no transition and no visible key in the Space window (INCONCLUSIVE): INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: G3: a visible Space event that is not trusted: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "G3: a visible trusted Space with no state change -> evidence PASS, finding \"no toggle\" (DEFECT_CONFIRMED)",
    "pass": true,
    "detail": ""
   },
@@ -225,7 +250,7 @@
    "detail": ""
   },
   {
-   "name": "fault: a Space with two effective toggles is distinguished from one (double -> DEFECT_CONFIRMED)",
+   "name": "fault: two transitions returning to the starting state -> double toggle (DEFECT_CONFIRMED), distinguished from the single",
    "pass": true,
    "detail": ""
   },
@@ -245,7 +270,42 @@
    "detail": ""
   },
   {
-   "name": "fault: production no longer suppresses the native Space -> double toggle detected, with production handler and native default reported separately",
+   "name": "browser model (Space reaches the page): production-handled single toggle with the default suppressed is distinguishable; the production call and the visible key are recorded",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: production no longer suppresses the native Space -> double toggle detected, both paths implicated (production handler ran, key visible, default not prevented)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "browser model: no Space consequence at all -> G3 INCONCLUSIVE (INVALID) after the bounded window; the rest of the page stays valid",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "preflight plan: one page (G3PRE) with one video card",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "preflight smoke: the same package runs only G3 and reports G3 PREFLIGHT COMPLETE (panel and evaluator)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "preflight: no Space consequence -> INVALID (panel and evaluator)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "preflight: native control does not focus the video -> INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "preflight: a full V-VIEW result is not accepted as a preflight",
    "pass": true,
    "detail": ""
   },

@@ -21,7 +21,7 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const b = require('./build_ib11_vview.cjs');
 const srv = require('./vview_server.cjs');
-const { evaluate, REVISION } = require('./vview_evaluate.cjs');
+const { evaluate, evaluatePreflight, REVISION } = require('./vview_evaluate.cjs');
 const { smoke } = require('./vview_sim.cjs');
 const { split } = require('../ib07/build_production_conformance.cjs');
 const { mustReplace } = require('../../host/ib09/dwell_prototype.cjs');
@@ -80,7 +80,7 @@ async function main() {
   check(`smoke: both pages valid; evaluator revision ${REVISION}: evidence PASS on all 11 cells`, r.evidencePass && r.counts.PASS === 11, JSON.stringify({ problems: r.problems, bad: r.cells.filter((c) => c.evidence !== 'PASS') }));
   const want = { VD7: 'DEFECT_CONFIRMED', VD6B: 'DEFECT_CONFIRMED', VD1: 'DEFECT_CONFIRMED', VD5SYN: 'CONTROL_ONLY', VD4: 'DEFECT_CONFIRMED', VD5: 'DEFECT_CONFIRMED', G3: 'BEHAVIOR_OK', FOCUS_M: 'OBSERVED', FOCUS_K: 'OBSERVED', NATIVE: 'BEHAVIOR_OK', VD6A: 'DEFECT_CONFIRMED' };
   check('smoke findings = the source-characterized current behavior (V-D7/V-D4/V-D6b/V-D1/V-D5/V-D6a confirmed; single Space toggle; native link navigates)', Object.entries(want).every(([k, v]) => r.findings[k] === v), JSON.stringify(r.findings));
-  { const g = cellOf(doc, 'G3'); check('G3 premise observed through consequences: trusted-path transition, focus on the video, no production call, no surface click, then one Space', cellR(r, 'G3').evidence === 'PASS' && g.premise && g.control.focusAfter.tag === 'VIDEO' && g.control.pausedBefore !== g.control.pausedAfter && !g.control.productionCallsDuringPrompt.length && !g.control.surfacePointerBeforeTransition && g.space, JSON.stringify(g)); }
+  { const g = cellOf(doc, 'G3'); const gr = cellR(r, 'G3'); check('G3 (rev 1.2, Chrome-like native Space): premise via the native-control transition + focus; Space observed through its bounded media consequence with NO page-visible key event; native-only single toggle', gr.evidence === 'PASS' && g.premise && g.space.firstTransition && g.space.keyVisible === false && g.space.focusBefore.tag === 'VIDEO' && g.space.focusAfter.tag === 'VIDEO' && gr.finding.detail.kind === 'native-only single' && gr.finding.detail.productionHandler === false, JSON.stringify({ g, gr })); }
   check('evidence and product finding are separate: confirmed defects still have evidence PASS', ['VD7', 'VD4', 'VD6B', 'VD1', 'VD5', 'VD6A'].every((k) => cellR(r, k).evidence === 'PASS' && cellR(r, k).finding.code === 'DEFECT_CONFIRMED'));
   check('V-D6a separates "overlay left shown" from "native recovery blocked"', /overlay left shown/.test(cellR(r, 'VD6A').finding.detail.summary) && cellR(r, 'VD6A').finding.detail.destinationArrived === true);
 
@@ -101,7 +101,13 @@ async function main() {
   ef('original already complete at the early sample', 'VD7', (d, c) => { c.samples[0].media.complete = true; }, 'INVALID');
   ef('V-D6b seam did not throw', 'VD6B', (d, c) => { c.seam = []; }, 'INVALID');
   ef('V-D6a seam did not throw', 'VD6A', (d, c) => { c.seam = []; }, 'INVALID');
-  ef('G3 premise: the video was not focused at Space', 'G3', (d, c) => { c.space.active = { tag: 'BODY' }; }, 'INVALID');
+  ef('G3: video not focused before Space', 'G3', (d, c) => { c.space.focusBefore = { tag: 'BODY' }; }, 'INVALID');
+  ef('G3: focus lost during the Space action', 'G3', (d, c) => { c.space.focusAfter = { tag: 'BODY' }; }, 'INVALID');
+  ef('G3: non-handler page JavaScript called pause() before the first transition (not attributed to native behavior)', 'G3', (d, c) => { c.space.jsCalls = [{ t: c.space.firstTransition.t - 5, op: 'pause', caller: 'other' }]; }, 'INVALID');
+  ef('G3: no transition and no visible key in the Space window (INCONCLUSIVE)', 'G3', (d, c) => { c.space.firstTransition = null; c.space.transitions = []; c.space.pausedAfter = c.space.pausedBefore; c.space.keyVisible = false; c.space.keys = []; }, 'INVALID');
+  ef('G3: a visible Space event that is not trusted', 'G3', (d, c) => { c.space.keyVisible = true; c.space.keys = [{ type: 'keydown', t: c.space.promptT + 5, trusted: false, defaultPrevented: false }]; }, 'INVALID');
+  { const d = clone(doc); const c = cellOf(d, 'G3'); c.space.firstTransition = null; c.space.transitions = []; c.space.pausedAfter = c.space.pausedBefore; c.space.keyVisible = true; c.space.keys = [{ type: 'keydown', t: c.space.promptT + 5, trusted: true, defaultPrevented: false }]; const rr = evaluate(d); const g = cellR(rr, 'G3');
+    check('G3: a visible trusted Space with no state change -> evidence PASS, finding "no toggle" (DEFECT_CONFIRMED)', g.evidence === 'PASS' && g.finding.code === 'DEFECT_CONFIRMED' && g.finding.detail.kind === 'no toggle', JSON.stringify(g)); }
   // G3 native-control premise (revision 1.1)
   ef('G3: synthetic (untrusted) play/pause transition offered as the native-control action', 'G3', (d, c) => { c.control.trusted = false; }, 'INVALID');
   ef('G3: native-control transition without video focus', 'G3', (d, c) => { c.control.focusAfter = { tag: 'BODY' }; c.premise = false; }, 'INVALID');
@@ -112,7 +118,7 @@ async function main() {
   ef('trusted input outside a prompt during an automatic cell', 'VD1', (d, c) => { c.outsideTrusted = 1; }, 'INVALID');
   { const d = clone(doc); d.pages.push(clone(d.pages[0])); d.pages[d.pages.length - 1].attempt = 2; const rr = evaluate(d); check('fault: ambiguous duplicate valid attempts: rejected', !rr.evidencePass && rr.problems.some((x) => /AMBIGUOUS/.test(x)) && rr.cells.filter((c) => ['VD7', 'NATIVE'].includes(c.id)).every((c) => c.evidence === 'INVALID'), JSON.stringify(rr.problems)); }
   { const d = clone(doc); const c = cellOf(d, 'VD5'); c.chords.forEach((x) => { x.fav = 0; x.dl = 0; }); const rr = evaluate(d); check('fault: Favorite/Download stubs not invoked -> finding DEFECT_NOT_REPRODUCED (distinguishable; evidence still valid)', cellR(rr, 'VD5').finding.code === 'DEFECT_NOT_REPRODUCED' && cellR(rr, 'VD5').evidence === 'PASS'); }
-  { const d = clone(doc); const c = cellOf(d, 'G3'); c.events = [[c.space.t + 10, 'pause'], [c.space.t + 20, 'play']]; c.pausedAfter = c.pausedBefore; const rr = evaluate(d); check('fault: a Space with two effective toggles is distinguished from one (double -> DEFECT_CONFIRMED)', cellR(rr, 'G3').finding.code === 'DEFECT_CONFIRMED' && cellR(rr, 'G3').finding.detail.kind === 'double' && cellR(r, 'G3').finding.detail.kind === 'single'); }
+  { const d = clone(doc); const c = cellOf(d, 'G3'); const t1 = c.space.firstTransition.t; c.space.transitions = [[t1, 'pause'], [t1 + 120, 'play']]; c.space.pausedAfter = c.space.pausedBefore; const rr = evaluate(d); check('fault: two transitions returning to the starting state -> double toggle (DEFECT_CONFIRMED), distinguished from the single', cellR(rr, 'G3').finding.code === 'DEFECT_CONFIRMED' && cellR(rr, 'G3').finding.detail.kind === 'double toggle' && cellR(r, 'G3').finding.detail.kind === 'native-only single'); }
   { const rr = evaluate({ probe: 'something-else' }); check('fault: wrong result type rejected', !rr.evidencePass); }
 
   // ---- 4b. faults (packages) ----
@@ -121,8 +127,21 @@ async function main() {
     check('fault: wrong production artifact -> identity MISMATCH rejected', !rr.evidencePass && rr.problems.some((x) => /identity MISMATCH/.test(x)), JSON.stringify(rr.problems)); }
   { const { doc: d, uis } = await smoke(PKG, { skip: ['Escape'] }); const rr = evaluate(d);
     check('fault: missing prompt action (Escape never pressed) -> PROMPT_TIMEOUT, MAIN attempt INVALID, panel says INVALID', !rr.evidencePass && rr.invalidAttempts.some((x) => x.page === 'MAIN' && /PROMPT_TIMEOUT/.test(x.error)) && /INVALID/.test(uis[0].msg) && /INVALID/.test(uis[0].title), JSON.stringify({ inv: rr.invalidAttempts, ui: uis[0] })); }
-  { const { doc: d } = await smoke(mut('\t\t\tif (fn) { e.preventDefault(); fn(); }', '\t\t\tif (fn) { fn(); }'), { forceIdentity: true }); const rr = evaluate(d); const g = cellR(rr, 'G3');
-    check('fault: production no longer suppresses the native Space -> double toggle detected, with production handler and native default reported separately', g.finding.code === 'DEFECT_CONFIRMED' && g.finding.detail.kind === 'double' && g.finding.detail.productionHandler === true && g.finding.detail.defaultPrevented === false && cellR(r, 'G3').finding.detail.productionHandler === true && cellR(r, 'G3').finding.detail.defaultPrevented === true, JSON.stringify(g)); }
+  { const { doc: d } = await smoke(PKG, { spaceMode: 'page' }); const rr = evaluate(d); const g = cellR(rr, 'G3'); const raw = cellOf(d, 'G3');
+    check('browser model (Space reaches the page): production-handled single toggle with the default suppressed is distinguishable; the production call and the visible key are recorded', g.evidence === 'PASS' && g.finding.code === 'BEHAVIOR_OK' && g.finding.detail.kind === 'production-handled single (default suppressed)' && g.finding.detail.keyVisible === true && raw.space.jsCalls.some((x) => x.caller === 'togglePlayPause'), JSON.stringify(g)); }
+  { const { doc: d } = await smoke(mut('\t\t\tif (fn) { e.preventDefault(); fn(); }', '\t\t\tif (fn) { fn(); }'), { forceIdentity: true, spaceMode: 'page' }); const rr = evaluate(d); const g = cellR(rr, 'G3');
+    check('fault: production no longer suppresses the native Space -> double toggle detected, both paths implicated (production handler ran, key visible, default not prevented)', g.finding.code === 'DEFECT_CONFIRMED' && g.finding.detail.kind === 'double toggle' && g.finding.detail.productionHandler === true && g.finding.detail.keyVisible === true && g.finding.detail.defaultPrevented === false && g.finding.detail.nativeImplicated === true, JSON.stringify(g)); }
+  { const { doc: d } = await smoke(PKG, { spaceMode: 'none' }); const rr = evaluate(d); const g = cellR(rr, 'G3');
+    check('browser model: no Space consequence at all -> G3 INCONCLUSIVE (INVALID) after the bounded window; the rest of the page stays valid', g.evidence === 'INVALID' && g.reasons.some((x) => /INCONCLUSIVE/.test(x)) && rr.cells.filter((c) => c.id !== 'G3').every((c) => c.evidence === 'PASS'), JSON.stringify(g)); }
+  // ---- G3 real-browser preflight mode (same package, G3 only) ----
+  { const pp = srv.plan({ preflight: true }); check('preflight plan: one page (G3PRE) with one video card', pp.length === 1 && pp[0].id === 'G3PRE' && pp[0].cards.length === 1 && pp[0].cards[0].role === 'G3' && pp[0].cards[0].kind === 'video'); }
+  { const { doc: d, uis } = await smoke(PKG, { preflight: true }); const rr = evaluatePreflight(d);
+    check('preflight smoke: the same package runs only G3 and reports G3 PREFLIGHT COMPLETE (panel and evaluator)', rr.verdict === 'G3 PREFLIGHT COMPLETE' && /G3 PREFLIGHT COMPLETE/.test(uis[0].msg) && Object.keys(d.pages[0].client.cells).join() === 'G3', JSON.stringify({ rr, ui: uis[0] })); }
+  { const { doc: d, uis } = await smoke(PKG, { preflight: true, spaceMode: 'none' }); const rr = evaluatePreflight(d);
+    check('preflight: no Space consequence -> INVALID (panel and evaluator)', rr.verdict === 'INVALID' && /PREFLIGHT INVALID/.test(uis[0].msg), JSON.stringify({ rr, ui: uis[0] })); }
+  { const { doc: d } = await smoke(PKG, { preflight: true, nativeControl: 'nofocus' }); const rr = evaluatePreflight(d);
+    check('preflight: native control does not focus the video -> INVALID', rr.verdict === 'INVALID', JSON.stringify(rr)); }
+  { const rr = evaluatePreflight({ probe: 'ib11-vview' }); check('preflight: a full V-VIEW result is not accepted as a preflight', rr.verdict === 'INVALID'); }
   { const { doc: d } = await smoke(PKG, { nativeControl: 'nofocus' }); const rr = evaluate(d); const g = cellR(rr, 'G3'); const raw = cellOf(d, 'G3');
     check('browser model: the native control toggles but does not focus the video -> G3 INVALID (premise), no Space prompt, the rest of the page stays valid', g.evidence === 'INVALID' && g.reasons.some((x) => /did not focus the video/.test(x)) && !raw.space && rr.cells.filter((c) => c.id !== 'G3').every((c) => c.evidence === 'PASS'), JSON.stringify({ g, others: rr.cells.filter((c) => c.evidence !== 'PASS').map((c) => c.id) })); }
   { const { doc: d } = await smoke(PKG, { skip: ['play/pause button'] }); const rr = evaluate(d);

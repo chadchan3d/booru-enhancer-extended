@@ -9,9 +9,10 @@
 - E1: first G-PLAY run; evaluator revision 1.1; DELIB recovery tooling.
 - E2: recovery ingested; **G-PLAY(TC): E → PASS(scope)**.
 - **E3: the V-VIEW browser-evidence probe is built and locally qualified** (`IB11_BASELINE.md` §11).
-- **E3 correction (§12):** the first real V-VIEW attempt stalled at G3; that was a probe defect, and the attempt produced no qualifying browser result.
-  - The G3 native-control premise is now observed through media/focus consequences (package and evaluator revision 1.1).
-  - A full fresh operator run is pending.
+- **E3 corrections (§12, §13):** two real V-VIEW attempts stalled at G3, both probe defects with no qualifying browser result.
+  - Revision 1.1: Chrome's native controls hide pointer input; the native-control premise is now observed via media/focus consequences.
+  - Revision 1.2: the focused native control also consumes Space; Space is now observed via its bounded media consequence plus the production-call trace, and a DOM key event is supplemental only.
+  - A real-Chrome **G3 preflight** (about 30 s) must succeed before any further full V-VIEW run.
 - The keyboard, focus, native-link and visual V-D4/V-D6/V-D7 evidence stays OPEN until that run is evaluated.
 - No production change and no P work.
 
@@ -67,14 +68,15 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
-- **IB11-E3 V-VIEW tooling** (local; not browser evidence; revision 1.1 after the G3 correction):
-  - `verify_ib11_vview.cjs --media` **54/54**, covering:
+- **IB11-E3 V-VIEW tooling** (local; not browser evidence; revision 1.2 after two G3 corrections):
+  - `verify_ib11_vview.cjs --media` **66/66**, covering:
     - static checks, including body byte-identity with `00915584…e945`;
     - server routes over real HTTP;
     - a jsdom simulator smoke: evidence PASS on all 11 cells, with the source-characterized findings;
-    - 26 evidence/evaluator faults and 5 package/browser-model faults, including the G3 native-control premise (trusted transition, no JS call, no surface click, focus required, no-transition timeout);
+    - G3 controls: the native-control premise; Space observed without a page-visible key; focus before and after; foreign JS calls; INCONCLUSIVE; no toggle; double toggle; production-handled versus native-only; the G3 preflight mode;
+    - the other evidence/evaluator and package faults;
     - 6 repair probes, each flipping its defect finding.
-  - Package SHA-256 `1662c903…592d` (supersedes `b7bd9ce9…bd8f`); evaluator revision 1.1.
+  - Package SHA-256 `878a3cd3…639c` (supersedes `1662c903…592d` and `b7bd9ce9…bd8f`); evaluator revision 1.2.
 - **G-PLAY merged evaluation** (`gplay_evaluate.cjs` revision 1.1; exit 0; 32/32 PASS):
   - original raw `ib11-gplay-results.json` SHA-256 `13888dd9…0048`;
   - recovery raw `ib11-gplay-recovery.json` SHA-256 `ebd4f57c…5a90`;
@@ -88,8 +90,8 @@
 - **IB09 live production conformance on `b9d133c`:** all four sessions PASS.
 
 ## Unresolved, parked, deferred
-- **First V-VIEW attempt (package `b7bd9ce9…`):** it stalled at G3. That was a probe defect (Chrome's native controls do not deliver page-level pointerdown); there is no qualifying result, and none of its cells is used.
-- **IB11 open browser evidence (fresh V-VIEW run pending; must be resolved before freezing P scope):**
+- **V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` rev 1.0 and `1662c903…` rev 1.1):** both stalled at G3. They were probe defects (Chrome's native controls hide first the pointer input, then Space, from the page); neither has a qualifying result, and none of their cells is used.
+- **IB11 open browser evidence (G3 preflight, then a fresh V-VIEW run; must be resolved before freezing P scope):**
   - keyboard: Space with the native control focused (G3); real Ctrl+F / Ctrl+D (V-D5);
   - focus: mouse and keyboard origins, Tab behind the overlay, return on Escape and ✕;
   - native link: a real click after a real failure;
@@ -116,4 +118,4 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active: IB11, E stage.** The operator runs V-VIEW **again from the start** with the rebuilt package (`1662c903…`; `tests/browser/ib11/README.md`, "IB11 V-VIEW"; about 4 minutes; 15 prompted inputs) and a fresh results file, then returns `ib11-vview-results.json`. It is evaluated with `vview_evaluate.cjs` (revision 1.1). No IB11 P change before that evidence is in and the P repair scope is frozen. Do not start IB12.
+**Active: IB11, E stage.** The operator runs the **G3 real-browser preflight** only (`tests/browser/ib11/README.md`, "G3 real-browser PREFLIGHT"; about 30 s; `vview_server.cjs --g3-preflight`; package `878a3cd3…`) and returns `ib11-vview-g3-preflight.json`. It is evaluated with `vview_evaluate.cjs --preflight` (revision 1.2). A further full V-VIEW run is requested only after the preflight succeeds. No IB11 P change before that evidence is in and the P repair scope is frozen. Do not start IB12.

@@ -491,7 +491,7 @@ Every prompt uses the large-panel / INVALID-on-timeout pattern from the recovery
 | 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
 | 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
 | 5 | Click the play/pause button at the bottom-left of the video once | **Click the video's own play/pause button** (bottom-left of the video's control bar) once, **not the picture**. If the panel then does not ask for Space, the run continues by itself; that is recorded. |
-| 6 | Press the Space bar once | Press **Space** once. |
+| 6 | Press the Space bar once | Press **Space** once (do not click anything first). The page may not see the key itself; the probe watches the video. |
 | 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
 | 8 | Press Escape once | Press **Esc**. |
 | 9 | Press Tab until the BLUE-outlined card is focused, then press Enter | Press **Tab** (usually once) until the panel says "✓ … press Enter now", then press **Enter**. |
@@ -565,3 +565,65 @@ All 45 earlier checks still pass.
 - the first attempt produced no valid page result;
 - its earlier cells were recorded by the previous runner revision, inside an attempt that is not evidence;
 - splicing them in would add a provenance merge for no saving of real value.
+
+## 13. IB11-E3 correction 2: G3 Space is also hidden by Chrome's native controls (revision 1.2) and a real-browser G3 preflight
+
+**Second real V-VIEW attempt (package revision 1.1, `1662c903…`): probe defect at G3, no qualifying browser result.**
+- Revision 1.1 fixed the first half: the operator clicked the native play/pause control, the harness observed the native media transition, and it accepted `document.activeElement` = the video after 600 ms.
+- At "Press the Space bar once" the operator pressed Space, and the harness never advanced.
+- This is a tooling failure, not product evidence. None of the attempt's cells is used, and no provenance merge is built for its partial MAIN run.
+
+**Root cause.** Revision 1.1 still required a page-visible `keydown` for Space. With Chrome's native media control focused, the control consumes Space inside the user-agent shadow tree (just as it consumed the pointer input), so the page never received the key in the form required. Two consecutive assumptions about Chrome's closed native controls failed only in real Chrome. Local simulation alone can no longer establish that this boundary is usable.
+
+**Revised G3 evidence contract (revision 1.2).** After the unchanged native-control click/focus premise:
+1. **Before the prompt,** record the paused state and the focused element.
+2. **Prompt** "Press the Space bar once" (subtitle: "Only once. Do not click anything first.").
+3. **During a bounded window of 60 s,** observe every available channel: `keydown`/`keyup` if Chrome exposes them (with `isTrusted` and `defaultPrevented`), play/pause transitions on the video, every page-JavaScript `play()`/`pause()` call on it with its caller (production `togglePlayPause` or other), and focus and paused state before and after.
+   - The first transition ends the wait; all transitions and calls in the following 1.5 s are recorded.
+4. **A page-visible key event is supplemental:** `keyVisible` is recorded and never required.
+5. **The operator's single Space counts as observed** when, under the controlled runbook, the focused video makes a play/pause transition inside the prompt window, provided that:
+   - the video was focused before the prompt and is still focused afterwards;
+   - no page JavaScript other than production's key handler called `play()`/`pause()` before the first transition;
+   - all production calls and all transitions in the window are recorded.
+
+   Media events' `isTrusted` is **not** used as proof that Space caused them. The cause is inferred from the prompt window, the before/after state, the call trace, and whether a key event was visible.
+6. **No transition:** a visible trusted Space with no state change gives the finding **no toggle**. With neither a transition nor a visible key, the cell is **INCONCLUSIVE** (evidence INVALID); the page continues.
+7. **Findings (descriptive):**
+
+| Kind | Meaning | Finding |
+| --- | --- | --- |
+| native-only single | one effective transition, no production key-handler call | BEHAVIOR_OK |
+| production-handled single (default suppressed) | production handler ran, the browser default was suppressed, one effective transition | BEHAVIOR_OK |
+| double toggle | two transitions or a return to the starting state, with the implicated paths recorded | DEFECT_CONFIRMED |
+| no toggle | no state change | DEFECT_CONFIRMED |
+| INCONCLUSIVE / INVALID | focus premise lost, or no bounded media consequence | — |
+
+The likely current-Chrome outcome is not assumed from the source.
+
+**G3 real-browser preflight (new).** Before any further full V-VIEW run:
+- **Server:** `vview_server.cjs --g3-preflight` serves one page (`G3PRE`) with one video card.
+- **Package:** the **same** rebuilt package and recorder run only the G3 cell, post a small JSON result, and show **G3 PREFLIGHT COMPLETE** or **G3 PREFLIGHT INVALID**.
+- **Evaluation:** `vview_evaluate.cjs --preflight <file>`.
+- This is evidence-tool qualification only; it does not replace the V-VIEW G3 cell. The runbook is in `tests/browser/ib11/README.md`.
+
+**Simulator.** The default Space model is now Chrome-like: the focused native control consumes Space, no page-visible key event, and the native control toggles. Two more models exist: `page` (the key reaches the page; the native default runs after dispatch unless prevented) and `none` (nothing happens).
+
+**Local qualification: `verify_ib11_vview.cjs --media <fixtures>` 66/66.** New and revised G3 controls:
+- **Chrome-like smoke:** the premise holds; Space is observed through its media consequence with **no** visible key; the finding is native-only single.
+- **Video not focused before Space → INVALID; focus lost during the action → INVALID.**
+- **Non-handler page JavaScript calling `pause()` before the first transition → INVALID** (recorded, not attributed to native behavior).
+- **No transition and no visible key → INCONCLUSIVE / INVALID,** by result mutation and by the `none` browser model (the rest of the page stays valid).
+- **A visible untrusted Space → INVALID.** A visible trusted Space with no state change → evidence PASS, finding "no toggle".
+- **Two transitions back to the starting state → "double toggle",** distinguished from the single.
+- **`page` model:** with current production, "production-handled single (default suppressed)", with the production call and the visible key recorded. With the production mutant without `preventDefault`, a "double toggle" with both paths implicated (handler ran, key visible, default not prevented).
+- **Preflight:**
+  - plan: one page, one video card;
+  - smoke: the same package runs only G3, and the panel and evaluator say COMPLETE;
+  - no Space consequence, or a native control that doesn't focus the video → INVALID;
+  - a full V-VIEW result is not accepted as a preflight.
+
+The earlier V-VIEW checks still pass.
+
+**Package:** `IB11_VVIEW_Controlled.user.js`, SHA-256 `878a3cd39852174ce2fe54c921243c8d7cee9a9df7281a181887377659ec639c` (supersedes `1662c903…`). Package and evaluator revision 1.2. The production body is unchanged and byte-identical to `4d793a2` (`00915584…e945`).
+
+**Status:** IB11 PARTIAL, E stage. The real-Chrome G3 preflight is pending; no further full V-VIEW run is requested until it succeeds. No production change; no P work.

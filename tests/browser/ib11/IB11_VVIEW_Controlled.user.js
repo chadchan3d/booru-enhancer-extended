@@ -5622,6 +5622,7 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
   const WRAP_FN_HEAD = 'function (location) {\n';
   const PROMPT_TIMEOUT_MS = 180000;
   const NAV_FALLBACK_MS = 5000;
+  const SPACE_WINDOW_MS = 60000;
   const V = IB11V;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const waitFor = async (fn, ms) => { const end = performance.now() + ms; while (performance.now() < end) { if (fn()) return true; await sleep(25); } return !!fn(); };
@@ -5798,14 +5799,33 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
         productionCallsDuringPrompt: V.calls.filter((c) => rv && c[1] === rv.i && c[0] >= t0 && c[0] <= tr.t + 50).map((c) => c[3]),
         surfacePointerBeforeTransition: surface.some((x) => x >= tr.t - 1000 && x <= tr.t), focusAfter: desc(document.activeElement) };
       const premise = !!control.focusAfter && control.focusAfter.tag === 'VIDEO';
-      const r = { card: 'G3', revision: '1.1', control, premise };
+      const r = { card: 'G3', revision: '1.2', control, premise };
       if (!premise) { closeViewer(); return r; }  // cell INVALID (no Space prompt); focus is never invented
-      const pausedBefore = v.paused; const activeAtPrompt = desc(document.activeElement);
-      prompt('Press the Space bar once.');
-      const sp = await expectEvent(['keydown'], (e) => e.key === ' ' || e.code === 'Space', PROMPT_TIMEOUT_MS, 'Space');
-      await sleep(1500);
-      Object.assign(r, { pausedBefore, activeAtPrompt, space: { ...strip(sp), defaultPrevented: sp.e.defaultPrevented },
-        pausedAfter: v.paused, events: rv ? rv.ev.filter((x) => x[0] >= sp.t && (x[1] === 'play' || x[1] === 'pause')) : [], prodCalls: V.calls.filter((c) => c[0] >= sp.t && rv && c[1] === rv.i) });
+      // [rev 1.2] The focused native control may consume Space before the page
+      // sees it (observed in real Chrome). A page-visible keydown/keyup is
+      // SUPPLEMENTAL; the operator's single Space is established by the bounded
+      // media consequence in the prompt window, with every production call and
+      // every transition recorded. The media events' isTrusted is not used as
+      // proof of the cause.
+      const pausedBefore = v.paused; const focusBefore = desc(document.activeElement); const tP = V.t();
+      const keys = [];
+      const onKey = (e) => { if (e.key === ' ' || e.code === 'Space') keys.push({ type: e.type, t: V.t(), trusted: e.isTrusted, target: desc(e.target), ev: e }); };
+      window.addEventListener('keydown', onKey, true); window.addEventListener('keyup', onKey, true);
+      prompt('Press the Space bar once.', 'Only once. Do not click anything first.');
+      const first = await new Promise((resolve) => {
+        const h = (e) => done({ type: e.type, t: V.t() });
+        const done = (x) => { v.removeEventListener('play', h); v.removeEventListener('pause', h); clearTimeout(tm); resolve(x); };
+        v.addEventListener('play', h); v.addEventListener('pause', h);
+        const tm = setTimeout(() => done(null), SPACE_WINDOW_MS);
+      });
+      if (first) await sleep(1500);
+      window.removeEventListener('keydown', onKey, true); window.removeEventListener('keyup', onKey, true);
+      const tEnd = V.t();
+      Object.assign(r, { space: {
+        promptT: tP, windowMs: first ? tEnd - tP : SPACE_WINDOW_MS, focusBefore, pausedBefore, pausedAfter: v.paused, focusAfter: desc(document.activeElement),
+        firstTransition: first, transitions: rv ? rv.ev.filter((x) => x[0] >= tP && x[0] <= tEnd && (x[1] === 'play' || x[1] === 'pause')) : [],
+        jsCalls: V.calls.filter((c) => rv && c[1] === rv.i && c[0] >= tP && c[0] <= tEnd).map((c) => ({ t: c[0], op: c[2], caller: c[3] })),
+        keyVisible: keys.length > 0, keys: keys.map(({ ev, ...k }) => ({ ...k, defaultPrevented: ev.defaultPrevented })) } });
       endPrompt(); closeViewer(); return r;
     },
     async FOCUS_M() {
@@ -5904,7 +5924,12 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
     BE.settings.set('media.hoverPreview', false); BE.settings.set('viewer.autoplayVideo', true); BE.settings.set('viewer.muteVideo', true);
     BE.settings.set('viewer.loopVideo', true); BE.settings.set('viewer.rememberVolume', true); BE.settings.set('viewer.fitMode', 'fit-both');
     await BE.store.set('viewer:volume', 0.37);
-    if (cfg.page === 'MAIN') {
+    if (cfg.page === 'G3PRE') {
+      cell = 'G3'; const r = await CELLS.G3(); r.outsideTrusted = outside.G3 || 0; out.cells.G3 = r;
+      await fetch('/vview/result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(out) });
+      const sp = r.space || {}; const ok = r.premise && sp.firstTransition && sp.focusBefore && sp.focusBefore.tag === 'VIDEO' && sp.focusAfter && sp.focusAfter.tag === 'VIDEO';
+      panel.style.cssText = BIG; say(ok ? 'G3 PREFLIGHT COMPLETE' : 'G3 PREFLIGHT INVALID', ok ? 'Return the preflight results file.' : 'Reload this page (F5) to retry, or return the file as is.'); document.title = ok ? 'G3 PREFLIGHT COMPLETE' : 'G3 PREFLIGHT INVALID';
+    } else if (cfg.page === 'MAIN') {
       say('running automatic checks; keep hands off until a yellow instruction appears.');
       for (const id of ['VD7', 'VD6B', 'VD1', 'VD5SYN', 'VD4', 'VD5', 'G3', 'FOCUS_M', 'FOCUS_K']) {
         cell = id; const r = await CELLS[id](); r.outsideTrusted = outside[id] || 0; out.cells[id] = r;

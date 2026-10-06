@@ -86,7 +86,7 @@ It characterizes the remaining IB11 viewer behavior:
 
 **Local qualification:**
 - `node tests/browser/ib11/build_ib11_vview.cjs --check`
-- `node tests/browser/ib11/verify_ib11_vview.cjs --media <fixture folder>` (54/54)
+- `node tests/browser/ib11/verify_ib11_vview.cjs --media <fixture folder>` (66/66)
 
 ## Operator runbook (Chrome + Tampermonkey, normal profile; about 4 minutes)
 
@@ -104,7 +104,7 @@ It characterizes the remaining IB11 viewer behavior:
 | 3 | Hold Ctrl and press F once | Press **Ctrl+F**. If a Find bar appears, press **Esc** to close it (you have 6 s; that Esc is not counted). |
 | 4 | Hold Ctrl and press D once | Press **Ctrl+D**. If a bookmark dialog appears, press **Esc**. |
 | 5 | Click the play/pause button at the bottom-left of the video once | **Click the video's own play/pause button** (bottom-left of the video's control bar) once, **not the picture**. If the panel then does not ask for Space, the run continues by itself; that is recorded. |
-| 6 | Press the Space bar once | Press **Space** once. |
+| 6 | Press the Space bar once | Press **Space** once (do not click anything first). The page may not see the key itself; the probe watches the video. |
 | 7 | Click the PINK-outlined card once | **Click** the pink-outlined card with the mouse. |
 | 8 | Press Escape once | Press **Esc**. |
 | 9 | Press Tab until the BLUE-outlined card is focused, then press Enter | Press **Tab** (usually once) until the panel says "✓ … press Enter now", then press **Enter**. |
@@ -123,4 +123,19 @@ It characterizes the remaining IB11 viewer behavior:
 - **Start a fresh run:** if you have a results file from the first V-VIEW attempt (stalled at the video step), do not reuse it. Start the server with a new `--out` file and run the whole sequence again with the rebuilt package.
 - **If the panel ever shows INVALID:** press **F5** to retry that page. An INVALID attempt is never evidence.
 
-**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json>` (revision 1.1). It reports evidence (PASS/FAIL/INVALID) and the product finding separately for every cell.
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json>` (revision 1.2). It reports evidence (PASS/FAIL/INVALID) and the product finding separately for every cell.
+
+## G3 real-browser PREFLIGHT (about 30 seconds; do this before any further full V-VIEW run)
+
+This is evidence-tool qualification only: it does not replace the V-VIEW G3 cell. It uses exactly the rebuilt package (SHA-256 `878a3cd39852174ce2fe54c921243c8d7cee9a9df7281a181887377659ec639c`), running only the G3 cell.
+
+1. **Start the server in preflight mode:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --g3-preflight --out <fixture folder>/ib11-vview-g3-preflight.json`. It prints "1 pages (G3 PREFLIGHT only)".
+2. **Install the package:** in Tampermonkey, **replace** the V-VIEW script with the rebuilt `IB11_VVIEW_Controlled.user.js`. Keep all other scripts disabled.
+3. **Open** `http://127.0.0.1:8797/vview/start`. The video opens in the viewer by itself. Keep your hands off until the yellow instruction appears.
+4. **"Click the play/pause button at the bottom-left of the video once":** click the **video's own play/pause button** once, not the picture.
+5. **"Press the Space bar once":** press **Space** once. Do not click anything first.
+6. **Result:** the panel shows **G3 PREFLIGHT COMPLETE** or **G3 PREFLIGHT INVALID**.
+   - On COMPLETE, return `ib11-vview-g3-preflight.json`.
+   - On INVALID, press F5 once to retry, or return the file as it is. The Space window waits up to 60 s for a consequence.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>`.
