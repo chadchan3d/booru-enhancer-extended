@@ -1,0 +1,459 @@
+{
+ "probe": "ib11-e0-viewer-baseline",
+ "productionBlob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "checks": 38,
+ "passed": 38,
+ "faultsTotal": 46,
+ "faultsCaught": 46,
+ "results": [
+  {
+   "id": "S0",
+   "name": "production under test is blob 002bdfd1a88adf8ed851df7ed768e6189e2bc958 (4d793a2)",
+   "pass": true,
+   "faults": []
+  },
+  {
+   "id": "A1",
+   "name": "plain left click on a card: viewer takes over synchronously (opened, native navigation cancelled), target = the clicked card, media = card original file",
+   "pass": true,
+   "faults": [
+    {
+     "label": "takeover no longer cancels native navigation",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "A2",
+   "name": "modifier and middle clicks keep native behavior (no viewer, not cancelled): ctrl, meta, shift, alt, button 1",
+   "pass": true,
+   "faults": [
+    {
+     "label": "modifier keys not checked",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "A3",
+   "name": "viewer.enabled = false: ordinary click keeps native behavior",
+   "pass": true,
+   "faults": [
+    {
+     "label": "enabled preference ignored",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "A4",
+   "name": "[FINDING] the per-card \"Open viewer\" action button opens the viewer even when viewer.enabled = false (explicit action, not an ordinary click)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: action button honors viewer.enabled",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "A5",
+   "name": "[DEFECT V-D6a] synchronous failure during takeover (stored remembered volume 1.5 on a video card): native navigation is NOT cancelled (correct), but the overlay is left displayed with an empty stage",
+   "pass": true,
+   "faults": [
+    {
+     "label": "takeover cancels navigation even when open threw",
+     "caught": true
+    },
+    {
+     "label": "repair probe: overlay shown only after media was built",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "A6",
+   "name": "[DEFECT V-D6b] synchronous failure during in-viewer navigation (ArrowRight to a video card while the stored volume is 1.5): the viewer stays open on the new target with an empty stage, no message and no native link (blank, uncommunicated failure)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: build failure shows the failed state",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "B1",
+   "name": "[DEFECT V-D7] image card: the viewer loads the original file directly (no staged thumbnail/sample placeholder) and shows no loading state while it loads",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: images show a loading state",
+     "caught": true
+    },
+    {
+     "label": "repair probe: stage the sample first",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "name": "video card: the non-video preview is the poster; \"Loading video…\" appears after 180 ms and clears at loadeddata",
+   "pass": true,
+   "faults": [
+    {
+     "label": "poster not set",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "B3",
+   "name": "metadata-pending target (no original yet): sample/preview shown with \"Loading media…\" after 220 ms",
+   "pass": true,
+   "faults": [
+    {
+     "label": "pending state removed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "C1",
+   "name": "image failure after takeover: \"Media failed to load\" plus an \"Open native post\" link to the card post; the link click is not intercepted",
+   "pass": true,
+   "faults": [
+    {
+     "label": "native link removed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "C2",
+   "name": "video failure after takeover: \"Video failed to load\" plus the native link",
+   "pass": true,
+   "faults": [
+    {
+     "label": "video error not shown",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "C3",
+   "name": "[DEFECT V-D1] a later same-ID metadata update with an unchanged URL (late enrichment) erases the failed state and its native link; the failed media stays (blank, uncommunicated failure)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: update keeps the state when the URL is unchanged",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "C4",
+   "name": "[FINDING] a target without postUrl (direct viewer.open callers) fails with no native link",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: fall back to the page URL",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D1",
+   "name": "rapid different-post navigation: a late metadata update for the previous post is ignored (post-ID guard)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "post-ID guard removed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D2",
+   "name": "stale callbacks: loadeddata/canplay/playing/error/waiting from the previous video do not touch the current target's state",
+   "pass": true,
+   "faults": [
+    {
+     "label": "readiness guard removed",
+     "caught": true
+    },
+    {
+     "label": "old error applied to the current generation",
+     "caught": true
+    },
+    {
+     "label": "canplay guard removed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D3",
+   "name": "replacement stops the previous video: pause, src removed, load(); old element detached",
+   "pass": true,
+   "faults": [
+    {
+     "label": "previous media not stopped",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D4",
+   "name": "[FINDING] rapid same-ID metadata generations: no generation guard; the last applied update wins regardless of request order (an older result can replace a newer URL)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "URL changes not applied in place",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D5",
+   "name": "image placeholder -> video when metadata reveals a video: the element is rebuilt as <video>; rotation/flip kept; [FINDING] manual zoom and pan are discarded (refit)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "type change not rebuilt",
+     "caught": true
+    },
+    {
+     "label": "repair probe: replacement keeps manual zoom",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D6",
+   "name": "same-element video URL upgrade: src swapped and load(); play() is called only when viewer.autoplayVideo is true",
+   "pass": true,
+   "faults": [
+    {
+     "label": "autoplay=false still plays on upgrade",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "D7",
+   "name": "close before readiness: the video is stopped (pause, src removed, load); later readiness/error from it changes nothing; an image closed before load is inert",
+   "pass": true,
+   "faults": [
+    {
+     "label": "close leaves the old video active",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "name": "fit modes (stage 1000x800, 12 px padding each side): fit-both = min, fit-width, fit-height, original-size = 1, for landscape 2000x1000 and portrait 1000x2000",
+   "pass": true,
+   "faults": [
+    {
+     "label": "fit-width uses the height",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E2",
+   "name": "resize: refits when zoom is not manual; manual zoom and pan survive a resize",
+   "pass": true,
+   "faults": [
+    {
+     "label": "resize refits a manual zoom",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E3",
+   "name": "rotation and flip survive a same-type placeholder -> better image upgrade (in-place src swap)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "upgrade resets rotation",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E4",
+   "name": "[FINDING] manual zoom is absolute to native pixels: across a placeholder (300x150) -> original (3000x1500) upgrade the scale is kept, so the apparent size jumps 10x; pan is kept",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: refit at readiness",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E5",
+   "name": "[DEFECT V-D4] fit ignores rotation: a 2000x1000 image rotated 90 deg and refit on resize is scaled for the unrotated box and overflows the 776 px available height",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: fit uses the rotated box",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "E6",
+   "name": "[FINDING] the \"Fit\" button resets rotation and flip as well as zoom/pan",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: Fit keeps rotation",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "F1",
+   "name": "close returns focus to the native card link when focus was inside the viewer; otherwise focus is left alone",
+   "pass": true,
+   "faults": [
+    {
+     "label": "no focus return",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "F2",
+   "name": "[FINDING] open does not move focus into the viewer and the overlay has no dialog semantics (no role, no aria-modal)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: dialog role",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "F3",
+   "name": "dispose: overlay removed, keys inert, late metadata update is a no-op, and a later open re-initializes",
+   "pass": true,
+   "faults": [
+    {
+     "label": "owner not disposed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "G1",
+   "name": "keys: Escape closes; ArrowRight/ArrowLeft move to the next/previous card; Space plays a paused video; handled keys are preventDefault-ed",
+   "pass": true,
+   "faults": [
+    {
+     "label": "handled keys not prevented",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "G2",
+   "name": "[DEFECT V-D5] viewer keys ignore modifiers: Ctrl+F toggles Favorite (an account mutation path) and blocks the browser's Find; Ctrl+D downloads; Ctrl+O opens the original",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: modifier guard",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "G3",
+   "name": "[FINDING] Space is handled at document level even when the native video control has focus (play() + preventDefault); the real-browser interaction with native controls is UNKNOWN (browser evidence)",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: leave keys to a focused media element",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "G4",
+   "name": "[FINDING] a rejected play() (autoplay/permission refusal) is swallowed: no blocked-Play state, no message; native controls remain the only Play affordance",
+   "pass": true,
+   "faults": [
+    {
+     "label": "repair probe: blocked-Play state",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "G5",
+   "name": "keys are inert while the viewer is closed: no action and page keys (arrows, Space, Escape) are not prevented",
+   "pass": true,
+   "faults": [
+    {
+     "label": "closed-state check removed",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "H1",
+   "name": "video element reflects autoplay / loop / mute exactly for all 8 combinations (muted and defaultMuted both follow mute); controls on; preload auto",
+   "pass": true,
+   "faults": [
+    {
+     "label": "explicit mute=false forcibly remuted",
+     "caught": true
+    },
+    {
+     "label": "loop=false ignored",
+     "caught": true
+    },
+    {
+     "label": "autoplay=false ignored",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "H2",
+   "name": "remember volume: on -> stored volume applied and changes stored; off -> default volume 1 and nothing stored",
+   "pass": true,
+   "faults": [
+    {
+     "label": "remembered volume lost",
+     "caught": true
+    },
+    {
+     "label": "volume changes not stored",
+     "caught": true
+    }
+   ]
+  },
+  {
+   "id": "H3",
+   "name": "deliberate unmute then next video: the next video starts muted again (mute preference re-applied per video) at the remembered volume",
+   "pass": true,
+   "faults": [
+    {
+     "label": "remembered volume lost",
+     "caught": true
+    },
+    {
+     "label": "mute preference not applied",
+     "caught": true
+    }
+   ]
+  }
+ ]
+}

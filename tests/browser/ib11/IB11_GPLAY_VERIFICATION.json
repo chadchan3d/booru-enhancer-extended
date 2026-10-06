@@ -1,0 +1,192 @@
+{
+ "probe": "ib11-gplay-verification",
+ "commit": "4d793a2",
+ "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "evaluatorRevision": "1.0",
+ "passed": 28,
+ "total": 28,
+ "smokeCapabilityTable": {
+  "N-mp4": {
+   "PREF": "PLAYED",
+   "UNMUTED": "BLOCKED",
+   "NOAUTO": "IDLE",
+   "LOOPF": "PLAYED",
+   "LOOPT": "PLAYED",
+   "RVOFF": "PLAYED",
+   "RVON": "PLAYED",
+   "PLAYREJ": "BLOCKED",
+   "FAIL": "ERROR",
+   "CLOSEPEND": "CLOSED_BEFORE_READY",
+   "CLOSEPLAY": "PLAYED",
+   "STALE": "PLAYED",
+   "RETRY": "PLAYED"
+  },
+  "N-webm": {
+   "PREF": "PLAYED",
+   "UNMUTED": "BLOCKED",
+   "NOAUTO": "IDLE",
+   "LOOPF": "PLAYED",
+   "LOOPT": "PLAYED",
+   "RVOFF": "PLAYED",
+   "RVON": "PLAYED",
+   "PLAYREJ": "BLOCKED",
+   "FAIL": "ERROR",
+   "CLOSEPEND": "CLOSED_BEFORE_READY",
+   "CLOSEPLAY": "PLAYED",
+   "STALE": "PLAYED",
+   "RETRY": "PLAYED"
+  },
+  "U-mp4": {
+   "UNMUTED": "PLAYED",
+   "PLAYAPI": "PLAYED",
+   "DELIB": "PLAYED"
+  },
+  "U-webm": {
+   "UNMUTED": "PLAYED",
+   "PLAYAPI": "PLAYED",
+   "DELIB": "PLAYED"
+  }
+ },
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "production at the pinned commit is blob 002bdfd and equals the working tree",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the package executes the committed production body byte for byte (no hooks)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: matches only the local G-PLAY server",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "plan: 4 pages (N/U x MP4/WebM); arm N 13 cells ending with RETRY; arm U 3 cells incl. DELIB",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server refuses to start without the pinned media fixtures",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: all 4 pages ran end to end; identity MATCH; evaluator revision 1.0 PASS on simulated media",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke capability table follows the simulated policy (not the assigned attributes): N muted autoplay PLAYED, N unmuted autoplay BLOCKED, N autoplay=false IDLE (no play attempted), U unmuted PLAYED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: the metadata-update play() without activation is recorded as rejected (NotAllowedError) and the cell is not counted as played",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: explicit Play retry (trusted Space -> production togglePlayPause) resolved and played after the blocked autoplay",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: explicit mute=false forcibly remuted: caught (PREF)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: autoplay=false still plays automatically: caught (NOAUTO)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: loop=false ignored: caught (LOOP)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: remembered volume lost: caught (VOL)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: older generation keeps playing after replacement (previous media not stopped): caught (STALE)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: close leaves the old video active: caught (CLOSE)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: native recovery link removed after failure: caught (FAILN)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: Space no longer retries play (togglePlayPause pauses only): caught (RETRY)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault production: production re-mutes after a deliberate unmute: caught (MUTE)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rejected play reported as success (outcome \"resolved\" without playback): caught (PLAY)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: unmuted autoplay assigned but never played is still reported 'playing': caught (PLAY)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a newer target shows the old generation failure: caught (STALE)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: old video still holds its source at the cell end: caught (REL)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: page identity mismatch: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt contaminates the cell: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a page is missing: caught",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: retry press not trusted: caught (RETRY)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: arm U Start click not trusted: caught",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}
