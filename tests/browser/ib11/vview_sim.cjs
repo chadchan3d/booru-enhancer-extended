@@ -33,6 +33,14 @@ function layout(w, env) {
     if (shown && this.closest && this.closest('.be-media-state')) return R(env.vw / 2 - 60, (env.vh - TOOLBAR) / 2, 120, 20);
     return orig.call(this);
   };
+  // Hit testing like a browser: the deepest element under the point whose
+  // computed pointer-events is not 'none' (jsdom computes the inherited value).
+  w.document.elementFromPoint = (x, y) => {
+    const hits = [...w.document.querySelectorAll('*')].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+    const depth = (el) => { let n = 0; for (let a = el; a; a = a.parentElement) n++; return n; };
+    hits.sort((a, b) => depth(b) - depth(a));
+    return hits.find((el) => w.getComputedStyle(el).pointerEvents !== 'none') || w.document.body;
+  };
   Object.defineProperty(w, 'innerWidth', { configurable: true, get: () => env.vw });
   Object.defineProperty(w, 'innerHeight', { configurable: true, get: () => env.vh });
 }
@@ -89,6 +97,13 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     ['BLUE', () => { const l = art('FOCUS_K').querySelector('a'); l.focus(); w.setTimeout(() => { K(l, 'Enter'); click(l); }, 50); }],
     ['Tab once', () => { const a = doc.activeElement; K(a, 'Tab'); const f = focusables(); const i = f.indexOf(a); const n = f[(i + 1) % f.length]; if (n) n.focus(); }],
     ['Close', () => { const b = [...doc.querySelectorAll('.be-viewer-btn')].find((x) => x.title.startsWith('Close')); b.focus(); click(b); }],
+    // Recovery NATIVE: the operator clicks where the link visibly is; the event
+    // goes to whatever the browser hit-tests there.
+    ['visible underlined', () => { const l = doc.querySelector('.be-viewer-native-fallback'); if (!l) return; const r = l.getBoundingClientRect(); const cx = r.left + r.width / 2; const cy = r.top + r.height / 2; const el = doc.elementFromPoint(cx, cy) || doc.body;
+      const init = { bubbles: true, cancelable: true, button: 0, clientX: cx, clientY: cy };
+      if (env.nativeClick === 'outside') { init.clientX = r.right + 40; }
+      el.dispatchEvent(new w.MouseEvent('pointerdown', init)); const e = new w.MouseEvent('click', init); el.dispatchEvent(e);
+      if (el.closest && el.closest('.be-viewer-native-fallback') && !e.defaultPrevented) navigate('NATIVE'); }],
     ['Open native post', () => { const l = doc.querySelector('.be-viewer-native-fallback'); const e = click(l); if (!e.defaultPrevented) navigate('NATIVE'); }],
     ['ORANGE', () => { const im = art('VD6A').querySelector('img'); const e = click(im); if (!e.defaultPrevented) navigate('VD6A'); }],
   ];
@@ -98,13 +113,13 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     if (!/ACTION NEEDED/.test(doc.title)) return;
     for (const [k, fn] of RULES) {
       const id = `${k}|${text}`;
-      if (text.includes(k) && !done.has(id)) { done.add(id); if (!skip.includes(k)) fn(); return; }
+      if (text.includes(k)) { if (!done.has(id)) { done.add(id); if (!skip.includes(k)) fn(); } return; } // first matching rule only
     }
   };
 }
 
-async function runPage(pg, source, { skip = [], maxMs = 300000, nativeControl = 'focus', spaceMode = 'native' } = {}) {
-  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000, nativeControl, spaceMode };
+async function runPage(pg, source, { skip = [], maxMs = 300000, nativeControl = 'focus', spaceMode = 'native', nativeClick = 'center' } = {}) {
+  let clock = null; let posted = null; const env = { vw: 1600, vh: 900, activation: true, slowHeaderMs: 1500, slowCompleteMs: 9000, nativeControl, spaceMode, nativeClick };
   const arrivals = []; const requests = [];
   const sizes = { webm: 3091428, thumb: 269, wide: 11362, slow: 3842038 };
   const c = h.load({ url: `http://127.0.0.1:${srv.PORT}/posts?page=${pg.token}`, html: srv.page(pg, srv.PORT, sizes), source, settings: {}, setup: (w) => {
@@ -136,19 +151,19 @@ function trustOperator(client) {
   if (c.G3) { T(c.G3.control); if (c.G3.space) (c.G3.space.keys || []).forEach(T); }
   if (c.FOCUS_M) { T(c.FOCUS_M.pointer); T(c.FOCUS_M.click); T(c.FOCUS_M.escape); }
   if (c.FOCUS_K) { T(c.FOCUS_K.enter); (c.FOCUS_K.tabs || []).forEach(T); T(c.FOCUS_K.closeClick); }
-  if (c.NATIVE) T(c.NATIVE.click);
+  if (c.NATIVE) { T(c.NATIVE.click); T(c.NATIVE.pointer); }
   if (c.VD6A) T(c.VD6A.click);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight })) {
-    const r = await runPage(pg, source, { skip, nativeControl, spaceMode, maxMs: preflight ? 120000 : 300000 });
+  for (const pg of srv.plan({ preflight, recovery })) {
+    const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview', version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

@@ -1,5 +1,6 @@
 'use strict';
-// IB11 V-VIEW evaluator (revision 1.2; 1.0/1.1 differ only in G3, see below). A CHARACTERIZATION probe: for every
+// IB11 V-VIEW evaluator (revision 1.3; earlier revisions differ in G3 and NATIVE,
+// see below). A CHARACTERIZATION probe: for every
 // cell it reports two separate things:
 //   evidence  PASS | FAIL | INVALID - did the probe validly and unambiguously
 //             observe what the cell is designed to observe (trusted operator
@@ -55,19 +56,42 @@
 //   FOCUS_M / FOCUS_K  E: trusted inputs, an invoking element in the target
 //        card, viewer opened and closed, descriptors present. F: OBSERVED
 //        (focus after open, Tab targets, return to the invoker).
-//   NATIVE  E: failure link visible (nonzero box), trusted click, the page
-//        left and the native destination recorded the arrival.
-//        F: BEHAVIOR_OK if native recovery navigated.
+//   NATIVE  (record revision 1.0-1.2, MAIN page) E: failure link visible, trusted
+//        click ON the link, page left, destination arrival. That form cannot
+//        characterize a link that does not receive clicks (the first full run
+//        timed out there), so it is superseded by:
+//   NATIVE  [1.3 record, recovery page NATIVE_R] characterizes a working OR a
+//        broken link. E: link box nonzero; computed pointer-events of the link
+//        and its ancestors recorded; elementFromPoint at the link centre
+//        recorded and consistent with pointer-events; destination = the card's
+//        /posts/<id>; one TRUSTED click inside the recorded box while the link
+//        was present (the target need not be the link); navigation outcome
+//        observed; a destination arrival without (before) the prompted click is
+//        INVALID. F: BEHAVIOR_OK when the click targets the link, hit-testing
+//        finds the link and the destination is reached; DEFECT_CONFIRMED when
+//        the click cannot target the link, no navigation follows, and
+//        pointer-events/hit-testing show the link is not interactive (a
+//        confirmed defect is evidence PASS); anything else is ambiguous
+//        (INVALID).
 //   VD6A E: trusted ordinary click; the seam threw; overlay state recorded; a
 //        page exit without a destination arrival is a FAIL. F: separates
 //        "overlay left shown (blank) while native navigation proceeds" from
 //        "native recovery blocked" (no navigation and no communicated failure);
 //        a failure shown in the viewer with a native link is BEHAVIOR_OK.
-// Usage: node vview_evaluate.cjs <ib11-vview-results.json>
+// Recovery merge [1.3]: evaluate(original, { recovery, provenance }) takes the
+// completed MAIN evidence from the original file and ONLY the authorized
+// cells from a separately hashed recovery file (probe ib11-vview-recovery):
+// NATIVE from page NATIVE_R and VD6A from page TAKEOVER, each from exactly one
+// valid recovery attempt with identity MATCH. Unknown pages/cells, duplicate
+// valid attempts, identity mismatch, a VD6A present in both files, or a wrong
+// probe are rejected. Every cell reports its source; the raw files are never
+// modified.
+// Usage: node vview_evaluate.cjs <ib11-vview-results.json> [--recovery <ib11-vview-recovery.json>] [--g3-preflight-ref <ib11-vview-g3-preflight.json>]
 //        node vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>
 const fs = require('fs');
 
-const REVISION = '1.2';
+const REVISION = '1.3';
+const RECOVERY = { NATIVE: 'NATIVE_R', VD6A: 'TAKEOVER' };
 const MAIN_CELLS = ['VD7', 'VD6B', 'VD1', 'VD5SYN', 'VD4', 'VD5', 'G3', 'FOCUS_M', 'FOCUS_K', 'NATIVE'];
 const TAKEOVER_CELLS = ['VD6A'];
 const dimsOk = (b) => !!b && b.w > 0 && b.h > 0;
@@ -193,10 +217,36 @@ function evalCell(id, c, ctx) {
       break;
     }
     case 'NATIVE': {
+      if (c.rev === '1.3') {
+        const L = c.link || {}; const b = L.box; const k = c.click;
+        if (!dimsOk(b)) inv('link not actually visible (zero or missing box)');
+        if (!L.pointerEvents || !(L.chain || []).length || (L.chain || []).some((x) => !x.pointerEvents)) inv('pointer-events evidence missing');
+        if (!c.hit || !c.hit.target) inv('elementFromPoint not recorded');
+        if (!L.destination || L.destination.kind !== 'card-post' || !L.destination.cardMatch) bad('link destination is not the card native post');
+        if (!k) inv('no prompted click recorded');
+        else {
+          if (k.trusted !== true) inv('click not trusted (synthetic clicks are not evidence)');
+          const inside = !!b && k.x >= b.x - 1 && k.x <= b.x + b.w + 1 && k.y >= b.y - 1 && k.y <= b.y + b.h + 1;
+          if (!inside) inv('click outside the recorded link box');
+          if (k.linkPresentAtClick !== true) inv('link not present when the click arrived (viewer already closed)');
+        }
+        const arrivals = ctx.arrivals.filter((a) => a.page === ctx.page && a.card === 'NATIVE');
+        const arrivedAfter = !!k && arrivals.some((a) => a.wall >= k.wall - 100);
+        if (arrivals.length && !arrivedAfter) inv('destination arrival without the prompted click');
+        if (c.navigated !== true && c.navigated !== false) inv('navigation outcome not observed');
+        const peNone = L.pointerEvents === 'none'; const hitLink = !!(c.hit && c.hit.isLink); const tLink = !!(k && k.targetIsLink);
+        if (peNone && hitLink) inv('elementFromPoint mismatch: pointer-events none but the hit test returned the link');
+        let code = 'INCONCLUSIVE'; let kind = 'ambiguous';
+        if (tLink && arrivedAfter && hitLink && !peNone) { code = 'BEHAVIOR_OK'; kind = 'the visible link receives the click and reaches the native post'; }
+        else if (!tLink && !arrivedAfter && (peNone || !hitLink)) { code = 'DEFECT_CONFIRMED'; kind = peNone ? 'visible link is not hit-testable (computed pointer-events: none); clicks fall through' : 'visible link is covered by another element'; }
+        else inv('ambiguous: click target, hit test and navigation disagree');
+        finding = { code, detail: { kind, linkPointerEvents: L.pointerEvents, chain: L.chain, hit: c.hit, clickTarget: k && k.target, clickTargetIsLink: tLink, clickDefaultPrevented: k && k.defaultPrevented, viewerAfterClick: c.after, navigated: c.navigated, destinationArrived: arrivedAfter, outsideBoxClicks: c.outsideBoxClicks } };
+        break;
+      }
       const f = c.failed || {};
       if (f.link !== 'card-post' || !dimsOk(f.linkBox)) bad('native link not visible after the failure');
       if (!isTrusted(c.click)) inv('native link click not trusted (programmatic clicks are not evidence)');
-      const arrived = ctx.arrivals.some((a) => a.page === 'MAIN' && a.card === 'NATIVE' && (!c.click || a.wall >= c.click.wall - 100));
+      const arrived = ctx.arrivals.some((a) => a.page === ctx.page && a.card === 'NATIVE' && (!c.click || a.wall >= c.click.wall - 100));
       if (!c.navigated) bad('the page did not leave after the click');
       if (!arrived) bad('navigation never reached the native destination');
       finding = { code: arrived ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { linkVisible: dimsOk(f.linkBox), navigated: !!c.navigated, arrived, clickPrevented: c.clickPrevented } };
@@ -223,34 +273,59 @@ function evalCell(id, c, ctx) {
   return cellResult(id, ev, finding);
 }
 
-function evaluate(doc) {
-  const problems = []; const invalidAttempts = []; const pages = {};
+const ctxOf = (d, page) => ({ page, fixtures: d.fixtures || {}, requests: d.requests || [], arrivals: d.arrivals || [] });
+function pick(doc, pid, problems, invalidAttempts, tag = '') {
+  const all = (doc.pages || []).filter((p) => p.page === pid);
+  for (const p of all) if (p.client && p.client.error) invalidAttempts.push({ page: `${tag}${pid}`, attempt: p.attempt, error: p.client.error });
+  const valid = all.filter((p) => p.client && !p.client.error);
+  if (valid.length > 1) problems.push(`AMBIGUOUS: ${valid.length} valid attempts for ${tag}${pid}`);
+  return valid.length === 1 ? valid[0] : null;
+}
+function evaluate(doc, { recovery = null, provenance = null } = {}) {
+  const problems = []; const invalidAttempts = [];
   if (!doc || doc.probe !== 'ib11-vview') return { kind: 'vview', revision: REVISION, evidencePass: false, problems: ['not an ib11-vview result'], cells: [] };
-  for (const pid of ['MAIN', 'TAKEOVER']) {
-    const all = (doc.pages || []).filter((p) => p.page === pid);
-    for (const p of all) if (p.client && p.client.error) invalidAttempts.push({ page: pid, attempt: p.attempt, error: p.client.error });
-    const valid = all.filter((p) => p.client && !p.client.error);
-    if (valid.length > 1) problems.push(`AMBIGUOUS: ${valid.length} valid attempts for ${pid}`);
-    if (!valid.length) problems.push(`no valid attempt for ${pid}`);
-    pages[pid] = valid.length === 1 ? valid[0] : null;
-    if (pages[pid] && pages[pid].client.identity !== 'MATCH_EXPECTED_ARTIFACT') problems.push(`${pid} identity ${pages[pid].client.identity}`);
-  }
-  const cells = [];
-  for (const [pid, ids] of [['MAIN', MAIN_CELLS], ['TAKEOVER', TAKEOVER_CELLS]]) {
-    const p = pages[pid];
-    const ctx = { page: pid, fixtures: doc.fixtures || {}, requests: doc.requests || [], arrivals: doc.arrivals || [] };
-    for (const id of ids) {
-      if (!p) { cells.push({ id, evidence: 'INVALID', reasons: [`INVALID page ${pid} has no single valid attempt`], finding: null }); continue; }
-      const r = evalCell(id, p.client.cells && p.client.cells[id], ctx);
-      if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') { r.evidence = 'FAIL'; r.reasons.push('FAIL wrong production artifact'); }
-      cells.push(r);
+  const sources = {};
+  const main = pick(doc, 'MAIN', problems, invalidAttempts);
+  if (!main && !problems.some((x) => /MAIN/.test(x))) problems.push('no valid attempt for MAIN');
+  if (main) for (const id of MAIN_CELLS) sources[id] = { c: main.client.cells && main.client.cells[id], ctx: ctxOf(doc, 'MAIN'), source: 'original', identity: main.client.identity };
+  const tk = pick(doc, 'TAKEOVER', problems, invalidAttempts);
+  if (tk) sources.VD6A = { c: tk.client.cells && tk.client.cells.VD6A, ctx: ctxOf(doc, 'TAKEOVER'), source: 'original', identity: tk.client.identity };
+  let merge = null;
+  if (recovery) {
+    merge = { problems: [], replaced: [], invalidAttempts: [] };
+    if (!recovery || recovery.probe !== 'ib11-vview-recovery') merge.problems.push('not an ib11-vview-recovery result');
+    else {
+      for (const p of recovery.pages || []) {
+        if (!Object.values(RECOVERY).includes(p.page)) merge.problems.push(`unauthorized recovery page ${p.page}`);
+        for (const k of Object.keys((p.client && p.client.cells) || {})) if (RECOVERY[k] !== p.page) merge.problems.push(`unauthorized recovery cell ${k} on ${p.page}`);
+      }
+      for (const [id, pid] of Object.entries(RECOVERY)) {
+        const before = merge.problems.length;
+        const p = pick(recovery, pid, merge.problems, merge.invalidAttempts, 'recovery:');
+        if (merge.problems.length > before) continue;
+        if (!p) { merge.problems.push(`no valid recovery attempt for ${id}`); continue; }
+        if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') { merge.problems.push(`recovery ${pid} identity ${p.client.identity}`); continue; }
+        if (id === 'VD6A' && tk) { merge.problems.push('ambiguous provenance: VD6A has a valid attempt in both the original and the recovery'); continue; }
+        merge.replaced.push({ cell: id, previousSource: sources[id] ? sources[id].source : null, recoveryPage: pid, attempt: p.attempt, recoverySha256: (provenance && provenance.recoverySha256) || null });
+        sources[id] = { c: p.client.cells && p.client.cells[id], ctx: ctxOf(recovery, pid), source: 'recovery', identity: p.client.identity };
+      }
     }
+  } else if (!tk && !problems.some((x) => /TAKEOVER/.test(x))) problems.push('no valid attempt for TAKEOVER');
+  const cells = [];
+  for (const id of [...MAIN_CELLS, ...TAKEOVER_CELLS]) {
+    const src = sources[id];
+    if (!src) { cells.push({ id, evidence: 'INVALID', reasons: ['INVALID no single valid source for this cell'], finding: null, source: null }); continue; }
+    const r = evalCell(id, src.c, src.ctx);
+    if (src.identity !== 'MATCH_EXPECTED_ARTIFACT') { r.evidence = 'FAIL'; r.reasons.push('FAIL wrong production artifact'); }
+    r.source = src.source; cells.push(r);
   }
-  const runtime = pages.MAIN ? pages.MAIN.client.runtime : null;
-  const evidencePass = !problems.length && cells.every((c) => c.evidence === 'PASS');
-  return { kind: 'vview', revision: REVISION, runtime, problems, invalidAttempts, evidencePass,
+  for (const pid of ['MAIN', 'TAKEOVER']) { const p = pid === 'MAIN' ? main : tk; if (p && p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') problems.push(`${pid} identity ${p.client.identity}`); }
+  const runtime = main ? main.client.runtime : null;
+  const evidencePass = !problems.length && !(merge && merge.problems.length) && cells.every((c) => c.evidence === 'PASS');
+  return { kind: 'vview', revision: REVISION, runtime, provenance: provenance || null, recovery: merge, problems, invalidAttempts, evidencePass,
     counts: cells.reduce((m, c) => { m[c.evidence] = (m[c.evidence] || 0) + 1; return m; }, {}),
-    findings: Object.fromEntries(cells.map((c) => [c.id, c.finding ? c.finding.code : null])), cells };
+    findings: Object.fromEntries(cells.map((c) => [c.id, c.finding ? c.finding.code : null])),
+    sources: Object.fromEntries(cells.map((c) => [c.id, c.source])), cells };
 }
 
 // G3 preflight (evidence-tool qualification only; never replaces the V-VIEW G3
@@ -273,8 +348,18 @@ module.exports = { evaluate, evaluatePreflight, evalCell, REVISION, MAIN_CELLS, 
 
 if (require.main === module) {
   const pre = process.argv[2] === '--preflight';
-  const doc = JSON.parse(fs.readFileSync(process.argv[pre ? 3 : 2], 'utf8'));
-  const r = pre ? evaluatePreflight(doc) : evaluate(doc);
+  const file = process.argv[pre ? 3 : 2];
+  const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
+  const sha = (f) => require('crypto').createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+  let r;
+  if (pre) r = evaluatePreflight(doc);
+  else {
+    const rec = arg('--recovery'); const pf = arg('--g3-preflight-ref');
+    const provenance = { originalSha256: sha(file), recoverySha256: rec ? sha(rec) : null,
+      g3Preflight: pf ? { sha256: sha(pf), verdict: evaluatePreflight(JSON.parse(fs.readFileSync(pf, 'utf8'))).verdict } : null };
+    r = evaluate(doc, { recovery: rec ? JSON.parse(fs.readFileSync(rec, 'utf8')) : null, provenance });
+  }
   console.log(JSON.stringify(r, null, 1));
   process.exitCode = (pre ? r.verdict === 'G3 PREFLIGHT COMPLETE' : r.evidencePass) ? 0 : 1;
 }

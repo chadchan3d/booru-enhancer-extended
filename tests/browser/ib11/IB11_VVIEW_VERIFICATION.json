@@ -2,7 +2,7 @@
  "probe": "ib11-vview-verification",
  "commit": "4d793a2",
  "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
- "evaluatorRevision": "1.2",
+ "evaluatorRevision": "1.3",
  "passed": 66,
  "total": 66,
  "smokeFindings": {
@@ -80,7 +80,7 @@
    "detail": ""
   },
   {
-   "name": "smoke: both pages valid; evaluator revision 1.2: evidence PASS on all 11 cells",
+   "name": "smoke: both pages valid; evaluator revision 1.3: evidence PASS on all 11 cells",
    "pass": true,
    "detail": ""
   },

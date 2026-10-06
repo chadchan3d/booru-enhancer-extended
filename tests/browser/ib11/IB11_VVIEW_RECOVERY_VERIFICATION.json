@@ -1,0 +1,170 @@
+{
+ "probe": "ib11-vview-recovery-verification",
+ "commit": "4d793a2",
+ "blob": "002bdfd1a88adf8ed851df7ed768e6189e2bc958",
+ "evaluatorRevision": "1.3",
+ "passed": 32,
+ "total": 32,
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "package executes the committed production body byte for byte (009155841b19…e945)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recovery plan: NATIVE_R (one failing image card NATIVE) then TAKEOVER (VD6A); authorized cells NATIVE, VD6A",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: an INVALID attempt is kept and does not advance",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: a valid NATIVE_R result without navigation forwards to the TAKEOVER page",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: /posts/<id> records a NATIVE_R arrival and forwards to TAKEOVER",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server recovery: results file probe ib11-vview-recovery with the authorized cells and both attempts",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "original (real-run shape): 9 MAIN cells evidence PASS; NATIVE and VD6A INVALID; TAKEOVER missing",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "merge (revision 1.3): one explicit report, evidence PASS on all 11 cells, no merge problems",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "merge: NATIVE and VD6A come from the recovery, the other 9 cells from the original; replaced list and provenance recorded; original document untouched",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "NATIVE (current production): DEFECT_CONFIRMED with evidence PASS - computed pointer-events none, hit test on the stage, the trusted in-box click lands on the stage, viewer closes, no navigation",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "VD6A (recovery): characterized as before (overlay left shown; native recovery not blocked)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "NATIVE characterizes a working link too: with pointer-events:auto on the link (test copy) -> click targets the link, destination reached -> BEHAVIOR_OK, evidence PASS",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: click outside the recorded link box: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: synthetic (untrusted) click: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: zero-size (invisible) link: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: elementFromPoint mismatch (pointer-events none but the hit test returned the link): INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: pointer-events evidence missing: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: ancestor pointer-events evidence missing: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: destination arrival without the prompted click: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: link no longer present when the click arrived: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: click on the link but no navigation (ambiguous): INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: no prompted click recorded: INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault NATIVE: link destination is not the card native post: FAIL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "browser model: the operator clicks outside the link box -> not accepted; prompt times out; NATIVE_R attempt INVALID; merge rejects (no valid NATIVE recovery)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: duplicate valid recovery attempts: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery tries to replace a non-authorized cell (VD7): rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery carries an unauthorized page (MAIN): rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: recovery identity mismatch: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: VD6A in both the original and the recovery (ambiguous provenance): rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: missing VD6A recovery: rejected",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault merge: wrong recovery probe: rejected",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

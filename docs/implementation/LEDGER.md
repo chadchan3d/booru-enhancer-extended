@@ -12,7 +12,9 @@
 - **E3 corrections (§12, §13):** two real V-VIEW attempts stalled at G3, both probe defects with no qualifying browser result.
   - Revision 1.1: Chrome's native controls hide pointer input; the native-control premise is now observed via media/focus consequences.
   - Revision 1.2: the focused native control also consumes Space; Space is now observed via its bounded media consequence plus the production-call trace, and a DOM key event is supplemental only.
-  - A real-Chrome **G3 preflight** (about 30 s) must succeed before any further full V-VIEW run.
+  - **G3 preflight: COMPLETE** in real Chrome (SHA-256 `9e434c09…8f07`): native-only single toggle.
+- **E4 (§14):** the full revision-1.2 run (`ff2fce48…1599`) gave evidence PASS for 9 MAIN cells, which are kept. NATIVE timed out because the visible fallback link is not clickable (`pointer-events: none` inherited; a likely product defect), and there is no TAKEOVER attempt.
+  - A NATIVE + VD6A recovery (revision 1.3) is prepared, to be merged at evaluation time. The operator recovery run is pending.
 - The keyboard, focus, native-link and visual V-D4/V-D6/V-D7 evidence stays OPEN until that run is evaluated.
 - No production change and no P work.
 
@@ -76,7 +78,14 @@
     - G3 controls: the native-control premise; Space observed without a page-visible key; focus before and after; foreign JS calls; INCONCLUSIVE; no toggle; double toggle; production-handled versus native-only; the G3 preflight mode;
     - the other evidence/evaluator and package faults;
     - 6 repair probes, each flipping its defect finding.
-  - Package SHA-256 `878a3cd3…639c` (supersedes `1662c903…592d` and `b7bd9ce9…bd8f`); evaluator revision 1.2.
+  - `verify_ib11_vview_recovery.cjs --media` **32/32**: the merge with per-cell sources and provenance; NATIVE characterizes both a broken link (DEFECT_CONFIRMED, evidence PASS) and a working one (BEHAVIOR_OK); outside-box, untrusted, invisible, hit-test mismatch, missing pointer-events evidence, arrival without the click; duplicate / unauthorized / mismatched / ambiguous recovery rejected.
+  - Package SHA-256 `598ba6c5…b06a` (supersedes `878a3cd3…`, which produced the full run's MAIN evidence); evaluator revision 1.3.
+- **IB11 V-VIEW real-Chrome evidence (preserved; original raw `ff2fce48…1599`, not committed):**
+  - VD7, VD6B, VD1, VD4 and VD5 DEFECT_CONFIRMED;
+  - G3 BEHAVIOR_OK (native-only single);
+  - FOCUS_M and FOCUS_K OBSERVED (the viewer does not take focus; focus stays on the invoker; Tab moves behind the overlay);
+  - VD5SYN control only;
+  - all 9 evidence PASS.
 - **G-PLAY merged evaluation** (`gplay_evaluate.cjs` revision 1.1; exit 0; 32/32 PASS):
   - original raw `ib11-gplay-results.json` SHA-256 `13888dd9…0048`;
   - recovery raw `ib11-gplay-recovery.json` SHA-256 `ebd4f57c…5a90`;
@@ -91,11 +100,12 @@
 
 ## Unresolved, parked, deferred
 - **V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` rev 1.0 and `1662c903…` rev 1.1):** both stalled at G3. They were probe defects (Chrome's native controls hide first the pointer input, then Space, from the page); neither has a qualifying result, and none of their cells is used.
-- **IB11 open browser evidence (G3 preflight, then a fresh V-VIEW run; must be resolved before freezing P scope):**
-  - keyboard: Space with the native control focused (G3); real Ctrl+F / Ctrl+D (V-D5);
-  - focus: mouse and keyboard origins, Tab behind the overlay, return on Escape and ✕;
-  - native link: a real click after a real failure;
-  - visual: V-D4 (real resize), V-D6a/b, V-D7.
+- **Likely new product defect (V-D8, pending recovery evidence):** the viewer's "Open native post" fallback is visible but not clickable.
+  - `.be-media-state { pointer-events: none }` (`:4916`) is inherited by the link (`:3591–3596`).
+  - A click falls through to the stage, which closes the viewer (`:3417`).
+  - IB04 P07 only checked that the link exists and has the right href.
+- **Focus policy (owner judgment, not a P decision):** the viewer does not take focus on open, and Tab reaches page controls behind the overlay; focus return works only because focus never leaves the invoker.
+- **IB11 open browser evidence:** NATIVE (a real click on the visible fallback link) and VD6A (a real takeover failure through to navigation), both by the prepared recovery. All other V-VIEW cells have real-Chrome evidence.
 - **IB11 observed defects (E0; not fixed):**
   - V-D1: a late same-ID update erases the failure state and native link;
   - V-D4: fit ignores rotation;
@@ -118,4 +128,4 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active: IB11, E stage.** The operator runs the **G3 real-browser preflight** only (`tests/browser/ib11/README.md`, "G3 real-browser PREFLIGHT"; about 30 s; `vview_server.cjs --g3-preflight`; package `878a3cd3…`) and returns `ib11-vview-g3-preflight.json`. It is evaluated with `vview_evaluate.cjs --preflight` (revision 1.2). A further full V-VIEW run is requested only after the preflight succeeds. No IB11 P change before that evidence is in and the P repair scope is frozen. Do not start IB12.
+**Active: IB11, E stage.** The operator runs the **V-VIEW recovery (NATIVE + VD6A only)** (`tests/browser/ib11/README.md`, "V-VIEW recovery"; about 1 minute; `vview_server.cjs --recovery`; package `598ba6c5…`) and returns `ib11-vview-recovery.json`. It is evaluated with `vview_evaluate.cjs <ib11-vview-results.json> --recovery <ib11-vview-recovery.json> --g3-preflight-ref <ib11-vview-g3-preflight.json>` (revision 1.3). After that, review the complete findings and obtain owner decisions; the P scope is not frozen yet. No IB11 P change before that evidence is in and the P repair scope is frozen. Do not start IB12.

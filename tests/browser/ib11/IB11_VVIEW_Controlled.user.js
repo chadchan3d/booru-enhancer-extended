@@ -5896,6 +5896,56 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
     endPrompt(); say('Recorded. Leaving for the native post page…');
     nav.clicked();
   }
+  // [rev 1.3] Recovery NATIVE cell (page NATIVE_R). It characterizes a working OR
+  // a broken visible recovery link: it measures the link (box, computed
+  // pointer-events of the link and its ancestors, elementFromPoint at its
+  // centre, destination), then accepts the operator's trusted click anywhere
+  // inside the recorded box - without requiring the event target to be the
+  // link - and records where the click actually landed and what followed.
+  async function NATIVE_R(out) {
+    cell = 'NATIVE';
+    await openCard('NATIVE');
+    const ok = await waitFor(() => stageInfo().link === 'card-post', 6000);
+    if (!ok) throw new Error('NATIVE_NO_FAILURE_LINK');
+    await sleep(300);
+    const failed = stageInfo();
+    const link = document.querySelector('.be-viewer-native-fallback');
+    const r1 = (n) => Math.round(n * 10) / 10;
+    const lb = link.getBoundingClientRect(); const box = { x: r1(lb.left), y: r1(lb.top), w: r1(lb.width), h: r1(lb.height) };
+    const pe = (el) => (el ? getComputedStyle(el).pointerEvents : null);
+    const chain = []; for (let a = link; a && a !== document.body; a = a.parentElement) { chain.push({ tag: a.tagName, cls: typeof a.className === 'string' ? a.className.split(/\s+/)[0] || '' : '', id: a.id || '', pointerEvents: pe(a) }); if (a.id === 'be-viewer-overlay') break; }
+    const cx = lb.left + lb.width / 2; const cy = lb.top + lb.height / 2;
+    const hitEl = document.elementFromPoint(cx, cy);
+    const isLink = (el) => !!el && !!(el.closest && el.closest('.be-viewer-native-fallback'));
+    const path = new URL(link.href, location.href).pathname;
+    const rec = { card: 'NATIVE', rev: '1.3', cardId: cfg.cards.NATIVE, failed,
+      link: { box, pointerEvents: pe(link), chain, destination: { kind: /^\/posts\/\d+$/.test(path) ? 'card-post' : 'other', cardMatch: path === `/posts/${cfg.cards.NATIVE}` } },
+      hit: { at: [r1(cx), r1(cy)], target: desc(hitEl), isLink: isLink(hitEl) }, click: null, pointer: null, outsideBoxClicks: 0, after: null, navigated: null };
+    out.cells.NATIVE = rec; out.outsideTrusted = outside;
+    let sent = false;
+    const send = async (navigated) => {
+      if (sent) return; sent = true; rec.navigated = navigated; rec.pagehideWall = navigated ? Date.now() : null;
+      const ov = document.querySelector('#be-viewer-overlay'); rec.overlayAtLeave = ov ? ov.style.display : 'absent';
+      const body = JSON.stringify(out);
+      if (navigated && navigator.sendBeacon) { navigator.sendBeacon('/vview/result', new Blob([body], { type: 'text/plain' })); return; }
+      let j = {}; try { const res = await fetch('/vview/result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }); j = await res.json(); } catch { j = {}; }
+      say('No navigation happened (recorded).', j.next ? 'Continuing to the next page…' : 'Return the results file.');
+      if (j.next) setTimeout(() => { location.href = j.next; }, 1500);
+    };
+    window.addEventListener('pagehide', () => send(true), { once: true });
+    const inBox = (e) => typeof e.clientX === 'number' && e.clientX >= box.x - 1 && e.clientX <= box.x + box.w + 1 && e.clientY >= box.y - 1 && e.clientY <= box.y + box.h + 1;
+    let linkAtClick = null;
+    const pdP = expectEvent(['pointerdown'], inBox, PROMPT_TIMEOUT_MS + 5000, 'native link pointer').catch(() => null);
+    prompt('Click the visible underlined "Open native post" text once.');
+    const ck = await expectEvent(['click'], (e) => { if (!inBox(e)) { if (e.isTrusted) rec.outsideBoxClicks++; return false; } linkAtClick = link.isConnected && isOpen(); return true; }, PROMPT_TIMEOUT_MS, 'native link click');
+    const pd = await Promise.race([pdP, sleep(50).then(() => null)]);
+    rec.click = { ...strip(ck), x: ck.e.clientX, y: ck.e.clientY, targetIsLink: isLink(ck.e.target), linkPresentAtClick: linkAtClick, defaultPrevented: null };
+    rec.pointer = pd ? { ...strip(pd), x: pd.e.clientX, y: pd.e.clientY, targetIsLink: isLink(pd.e.target) } : null;
+    setTimeout(() => { rec.click.defaultPrevented = ck.e.defaultPrevented; rec.after = { open: isOpen(), display: (document.querySelector('#be-viewer-overlay') || {}).style ? document.querySelector('#be-viewer-overlay').style.display : 'absent' }; }, 0);
+    endPrompt(); say('Recorded. Watching for 3 seconds…');
+    await sleep(3000);
+    if (!sent) await send(false);
+  }
   async function VD6A(out) {
     cell = 'VD6A';
     await BE.store.set('viewer:volume', 1.5);
@@ -5929,6 +5979,8 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
       await fetch('/vview/result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(out) });
       const sp = r.space || {}; const ok = r.premise && sp.firstTransition && sp.focusBefore && sp.focusBefore.tag === 'VIDEO' && sp.focusAfter && sp.focusAfter.tag === 'VIDEO';
       panel.style.cssText = BIG; say(ok ? 'G3 PREFLIGHT COMPLETE' : 'G3 PREFLIGHT INVALID', ok ? 'Return the preflight results file.' : 'Reload this page (F5) to retry, or return the file as is.'); document.title = ok ? 'G3 PREFLIGHT COMPLETE' : 'G3 PREFLIGHT INVALID';
+    } else if (cfg.page === 'NATIVE_R') {
+      await NATIVE_R(out);
     } else if (cfg.page === 'MAIN') {
       say('running automatic checks; keep hands off until a yellow instruction appears.');
       for (const id of ['VD7', 'VD6B', 'VD1', 'VD5SYN', 'VD4', 'VD5', 'G3', 'FOCUS_M', 'FOCUS_K']) {

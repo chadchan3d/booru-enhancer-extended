@@ -139,3 +139,18 @@ This is evidence-tool qualification only: it does not replace the V-VIEW G3 cell
    - On INVALID, press F5 once to retry, or return the file as it is. The Space window waits up to 60 s for a consequence.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>`.
+
+## V-VIEW recovery: NATIVE + VD6A only (IB11-E4; about 1 minute)
+
+The full run's other nine MAIN cells are kept from the original raw file. Only these two cells are run again, and they are merged at evaluation time.
+
+1. **Start the server in recovery mode:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --recovery --out <fixture folder>/ib11-vview-recovery.json`. It prints "2 pages (RECOVERY: NATIVE + VD6A only)".
+2. **Install the package:** in Tampermonkey, **replace** the V-VIEW script with the rebuilt `IB11_VVIEW_Controlled.user.js` (SHA-256 `598ba6c5be421adab0bf3837f55ce7ee76bfae922b5f2afb515f6db31f41b06a`). Keep all other scripts disabled.
+3. **Open** `http://127.0.0.1:8797/vview/start`.
+4. **Page 1:** the viewer opens with a failed image and an underlined "Open native post" text.
+   - At **"Click the visible underlined "Open native post" text once"**, click **exactly on the underlined words, once**.
+   - If nothing seems to happen, that is recorded; do not click again. The page continues by itself after a few seconds.
+5. **Page 2:** at **"Click the ORANGE-outlined video card once"**, click it. The page shows "Native post page reached", then the done page.
+6. **Return** `ib11-vview-recovery.json`. If a page shows INVALID, press F5 to retry that page.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json> --recovery <ib11-vview-recovery.json> --g3-preflight-ref <ib11-vview-g3-preflight.json>` (revision 1.3).

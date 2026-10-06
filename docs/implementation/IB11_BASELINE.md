@@ -627,3 +627,86 @@ The earlier V-VIEW checks still pass.
 **Package:** `IB11_VVIEW_Controlled.user.js`, SHA-256 `878a3cd39852174ce2fe54c921243c8d7cee9a9df7281a181887377659ec639c` (supersedes `1662c903…`). Package and evaluator revision 1.2. The production body is unchanged and byte-identical to `4d793a2` (`00915584…e945`).
 
 **Status:** IB11 PARTIAL, E stage. The real-Chrome G3 preflight is pending; no further full V-VIEW run is requested until it succeeds. No production change; no P work.
+
+## 14. IB11-E4: V-VIEW MAIN evidence preserved; NATIVE + VD6A recovery prepared (revision 1.3)
+
+**Raw evidence.** Neither file is committed (`.gitignore`), and neither was modified.
+
+| File | SHA-256 | Package / revision | Content |
+| --- | --- | --- | --- |
+| Full V-VIEW run `ib11-vview-results.json` | `ff2fce48f25270f4430e59b957efac0b459eab8ef69306d6df74be0577201599` | `878a3cd3…`, revision 1.2 | one MAIN attempt; identity `MATCH_EXPECTED_ARTIFACT`; Chrome 154 / Windows / Tampermonkey 5.5.0; `error: null`; no TAKEOVER attempt |
+| G3 preflight `ib11-vview-g3-preflight.json` | `9e434c09920f01239caadf25b03034bfefbc1747dce224445eee120ff8ef8f07` | revision 1.2 | **G3 PREFLIGHT COMPLETE**: evidence PASS, native-only single toggle, no page-visible key, no production handler |
+
+In the full run the operator stopped at NATIVE and closed the window. That close triggered the page-exit beacon, so the NATIVE record says "navigated" with no click; it is not a navigation and is not used.
+
+**Preserved MAIN cells** (committed evaluator, revisions 1.2 and 1.3 identical for these cells):
+
+| Cell | Evidence | Finding |
+| --- | --- | --- |
+| VD7 | PASS | DEFECT_CONFIRMED: no staged placeholder; nothing visible at 300 ms and 1000 ms (original area 0, no loading text); the original painted progressively by 3000 ms |
+| VD6B | PASS | DEFECT_CONFIRMED: after the synchronous `IndexSizeError` the viewer is open with no media, no state text and no native link; previous media detached |
+| VD1 | PASS | DEFECT_CONFIRMED: "Media failed to load" + native link before; both erased by the same-ID update; same failed element |
+| VD4 | PASS | DEFECT_CONFIRMED: rotated fit overflows after both trusted F11 resizes (about 570 px above and below the stage; stage 2560×1395 in full screen) |
+| VD5 | PASS | DEFECT_CONFIRMED: trusted Ctrl+F → Favorite stub; trusted Ctrl+D → Download stub; `defaultPrevented` true for both (browser shortcuts suppressed); viewer stays open |
+| G3 | PASS | BEHAVIOR_OK: native-only single toggle (no page-visible key, no production handler) |
+| FOCUS_M | PASS | OBSERVED: a mouse click focuses the invoking card link; the viewer does not take focus; after Escape focus is still the invoker |
+| FOCUS_K | PASS | OBSERVED: same for Tab+Enter; the three Tabs go to the card's own action buttons behind the overlay (Open viewer, Download, Open original); after ✕ focus is the invoker |
+| VD5SYN | PASS | CONTROL_ONLY |
+| NATIVE | INVALID | no prompted click recorded |
+| VD6A | INVALID | no TAKEOVER attempt |
+
+**Focus (owner-judgment item, not a P decision).**
+- Focus ends on the invoker after Escape or ✕, but production's focus-restore code is not what achieves it: in real Chrome focus never left the invoking link, because the viewer does not take focus on open.
+- Tab reaches page controls behind the open overlay.
+- The Blueprint requires focus return and browser checks; it does not by itself settle a focus-trap policy. Recorded for owner judgment.
+
+**NATIVE root cause (source audit).** The fallback is not clickable:
+- `showMediaState(..., error = true)` creates `a.be-viewer-native-fallback` inside `div.be-media-state` (`Booru_Enhancer.user.js:3591–3596`). Its inline style (`margin-left:8px;color:inherit;text-decoration:underline;`) does not set `pointer-events`.
+- The production stylesheet gives `.be-media-state` `pointer-events: none` (`:4916`). `pointer-events` is inherited, so the link's computed value is `none` and it is not a hit-test target.
+- A click on the visible text falls through to `.be-viewer-stage`. The overlay click handler closes the viewer when the target is the stage (`:3417`). That is consistent with the real run's `overlayAtLeave: "none"`.
+- IB04's P07 conformance check (`tests/browser/ib04/IB04_Production_Conformance.user.js`) only asserted that the link exists and points at the native post; it never clicked it.
+
+This is a likely **product defect**, not a probe problem. The revision ≤ 1.2 NATIVE cell could not characterize it, because it waited for a click targeted at the link.
+
+**Recovery design.**
+- **Server `--recovery`:** two pages, `NATIVE_R` (one failing image card) and `TAKEOVER` (VD6A, unchanged). The probe is `ib11-vview-recovery`. After a no-navigation NATIVE result the server forwards to TAKEOVER.
+- **Same production body.** The rebuilt package (SHA-256 `598ba6c5be421adab0bf3837f55ce7ee76bfae922b5f2afb515f6db31f41b06a`) has the production body byte-identical to `4d793a2`.
+- **NATIVE cell, record revision 1.3.** After a real 404 it records:
+  - the link's box;
+  - computed `pointer-events` for the link and each ancestor up to the overlay;
+  - `document.elementFromPoint()` at the link centre before any input;
+  - the destination (the card's `/posts/<id>`).
+
+  The prompt "Click the visible underlined "Open native post" text once" accepts a trusted click anywhere inside the recorded box, without requiring the target to be the link. The cell then records:
+  - the actual target, the coordinates, and whether the target is the link;
+  - `defaultPrevented`, and the viewer state just after the click;
+  - clicks outside the box;
+  - whether navigation occurred, and the controlled destination's arrival;
+
+  It watches for 3 s. The production CSS is not altered.
+- **Evaluator revision 1.3, NATIVE:**
+  - **Evidence:** a nonzero link box; `pointer-events` evidence for the link and its ancestors; the hit test recorded and consistent with `pointer-events` (none plus a hit on the link is INVALID); the destination is the card post; one trusted in-box click while the link was present; the navigation outcome observed; an arrival before or without the prompted click is INVALID.
+  - **Finding:** **BEHAVIOR_OK** when the click targets the link, the hit test finds it and the destination is reached. **DEFECT_CONFIRMED** when the click cannot target the link, no navigation follows, and `pointer-events`/hit-testing show the link is non-interactive; a confirmed defect is evidence PASS. Anything else is ambiguous (INVALID).
+- **Evaluator revision 1.3, merge.** `evaluate(original, { recovery, provenance })` takes the nine MAIN cells from the original file and only the authorized cells from the recovery: NATIVE from `NATIVE_R` and VD6A from `TAKEOVER`, each from exactly one valid attempt with identity MATCH. It rejects:
+  - unknown pages or cells;
+  - duplicate valid attempts;
+  - identity mismatch;
+  - a VD6A in both files;
+  - a wrong probe.
+
+  Every cell reports its source. The provenance carries the original SHA-256, the recovery SHA-256, and the G3 preflight SHA-256 with its verdict (`--g3-preflight-ref`).
+
+**Local qualification:**
+- **`verify_ib11_vview_recovery.cjs --media` 32/32**, covering:
+  - static: package fresh and body byte-identical; recovery plan;
+  - server recovery protocol over real HTTP;
+  - an original in the real run's shape (9 PASS; NATIVE and VD6A INVALID; TAKEOVER missing);
+  - the merge with recovery: 11/11 evidence PASS, per-cell sources, replaced list, provenance, original untouched;
+  - **NATIVE on current production: DEFECT_CONFIRMED, evidence PASS** (`pointer-events: none`; hit test on the stage; the in-box click lands on the stage; the viewer closes; no navigation);
+  - **a working link** (`pointer-events:auto` on the link in a test copy only) → BEHAVIOR_OK;
+  - VD6A as before;
+  - NATIVE faults, each caught: a click outside the box (by mutation and by a browser model, where the prompt times out and the merge rejects); an untrusted click; a zero-size link; an `elementFromPoint` mismatch; missing link or ancestor `pointer-events` evidence; an arrival without the prompted click; the link absent at the click; a click on the link but no navigation; no click; the wrong destination;
+  - merge faults, each rejected: duplicate valid attempts; a non-authorized cell (VD7); a non-authorized page (MAIN); identity mismatch; VD6A in both files; a missing VD6A recovery; a wrong probe.
+- **`verify_ib11_vview.cjs --media` still 66/66.**
+
+**Status.** IB11 PARTIAL, E stage. The P scope is **not** frozen: after the recovery, the complete findings need review, and owner decisions are needed wherever the Blueprint does not itself dictate the repair (focus policy and the other §4 findings). No production change.
