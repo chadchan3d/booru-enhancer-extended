@@ -113,7 +113,7 @@
   - V-D1: durable failed state, with the same-ID generation guard (D4) as its supporting mechanism;
   - V-D6a / V-D6b: safe takeover and build-failure communication with a native link;
   - **V-D8:** a usable native link. Confirmed: the visible fallback inherits `pointer-events: none` (`:4916`, link at `:3591–3596`); a trusted in-box click hits `.be-viewer-stage` and closes the viewer (`:3417`); no navigation. **P1 repair at `9aeab36`; real-Chrome qualification pending.**
-  - V-D4: valid Fit with rotation across resize (acceptance items 9/10), subject to a scope confirmation.
+  - V-D4: valid Fit with rotation across resize (acceptance items 9/10); scope confirmed by the owner at P1.
 - **B. Owner decision made:** V-D5, the narrow modifier guard.
 - **Resolved by evidence:** G3 (one native toggle; production not involved).
 
