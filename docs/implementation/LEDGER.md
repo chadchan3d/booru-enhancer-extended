@@ -10,6 +10,10 @@
   - V-VIEW browser evidence: 11/11 evidence PASS.
 - **P scope: frozen** (owner decisions below).
 - **P1 (V-D8): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §1–§2).
+- **P2 (V-D1): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §3):
+  - production repair committed at `bef4437`;
+  - local qualification PASS: regression 11/11 and P2 package verifier 23/23;
+  - **real-Chrome qualification PENDING.**
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -24,12 +28,13 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P1 closure commit (see that commit's message for its hash).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P2 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `9aeab364a2e336039250a31d3183f779a7da16c1` (IB11-P1);
-  - blob `039b99e81fe844d864cbcc047cdca1e5b16ee1e2`;
-  - production body SHA-256 `35474709e617b3adedbd273c929f683d9d140670748cba0de55ee8baff06c46b`.
+  - commit `bef44372688b69968ee75507ff75895b165427ce` (IB11-P2, V-D1);
+  - blob `56c495e2c726a5a17f443d89d729fbd8f206eb46`;
+  - production body SHA-256 `a6d7bcc18b3fb9d2f4383eca2d00ecd13494155d9bb1c82a8e6b518ff4834839`.
 - **Previous production artifacts:**
+  - `9aeab36` / `039b99e` / body `35474709…c46b`: IB11-P1 (V-D8; the P1 qualification artifact);
   - `4d793a2` / `002bdfd` / body `00915584…e945`: IB10 artifact, and the artifact for all IB11 E-stage evidence;
   - `8324552` / `4258ad7`: IB10 P;
   - `b9d133c` / `22e843c`: IB09.
@@ -81,7 +86,7 @@
 | Item | Status |
 | --- | --- |
 | **P1 — V-D8** (native recovery link usable) | **COMPLETE, PASS(scope) in TC** |
-| V-D1 (durable failure state; same-ID generation guard as support) | NOT STARTED |
+| **P2 — V-D1** (durable failure state across late same-post updates) | **PARTIAL**: repair `bef4437` locally qualified; real-Chrome qualification pending |
 | V-D4 (rotated Fit valid across resize) | NOT STARTED |
 | V-D5 (narrow viewer-key modifier guard) | NOT STARTED |
 | V-D6a (safe takeover on a synchronous build failure) | NOT STARTED |
@@ -100,6 +105,19 @@
 - **Real-Chrome qualification:** raw `ib11-p1-native.json` SHA-256 `5b23289a6a73776378466881578ce7644905484f19a6e9f854705e14c6fb0bb8` (not committed). `vview_evaluate.cjs --p1`: revision 1.3, exit 0, **V-D8 REPAIR QUALIFIED**.
   - STAGECLOSE PASS / BEHAVIOR_OK: a trusted empty-stage click closes the viewer.
   - NATIVE PASS / BEHAVIOR_OK: link `pointer-events` auto, container none; the hit test and a trusted click land on the anchor; not prevented; the viewer is not closed; navigation; destination reached.
+
+**P2 detail:**
+- **Change** (`bef4437`, `updatePost` only): the unconditional `clearMediaState()` is removed and called only in the branch that starts a new load (a URL change). `replaceMedia` paths are unchanged.
+- **No generation guard:** the only `updatePost` caller (the open-time enrichment) delivers the cached/in-flight post, so stale same-post updates carry unchanged data.
+- **Regression:** `tests/host/ib11/p2_vd1_failure_durable.cjs` 11/11. The V-D1 checks fail on `9aeab36` and on a mutant restoring the unconditional clear; current-work and preservation checks hold everywhere.
+- **Package verifier:** `verify_ib11_p2.cjs` 23/23; package `d38963eb…f07a`.
+- **Regressions on `bef4437`:**
+  - IB01–IB10 pass (IB07 blob pins only);
+  - P1 regression 6/6;
+  - G-PLAY 36/37, V-VIEW 65/66 and P1 verifier 22/23, each failing only its superseded working-tree pin;
+  - E0 characterization 36/38 and fault controls 45/46: S0 pin plus the C3 V-D1 witness, now repaired;
+  - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
+- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p2`; `vview_evaluate.cjs --p2` must report **V-D1 REPAIR QUALIFIED**).
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -134,7 +152,10 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Handoff boundary.** P1 is closed. The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D1, V-D4, V-D5, V-D6a, V-D6b, V-D7, focus ownership/return.
+- **Active: IB11-P2 (V-D1 only), operator step.**
+  - Run the P2 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P2"; about 1 minute; `vview_server.cjs --p2`; package `d38963eb…`) and return `ib11-p2-vd1.json`.
+  - It is evaluated with `vview_evaluate.cjs --p2`, which must report **V-D1 REPAIR QUALIFIED** before V-D1 is marked COMPLETE.
+  - After P2 closes, the next eligible assignment is **one** remaining frozen item, chosen by the owner from: V-D4, V-D5, V-D6a, V-D6b, V-D7, focus ownership/return.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;

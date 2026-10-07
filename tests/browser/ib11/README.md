@@ -178,3 +178,28 @@ It qualifies only V-D8. The evidence-pinned V-VIEW package is unchanged.
 6. **Return** `ib11-p1-native.json`. If a page shows INVALID, press F5 to retry.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p1 <ib11-p1-native.json>`. The verdict must be **V-D8 REPAIR QUALIFIED**.
+
+---
+
+# IB11-P2: V-D1 repair qualification (real Chrome; about 1 minute)
+
+`IB11_P2_VD1.user.js` (SHA-256 `d38963eb5359ab511e4815195ae6f3aab99a3319c476aa86b19197e88741f07a`) contains the **repaired** production (commit `bef4437`, blob `56c495e`) unchanged, wrapped by the V-VIEW recorder and runner. The P2 page runs automatically:
+1. it opens a card whose media fails (a real 404) and waits for the failure state and its native link;
+2. it applies a late same-post update through the production path (`viewer.updatePost` with the cached post, which is what the gallery's enrichment delivers);
+3. it records the failure text and the link 0 ms and 500 ms later.
+
+If they survive, the revision-1.3 NATIVE cell then asks for one click on the link in the **same** open viewer. The package qualifies only V-D1. The V-VIEW and P1 packages are unchanged.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p2.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p2.cjs --media <fixture folder>` (23/23)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p2 --out <fixture folder>/ib11-p2-vd1.json`. It prints "1 pages (IB11-P2 V-D1 qualification)".
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1 scripts**. Install and enable `IB11_P2_VD1.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start`. The viewer opens with a failed image and an underlined "Open native post" text. Keep hands off for about 2 seconds.
+4. **At "Click the visible underlined "Open native post" text once":** click exactly on the underlined words, once. The page should change to "Native post page reached", then to the done page.
+   - If instead the panel says the failure state was erased, nothing needs clicking; return the file.
+5. **Return** `ib11-p2-vd1.json`. If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p2 <ib11-p2-vd1.json>`. The verdict must be **V-D1 REPAIR QUALIFIED**.

@@ -1,0 +1,126 @@
+{
+ "probe": "ib11-p2-verification",
+ "p2Commit": "bef4437",
+ "p2Blob": "56c495e2c726a5a17f443d89d729fbd8f206eb46",
+ "repairBodySha256": "a6d7bcc18b3fb9d2f4383eca2d00ecd13494155d9bb1c82a8e6b518ff4834839",
+ "evaluatorRevision": "1.3",
+ "passed": 23,
+ "total": 23,
+ "results": [
+  {
+   "name": "P2 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P2 package executes the committed repair body byte for byte (bef4437 / blob 56c495e, body a6d7bcc1…4839); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P2 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW (598ba6c5…) and P1 (5842a1da…) packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P2 plan: one page P2_VD1 with one failing image card",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p2: page served; /posts/<id> records a P2_VD1 arrival; results file probe ib11-p2-vd1",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D1 REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: real failure (error event, failure text, native link); after the late same-post update the failure text and link remain at 0 ms and 500 ms; same media element and same link node",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: the link remains usable after the update (revision-1.3 NATIVE BEHAVIOR_OK: hit test and click on the link, not prevented, destination reached)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-P2 artifact 9aeab36 -> NOT QUALIFIED (VD1P2 evidence PASS, DEFECT_CONFIRMED: failure text and link erased; no NATIVE click)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: mutant restoring the unconditional clearMediaState() -> NOT QUALIFIED (DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: V-D8 regressed (link not pointer-interactive) -> NOT QUALIFIED (link survives but NATIVE DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no real failure before the update (no error event): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: failure state absent before the update: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: media element replaced (not a same-media update): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: link erased 500 ms after the update: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (programmatic) link click: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no native destination arrival: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

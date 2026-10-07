@@ -4,6 +4,7 @@
 
 **Status:** **IB11 PARTIAL / NOT COMPLETE.**
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
+- **P2 (V-D1): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§3).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -176,3 +177,107 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 3. P2 — V-D1: keep an established failure state across late same-post updates
+
+**Pre-edit gate:**
+- `26bb6704` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `9aeab36` / blob `039b99e` / body `35474709…c46b`.
+- No mismatch with the Ledger.
+
+**Baseline defect.** E0 C3 (local) and V-VIEW VD1 (real Chrome, `ff2fce48…`): after a real media failure, a same-post `updatePost` with unchanged data erases "Media failed to load" and its native link, while the failed media stays.
+- Cause: `updatePost` called `clearMediaState()` unconditionally (`Booru_Enhancer.user.js:3740` at `9aeab36`).
+
+**Source facts used for the design:**
+- `viewer.updatePost` has exactly one production caller: the gallery's open-time enrichment, `enrichSinglePost(postId).then(updatePost)` (`:4096`).
+- `enrichSinglePost` returns the cached post or the single in-flight request for that ID (`:4372–4390`).
+- So every same-post update delivers the same cached post data. Its **first** arrival may legitimately differ from the DOM-derived initial target (e.g. sample → original: current work). A **later or duplicate** arrival (re-open, navigation away and back) carries unchanged media.
+
+**Production change** (commit `bef44372688b69968ee75507ff75895b165427ce`; in `updatePost` only):
+- the unconditional `clearMediaState()` after `updateStatus(post)` is removed;
+- `clearMediaState()` is called inside the branch that starts a new load (`nextUrl` differs), before the src swap.
+
+The `!mediaEl` and type-change paths still go through `replaceMedia`, which manages its own state. Same-post updates that do not change the media now leave the current media state (a failure with its native link, or a pending loading state) untouched.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `56c495e2c726a5a17f443d89d729fbd8f206eb46` |
+| Production body SHA-256 | `a6d7bcc18b3fb9d2f4383eca2d00ecd13494155d9bb1c82a8e6b518ff4834839` |
+| Diff | 1 line removed; 1 call plus a 3-line comment added in the new-load branch |
+
+**Generation guard: not used.** The frozen scope permits a same-ID generation guard only as V-D1's supporting mechanism. Because the only caller always delivers the cached post, no differing stale same-post data can reach the viewer, so a guard would have no consumer. The same-post last-writer behavior (E0 D4) is unchanged.
+
+**Why this is the minimum.** The defect is solely the unconditional clear. Moving it into the one branch that replaces the media's source keeps every legitimate update (a new URL, a type change, a first open) exactly as before, and stops non-media updates from destroying the state.
+
+**Forbidden-scope audit.** No change to:
+- V-D4, V-D5, V-D6a/b, V-D7, focus, A4, C4, E6, G4;
+- playback policy, the viewer structure, or IB12.
+
+**Permanent regression:** `tests/host/ib11/p2_vd1_failure_durable.cjs` **11/11** (result `p2-vd1-failure-durable-result.json`). Each check runs on the repair, the pre-P2 artifact `9aeab36`, and a **mutant** that restores the unconditional clear.
+
+| Check | Repair | Prior `9aeab36` | Mutant |
+| --- | --- | --- | --- |
+| P2-1 [V-D1] late same-post update (unchanged data) keeps the failure text and native link; same media | **true** | **false** | **false** |
+| P2-2 [V-D1] superseded work (A → B → A, A fails, two late deliveries) keeps the state | **true** | **false** | **false** |
+| P2-3 [V-D1 + V-D8] after the update the link is still hit-tested, clicked, not prevented, viewer open | **true** | **false** | **false** |
+| P2-4 [current work] a same-post update with a new URL clears the failure and loads the new source | true | true | true |
+| P2-5 [current work] metadata-pending sample → original upgrade in place; the loading state is replaced | true | true | true |
+| P2-6 different-post late update ignored | true | true | true |
+| P2-7 image → video rebuild | true | true | true |
+| P2-8 video URL upgrade: load + autoplay play (playback unchanged) | true | true | true |
+| P2-9 empty-stage click closes; close releases the video | true | true | true |
+| P2-10 unmodified keys (ArrowRight / ArrowLeft / Escape) | true | true | true |
+| P2-11 fresh failure: native fallback present and pointer-interactive (V-D8) | true | true | true |
+
+**Real-browser qualification: required.** The defect was characterized in real Chrome, and "native link remains usable" is browser hit-testing. Prepared package `tests/browser/ib11/IB11_P2_VD1.user.js` (SHA-256 `d38963eb5359ab511e4815195ae6f3aab99a3319c476aa86b19197e88741f07a`):
+- **Build:** `build_ib11_p2.cjs` from `bef4437`; the body is byte-identical (a6d7bcc1…4839).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p2_vd1.js`; NATIVE_R can reuse the open viewer). The V-VIEW (`598ba6c5…`) and P1 (`5842a1da…`) packages are unchanged.
+- **Page P2_VD1:**
+  1. a real 404 failure → state and link recorded;
+  2. the late same-post update through `viewer.updatePost` with the cached post (the enrichment path) → state and link at 0 ms and 500 ms, same media and same link node;
+  3. if they survive, the revision-1.3 NATIVE cell: one trusted click on the link in the same viewer → hit test, target, navigation, destination arrival.
+- **Server and evaluator:** `vview_server.cjs --p2`; `vview_evaluate.cjs --p2`. The verdict is **V-D1 REPAIR QUALIFIED** only if VD1P2 is PASS/BEHAVIOR_OK and NATIVE is PASS/BEHAVIOR_OK.
+
+**Local qualification: `verify_ib11_p2.cjs --media` 23/23** (`IB11_P2_VERIFICATION.json`; `IB11_P2_SHA256SUMS.txt`).
+- **Static:** the package is fresh, its body byte-identical, and its runner equals the V-VIEW runner plus exactly the P2 patches; the V-VIEW and P1 packages are unchanged; local scope; plan; server `--p2`.
+- **Smoke (simulated browser):** the repair qualifies. The failure and link survive with the same media and the same node; the link is then clicked and the native post reached.
+- **Production faults (NOT QUALIFIED):**
+  - the probe on `9aeab36` gives VD1P2 DEFECT_CONFIRMED, with no click prompt;
+  - the mutant restoring the clear gives DEFECT_CONFIRMED;
+  - V-D8 regressed (`pointer-events` removed) gives a surviving link but NATIVE DEFECT_CONFIRMED.
+- **Evidence faults (NOT QUALIFIED):**
+  - no error event; no failure before the update; media replaced;
+  - link erased at 500 ms; trusted input outside a prompt;
+  - untrusted click; no arrival;
+  - wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `bef4437`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only (`fail: []`, `failed: []`, `controlFailures: []`) |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 67/67 |
+| IB11 P1 regression | 6/6 (V-D8 preserved on the new production) |
+| IB11 P2 regression | 11/11 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1 package verifier | 22/23 |
+| IB11 E0 characterization | 36/38; fault controls 45/46 |
+
+**Pin and witness failures (expected; not behavioral):**
+- **Blob and working-tree pins,** each superseded by P2:
+  - the G-PLAY and V-VIEW verifiers: their `4d793a2` working-tree pin;
+  - the P1 package verifier: its `039b99e` working-tree pin;
+  - the E0 characterization's S0: its `4d793a2` blob pin.
+- **E0 characterization C3:** the V-D1 defect witness, which no longer holds because V-D1 is repaired. Its repair-probe control therefore has nothing left to flip (the 1 of 46).
+- **Not reached by the repair:** every other E0 check (stage close, modifier bypass, failure display C1/C2, D1–D7, transforms, focus, keys, playback H1–H3) and every other defect witness (V-D4, V-D5, V-D6a/b, V-D7) still pass as before.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**P2 status: PARTIAL, NOT COMPLETE.** The production repair is committed, the local qualification and regressions pass, and **real-Chrome qualification is PENDING**. V-D1 is not marked repaired until the P2 probe returns **V-D1 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P2".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

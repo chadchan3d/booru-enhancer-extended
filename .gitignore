@@ -21,3 +21,5 @@ tests/browser/ib10/ib11-vview-g3-preflight.json
 tests/browser/ib11/ib11-vview-g3-preflight.json
 tests/browser/ib10/ib11-p1-native.json
 tests/browser/ib11/ib11-p1-native.json
+tests/browser/ib10/ib11-p2-vd1.json
+tests/browser/ib11/ib11-p2-vd1.json

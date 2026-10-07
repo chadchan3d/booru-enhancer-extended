@@ -89,6 +89,7 @@
 // Usage: node vview_evaluate.cjs <ib11-vview-results.json> [--recovery <ib11-vview-recovery.json>] [--g3-preflight-ref <ib11-vview-g3-preflight.json>]
 //        node vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>
 //        node vview_evaluate.cjs --p1 <ib11-p1-native.json>
+//        node vview_evaluate.cjs --p2 <ib11-p2-vd1.json>
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -374,9 +375,49 @@ function evaluateP1(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P2 (V-D1 repair) qualification: one page P2_VD1, one valid attempt,
+// identity MATCH. VD1P2: E = a real failure (error event; failure text and
+// native link) before the update, the failed media element unchanged, no
+// trusted input outside a prompt; F = BEHAVIOR_OK when the failure text and
+// the native link are still present 0 ms and 500 ms after the late same-post
+// update, DEFECT_CONFIRMED when they were erased. NATIVE (only when the link
+// survived): the revision-1.3 rule. Verdict "V-D1 REPAIR QUALIFIED" only when
+// VD1P2 is PASS / BEHAVIOR_OK and NATIVE is PASS / BEHAVIOR_OK.
+function evaluateP2(doc) {
+  const out = { kind: 'ib11-p2', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p2-vd1') { out.problems.push('not an ib11-p2-vd1 result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P2_VD1', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P2_VD1'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const c = p.client.cells && p.client.cells.VD1P2; const reasons = [];
+  if (!c) reasons.push('INVALID no VD1P2 record');
+  else {
+    const b0 = c.before || {};
+    if (!c.failEvent || b0.link !== 'card-post' || !/failed/i.test(b0.state || '')) reasons.push('INVALID no real failure state with a native link before the update');
+    if (!c.sameMedia) reasons.push('INVALID the failed media element changed (not a same-media update)');
+    if (c.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+  }
+  const kept = (s) => !!s && s.link === 'card-post' && /failed/i.test(s.state || '');
+  const preserved = !!c && kept(c.after0) && kept(c.after500);
+  out.cells.VD1P2 = { evidence: reasons.length ? 'INVALID' : 'PASS', reasons,
+    finding: c ? { code: preserved ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { before: c.before && { state: c.before.state, link: c.before.link }, after0: c.after0 && { state: c.after0.state, link: c.after0.link }, after500: c.after500 && { state: c.after500.state, link: c.after500.link }, sameLinkNode: c.sameLinkNode } } : null };
+  if (preserved) out.cells.NATIVE = evalCell('NATIVE', p.client.cells && p.client.cells.NATIVE, ctxOf(doc, 'P2_VD1'));
+  const v = out.cells.VD1P2; const n = out.cells.NATIVE;
+  if (!out.problems.length && v.evidence === 'PASS' && v.finding.code === 'BEHAVIOR_OK' && n && n.evidence === 'PASS' && n.finding && n.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D1 REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p2') {
+    const r2 = evaluateP2(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r2.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r2, null, 1)); process.exitCode = r2.verdict === 'V-D1 REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p1') {
     const r1 = evaluateP1(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r1.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
