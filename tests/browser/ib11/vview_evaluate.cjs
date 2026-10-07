@@ -88,6 +88,7 @@
 // modified.
 // Usage: node vview_evaluate.cjs <ib11-vview-results.json> [--recovery <ib11-vview-recovery.json>] [--g3-preflight-ref <ib11-vview-g3-preflight.json>]
 //        node vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>
+//        node vview_evaluate.cjs --p1 <ib11-p1-native.json>
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -344,9 +345,43 @@ function evaluatePreflight(doc) {
   return { kind: 'g3-preflight', revision: REVISION, verdict, problems, runtime: p ? p.client.runtime : null, cell };
 }
 
-module.exports = { evaluate, evaluatePreflight, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P1 (V-D8 repair) qualification: one page P1_NATIVE, one valid attempt,
+// identity MATCH (the repaired production). STAGECLOSE: E = trusted click on
+// the empty stage (target .be-viewer-stage); F = BEHAVIOR_OK if the viewer
+// closed. NATIVE: the revision-1.3 rule. Verdict "V-D8 REPAIR QUALIFIED" only
+// when both have evidence PASS and NATIVE is BEHAVIOR_OK (the link receives
+// the click and reaches the native post) and STAGECLOSE is BEHAVIOR_OK.
+function evaluateP1(doc) {
+  const out = { kind: 'ib11-p1', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p1-native') { out.problems.push('not an ib11-p1-native result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P1_NATIVE', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P1_NATIVE'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const sc = p.client.cells && p.client.cells.STAGECLOSE; const reasons = [];
+  if (!sc) reasons.push('INVALID no STAGECLOSE record');
+  else {
+    if (!sc.click || sc.click.trusted !== true) reasons.push('INVALID stage click not trusted');
+    if (sc.click && !sc.click.targetIsStage) reasons.push('INVALID click did not land on the empty stage');
+    if (sc.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+  }
+  out.cells.STAGECLOSE = { evidence: reasons.length ? 'INVALID' : 'PASS', reasons, finding: sc ? { code: sc.openAfter === false ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { viewerClosed: sc.openAfter === false } } : null };
+  out.cells.NATIVE = evalCell('NATIVE', p.client.cells && p.client.cells.NATIVE, ctxOf(doc, 'P1_NATIVE'));
+  const n = out.cells.NATIVE; const s = out.cells.STAGECLOSE;
+  if (!out.problems.length && n.evidence === 'PASS' && s.evidence === 'PASS' && n.finding && n.finding.code === 'BEHAVIOR_OK' && s.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D8 REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p1') {
+    const r1 = evaluateP1(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r1.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r1, null, 1)); process.exitCode = r1.verdict === 'V-D8 REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   const pre = process.argv[2] === '--preflight';
   const file = process.argv[pre ? 3 : 2];
   const doc = JSON.parse(fs.readFileSync(file, 'utf8'));

@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
 
 ## Current milestone
-**IB11 — Existing viewer hardening: PARTIAL, NOT COMPLETE (E stage complete for TC; P not started).**
+**IB11 — Existing viewer hardening: PARTIAL, NOT COMPLETE (E stage complete for TC; P stage in progress).**
 - E0–E2: viewer characterization; G-PLAY tooling, run and recovery; **G-PLAY(TC): E → PASS(scope)**.
 - E3: the V-VIEW probe, plus two G3 corrections (revisions 1.1 and 1.2) after probe defects in real Chrome. G3 preflight COMPLETE.
 - **E4: V-VIEW browser evidence complete for TC.**
@@ -12,7 +12,11 @@
   - Result: **11/11 evidence PASS** (`IB11_BASELINE.md` §14, §15).
   - **V-D8 confirmed.**
 - **Owner decisions complete; IB11 P scope FROZEN** (see "Owner decisions in force for IB11").
-- **Active: P1 = V-D8 only** (make the existing "Open native post" fallback usable). The other frozen items are not started.
+- **P1 = V-D8 only** (`IB11_P_STAGE.md` §1):
+  - production repair committed at `9aeab36`: the fallback anchor declares `pointer-events:auto`; `.be-media-state` is unchanged;
+  - local qualification PASS: regression 6/6 and P1 package verifier 23/23;
+  - **real-Chrome qualification PENDING.** V-D8 is not yet marked repaired.
+- The other frozen items are not started.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -27,7 +31,8 @@
 
 ## Current state
 - Branch `implementation/ib00-baseline`, pushed to `origin/implementation/ib00-baseline`.
-- Production `Booru_Enhancer.user.js`: commit `4d793a2`, blob `002bdfd1a88adf8ed851df7ed768e6189e2bc958`, production body SHA-256 `00915584…e945`. Unchanged through IB11-E0 to E4.
+- Production `Booru_Enhancer.user.js`: commit `9aeab36`, blob `039b99e81fe844d864cbcc047cdca1e5b16ee1e2`, production body SHA-256 `35474709…c46b` (IB11-P1, V-D8).
+- **Previous production:** `4d793a2` / `002bdfd` (IB10 artifact; the artifact for all IB11 E-stage evidence).
 - **Previous artifacts:**
   - `8324552` / `4258ad7`: IB10 P;
   - `b9d133c` / `22e843c`: IB09.
@@ -76,6 +81,13 @@
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
 ## Verified
+- **IB11-P1 (V-D8) on `9aeab36`:**
+  - `tests/host/ib11/p1_native_link.cjs` 6/6; the V-D8 checks fail on `4d793a2` and on a mutant restoring `pointer-events: none`;
+  - `verify_ib11_p1.cjs --media` 23/23: the P1 package `5842a1da…e718` qualifies in simulation, the pre-repair artifact and the mutant do not, and the evidence faults are rejected;
+  - regressions: IB01–IB10 pass (known IB07 pins only);
+  - IB11 E0 characterization 37/38, the G-PLAY verifier 36/37 and the V-VIEW verifier 65/66, each failing only its superseded `4d793a2` pin;
+  - G-PLAY recovery 28/28 and V-VIEW recovery 32/32;
+  - historical result files restored.
 - **V-VIEW merged evaluation:** `vview_evaluate.cjs` revision 1.3; exit 0; evidencePass true; 11/11 PASS; no problems.
   - **Raw files** (not committed; unmodified):
     - original `ib11-vview-results.json` SHA-256 `ff2fce48…1599` (package `878a3cd3…`, revision 1.2): the source of VD7, VD6B, VD1, VD5SYN, VD4, VD5, G3, FOCUS_M, FOCUS_K;
@@ -100,7 +112,7 @@
   - V-D7: staged placeholder;
   - V-D1: durable failed state, with the same-ID generation guard (D4) as its supporting mechanism;
   - V-D6a / V-D6b: safe takeover and build-failure communication with a native link;
-  - **V-D8:** a usable native link. Confirmed: the visible fallback inherits `pointer-events: none` (`:4916`, link at `:3591–3596`); a trusted in-box click hits `.be-viewer-stage` and closes the viewer (`:3417`); no navigation;
+  - **V-D8:** a usable native link. Confirmed: the visible fallback inherits `pointer-events: none` (`:4916`, link at `:3591–3596`); a trusted in-box click hits `.be-viewer-stage` and closes the viewer (`:3417`); no navigation. **P1 repair at `9aeab36`; real-Chrome qualification pending.**
   - V-D4: valid Fit with rotation across resize (acceptance items 9/10), subject to a scope confirmation.
 - **B. Owner decision made:** V-D5, the narrow modifier guard.
 - **Resolved by evidence:** G3 (one native toggle; production not involved).
@@ -123,4 +135,4 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active: IB11-P1 (V-D8 only).** Make the fallback link usable and qualify the repair. Do not proceed to the next IB11 repair automatically. Do not start IB12.
+**Active: IB11-P1 (V-D8 only), operator step.** Run the P1 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P1"; about 1 minute; `vview_server.cjs --p1`; package `5842a1da…`) and return `ib11-p1-native.json`. It is evaluated with `vview_evaluate.cjs --p1`, which must report **V-D8 REPAIR QUALIFIED** before V-D8 is marked repaired. Do not proceed to the next IB11 repair automatically. Do not start IB12.

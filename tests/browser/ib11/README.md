@@ -154,3 +154,27 @@ The full run's other nine MAIN cells are kept from the original raw file. Only t
 6. **Return** `ib11-vview-recovery.json`. If a page shows INVALID, press F5 to retry that page.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs <ib11-vview-results.json> --recovery <ib11-vview-recovery.json> --g3-preflight-ref <ib11-vview-g3-preflight.json>` (revision 1.3).
+
+---
+
+# IB11-P1: V-D8 repair qualification (real Chrome; about 1 minute)
+
+`IB11_P1_Native.user.js` (SHA-256 `5842a1dad2a291c36e8c691d579e83d2fa7452c25a8974b8e037fa04552fe718`) contains the **repaired** production (commit `9aeab36`, blob `039b99e`) unchanged, wrapped by the V-VIEW recorder and runner. The P1 page runs two checks:
+- an empty-stage click must still close the viewer;
+- the revision-1.3 NATIVE cell, which characterizes the native link.
+
+It qualifies only V-D8. The evidence-pinned V-VIEW package is unchanged.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p1.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p1.cjs --media <fixture folder>` (23/23)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p1 --out <fixture folder>/ib11-p1-native.json`. It prints "1 pages (IB11-P1 V-D8 qualification)".
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW script**. Install and enable `IB11_P1_Native.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start`. The viewer opens with a failed image and an underlined "Open native post" text.
+4. **At "Click once on the dark empty area of the viewer, away from the message":** click once on the dark area, not on the toolbar and not on the message. The viewer closes.
+5. **The viewer opens again. At "Click the visible underlined "Open native post" text once":** click exactly on the underlined words, once. The page should change to "Native post page reached", then to the done page.
+6. **Return** `ib11-p1-native.json`. If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p1 <ib11-p1-native.json>`. The verdict must be **V-D8 REPAIR QUALIFIED**.

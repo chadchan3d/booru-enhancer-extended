@@ -99,6 +99,7 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     ['Close', () => { const b = [...doc.querySelectorAll('.be-viewer-btn')].find((x) => x.title.startsWith('Close')); b.focus(); click(b); }],
     // Recovery NATIVE: the operator clicks where the link visibly is; the event
     // goes to whatever the browser hit-tests there.
+    ['dark empty area', () => { const el = doc.elementFromPoint(40, 40) || doc.body; el.dispatchEvent(new w.MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0, clientX: 40, clientY: 40 })); el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, button: 0, clientX: 40, clientY: 40 })); }],
     ['visible underlined', () => { const l = doc.querySelector('.be-viewer-native-fallback'); if (!l) return; const r = l.getBoundingClientRect(); const cx = r.left + r.width / 2; const cy = r.top + r.height / 2; const el = doc.elementFromPoint(cx, cy) || doc.body;
       const init = { bubbles: true, cancelable: true, button: 0, clientX: cx, clientY: cy };
       if (env.nativeClick === 'outside') { init.clientX = r.right + 40; }
@@ -152,18 +153,19 @@ function trustOperator(client) {
   if (c.FOCUS_M) { T(c.FOCUS_M.pointer); T(c.FOCUS_M.click); T(c.FOCUS_M.escape); }
   if (c.FOCUS_K) { T(c.FOCUS_K.enter); (c.FOCUS_K.tabs || []).forEach(T); T(c.FOCUS_K.closeClick); }
   if (c.NATIVE) { T(c.NATIVE.click); T(c.NATIVE.pointer); }
+  if (c.STAGECLOSE) T(c.STAGECLOSE.click);
   if (c.VD6A) T(c.VD6A.click);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, nativeClick = 'center' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight, recovery })) {
+  for (const pg of srv.plan({ preflight, recovery, p1 })) {
     const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

@@ -1,0 +1,126 @@
+{
+ "probe": "ib11-p1-verification",
+ "p1Commit": "9aeab36",
+ "p1Blob": "039b99e81fe844d864cbcc047cdca1e5b16ee1e2",
+ "repairBodySha256": "35474709e617b3adedbd273c929f683d9d140670748cba0de55ee8baff06c46b",
+ "evaluatorRevision": "1.3",
+ "passed": 23,
+ "total": 23,
+ "results": [
+  {
+   "name": "P1 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P1 package executes the committed repair body byte for byte (9aeab36 / blob 039b99e, body 35474709…c46b); production working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P1 patches (STAGECLOSE + P1 page)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW package is unchanged (598ba6c5…)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P1 plan: one page P1_NATIVE with one failing image card",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p1: page served; /posts/<id> records a P1_NATIVE arrival; results file probe ib11-p1-native",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D8 REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: nonzero link box; computed pointer-events auto on the link while .be-media-state stays none; hit test at the centre = the link; the trusted click targets the link, is not prevented, reaches the native post; not treated as a stage-close",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: a trusted click on the empty stage still closes the viewer (STAGECLOSE BEHAVIOR_OK)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-repair artifact 4d793a2 -> NOT QUALIFIED (NATIVE DEFECT_CONFIRMED, pointer-events none, click lands on the stage)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: mutant restoring the broken pointer behavior -> NOT QUALIFIED (NATIVE DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: stage click-to-close broken -> NOT QUALIFIED (STAGECLOSE finding DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (programmatic) link click: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: click outside the visible link box: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: zero-size link: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no native destination arrival: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: click hit the link but the page never left: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted stage click: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: stage click that did not land on the empty stage: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -22,10 +22,10 @@ const OUT = path.join(__dirname, 'IB11_VVIEW_Controlled.user.js');
 const REPO = path.resolve(__dirname, '../../..');
 const read = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8').replace(/\r\n/g, '\n');
 
-function productionSource() {
-  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
-  if (blob !== EXPECTED_PRODUCTION_BLOB) throw new Error('production blob at COMMIT is not the expected artifact');
-  return execFileSync('git', ['-C', REPO, 'show', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+function productionSource(commit = COMMIT, expectedBlob = EXPECTED_PRODUCTION_BLOB) {
+  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
+  if (blob !== expectedBlob) throw new Error('production blob at COMMIT is not the expected artifact');
+  return execFileSync('git', ['-C', REPO, 'show', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 }
 
 function deriveMeta(meta) {
@@ -39,14 +39,15 @@ function deriveMeta(meta) {
   return out.join('\n');
 }
 
-function build({ bodyTransform = null } = {}) {
-  const source = productionSource();
+function build({ bodyTransform = null, commit = COMMIT, expectedBlob = EXPECTED_PRODUCTION_BLOB, postTransform = null } = {}) {
+  const source = productionSource(commit, expectedBlob);
   if (source.includes('\r')) throw new Error('production blob is not LF');
   const { meta, body: prodBody } = split(source);
   const body = bodyTransform ? bodyTransform(prodBody) : prodBody;
   for (const name of ['IB11V_PRODUCTION_BODY', 'IB11V_LOCATION', 'IB11V']) if (prodBody.includes(name)) throw new Error(`name collides with production body: ${name}`);
   const expectedSha = crypto.createHash('sha256').update(prodBody, 'utf8').digest('hex');
-  const text = deriveMeta(meta) + BODY_START + read('vview_preamble.js') + WRAP_OPEN + body + WRAP_CLOSE + read('vview_postamble.js').replace('__EXPECTED_BODY_SHA256__', expectedSha);
+  const post = read('vview_postamble.js');
+  const text = deriveMeta(meta) + BODY_START + read('vview_preamble.js') + WRAP_OPEN + body + WRAP_CLOSE + (postTransform ? postTransform(post) : post).replace('__EXPECTED_BODY_SHA256__', expectedSha);
   return { text, body, expectedSha, prodBody };
 }
 
