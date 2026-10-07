@@ -3438,6 +3438,8 @@
 
 		function onKeydown(e) {
 			if (!overlay || overlay.style.display !== 'flex') return;
+			// V-D5: Ctrl/Meta/Alt chords belong to the browser/OS, never to viewer commands.
+			if (e.ctrlKey || e.metaKey || e.altKey) return;
 			const keys = {
 				[BE.settings.get('keys.close') || 'Escape']: close,
 				[BE.settings.get('keys.next') || 'ArrowRight']: () => onNext && onNext(),

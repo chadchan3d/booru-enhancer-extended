@@ -1,0 +1,121 @@
+{
+ "probe": "ib11-p3-vd5",
+ "productionBlob": "f2b46eb443e153e03123742fb5d4baa4be761dd6",
+ "prior": "bef4437",
+ "checks": 16,
+ "passed": 16,
+ "results": [
+  {
+   "name": "P3-1 [V-D5] Ctrl+F: no viewer Favorite; not prevented (browser Find stays available)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-2 [V-D5] Ctrl+D: no viewer Download; not prevented (browser bookmark stays available)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-3 [V-D5] Meta+D and Meta+F: no viewer Download / Favorite; not prevented",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-4 [V-D5] Alt+O and Alt+F: no viewer Open original / Favorite; not prevented",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-5 [V-D5] Alt+ArrowLeft and Ctrl+ArrowRight: no viewer navigation; Ctrl+Escape does not close; none prevented",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-6 [V-D5] a customized binding (keys.favorite = g) is guarded the same way: Ctrl+G does not favorite (unmodified g does)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P3-7 [preserved] unmodified f -> Favorite once, prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-8 [preserved] unmodified d -> Download once, prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-9 [preserved] unmodified o -> Open original once, prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-10 [preserved] ArrowRight / ArrowLeft navigate, Escape closes; all prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-11 [preserved] Space plays a paused viewer video (togglePlayPause), prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-12 [preserved] Shift unchanged: Shift+ArrowRight still navigates; Shift+F (key \"F\") matches no binding",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-13 [preserved] keys are inert while the viewer is closed (not prevented, no action)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-14 [preserved] V-D1: a late same-post update keeps the failure state and native link",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-15 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P3-16 [preserved] no focus change: opening the viewer does not move focus into it (focus item not started)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}
