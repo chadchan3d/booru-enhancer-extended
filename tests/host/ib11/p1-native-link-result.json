@@ -1,0 +1,51 @@
+{
+ "probe": "ib11-p1-native-link",
+ "productionBlob": "039b99e81fe844d864cbcc047cdca1e5b16ee1e2",
+ "baseline": "4d793a2",
+ "checks": 6,
+ "passed": 6,
+ "results": [
+  {
+   "name": "P1-1 failure fallback present: \"Open native post\" to the card native post, inside the failure state",
+   "repair": true,
+   "baseline": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P1-2 the fallback anchor is pointer-interactive (computed pointer-events not none) while the media-state container stays pointer-events:none",
+   "repair": true,
+   "baseline": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P1-3 hit-testing at the centre of the visible link resolves to the fallback anchor",
+   "repair": true,
+   "baseline": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P1-4 a click on the displayed words targets the anchor, is not prevented (native navigation proceeds) and is not treated as a stage-close click (viewer stays open)",
+   "repair": true,
+   "baseline": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P1-5 a click elsewhere on the stage still closes the viewer",
+   "repair": true,
+   "baseline": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P1-6 failure-state presentation unchanged apart from pointer-events (text, underline, spacing, colour inheritance)",
+   "repair": true,
+   "baseline": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}

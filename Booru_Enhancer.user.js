@@ -3592,7 +3592,7 @@
 						fallback.href = nativeUrl;
 						fallback.textContent = 'Open native post';
 						fallback.className = 'be-viewer-native-fallback';
-						fallback.style.cssText = 'margin-left:8px;color:inherit;text-decoration:underline;';
+						fallback.style.cssText = 'margin-left:8px;color:inherit;text-decoration:underline;pointer-events:auto;';
 						state.appendChild(fallback);
 					}
 				}
