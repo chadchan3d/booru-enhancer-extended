@@ -11,7 +11,8 @@
   - Sources: the full run (nine MAIN cells) plus the NATIVE + VD6A recovery, merged by evaluator revision 1.3.
   - Result: **11/11 evidence PASS** (`IB11_BASELINE.md` §14, §15).
   - **V-D8 confirmed.**
-- **Next:** owner review of the remaining judgment items, then an explicit P-scope freeze. No P design or implementation yet; no production change.
+- **Owner decisions complete; IB11 P scope FROZEN** (see "Owner decisions in force for IB11").
+- **Active: P1 = V-D8 only** (make the existing "Open native post" fallback usable). The other frozen items are not started.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -49,11 +50,18 @@
     - Blueprint enforcement of the poster/View fallback (option B).
 
 ## Owner decisions in force for IB11
-- **V-D5 belongs in IB11 (recorded at IB11-E2).**
+- **V-D5 (IB11-E2):**
   - Viewer Ctrl/Meta/Alt chords must not trigger ordinary viewer commands. In particular, Ctrl+F must not invoke Favorite and Ctrl+D must not invoke the viewer download.
   - The repair is a narrow viewer-key modifier guard that preserves normal unmodified viewer keybinds and browser shortcuts.
-  - This authorizes eventual P scope only.
-- No other IB11 finding is decided (see "Owner decisions needed").
+- **Recorded at IB11-P1:**
+  1. **Focus:** the viewer owns focus while open. Tab and Shift+Tab stay within viewer-owned interactive elements. Close restores focus to the invoking element when it still exists.
+  2. **V-D4:** the rotated-Fit correction belongs in IB11 P.
+  3. **Placeholder → full-image replacement:** preserve the apparent on-screen view, not the raw numeric scale, and do not automatically refit.
+  4. **A4, C4, E6 and G4 stay unchanged.**
+- **Frozen IB11 P scope:**
+  - V-D1, V-D4, V-D5, V-D6a, V-D6b, V-D7, V-D8, and the approved focus ownership/return behavior.
+  - Same-ID generation guarding is permitted only as the supporting mechanism for V-D1.
+  - Each item is implemented as its own assignment: P1 = V-D8 only.
 
 ## Gates relevant to the next step
 - **G-PLAY(TC): PASS(scope)** at the E stage. Chrome 154 + Tampermonkey 5.5.0; controlled local MP4/WebM fixtures only; no general autoplay claim.
@@ -97,16 +105,6 @@
 - **B. Owner decision made:** V-D5, the narrow modifier guard.
 - **Resolved by evidence:** G3 (one native toggle; production not involved).
 
-## Owner decisions needed before the IB11 P scope can be frozen
-1. **Focus policy.** Today the viewer does not take focus on open, focus stays on the invoking link, Tab reaches page controls behind the overlay, and close "returns" focus only because it never left. The Blueprint requires focus return and stable focus for IB12, but does not dictate a modal-focus policy.
-2. **V-D4 scope confirmation:** the fit-with-rotation correction in IB11 P (item 3 does not name fit computation explicitly).
-3. **Manual zoom across a placeholder → better upgrade (D5/E4):** keep the absolute scale, keep the apparent size, or refit. This becomes material once V-D7 staging lands.
-4. **Optional, defaulting to "leave unchanged":**
-   - A4: the card "Open viewer" action ignores `viewer.enabled`;
-   - C4: no native link for targets without `postUrl`;
-   - E6: Fit also resets rotation/flip;
-   - G4: no visible blocked-Play state (the native-control/Space fallback is evidenced).
-
 ## Unresolved, parked, deferred
 - **Superseded attempts:** V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` rev 1.0 and `1662c903…` rev 1.1) stalled at G3 because of probe defects; none of their cells is used.
 - **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured.
@@ -125,4 +123,4 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Owner review** of the decisions listed above, then an **explicit IB11 P-scope freeze**. No P design or implementation before that. Do not start IB12.
+**Active: IB11-P1 (V-D8 only).** Make the fallback link usable and qualify the repair. Do not proceed to the next IB11 repair automatically. Do not start IB12.
