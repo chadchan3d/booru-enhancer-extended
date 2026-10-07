@@ -92,6 +92,7 @@
 //        node vview_evaluate.cjs --p2 <ib11-p2-vd1.json>
 //        node vview_evaluate.cjs --p3 <ib11-p3-vd5.json>
 //        node vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>
+//        node vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -493,9 +494,60 @@ function evaluateP4(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P5 (V-D6b repair) qualification: one page P5_VD6B, one valid attempt,
+// identity MATCH. VD6BP5: a valid open image (VD6B_A: complete, current); a
+// trusted unmodified ArrowRight; the recorder seam threw from buildMedia; the
+// selection moved to the failing video target (NATIVE). BEHAVIOR_OK only when,
+// at 50 ms AND at 1000 ms, the viewer is open on the target with no media in
+// the stage, failure text, and the native link to the target's post; no
+// img/video anywhere in the viewer; the previous image detached; the status
+// names the target. NATIVE (revision-1.3 rule, the same viewer): the link is
+// hit-tested, receives a trusted click and reaches the target's native post.
+// No trusted input outside a prompt. Verdict "V-D6b REPAIR QUALIFIED" only
+// when VD6BP5 and NATIVE are both PASS / BEHAVIOR_OK.
+function evaluateP5(doc) {
+  const out = { kind: 'ib11-p5', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p5-vd6b') { out.problems.push('not an ib11-p5-vd6b result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P5_VD6B', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P5_VD6B'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const cells = p.client.cells || {}; const c = cells.VD6BP5; const reasons = [];
+  if (!c) reasons.push('INVALID no VD6BP5 record');
+  let code = 'DEFECT_CONFIRMED'; let detail = null;
+  if (c) {
+    const toId = String(c.toId); const fromId = String(c.fromId); const b = c.before || {};
+    if (c.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+    if (!c.key || c.key.trusted !== true) reasons.push('INVALID ArrowRight not trusted (synthetic input is not browser evidence)');
+    else if (c.key.key !== 'ArrowRight' || c.key.ctrlKey || c.key.metaKey || c.key.altKey || c.key.shiftKey) reasons.push('FAIL navigation key is not an unmodified ArrowRight');
+    if (!(c.seam || []).some((x) => x.fromBuildMedia && x.name === 'IndexSizeError')) reasons.push('INVALID failure seam did not throw IndexSizeError from buildMedia');
+    if (!c.ready || !b.open || !b.media || b.media.tag !== 'IMG' || b.media.complete !== true || String(b.currentId) !== fromId || b.state) reasons.push('FAIL did not start from a valid open image');
+    const comm = (a) => !!a && a.open === true && String(a.currentId) === toId && !a.media && /failed/i.test(a.state || '') && a.link === 'card-post';
+    const a = c.after1000 || {};
+    if (String(a.currentId) !== toId) reasons.push(`FAIL selection did not move to the failing target (${a.currentId})`);
+    const ok = comm(c.after50) && comm(a) && c.overlayMedia === 0 && c.prevConnected === false && c.linkPath === `/posts/${toId}` && String(c.status || '').startsWith(`#${toId}`);
+    const blank = a.open && !a.media && !a.state && !a.link;
+    code = ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED';
+    detail = { blank, after50: c.after50 && { open: c.after50.open, currentId: c.after50.currentId, media: !!c.after50.media, state: c.after50.state, link: c.after50.link },
+      after1000: { open: a.open, currentId: a.currentId, media: !!a.media, state: a.state, link: a.link, children: a.children }, overlayMedia: c.overlayMedia, previousMediaConnected: c.prevConnected,
+      linkPath: c.linkPath, targetPost: `/posts/${toId}`, status: c.status, statusBefore: c.statusBefore, seam: (c.seam || []).map((x) => ({ name: x.name, value: x.value, fromBuildMedia: x.fromBuildMedia })), keyDefaultPrevented: c.key && c.key.defaultPrevented };
+  }
+  out.cells.VD6BP5 = { evidence: reasons.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (reasons.length ? 'FAIL' : 'PASS'), reasons, finding: { code, detail } };
+  if (cells.NATIVE) { const n = evalCell('NATIVE', cells.NATIVE, ctxOf(doc, 'P5_VD6B')); out.cells.NATIVE = { evidence: n.evidence, reasons: n.reasons, finding: n.finding }; }
+  if (!out.problems.length && out.cells.VD6BP5.evidence === 'PASS' && code === 'BEHAVIOR_OK' && out.cells.NATIVE && out.cells.NATIVE.evidence === 'PASS' && out.cells.NATIVE.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D6b REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p5') {
+    const r5 = evaluateP5(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r5.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r5, null, 1)); process.exitCode = r5.verdict === 'V-D6b REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p4') {
     const r4 = evaluateP4(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r4.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');

@@ -1,0 +1,171 @@
+{
+ "probe": "ib11-p5-verification",
+ "p5Commit": "24ee7c2",
+ "p5Blob": "68e37d1c9071d2ae78ae44b31f0082cd51010992",
+ "repairBodySha256": "062227fa23a6b637098cf553b29a543e03bf342240354a61d1f587bd414d9f26",
+ "evaluatorRevision": "1.3",
+ "passed": 32,
+ "total": 32,
+ "results": [
+  {
+   "name": "P5 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P5 package executes the committed repair body byte for byte (24ee7c2 / blob 68e37d1, body 062227fa…9f26); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P5 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW, P1, P2, P3 (d29d590b…) and P4 (8c9fd499…) packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the failure seam is the package recorder (media volume setter), not a production change; the cell arms stored volume 1.5 only after the image is open and asks for a trusted unmodified ArrowRight",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P5 plan: one page P5_VD6B: image card VD6B_A, then the video card NATIVE (the in-viewer ArrowRight target)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p5: page served; /posts/<id> records a P5_VD6B arrival for the failing card; results file probe ib11-p5-vd6b",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D6b REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: valid open image; trusted ArrowRight; seam IndexSizeError (1.5) from buildMedia; at 50 ms and 1000 ms open on the target with failure text and the target's native link; no media; previous image detached; status names the target",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: the target's native link is usable in the same viewer (revision-1.3 NATIVE BEHAVIOR_OK: hit test and trusted click on the link, destination reached)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-P5 artifact fe1e06b -> NOT QUALIFIED (VD6BP5 evidence PASS, DEFECT_CONFIRMED: blank viewer on the target, stale status, no link to click)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: mutant that rethrows the build error as before -> NOT QUALIFIED (DEFECT_CONFIRMED, blank)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: V-D8 regressed (link not pointer-interactive) -> NOT QUALIFIED (failure communicated but NATIVE DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (synthetic) ArrowRight: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: modified ArrowRight (Shift held): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the seam did not throw: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: did not start from a loaded image: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: selection did not reach the failing target: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: failure text missing at 50 ms: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: native link missing at 1000 ms: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: native link points to another post: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a media element remains in the viewer: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the previous image is still attached: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: status still names the previous post: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (programmatic) link click: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no native destination arrival: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: NATIVE cell missing: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -270,3 +270,30 @@ The package qualifies only V-D6a. The V-VIEW, P1, P2 and P3 packages are unchang
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>`. The verdict must be **V-D6a REPAIR QUALIFIED**.
 
 **Limitation:** the overlay is measured by the page, right after the click is dispatched and again at page exit. How long the old page stays visible before the next page commits is up to the browser.
+
+---
+
+# IB11-P5: V-D6b repair qualification (real Chrome; about 1 minute)
+
+`IB11_P5_VD6B.user.js` (SHA-256 `2f5495a42199ab729501756481b7ae2ec200f7f85b087e3496f888489d15299b`) contains the **repaired** production (commit `24ee7c2`, blob `68e37d1`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p5_vd6b.js`; NATIVE_R can reuse the open viewer, as at P2). The P5 page:
+1. opens an image card in the viewer and waits until it has loaded;
+2. stores remembered volume 1.5, then asks for **one Right Arrow press**, which moves the viewer onto a video card whose media build throws `IndexSizeError`;
+3. records the viewer 50 ms and 1000 ms later: the target, the stage, the failure text, the native link, the status, and any remaining media;
+4. if the failure is shown with the target's native link, asks for one click on that link in the same viewer (the revision-1.3 NATIVE cell: hit test, target, navigation, destination arrival).
+
+The stored volume is reset to 0.37 afterwards. The package qualifies only V-D6b. The V-VIEW and P1–P4 packages are unchanged.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p5.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p5.cjs --media <fixture folder>` (32/32)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p5 --out <fixture folder>/ib11-p5-vd6b.json`. It prints "1 pages (IB11-P5 V-D6b qualification)".
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P4 scripts**. Install and enable `IB11_P5_VD6B.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start`. The viewer opens with an image. Keep hands off until the yellow prompt.
+4. **At "Press the Right Arrow key once":** press → once, and nothing else. The viewer should show "Media failed to load" with an underlined "Open native post" text.
+5. **At "Click the visible underlined "Open native post" text once":** click exactly on the underlined words, once. The page should change to "Native post page reached", then to the done page.
+   - If instead the panel says no failure state with a native link was shown, nothing needs clicking; return the file.
+6. **Return** `ib11-p5-vd6b.json`. If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>`. The verdict must be **V-D6b REPAIR QUALIFIED**.

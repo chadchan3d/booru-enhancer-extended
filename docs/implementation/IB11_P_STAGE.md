@@ -7,6 +7,7 @@
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
+- **P5 (V-D6b): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§9).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -654,3 +655,144 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 9. P5 — V-D6b: communicated failure during in-viewer navigation
+
+**Pre-edit gate (synchronized):**
+- HEAD `5520545470665dc6cafe1ca1f94a0791634380d2` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `fe1e06b` / blob `f232863` / body `4fd694e7…282b`.
+- No mismatch with the assignment or the Ledger.
+
+**Baseline defect.** E0 A6 (local) and V-VIEW VD6B (real Chrome, `ff2fce48…`): with the viewer open on an image and stored volume 1.5, an in-viewer ArrowRight onto a video card makes `buildMedia` throw `IndexSizeError` synchronously. The viewer stays open on the new target with a blank stage, no failure text and no native link.
+
+**Root cause** (at `fe1e06b`):
+- **The call path:** in-viewer navigation goes keydown → `onNext` → `navigateBy` → `openViewerForThumb` → `viewer.open`. `open` sets `currentPost` and `onNext`/`onPrev` to the target, then calls `replaceMedia` (`Booru_Enhancer.user.js:3726`).
+- **The failure:** `replaceMedia` stops the old media and empties the stage (`:3683–3684`), and `buildMedia` throws at `el.volume = vol` (`:3637`).
+- **The escape:** the exception leaves `open` before `updateStatus` and before any state display, and escapes the keydown handler.
+- **The result:**
+  - a blank stage with no failure text and no native link;
+  - the status still naming the previous post;
+  - `mediaEl` still referencing the detached previous element.
+
+**Production change** (commit `24ee7c299d1aac393f3a53f5a8151e423d6ac848`; `replaceMedia` and `open` only):
+- **`replaceMedia`** wraps the `buildMedia` call. On a throw it sets `mediaEl = null`. If the caller asked for `rethrowBuildError`, it rethrows. Otherwise it logs "[Viewer] media build failed" and shows the **existing** failure state, `showMediaState('Media failed to load', mediaGeneration, 0, true)`, which carries the current target's native-post link (the V-D8 anchor). It returns without attaching any media.
+- **`open`** records `wasOpen = isOpen()` before showing the overlay and passes `rethrowBuildError: !wasOpen`.
+  - A takeover from a closed viewer still rethrows, so the P4 / V-D6a gallery cleanup runs unchanged.
+  - Navigation inside an open viewer shows the failure. `open` then continues normally: `updateStatus`, `viewer:open`, enrichment.
+- **The two `updatePost` → `replaceMedia` rebuilds** use the default, the in-viewer behavior. They only run once a viewer owns the interaction, and this keeps a late enrichment from blanking a communicated failure (P5-4).
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `68e37d1c9071d2ae78ae44b31f0082cd51010992` |
+| Production body SHA-256 | `062227fa23a6b637098cf553b29a543e03bf342240354a61d1f587bd414d9f26` |
+| Diff | 15 insertions, 3 deletions |
+
+**Why this keeps V-D6a and V-D6b distinct:**
+- **V-D6a** (failure before a takeover is established): the build error still propagates to `onGalleryClick`, which abandons the shell and does not cancel native navigation (P5-8; P4 regression 15/15).
+- **V-D6b** (the viewer already owns the interaction): the failure is shown in the viewer on the failing target, with its native link.
+
+**Forbidden-scope audit.** No change to:
+- V-D4, V-D7, focus;
+- V-D6a, V-D1, V-D5, V-D8 (preservation only);
+- A4, C4, E6, G4;
+- playback;
+- successful navigation;
+- IB12.
+
+**Permanent regression:** `tests/host/ib11/p5_vd6b_inviewer_failure.cjs` **15/15** (result `p5-vd6b-inviewer-failure-result.json`).
+- **Sources:** each check runs on the repair, the pre-P5 artifact `fe1e06b`, and a **mutant** whose catch always rethrows (the pre-P5 behavior, through the same production path).
+- **The seam:** a test-page wrapper of the media `volume` setter records `IndexSizeError` 1.5 thrown from `buildMedia`, the same way on all three sources.
+- **Diagnosis:** all three start from a valid open image, and on all three the seam threw and post 102 became current.
+  - On the prior and the mutant the stage is blank, with no state and no link, and the status still reads `#101`.
+  - On the repair the stage shows "Media failed to load" with a link to `/posts/102`, and the status reads `#102`.
+
+| Check | Repair | Prior `fe1e06b` | Mutant |
+| --- | --- | --- | --- |
+| P5-1 [V-D6b] valid open image → ArrowRight onto the video; seam throws; open on the target with "Media failed to load" | **true** | **false** | **false** |
+| P5-2 [V-D6b] the target's native-post link, pointer-interactive and hit-tested (V-D8 semantics) | **true** | **false** | **false** |
+| P5-3 [V-D6b] coherent: no img/video in the viewer, previous image detached, status names the target | **true** | **false** | **false** |
+| P5-4 [V-D6b] durable: a late same-post update for the target keeps the failure and link | **true** | **false** | **false** |
+| P5-5 after the failure: ArrowLeft back to the image works; Escape closes and cleans up | true | true | true |
+| P5-6 successful in-viewer navigation image → image → back unchanged | true | true | true |
+| P5-7 successful in-viewer navigation onto a video (volume 0.5) unchanged | true | true | true |
+| P5-8 P4 / V-D6a: a failed takeover still abandons the shell; navigation not cancelled | true | true | true |
+| P5-9 successful image/video takeover; modifier and disabled clicks native | true | true | true |
+| P5-10 P1 / V-D8 native link usable | true | true | true |
+| P5-11 P2 / V-D1 durable load-failure state | true | true | true |
+| P5-12 P3 / V-D5 modifier guard | true | true | true |
+| P5-13 close / cleanup of a video | true | true | true |
+| P5-14 playback: Space plays a paused video | true | true | true |
+| P5-15 no focus behavior on open or after the in-viewer failure | true | true | true |
+
+**Real-browser qualification: required.** Prepared package `tests/browser/ib11/IB11_P5_VD6B.user.js` (SHA-256 `2f5495a42199ab729501756481b7ae2ec200f7f85b087e3496f888489d15299b`):
+- **Build:** `build_ib11_p5.cjs` from `24ee7c2`; the body is byte-identical (`062227fa…9f26`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p5_vd6b.js`; NATIVE_R may reuse the open viewer). The V-VIEW and P1–P4 packages are unchanged.
+- **Page P5_VD6B** (image card VD6B_A, then the video card NATIVE):
+  1. a valid open, loaded image;
+  2. stored volume 1.5 armed;
+  3. a **trusted** unmodified ArrowRight (the E-stage VD6B cell used a synthetic key; P5 requires a trusted one);
+  4. the recorder seam;
+  5. the viewer at 50 ms and 1000 ms, the status, the media count in the viewer, the previous image's attachment, and the link's path;
+  6. if communicated, the revision-1.3 NATIVE cell on the same viewer: link box, pointer-events chain, hit test, one trusted click, navigation and destination arrival for the failing card.
+  - Using a second step on the same open viewer keeps the primary evidence, which is recorded before the click.
+- **Server and evaluator:** `vview_server.cjs --p5`; `vview_evaluate.cjs --p5`. The verdict is **V-D6b REPAIR QUALIFIED** only if all of these hold:
+  - identity MATCH;
+  - a valid start, a trusted ArrowRight, and the seam threw from `buildMedia`;
+  - the selection reached the target;
+  - at 50 ms and at 1000 ms: open on the target, no stage media, failure text, and the native link to the target's post;
+  - no img/video in the viewer, the previous image detached, and the status names the target;
+  - NATIVE PASS / BEHAVIOR_OK;
+  - no trusted input outside a prompt.
+
+**Local qualification: `verify_ib11_p5.cjs --media` 32/32** (`IB11_P5_VERIFICATION.json`; `IB11_P5_SHA256SUMS.txt`).
+- **Static:** fresh build; byte-identical body; runner equals the V-VIEW runner plus exactly the P5 patches; the pinned V-VIEW and P1–P4 packages unchanged; local scope; recorder seam; armed volume after the image is open; trusted unmodified ArrowRight; plan; server `--p5` with arrival.
+- **Smoke:** the repair qualifies.
+- **Production faults (NOT QUALIFIED):**
+  - the probe on `fe1e06b`: blank, stale status, no link to click;
+  - the rethrow mutant: blank;
+  - V-D8 regressed: the failure is communicated, but NATIVE gives DEFECT_CONFIRMED.
+- **Evidence faults (NOT QUALIFIED):**
+  - untrusted or modified ArrowRight; no seam; image not loaded;
+  - selection not on the target; no text at 50 ms; no link at 1000 ms; link to another post;
+  - a media element remaining; previous image attached; stale status;
+  - trusted input outside a prompt;
+  - untrusted link click; no arrival; NATIVE missing;
+  - wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `24ee7c2`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 67/67 |
+| IB11 P1 / P2 / P3 / P4 regressions | 6/6, 11/11, 16/16, 15/15 (V-D8, V-D1, V-D5, V-D6a preserved) |
+| IB11 P5 regression | 15/15 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1 / P2 / P3 / P4 package verifiers | 22/23, 22/23, 31/32, 26/27 |
+| IB11 P5 package verifier | 32/32 |
+| IB11 E0 characterization | 33/38; fault controls 42/46 |
+
+**Pin, anchor and witness failures (expected; not behavioral):**
+- **Blob and working-tree pins,** each superseded by P5:
+  - G-PLAY and V-VIEW: `4d793a2`;
+  - P1, P2, P3 and P4 verifiers: `039b99e`, `56c495e`, `f2b46eb`, `f232863`;
+  - E0 S0: `4d793a2`.
+- **E0 A6, the V-D6b defect witness:** it **no longer reproduces the old blank state** because V-D6b is repaired. Measured on the repair: open on post 102 with the failure state and link. This is the expected change. Its repair-probe control is caught only vacuously; the P5 regression's mutant is now the sensitive control.
+- **E0 A5's repair-probe control** "overlay shown only after media was built" is no longer caught: its anchor (`overlay.style.display = 'flex';` + `replaceMedia(post);`) matches 0 times, because `open` now passes options to `replaceMedia`. It is the repair probe of a witness already repaired at P4, so this is an anchor pin.
+- **E0 A5, C3, G2 (repaired at P4, P2, P3) and the G5 control anchor:** as before.
+- **Not reached by the repair:** every other E0 check and the remaining defect witnesses (V-D4, V-D7) still pass as before.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**Limitations:**
+- The failure text is the existing generic "Media failed to load" (the same text as a load failure).
+- The `updatePost` rebuild path shares the in-viewer handling (P5-4).
+
+**P5 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D6b is not marked repaired until the P5 probe returns **V-D6b REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P5".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).
