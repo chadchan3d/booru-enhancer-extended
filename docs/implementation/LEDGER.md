@@ -12,10 +12,7 @@
 - **P1 (V-D8): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §1–§2).
 - **P2 (V-D1): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §3–§4).
 - **P3 (V-D5): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §5–§6).
-- **P4 (V-D6a): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §7):
-  - production repair committed at `fe1e06b`;
-  - local qualification PASS: regression 15/15 and P4 package verifier 27/27;
-  - **real-Chrome qualification PENDING.**
+- **P4 (V-D6a): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §7–§8).
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -30,7 +27,7 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P4 record commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P4 closure commit (documentation only).
 - **Production `Booru_Enhancer.user.js`:**
   - commit `fe1e06b92e7703692d38dc00cf09824cbfbfee9b` (IB11-P4, V-D6a);
   - blob `f2328634aac5d4c597361699f71155f0eb11ac17`;
@@ -93,7 +90,7 @@
 | **P2 — V-D1** (durable failure state across late same-post updates) | **COMPLETE, PASS(scope) in TC** |
 | V-D4 (rotated Fit valid across resize) | NOT STARTED |
 | **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
-| **P4 — V-D6a** (safe takeover on a synchronous build failure) | **PARTIAL**: repair `fe1e06b` locally qualified; real-Chrome qualification pending |
+| **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | V-D6b (communicated in-viewer build failure) | NOT STARTED |
 | V-D7 (staged placeholder; preserve apparent view on replacement) | NOT STARTED |
 | Focus ownership/return | NOT STARTED |
@@ -156,7 +153,10 @@
   - G-PLAY 36/37, V-VIEW 65/66 and the P1/P2/P3 verifiers 22/23, 22/23 and 31/32, each failing only its superseded working-tree pin;
   - E0 characterization 34/38 and controls 43/46: S0 pin, C3 and G2 (repaired earlier), **A5 (the V-D6a witness, now repaired: expected)**, the G5 anchor; **A6 (V-D6b) still witnesses**;
   - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
-- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p4`; `vview_evaluate.cjs --p4` must report **V-D6a REPAIR QUALIFIED**).
+- **Real-Chrome qualification:** raw `ib11-p4-vd6a.json` SHA-256 `04e21ce5bcb977e584088785e11fd647e4325c15de8563b908921c489ce56b1c` (not committed). `vview_evaluate.cjs --p4`: revision 1.3, exit 0, **V-D6a REPAIR QUALIFIED**.
+  - VD6A PASS / BEHAVIOR_OK: a trusted ordinary click; the `buildMedia` seam threw `IndexSizeError` (value 1.5); not prevented; the page navigated and the native destination recorded the arrival.
+  - After the failed takeover: `open` false, overlay none, no current post, 0 stage children, no media, state or link; overlay none at page exit. No client error.
+  - Preservation: successful takeover, bypasses, P1/P2/P3 and close/playback/focus unchanged (P4 regression and P1–P3 regressions).
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -191,10 +191,8 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Active: IB11-P4 (V-D6a only), operator step.**
-  - Run the P4 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P4"; about 1 minute; `vview_server.cjs --p4`; package `8c9fd499…`) and return `ib11-p4-vd6a.json`.
-  - It is evaluated with `vview_evaluate.cjs --p4`, which must report **V-D6a REPAIR QUALIFIED** before V-D6a is marked COMPLETE.
-  - After P4 closes, the next eligible assignment is **one** remaining frozen item, chosen by the owner from: V-D4, V-D6b, V-D7, focus ownership/return.
+- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1), P3 (V-D5) and P4 (V-D6a) are closed.
+  - The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D4, V-D6b, V-D7, focus ownership/return.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;

@@ -6,7 +6,7 @@
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
-- **P4 (V-D6a): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§7).
+- **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -610,6 +610,47 @@ IB11 remains **PARTIAL / NOT COMPLETE**.
 
 Historical result files rewritten by these runs were restored unedited.
 
-**P4 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D6a is not marked repaired until the P4 probe returns **V-D6a REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P4".
+**P4 status at the time of the repair:** local qualification and regressions passed; real-Chrome qualification was pending. It is now closed (§8).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 8. P4 closure: real-Chrome qualification of the V-D6a repair
+
+**Raw result:** `ib11-p4-vd6a.json`, SHA-256 `04e21ce5bcb977e584088785e11fd647e4325c15de8563b908921c489ce56b1c`. Verified; not committed (`.gitignore`); not modified.
+- Probe `ib11-p4-vd6a`; package `IB11_P4_VD6A.user.js` (`8c9fd499…c7a2`).
+- One attempt, page TAKEOVER.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `4fd694e7…282b`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompt.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p4 tests/browser/ib10/ib11-p4-vd6a.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D6a REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**VD6A:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **The click:** one trusted ordinary click on the video card.
+- **The failure:** the production `buildMedia` volume seam threw `IndexSizeError` with the characterized value 1.5.
+- **Navigation:** not cancelled (`defaultPrevented` false). The page navigated, and the controlled native destination recorded the TAKEOVER / VD6A arrival.
+- **Right after the failed takeover:** viewer `open` false, overlay `display` none, `currentId` null, 0 stage children, no media, no state text, no native-link shell.
+- **At page exit:** overlay `display` none.
+
+**Limitation:** the overlay is measured by the page right after the click and at page exit. How long the old page stays visible before the next page commits is up to the browser.
+
+**Preservation** (local; production unchanged since §7):
+- **Successful takeover:** image and video takeovers open normally and cancel navigation (P4-4, P4-5); a takeover after a failed one works (P4-8).
+- **Bypass rules:** modifier, middle-click and `viewer.enabled = false` clicks stay native (P4-6, P4-7).
+- **P1 / V-D8:** 6/6 and P4-10.
+- **P2 / V-D1:** 11/11 and P4-11.
+- **P3 / V-D5:** 16/16 and P4-12.
+- **Close/cleanup, playback and focus:** unchanged (P4-13 to P4-15).
+- **V-D6b:** untouched (P4-9; E0 A6 still witnesses).
+
+**Conclusion:** **P4 / V-D6a: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture). A synchronous viewer-build failure during an ordinary card-click takeover now leaves no viewer shell or partial state, and the native navigation proceeds to its destination.
+
+**Production:** commit `fe1e06b92e7703692d38dc00cf09824cbfbfee9b`, blob `f2328634aac5d4c597361699f71155f0eb11ac17`, body SHA-256 `4fd694e7cb24509953559249c65e3b95e695793e1b250730a108d9bf216d282b`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D4, V-D6b, V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.
