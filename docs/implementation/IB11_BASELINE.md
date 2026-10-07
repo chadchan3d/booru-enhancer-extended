@@ -4,7 +4,7 @@
 
 **Invariant (Blueprint §3 IB11 item 2):** "The viewer shows the selected target's usable placeholder, preserves transformations/preferences and offers native recovery when loading or playback fails."
 
-**Status:** **IB11 — PARTIAL, E stage.** **G-PLAY(TC): E → PASS(scope)** (§10). The remaining IB11 browser evidence (keyboard, focus, native link, visual V-D4/V-D6/V-D7) is OPEN; its probe, V-VIEW, is built and locally qualified (§11) and awaits the operator run. No production change. IB12 is not started.
+**Status:** **IB11 — PARTIAL, NOT COMPLETE (E stage).** **G-PLAY(TC): E → PASS(scope)** (§10). **V-VIEW browser evidence complete for TC** (§15): 11/11 cells evidence PASS. P-stage repair has not occurred and the P scope is not frozen. No production change. IB12 is not started.
 
 ## 1. Source identity and gate check
 
@@ -710,3 +710,102 @@ This is a likely **product defect**, not a probe problem. The revision ≤ 1.2 N
 - **`verify_ib11_vview.cjs --media` still 66/66.**
 
 **Status.** IB11 PARTIAL, E stage. The P scope is **not** frozen: after the recovery, the complete findings need review, and owner decisions are needed wherever the Blueprint does not itself dictate the repair (focus policy and the other §4 findings). No production change.
+
+## 15. IB11-E4 closure: NATIVE + VD6A recovery ingested; final E-stage findings
+
+**Raw evidence.** All three SHA-256 values are verified; no file is committed (`.gitignore`) and none was modified.
+
+| File | SHA-256 | Role |
+| --- | --- | --- |
+| `ib11-vview-results.json` | `ff2fce48f25270f4430e59b957efac0b459eab8ef69306d6df74be0577201599` | full V-VIEW run (package `878a3cd3…`, revision 1.2): the source of the nine MAIN cells |
+| `ib11-vview-recovery.json` | `a222632af9071c9dbd915ec5e28146142ebf4695a95a96e771c32c25848d37e4` | recovery (package `598ba6c5…`, revision 1.3): pages NATIVE_R and TAKEOVER, attempt 1 each |
+| `ib11-vview-g3-preflight.json` | `9e434c09920f01239caadf25b03034bfefbc1747dce224445eee120ff8ef8f07` | G3 preflight: **G3 PREFLIGHT COMPLETE** (kept as separate provenance) |
+
+All three record identity `MATCH_EXPECTED_ARTIFACT`, Chrome 154 / Windows / Tampermonkey 5.5.0, no attempt errors, and no trusted input outside prompts.
+
+**Authoritative merged evaluation.** `node tests/browser/ib11/vview_evaluate.cjs tests/browser/ib10/ib11-vview-results.json --recovery tests/browser/ib10/ib11-vview-recovery.json --g3-preflight-ref tests/browser/ib10/ib11-vview-g3-preflight.json`:
+- **Exit 0.** Revision **1.3**, `evidencePass: true`, **11/11 PASS**.
+- No problems, no invalid attempts, no merge problems.
+- Replaced: NATIVE (previously from the original) from NATIVE_R attempt 1, and VD6A from TAKEOVER attempt 1, both carrying the recovery hash.
+- Provenance: the original, recovery and G3-preflight hashes, plus the preflight verdict.
+
+**Independent raw check of the recovery:**
+- **NATIVE:**
+  - a real 404, with "Media failed to load" and a native link;
+  - link box x 1296.7, y 605.1, w 101.1, h 16.9;
+  - destination = the card's `/posts/<id>` (match);
+  - computed `pointer-events`: link `none`, `.be-media-state` `none`, `.be-viewer-stage` `auto`, overlay `auto`;
+  - `elementFromPoint` at the centre (1347.2, 613.5) → `.be-viewer-stage`, not the link;
+  - one **trusted** pointerdown and one **trusted** click at (1334, 613), inside the box, with the link present; both targeted `.be-viewer-stage`;
+  - `defaultPrevented` false; the viewer closed (display none); no navigation; no destination arrival; no outside-box clicks.
+- **VD6A:**
+  - a trusted ordinary click on the VD6A card;
+  - seam `IndexSizeError` (value 1.5) from `buildMedia`;
+  - overlay `flex` with an empty stage (0 children, no media, no state, no link);
+  - native navigation not cancelled; the page left; the controlled destination recorded the arrival after the click;
+  - overlay still `flex` at page leave.
+
+**V-VIEW evidence (TC), per cell:**
+
+| Cell | Source | Evidence | Finding |
+| --- | --- | --- | --- |
+| VD7 | original | PASS | DEFECT_CONFIRMED |
+| VD6B | original | PASS | DEFECT_CONFIRMED |
+| VD1 | original | PASS | DEFECT_CONFIRMED |
+| VD5SYN | original | PASS | CONTROL_ONLY |
+| VD4 | original | PASS | DEFECT_CONFIRMED |
+| VD5 | original | PASS | DEFECT_CONFIRMED |
+| G3 | original (plus the preflight, separately) | PASS | BEHAVIOR_OK (native-only single) |
+| FOCUS_M | original | PASS | OBSERVED |
+| FOCUS_K | original | PASS | OBSERVED |
+| NATIVE | recovery NATIVE_R | PASS | DEFECT_CONFIRMED (**V-D8**) |
+| VD6A | recovery TAKEOVER | PASS | DEFECT_CONFIRMED |
+
+**V-D8 confirmed.** The viewer's "Open native post" fallback is visible but not interactive. It inherits `pointer-events: none` from `.be-media-state` (`Booru_Enhancer.user.js:4916`; link at `:3591–3596`). A click on it falls through to the stage, which closes the viewer (`:3417`), so native recovery after a media failure is unusable. IB04's P07 check had verified only the link's presence and href.
+
+**E-stage evidence state:**
+- The **IB11 V-VIEW browser-evidence set is complete for the qualified TC cell** (Chrome 154 + Tampermonkey 5.5.0, local controlled fixtures).
+- NATIVE and VD6A are no longer open. G-PLAY(TC) PASS(scope) and every earlier limitation and runtime scope are retained.
+- IB11 itself remains **PARTIAL / NOT COMPLETE**: P-stage repair has not occurred.
+
+### Final E-stage finding table
+
+Blueprint references are §3 IB11 items 2 (invariant), 3 (allowed scope), 8 (master behavior), 9 (required tests) and 10 (acceptance), plus §6.
+
+| Item | Evidence (TC) | Finding | Blueprint already requires repair? | Owner decision still required? |
+| --- | --- | --- | --- | --- |
+| V-D7 no staged placeholder | VD7 PASS | DEFECT_CONFIRMED | **Yes.** Invariant "usable placeholder"; item 3 "Stage target thumbnail/sample before ready upgrade" | No |
+| V-D1 same-ID update erases the failure and native link | VD1 PASS | DEFECT_CONFIRMED | **Yes.** Invariant "native recovery when loading fails"; item 10 "no blank uncommunicated failure"; item 3 local failed states | No |
+| V-D6a takeover build failure leaves a blank overlay over the native navigation | VD6A PASS | DEFECT_CONFIRMED (native recovery not blocked; overlay left shown) | **Yes.** Item 3 "safe shell takeover and native link"; item 9 "Synchronous open throws before cancellation"; item 10 | No |
+| V-D6b in-viewer build failure leaves a blank viewer | VD6B PASS | DEFECT_CONFIRMED | **Yes.** Item 10 "no blank uncommunicated failure"; item 3 failed state and native link | No |
+| V-D8 native fallback link unclickable | NATIVE PASS | DEFECT_CONFIRMED | **Yes.** Invariant "offers native recovery when loading or playback fails"; item 10 "Native navigation remains usable after failure" | No |
+| V-D4 rotated Fit overflows after resize | VD4 PASS | DEFECT_CONFIRMED | **Yes by acceptance:** item 9 "all transforms across replacement/resize" and item 10 "no … invalid transform"; §6 keeps Fit/rotate behavior. Item 3's allowed list does not name fit computation explicitly | **Scope confirmation** that the fit-with-rotation correction belongs in IB11 P |
+| V-D5 viewer keys act on Ctrl/Meta/Alt chords | VD5 PASS | DEFECT_CONFIRMED (Ctrl+F → Favorite, Ctrl+D → Download, browser defaults suppressed) | Not by itself (§6 keybinds preserved) | **Already decided** (IB11-E2): narrow modifier guard |
+| G3 Space with the native control focused | G3 PASS (+ preflight COMPLETE) | BEHAVIOR_OK: one native toggle; production not involved | No | No |
+| FOCUS_M / FOCUS_K | PASS / PASS | OBSERVED: the viewer does not take focus on open; focus stays on the invoking link; Tab reaches page controls behind the overlay; Escape/✕ "return" works only because focus never left | Focus return and stable last-viewed focus (items 3 and 13; IB12) are satisfied as observed; **no modal-focus policy is dictated** | **Yes**: focus policy (take focus into the viewer? confine Tab? dialog semantics?) |
+| A4 card "Open viewer" action ignores `viewer.enabled` | local (A4) | FINDING | No (§6 names the ordinary click only) | Optional; default is to leave unchanged |
+| C4 no native link when a target lacks `postUrl` (direct `open` callers) | local (C4) | FINDING | Arguably under "native recovery"; affects only the page command on a post page (the native page is the current page) | Optional; default is to leave unchanged |
+| D4 no same-ID generation guard | local (D4) | FINDING | **Supporting mechanism of A** (item 3 "post-ID plus generation guards"); part of the V-D1/V-D7 staging repair | No separate decision |
+| D5 / E4 manual zoom across a type change / placeholder upgrade | local (D5, E4) | FINDING: reset to fit on a type change; absolute scale kept on an upgrade (apparent size jumps) | Item 10 forbids an "invalid transform reset" but does not define manual-zoom semantics across a resolution change | **Yes**: what manual zoom means across a placeholder → better upgrade (becomes material once V-D7 staging lands) |
+| E6 Fit button also resets rotation/flip | local (E6) | FINDING | No; existing affordance (§6 keep affordances) | No; keep unchanged unless the owner wants otherwise |
+| G4 rejected `play()` swallowed, no blocked-Play state | local (G4) + G-PLAY | FINDING. G-PLAY showed native controls and a trusted Space as a working Play fallback | Not required: item 6 "tested Play/native fallback" is met by the evidence; item 3 *allows* blocked-Play states | Optional (add a visible blocked-Play state or not) |
+| G-PLAY WebM no-activation path | G-PLAY | limitation | — | No (evidence limitation, not a decision) |
+
+### Classification
+
+- **A. Repairs already required by the Blueprint:**
+  - V-D7 (staged placeholder);
+  - V-D1 (durable failed state; with the D4 generation guard);
+  - V-D6a and V-D6b (safe takeover / build-failure communication with a native link);
+  - V-D8 (usable native link);
+  - V-D4 (valid Fit with rotation across resize), subject to the scope confirmation in C.
+- **B. Owner decisions already made:**
+  - V-D5: Ctrl/Meta/Alt chords must not invoke ordinary viewer commands; Ctrl+F must not Favorite; Ctrl+D must not viewer-Download; a narrow modifier guard only.
+- **C. Still requires owner judgment before the P scope is frozen:**
+  1. **Focus policy:** whether the viewer takes focus on open, confines Tab while open, or exposes dialog semantics. Today focus stays on the invoker and Tab reaches page controls behind the overlay.
+  2. **V-D4 scope confirmation:** the fit-with-rotation correction in IB11 P.
+  3. **Manual zoom semantics across a placeholder → better upgrade** (D5/E4).
+  4. **Optional items with a default of "leave unchanged":** A4 (action button ignores `viewer.enabled`), C4 (no native link without `postUrl`), E6 (Fit resets rotation/flip), G4 (no visible blocked-Play state).
+- **Resolved by evidence:** G3 (BEHAVIOR_OK). D4 is folded into A as its supporting mechanism.
+
+**Next:** owner review of the C items, then an explicit P-scope freeze. No P design or implementation here. Production unchanged (`4d793a2`).
