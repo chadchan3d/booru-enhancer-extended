@@ -27,7 +27,9 @@
 // for IB11_P1_Native.user.js; output probe ib11-p1-native.
 // IB11-P2 (--p2): one page P2_VD1 (real failure -> late same-post update ->
 // revision-1.3 NATIVE) for IB11_P2_VD1.user.js; output probe ib11-p2-vd1.
-// Usage: node vview_server.cjs --media <fixture folder> [--port 8797] [--out <file>] [--g3-preflight | --recovery | --p1 | --p2]
+// IB11-P3 (--p3): one page P3_VD5 (trusted Ctrl+F, Ctrl+D, Alt+O, unmodified
+// F and D) for IB11_P3_VD5.user.js; output probe ib11-p3-vd5.
+// Usage: node vview_server.cjs --media <fixture folder> [--port 8797] [--out <file>] [--g3-preflight | --recovery | --p1 | --p2 | --p3]
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -68,12 +70,13 @@ const MAIN_CARDS = [
 const TAKEOVER_CARDS = [['VD6A', 'video', 'webm']];
 const PREFLIGHT_CARDS = [['G3', 'video', 'webm']];
 const RECOVERY_CELLS = ['NATIVE', 'VD6A'];
-function plan({ preflight = false, recovery = false, p1 = false, p2 = false } = {}) {
+function plan({ preflight = false, recovery = false, p1 = false, p2 = false, p3 = false } = {}) {
   let id = 8000;
   const mk = (pageId, cards) => ({ token: crypto.randomBytes(8).toString('hex'), id: pageId,
     cards: cards.map(([role, kind, media]) => ({ role, kind, media, id: String(++id) })) });
   if (p1) return [mk('P1_NATIVE', [['NATIVE', 'img', 'fail']])];
   if (p2) return [mk('P2_VD1', [['NATIVE', 'img', 'fail']])];
+  if (p3) return [mk('P3_VD5', [['VD5', 'img', 'wide']])];
   if (recovery) return [mk('NATIVE_R', [['NATIVE', 'img', 'fail']]), mk('TAKEOVER', TAKEOVER_CARDS)];
   return preflight ? [mk('G3PRE', PREFLIGHT_CARDS)] : [mk('MAIN', MAIN_CARDS), mk('TAKEOVER', TAKEOVER_CARDS)];
 }
@@ -93,21 +96,21 @@ function page(pg, port, sizes) {
 </body></html>`;
 }
 
-function createServer({ mediaDir, port = PORT, out = null, preflight = false, recovery = false, p1 = false, p2 = false, log = console.log }) {
+function createServer({ mediaDir, port = PORT, out = null, preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, log = console.log }) {
   const media = verifyMedia(mediaDir);
   const imgs = images();
-  const pages = plan({ preflight, recovery, p1, p2 });
+  const pages = plan({ preflight, recovery, p1, p2, p3 });
   const byToken = new Map(pages.map((p) => [p.token, p]));
   const sizes = { webm: media.webm.size, ...Object.fromEntries(Object.entries(imgs).map(([k, v]) => [k, v.size])) };
   const attempts = []; const arrivals = []; const requests = [];
   const write = () => {
-    const doc = { probe: p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : (recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview')), version: '1.0.0', recoveryCells: recovery ? RECOVERY_CELLS : undefined, slowTransport: SLOW,
+    const doc = { probe: p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : (recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview')), version: '1.0.0', recoveryCells: recovery ? RECOVERY_CELLS : undefined, slowTransport: SLOW,
       fixtures: { webm: { size: media.webm.size, sha256: media.webm.sha256 }, ...Object.fromEntries(Object.entries(imgs).map(([k, v]) => [k, { size: v.size, sha256: v.sha256, dims: DIMS[k] }])) },
       pages: attempts, arrivals, requests };
     if (out) fs.writeFileSync(out, `${JSON.stringify(doc, null, 1)}\n`);
     return doc;
   };
-  const complete = () => pages.every((p) => attempts.some((a) => a.page === p.id && !a.client.error)) && (preflight || recovery || p1 || p2 || (arrivals.some((a) => a.page === 'MAIN') && arrivals.some((a) => a.page === 'TAKEOVER')));
+  const complete = () => pages.every((p) => attempts.some((a) => a.page === p.id && !a.client.error)) && (preflight || recovery || p1 || p2 || p3 || (arrivals.some((a) => a.page === 'MAIN') && arrivals.some((a) => a.page === 'TAKEOVER')));
   function serveImage(req, res, pg, role, kind) {
     const rec = { page: pg.id, label: `${role}-${kind}`, t0: Date.now(), status: 0, bytes: 0, writes: [], end: null };
     requests.push(rec);
@@ -210,8 +213,9 @@ if (require.main === module) {
   const recovery = process.argv.includes('--recovery');
   const p1 = process.argv.includes('--p1');
   const p2 = process.argv.includes('--p2');
-  const out = arg('--out', path.join(process.cwd(), p2 ? 'ib11-p2-vd1.json' : p1 ? 'ib11-p1-native.json' : (recovery ? 'ib11-vview-recovery.json' : (preflight ? 'ib11-vview-g3-preflight.json' : 'ib11-vview-results.json'))));
+  const p3 = process.argv.includes('--p3');
+  const out = arg('--out', path.join(process.cwd(), p3 ? 'ib11-p3-vd5.json' : p2 ? 'ib11-p2-vd1.json' : p1 ? 'ib11-p1-native.json' : (recovery ? 'ib11-vview-recovery.json' : (preflight ? 'ib11-vview-g3-preflight.json' : 'ib11-vview-results.json'))));
   let s;
-  try { s = createServer({ mediaDir, port, out, preflight, recovery, p1, p2 }); } catch (e) { console.error(`IB11 V-VIEW refused: ${e.message}`); process.exit(1); }
-  s.listen().then(() => { s.write(); console.log(`IB11 V-VIEW: media SHA-256 verified; ${s.pages.length} pages${preflight ? ' (G3 PREFLIGHT only)' : ''}${recovery ? ' (RECOVERY: NATIVE + VD6A only)' : ''}${p1 ? ' (IB11-P1 V-D8 qualification)' : ''}${p2 ? ' (IB11-P2 V-D1 qualification)' : ''}. Open http://127.0.0.1:${port}/vview/start in the Tampermonkey Chrome profile.`); });
+  try { s = createServer({ mediaDir, port, out, preflight, recovery, p1, p2, p3 }); } catch (e) { console.error(`IB11 V-VIEW refused: ${e.message}`); process.exit(1); }
+  s.listen().then(() => { s.write(); console.log(`IB11 V-VIEW: media SHA-256 verified; ${s.pages.length} pages${preflight ? ' (G3 PREFLIGHT only)' : ''}${recovery ? ' (RECOVERY: NATIVE + VD6A only)' : ''}${p1 ? ' (IB11-P1 V-D8 qualification)' : ''}${p2 ? ' (IB11-P2 V-D1 qualification)' : ''}${p3 ? ' (IB11-P3 V-D5 qualification)' : ''}. Open http://127.0.0.1:${port}/vview/start in the Tampermonkey Chrome profile.`); });
 }

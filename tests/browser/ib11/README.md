@@ -203,3 +203,43 @@ If they survive, the revision-1.3 NATIVE cell then asks for one click on the lin
 5. **Return** `ib11-p2-vd1.json`. If a page shows INVALID, press F5 to retry.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p2 <ib11-p2-vd1.json>`. The verdict must be **V-D1 REPAIR QUALIFIED**.
+
+---
+
+# IB11-P3: V-D5 repair qualification (real Chrome; about 2 minutes)
+
+`IB11_P3_VD5.user.js` (SHA-256 `d29d590bd04468f7e4096f055cbbb6af3e16597e6c3296f1050d74252d9cf0d6`) contains the **repaired** production (commit `48e44d9`, blob `f2b46eb`) unchanged, wrapped by the V-VIEW recorder and runner. The P3 page opens one image in the viewer and asks for five key presses, one at a time:
+1. Ctrl+F;
+2. Ctrl+D;
+3. Alt+O;
+4. F (no modifier);
+5. D (no modifier).
+
+**What the page does:**
+- Favorite, Download and "open original" are recording stubs in this test page. No real favorite, download or tab is made.
+- The viewer's decision is measured after production's key handler: which command ran, and whether the viewer called `preventDefault`.
+- **Ctrl+D:** after that measurement the runner blocks Chrome's default, so **no bookmark is added**.
+- **Ctrl+F:** Chrome's Find bar opens. That is expected and harmless; press Esc to close it.
+
+The package qualifies only V-D5. The V-VIEW, P1 and P2 packages are unchanged.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p3.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p3.cjs --media <fixture folder>` (32/32)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p3 --out <fixture folder>/ib11-p3-vd5.json`. It prints "1 pages (IB11-P3 V-D5 qualification)".
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW, P1 and P2 scripts**. Install and enable `IB11_P3_VD5.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start`. The viewer opens with an image. Keep hands off until the first yellow prompt.
+4. **At each prompt, press exactly the keys shown, once:**
+   - "Hold Ctrl and press F once": Chrome's Find bar may open. After "Recorded.", press Esc to close it.
+   - "Hold Ctrl and press D once": nothing should appear (no bookmark dialog).
+   - "Hold Alt and press O once".
+   - "Press F once (no other key held)".
+   - "Press D once (no other key held)".
+   After each "Recorded." the page continues by itself after 5 seconds. Press Esc only to close a browser bar, menu or dialog.
+5. **Return** `ib11-p3-vd5.json` when the page shows "P3 RECORDED". If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p3 <ib11-p3-vd5.json>`. The verdict must be **V-D5 REPAIR QUALIFIED**.
+
+**Limitation:** Meta is not exercised in real Chrome on Windows. It is the Windows key, and Win+D shows the desktop. Meta chords are covered by the local regression (P3-3).

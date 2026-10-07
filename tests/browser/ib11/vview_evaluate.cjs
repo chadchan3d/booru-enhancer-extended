@@ -90,6 +90,7 @@
 //        node vview_evaluate.cjs --preflight <ib11-vview-g3-preflight.json>
 //        node vview_evaluate.cjs --p1 <ib11-p1-native.json>
 //        node vview_evaluate.cjs --p2 <ib11-p2-vd1.json>
+//        node vview_evaluate.cjs --p3 <ib11-p3-vd5.json>
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -410,9 +411,61 @@ function evaluateP2(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P3 (V-D5 repair) qualification: one page P3_VD5, one valid attempt,
+// identity MATCH. VD5 (trusted Ctrl+F, Ctrl+D; revision-1.3 evidence rule):
+// each chord invokes no Favorite / Download and is NOT preventDefault-ed, and
+// the viewer stays open. P3KEYS: trusted Alt+O invokes no Open original /
+// Favorite / Download and is not prevented; trusted unmodified F invokes
+// Favorite exactly once and D invokes Download exactly once, both prevented.
+// No trusted input outside a prompt. Verdict "V-D5 REPAIR QUALIFIED" only when
+// all hold. defaultPrevented is the viewer's decision, measured by the runner's
+// window bubble-phase listener (after production's document listener); for
+// Ctrl+D that listener then suppresses Chrome's bookmark (required: no bookmark
+// mutation). (Meta is not exercised in real Chrome on Windows: it is the
+// Windows key and Win+D shows the desktop; the jsdom regression covers Meta.)
+function evaluateP3(doc) {
+  const out = { kind: 'ib11-p3', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p3-vd5') { out.problems.push('not an ib11-p3-vd5 result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P3_VD5', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P3_VD5'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const cells = p.client.cells || {};
+  const v = evalCell('VD5', cells.VD5, ctxOf(doc, 'P3_VD5'));
+  if (cells.VD5 && cells.VD5.outsideTrusted) out.problems.push('INVALID trusted input outside a prompt (VD5)');
+  for (const x of (cells.VD5 && cells.VD5.chords) || []) if (x.defaultPrevented !== true && x.defaultPrevented !== false) out.problems.push(`INVALID Ctrl+${String(x.want).toUpperCase()}: the viewer's defaultPrevented was not measured`);
+  { const x = ((cells.VD5 && cells.VD5.chords) || []).find((y) => y.want === 'd'); if (x && x.runnerSuppressedBrowserDefault !== true) out.problems.push('INVALID Ctrl+D: the runner did not suppress the browser bookmark default'); }
+  const ch = (cells.VD5 && cells.VD5.chords) || [];
+  const chordOk = ['f', 'd'].map((w) => { const x = ch.find((y) => y.want === w); return { want: `ctrl+${w}`, ok: !!x && x.fav === 0 && x.dl === 0 && x.defaultPrevented === false && x.openAfter === true, fav: x && x.fav, dl: x && x.dl, defaultPrevented: x && x.defaultPrevented }; });
+  out.cells.VD5 = { evidence: v.evidence, reasons: v.reasons, finding: { code: chordOk.every((x) => x.ok) ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: chordOk } };
+  const k = cells.P3KEYS; const reasons = []; const rows = (k && k.rows) || [];
+  const row = (w) => rows.find((x) => x.want === w);
+  if (!k) reasons.push('INVALID no P3KEYS record');
+  else {
+    if (k.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+    for (const w of ['alt+o', 'f', 'd']) { const x = row(w); if (!x) reasons.push(`INVALID ${w} not recorded`); else if (x.trusted !== true) reasons.push(`INVALID ${w} not trusted (synthetic input is not browser evidence)`); }
+    const a = row('alt+o'); if (a && (!a.altKey || String(a.key).toLowerCase() !== 'o')) reasons.push('FAIL alt+o modifier/key fields wrong');
+    for (const w of ['f', 'd']) { const x = row(w); if (x && (x.ctrlKey || x.metaKey || x.altKey || x.shiftKey || x.key !== w)) reasons.push(`FAIL ${w} not an unmodified key`); }
+    for (const x of rows) if (x.defaultPrevented !== true && x.defaultPrevented !== false) reasons.push(`INVALID ${x.want}: the viewer's defaultPrevented was not measured`);
+  }
+  const a = row('alt+o'); const f = row('f'); const d = row('d');
+  const keysOk = !!a && a.open === 0 && a.fav === 0 && a.dl === 0 && a.defaultPrevented === false && !!f && f.fav === 1 && f.defaultPrevented === true && !!d && d.dl === 1 && d.defaultPrevented === true;
+  out.cells.P3KEYS = { evidence: reasons.length ? (reasons.some((x) => x.startsWith('INVALID')) ? 'INVALID' : 'FAIL') : 'PASS', reasons,
+    finding: { code: keysOk ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { altO: a && { open: a.open, fav: a.fav, dl: a.dl, defaultPrevented: a.defaultPrevented }, f: f && { fav: f.fav, defaultPrevented: f.defaultPrevented }, d: d && { dl: d.dl, defaultPrevented: d.defaultPrevented } } } };
+  if (!out.problems.length && out.cells.VD5.evidence === 'PASS' && out.cells.VD5.finding.code === 'BEHAVIOR_OK' && out.cells.P3KEYS.evidence === 'PASS' && out.cells.P3KEYS.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D5 REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p3') {
+    const r3 = evaluateP3(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r3.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r3, null, 1)); process.exitCode = r3.verdict === 'V-D5 REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p2') {
     const r2 = evaluateP2(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r2.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');

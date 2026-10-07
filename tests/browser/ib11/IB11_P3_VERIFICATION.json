@@ -1,0 +1,171 @@
+{
+ "probe": "ib11-p3-verification",
+ "p3Commit": "48e44d9",
+ "p3Blob": "f2b46eb443e153e03123742fb5d4baa4be761dd6",
+ "repairBodySha256": "c42b71dbb7d660595be20095bac47cc1712a85381464d8327814895fa4745995",
+ "evaluatorRevision": "1.3",
+ "passed": 32,
+ "total": 32,
+ "results": [
+  {
+   "name": "P3 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P3 package executes the committed repair body byte for byte (48e44d9 / blob f2b46eb, body c42b71db…5995); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P3 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW (598ba6c5…), P1 (5842a1da…) and P2 (d38963eb…) packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner stubs: Favorite, Download and window.open are recording stubs inside the test page (no real favorite, download or tab)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner measures the viewer decision in the window BUBBLE phase (after production) and suppresses only Ctrl/Meta+D (no browser bookmark)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P3 plan: one page P3_VD5 with one image card",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p3: page served; results file probe ib11-p3-vd5",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D5 REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: Ctrl+F and Ctrl+D -> no Favorite, no Download, not prevented, viewer stays open",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: Alt+O -> no Open original / Favorite / Download, not prevented; unmodified F -> Favorite once (prevented); unmodified D -> Download once (prevented)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-P3 artifact bef4437 -> NOT QUALIFIED (VD5 and P3KEYS DEFECT_CONFIRMED: Ctrl+F favorites, Ctrl+D downloads, Alt+O opens the original, all prevented)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: mutant without the modifier guard -> NOT QUALIFIED (DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: over-broad guard (unmodified F no longer favorites) -> NOT QUALIFIED (P3KEYS DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted Ctrl+F: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Ctrl+D prevented: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Ctrl+F fired Favorite: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Ctrl+F viewer decision not measured: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Ctrl+D browser bookmark default not suppressed by the runner: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: unmodified F viewer decision not measured: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted Alt+O: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Alt+O without altKey: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: Alt+O opened the original: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: unmodified F not recorded: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: unmodified D did not download: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: unmodified F carried Shift: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt (P3KEYS): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt (VD5): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

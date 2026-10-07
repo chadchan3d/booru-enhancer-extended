@@ -5,6 +5,7 @@
 **Status:** **IB11 PARTIAL / NOT COMPLETE.**
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
+- **P3 (V-D5): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§5).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -321,3 +322,131 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 5. P3 — V-D5: viewer keys ignore Ctrl/Meta/Alt chords
+
+**Pre-edit gate:**
+- `b9a5ef9` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `bef4437` / blob `56c495e` / body `a6d7bcc1…4839`.
+- No mismatch with the Ledger.
+
+**Baseline defect.** E0 G2 (local) and V-VIEW VD5 (real Chrome): viewer `onKeydown` admits any key whose `e.key` matches a binding, regardless of modifiers.
+- Trusted Ctrl+F toggled Favorite; trusted Ctrl+D ran the viewer Download.
+- Both were `preventDefault`-ed, which blocked the browser's Find and bookmark shortcuts.
+- Source: `Booru_Enhancer.user.js:3439–3452` at `bef4437`.
+
+**Source facts used for the design:**
+- `onKeydown` is the only viewer keyboard admission path. It is registered once, through `viewerOwner.on(document, 'keydown', onKeydown)` (`:3430`).
+- The bindings come from settings with defaults (`:924–930`): close Escape, next ArrowRight, prev ArrowLeft, download d, favorite f, openOriginal o, playPause Space.
+- Shift needs no handling. Shift+F produces `e.key` "F", which matches no lower-case binding, and Shift+Arrow still navigates. Both are unchanged (P3-12).
+
+**Production change** (commit `48e44d98d01949001852984d8884966ddb6ae225`; `onKeydown` only): one early return, `if (e.ctrlKey || e.metaKey || e.altKey) return;`, placed after the open-viewer check and before the binding lookup, plus a one-line comment.
+- A chord now runs no viewer command and is not `preventDefault`-ed.
+- The bindings, the command implementations and unmodified keys are unchanged.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `f2b46eb443e153e03123742fb5d4baa4be761dd6` |
+| Production body SHA-256 | `c42b71dbb7d660595be20095bac47cc1712a85381464d8327814895fa4745995` |
+| Diff | 2 lines added (1 guard, 1 comment) |
+
+**Forbidden-scope audit.** No change to:
+- Shift handling, the bindings, or the download/favorite implementations;
+- V-D4, V-D6a/b, V-D7, focus, A4, C4, E6, G4;
+- playback, the viewer structure, or IB12.
+
+**Permanent regression:** `tests/host/ib11/p3_vd5_modifier_guard.cjs` **16/16** (result `p3-vd5-modifier-guard-result.json`). Each check runs on the repair, the pre-P3 artifact `bef4437`, and a **mutant** without the guard. The unmodified bindings are read from the source defaults.
+
+| Check | Repair | Prior `bef4437` | Mutant |
+| --- | --- | --- | --- |
+| P3-1 [V-D5] Ctrl+F: no Favorite; not prevented | **true** | **false** | **false** |
+| P3-2 [V-D5] Ctrl+D: no Download; not prevented | **true** | **false** | **false** |
+| P3-3 [V-D5] Meta+D, Meta+F: no Download / Favorite; not prevented | **true** | **false** | **false** |
+| P3-4 [V-D5] Alt+O, Alt+F: no Open original / Favorite; not prevented | **true** | **false** | **false** |
+| P3-5 [V-D5] Alt+ArrowLeft, Ctrl+ArrowRight: no navigation; Ctrl+Escape does not close; none prevented | **true** | **false** | **false** |
+| P3-6 [V-D5] custom binding `keys.favorite = g`: Ctrl+G does not favorite (g does) | **true** | **false** | **false** |
+| P3-7 unmodified f → Favorite once, prevented | true | true | true |
+| P3-8 unmodified d → Download once, prevented | true | true | true |
+| P3-9 unmodified o → Open original once, prevented | true | true | true |
+| P3-10 ArrowRight / ArrowLeft navigate, Escape closes; prevented | true | true | true |
+| P3-11 Space plays a paused viewer video (playback unchanged) | true | true | true |
+| P3-12 Shift unchanged (Shift+ArrowRight navigates; Shift+F matches no binding) | true | true | true |
+| P3-13 keys inert while the viewer is closed | true | true | true |
+| P3-14 V-D1 preserved: a late same-post update keeps the failure state and link | true | true | true |
+| P3-15 V-D8 preserved: the native link is pointer-interactive and hit-tested | true | true | true |
+| P3-16 no focus change: opening the viewer does not move focus | true | true | true |
+
+**Real-browser qualification: required.** The defect was observed with trusted keys in real Chrome. Prepared package `tests/browser/ib11/IB11_P3_VD5.user.js` (SHA-256 `d29d590bd04468f7e4096f055cbbb6af3e16597e6c3296f1050d74252d9cf0d6`):
+- **Build:** `build_ib11_p3.cjs` from `48e44d9`; the body is byte-identical (`c42b71db…5995`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p3_vd5.js`). The V-VIEW (`598ba6c5…`), P1 (`5842a1da…`) and P2 (`d38963eb…`) packages are unchanged.
+- **Page P3_VD5:** five trusted key prompts on an open image viewer: Ctrl+F, Ctrl+D, Alt+O, then unmodified F and D. For each it records:
+  - `isTrusted`, the key and the modifier fields;
+  - Favorite, Download and Open-original calls (test-page stubs);
+  - the viewer's `defaultPrevented`;
+  - whether the viewer stayed open.
+- **How the viewer's decision is measured:** a window **bubble-phase** listener reads `defaultPrevented` after production's `document` listener has run.
+- **Browser-default limitation (stated precisely):**
+  - For **Ctrl+D**, that listener then calls `preventDefault` so Chrome adds **no bookmark** (AGENTS.md forbids bookmark mutations). The evidence is the measured viewer decision (not prevented, no Download), not a bookmark dialog.
+  - For **Ctrl+F**, nothing is suppressed, and Chrome's Find bar opens: the real browser shortcut reaches the browser.
+  - **Alt+O** has no Chrome binding on Windows.
+  - **Meta** is not exercised in real Chrome on Windows (the Windows key; Win+D shows the desktop). It is covered by P3-3.
+- **Server and evaluator:** `vview_server.cjs --p3`; `vview_evaluate.cjs --p3`. The verdict is **V-D5 REPAIR QUALIFIED** only if all of these hold:
+  - every key is trusted with the right modifier fields, and no trusted input fell outside a prompt;
+  - Ctrl+F and Ctrl+D run no Favorite or Download, are not viewer-prevented, and leave the viewer open;
+  - Alt+O runs no Open original, Favorite or Download and is not viewer-prevented;
+  - unmodified F runs Favorite once and unmodified D runs Download once, both prevented;
+  - the Ctrl+D browser default was suppressed by the runner.
+
+**Local qualification: `verify_ib11_p3.cjs --media` 32/32** (`IB11_P3_VERIFICATION.json`; `IB11_P3_SHA256SUMS.txt`).
+- **Static:** the package is fresh and its body byte-identical; the runner equals the V-VIEW runner plus exactly the P3 patches; the V-VIEW, P1 and P2 packages are unchanged; local scope; recording stubs; the bubble-phase measurement and the Ctrl/Meta+D-only suppression; plan; server `--p3`.
+- **Smoke (simulated browser):** the repair qualifies.
+- **Production faults (NOT QUALIFIED):**
+  - the probe on `bef4437`: Ctrl+F favorites, Ctrl+D downloads, Alt+O opens the original, all prevented;
+  - the mutant without the guard;
+  - an over-broad guard that also swallows unmodified F.
+- **Evidence faults (NOT QUALIFIED):**
+  - untrusted Ctrl+F or Alt+O; Alt+O without `altKey`;
+  - Ctrl+D prevented; Ctrl+F favorited; Alt+O opened the original;
+  - viewer decision not measured (Ctrl+F, unmodified F); Ctrl+D browser default not suppressed;
+  - unmodified F missing or carrying Shift; unmodified D without a download;
+  - trusted input outside a prompt (each cell);
+  - wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `48e44d9`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 67/67 |
+| IB11 P1 regression | 6/6 (V-D8 preserved) |
+| IB11 P2 regression | 11/11 (V-D1 preserved) |
+| IB11 P3 regression | 16/16 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1 package verifier | 22/23 |
+| IB11 P2 package verifier | 22/23 |
+| IB11 P3 package verifier | 32/32 |
+| IB11 E0 characterization | 35/38; fault controls 43/46 |
+
+**Pin, anchor and witness failures (expected; not behavioral):**
+- **Blob and working-tree pins,** each superseded by P3:
+  - the G-PLAY and V-VIEW verifiers: their `4d793a2` working-tree pin;
+  - the P1 and P2 package verifiers: their `039b99e` and `56c495e` working-tree pins;
+  - the E0 characterization's S0: its `4d793a2` blob pin.
+- **E0 characterization G2, the V-D5 defect witness:** it no longer holds because V-D5 is repaired. Measured on the repair: Ctrl+F, Ctrl+D and Ctrl+O call no viewer command (`spies: []`) and are not prevented. Its repair-probe control ("modifier guard") has nothing left to flip. This is the expected change.
+- **E0 characterization C3 (V-D1 witness):** as at P2; unchanged.
+- **E0 G5 fault control "closed-state check removed": an anchor pin.** Its mutation anchor spans the open-check line and the `const keys = {` line, and the P3 guard now sits between them, so the anchor matches 0 times and the harness counts the control as not caught.
+  - G5 itself passes.
+  - Rerun once with the anchor narrowed to the open-check line only (a temporary copy, deleted afterwards), the control is **caught**: 44/46. The 2 remaining are the C3 and G2 repair probes.
+  - Closed-state inertness is also asserted by P3-13.
+- **Not reached by the repair:** every other E0 check and every other defect witness (V-D4, V-D6a/b, V-D7) still pass as before.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**P3 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D5 is not marked repaired until the P3 probe returns **V-D5 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P3".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

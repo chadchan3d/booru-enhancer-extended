@@ -84,6 +84,9 @@ function makeDriver(w, env, pageId, arrivals, skip) {
   const RULES = [
     ['F11 once', () => { env.vw = 1920; env.vh = 1080; w.dispatchEvent(new w.Event('resize')); }],
     ['F11 again', () => { env.vw = 1600; env.vh = 900; w.dispatchEvent(new w.Event('resize')); }],
+    ['Alt+O', () => K(doc.activeElement, 'o', { altKey: true })],
+    ['Press F once', () => K(doc.activeElement, 'f')],
+    ['Press D once', () => K(doc.activeElement, 'd')],
     ['Ctrl+F', () => K(doc.activeElement, 'f', { ctrlKey: true })],
     ['Ctrl+D', () => K(doc.activeElement, 'd', { ctrlKey: true })],
     ['play/pause button', () => { const v = video(); if (!v) return; if (env.nativeControl === 'surface') { pdown(v); click(v); } toggle(v); if (env.nativeControl !== 'nofocus') { v.setAttribute('tabindex', '-1'); v.focus(); } }],
@@ -154,18 +157,19 @@ function trustOperator(client) {
   if (c.FOCUS_K) { T(c.FOCUS_K.enter); (c.FOCUS_K.tabs || []).forEach(T); T(c.FOCUS_K.closeClick); }
   if (c.NATIVE) { T(c.NATIVE.click); T(c.NATIVE.pointer); }
   if (c.STAGECLOSE) T(c.STAGECLOSE.click);
+  if (c.P3KEYS) (c.P3KEYS.rows || []).forEach(T);
   if (c.VD6A) T(c.VD6A.click);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, nativeClick = 'center' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight, recovery, p1, p2 })) {
+  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3 })) {
     const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };
