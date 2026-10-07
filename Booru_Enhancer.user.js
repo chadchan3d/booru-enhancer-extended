@@ -3737,7 +3737,6 @@
 
 			currentPost = post;
 			updateStatus(post);
-			clearMediaState();
 
 			if (!mediaEl) {
 				replaceMedia(post);
@@ -3755,6 +3754,10 @@
 			}
 
 			if (nextUrl && nextUrl !== previousUrl && mediaEl.src !== nextUrl) {
+				// V-D1: only an update that starts a new load replaces the current
+				// media state; an unchanged same-post update keeps an established
+				// failure state and its native link.
+				clearMediaState();
 				if (mediaEl.tagName === 'VIDEO') {
 					if (post.previewUrl && guessMediaType(post.previewUrl) !== 'video') mediaEl.poster = post.previewUrl;
 					showMediaState('Loading video…', mediaGeneration, 180);

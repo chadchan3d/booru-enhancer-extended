@@ -1,0 +1,86 @@
+{
+ "probe": "ib11-p2-vd1",
+ "productionBlob": "56c495e2c726a5a17f443d89d729fbd8f206eb46",
+ "prior": "9aeab36",
+ "checks": 11,
+ "passed": 11,
+ "results": [
+  {
+   "name": "P2-1 [V-D1] a late same-post update with unchanged data (the open-time enrichment arriving after the failure) keeps the failure text and native link; the failed media element is unchanged",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P2-2 [V-D1] superseded same-post work: open A, move to B, back to A, A fails; two late deliveries of the same cached post for A keep the failure state and link",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P2-3 [V-D1 + V-D8] after the late same-post update the native link is still usable: hit test at its centre = the link; a click there targets it, is not prevented and does not close the viewer",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P2-4 [current work] a same-post update that starts a new load (new URL) is still applied after a failure: the failure state is cleared and the new source is loaded",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-5 [current work] a metadata-pending target is upgraded by its enrichment (sample -> original, in place) and the pending loading state is replaced",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-6 [preserved] a late update for a different post is ignored (post-ID guard): target and media unchanged",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-7 [preserved] image -> video type change from metadata rebuilds the element (replaceMedia path)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-8 [preserved] same-element video URL upgrade: src swapped, load() and an autoplay play() (playback behavior unchanged)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-9 [preserved] a click on the empty stage still closes the viewer, and close releases the video (pause, src removed)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-10 [preserved] unmodified viewer keys: ArrowRight / ArrowLeft navigate, Escape closes",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P2-11 [preserved] native-navigation fallback on a fresh failure (no late update): failure text and native link to the card post, link pointer-interactive (V-D8)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}
