@@ -3,7 +3,7 @@
 **Checkpoint:** IB11 — Existing viewer hardening (Blueprint §3 IB11). Evidence base: `IB11_BASELINE.md` (E0–E4, final E-stage findings §15).
 
 **Status:** **IB11 PARTIAL / NOT COMPLETE.**
-- **P1 (V-D8):** production repair committed and locally qualified; **real-Chrome qualification pending** (operator).
+- **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -126,6 +126,53 @@ The V-D8 checks (P1-2, P1-3, P1-4) fail on the baseline (known-failure oracle) a
 
 Historical result files rewritten by these runs were restored unedited.
 
-**P1 status: production repair committed; local qualification PASS; real-Chrome qualification PENDING.** V-D8 is **not** marked repaired until the operator's P1 probe returns **V-D8 REPAIR QUALIFIED**.
+**P1 status at the time of the repair commit:** local qualification PASS; real-Chrome qualification was pending. It is now closed (§2).
 
 **Operator step (about 1 minute):** see `tests/browser/ib11/README.md`, "IB11-P1".
+
+## 2. P1 closure: real-Chrome qualification of the V-D8 repair
+
+**Raw result:** `ib11-p1-native.json`, SHA-256 `5b23289a6a73776378466881578ce7644905484f19a6e9f854705e14c6fb0bb8`. Verified; not committed (`.gitignore`); not modified.
+- Package `IB11_P1_Native.user.js` (`5842a1da…e718`).
+- One attempt, page P1_NATIVE.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `35474709…c46b`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p1 tests/browser/ib10/ib11-p1-native.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D8 REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**STAGECLOSE:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- A trusted click at (1829, 394) on `.be-viewer-stage`, with the viewer open at capture.
+- The viewer closed afterwards (`openAfter: false`).
+
+**NATIVE (revision 1.3 rule):** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **Before the click:**
+  - failure state "Media failed to load" with the native link;
+  - destination = the card's `/posts/<id>` (match);
+  - link box x 1296.7, y 605.1, w 101.1, h 16.9;
+  - computed `pointer-events`: link **auto**, `.be-media-state` **none** (unchanged), stage auto, overlay auto;
+  - `elementFromPoint` at the centre (1347.2, 613.5) → the fallback **anchor**.
+- **The click:**
+  - a trusted pointerdown and a trusted click at (1330, 615), both targeting the anchor, with the link present;
+  - not prevented; the viewer stays open (not a stage-close click);
+  - the page navigated; the controlled native destination recorded the arrival after the click;
+  - no clicks outside the box.
+
+**Conclusion.** **P1 / V-D8: COMPLETE, PASS(scope)** for the qualified TC cell.
+- The existing native recovery link now receives real pointer clicks and reaches the native post.
+- The media-state overlay stays non-interactive, and empty-stage clicks still close the viewer.
+
+**Production:** commit `9aeab364a2e336039250a31d3183f779a7da16c1`, blob `039b99e81fe844d864cbcc047cdca1e5b16ee1e2`, body SHA-256 `35474709e617b3adedbd273c929f683d9d140670748cba0de55ee8baff06c46b`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D1 (with its same-ID generation guard);
+- V-D4;
+- V-D5;
+- V-D6a;
+- V-D6b;
+- V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.

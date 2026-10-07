@@ -1,22 +1,16 @@
 # Ledger
 
 ## Blueprint in force
-`docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added.
+`docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added. It is the controlling specification (AGENTS.md); where an instruction conflicts with it, the Blueprint wins.
 
 ## Current milestone
-**IB11 — Existing viewer hardening: PARTIAL, NOT COMPLETE (E stage complete for TC; P stage in progress).**
-- E0–E2: viewer characterization; G-PLAY tooling, run and recovery; **G-PLAY(TC): E → PASS(scope)**.
-- E3: the V-VIEW probe, plus two G3 corrections (revisions 1.1 and 1.2) after probe defects in real Chrome. G3 preflight COMPLETE.
-- **E4: V-VIEW browser evidence complete for TC.**
-  - Sources: the full run (nine MAIN cells) plus the NATIVE + VD6A recovery, merged by evaluator revision 1.3.
-  - Result: **11/11 evidence PASS** (`IB11_BASELINE.md` §14, §15).
-  - **V-D8 confirmed.**
-- **Owner decisions complete; IB11 P scope FROZEN** (see "Owner decisions in force for IB11").
-- **P1 = V-D8 only** (`IB11_P_STAGE.md` §1):
-  - production repair committed at `9aeab36`: the fallback anchor declares `pointer-events:auto`; `.be-media-state` is unchanged;
-  - local qualification PASS: regression 6/6 and P1 package verifier 23/23;
-  - **real-Chrome qualification PENDING.** V-D8 is not yet marked repaired.
-- The other frozen items are not started.
+**IB11 — Existing viewer hardening: PARTIAL, NOT COMPLETE.**
+- **E stage: complete for TC** (`IB11_BASELINE.md`).
+  - G-PLAY(TC) E → PASS(scope).
+  - V-VIEW browser evidence: 11/11 evidence PASS.
+- **P scope: frozen** (owner decisions below).
+- **P1 (V-D8): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §1–§2).
+- **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -30,97 +24,102 @@
 **IB12 is not started.**
 
 ## Current state
-- Branch `implementation/ib00-baseline`, pushed to `origin/implementation/ib00-baseline`.
-- Production `Booru_Enhancer.user.js`: commit `9aeab36`, blob `039b99e81fe844d864cbcc047cdca1e5b16ee1e2`, production body SHA-256 `35474709…c46b` (IB11-P1, V-D8).
-- **Previous production:** `4d793a2` / `002bdfd` (IB10 artifact; the artifact for all IB11 E-stage evidence).
-- **Previous artifacts:**
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P1 closure commit (see that commit's message for its hash).
+- **Production `Booru_Enhancer.user.js`:**
+  - commit `9aeab364a2e336039250a31d3183f779a7da16c1` (IB11-P1);
+  - blob `039b99e81fe844d864cbcc047cdca1e5b16ee1e2`;
+  - production body SHA-256 `35474709e617b3adedbd273c929f683d9d140670748cba0de55ee8baff06c46b`.
+- **Previous production artifacts:**
+  - `4d793a2` / `002bdfd` / body `00915584…e945`: IB10 artifact, and the artifact for all IB11 E-stage evidence;
   - `8324552` / `4258ad7`: IB10 P;
   - `b9d133c` / `22e843c`: IB09.
-- `main` is the untouched published baseline. `origin/implementation/ib01-harness` exists as a separate branch; its PR state is not verified here.
+- **Other branches:** `main` is the untouched published baseline. `origin/implementation/ib01-harness` is a separate branch; its PR state is not verified here.
+- **Raw evidence:** raw operator JSON is never committed (`.gitignore`); only SHA-256 values are recorded.
 
 ## Completed checkpoints (records in `docs/implementation/`)
 - **IB00–IB03:** PASS. IB02 is a local prerequisite only; IB03 is scoped to measured TC (Tampermonkey × Chromium) primitives.
 - **IB04, IB05, IB06:** complete for the active TC path. G-OWN, G-SETTINGS and G-REQUEST are PASS in TC.
-  - IB04 also covered the viewer's takeover ordering, modifier bypass, focus return and the failure link's presence.
-  - Its P07 check did not test the link's clickability; see V-D8.
+  - IB04's viewer checks covered takeover ordering, modifier bypass, focus return and the failure link's presence (not its clickability; that is V-D8, now repaired).
 - **IB07:** PASS(scope). G-HOST covers the Rule34, e621, e926 and Gelbooru rows as recorded.
 - **IB08:** PASS(scope). G-RENDITION covers logged-out e621/e926 `/posts`, the two-source WebP/JPEG card.
 - **IB09:** PASS(scope). G-HOVER covers the e621/e926 IB08-qualified still-image class.
 - **IB10:** PASS(scope). G-VIDEO, as in the Current milestone.
-  - Owner decisions:
-    - 200 ms dwell;
-    - the viewer ends the hover;
-    - original-file source;
-    - V3-R Option A;
-    - Blueprint enforcement of the poster/View fallback (option B).
+  - Owner decisions: 200 ms dwell; the viewer ends the hover; original-file source; V3-R Option A; Blueprint enforcement of the poster/View fallback (option B).
 
-## Owner decisions in force for IB11
-- **V-D5 (IB11-E2):**
-  - Viewer Ctrl/Meta/Alt chords must not trigger ordinary viewer commands. In particular, Ctrl+F must not invoke Favorite and Ctrl+D must not invoke the viewer download.
-  - The repair is a narrow viewer-key modifier guard that preserves normal unmodified viewer keybinds and browser shortcuts.
-- **Recorded at IB11-P1:**
-  1. **Focus:** the viewer owns focus while open. Tab and Shift+Tab stay within viewer-owned interactive elements. Close restores focus to the invoking element when it still exists.
-  2. **V-D4:** the rotated-Fit correction belongs in IB11 P.
-  3. **Placeholder → full-image replacement:** preserve the apparent on-screen view, not the raw numeric scale, and do not automatically refit.
-  4. **A4, C4, E6 and G4 stay unchanged.**
+## IB11 E stage: completion and provenance (`IB11_BASELINE.md`)
+- **G-PLAY(TC): E → PASS(scope).** `gplay_evaluate.cjs` revision 1.1, 32/32.
+  - Raw files: `13888dd9…0048` (original) and `ebd4f57c…5a90` (DELIB recovery).
+  - Chrome 154 + Tampermonkey 5.5.0; controlled local MP4/WebM fixtures; no general autoplay claim.
+  - Preferences are preserved, with no forced remute. autoplay=false stays idle. loop and remember-volume work. A deliberate unmute persists; the next target starts muted per the saved preference.
+  - MP4 without activation: unmuted autoplay is blocked and `play()` is rejected with NotAllowedError; a trusted Space press is a working Play fallback.
+  - The WebM no-activation path was not separately measured.
+- **V-VIEW (TC): complete.** `vview_evaluate.cjs` revision 1.3, merged, exit 0, 11/11 evidence PASS.
+  - **Raw files:**
+    - full run `ff2fce48…1599` (9 MAIN cells);
+    - recovery `a222632a…37e4` (NATIVE from NATIVE_R, VD6A from TAKEOVER);
+    - G3 preflight `9e434c09…8f07` (COMPLETE).
+  - **Findings:**
+    - DEFECT_CONFIRMED: V-D7 (VD7), V-D6b (VD6B), V-D1 (VD1), V-D4 (VD4), V-D5 (VD5), V-D8 (NATIVE), V-D6a (VD6A);
+    - G3 BEHAVIOR_OK (native-only single);
+    - FOCUS_M and FOCUS_K OBSERVED (the viewer does not take focus; Tab reaches page controls behind the overlay);
+    - VD5SYN control only.
+
+## IB11 owner decisions and frozen P scope
+- **Owner decisions:**
+  - **V-D5 (E2):** viewer Ctrl/Meta/Alt chords must not trigger ordinary viewer commands (Ctrl+F not Favorite; Ctrl+D not viewer-Download). The repair is a narrow modifier guard that preserves unmodified keybinds and browser shortcuts.
+  - **Focus (P1):** the viewer owns focus while open. Tab and Shift+Tab stay within viewer-owned interactive elements. Close restores focus to the invoking element when it still exists.
+  - **V-D4 (P1):** the rotated-Fit correction belongs in IB11 P.
+  - **Placeholder → full-image replacement (P1):** preserve the apparent on-screen view, not the raw numeric scale, and do not automatically refit.
+  - **A4, C4, E6, G4 (P1):** unchanged.
 - **Frozen IB11 P scope:**
   - V-D1, V-D4, V-D5, V-D6a, V-D6b, V-D7, V-D8, and the approved focus ownership/return behavior.
   - Same-ID generation guarding is permitted only as the supporting mechanism for V-D1.
-  - Each item is implemented as its own assignment: P1 = V-D8 only.
+  - One item per assignment; each needs its own regression, fault control and qualification.
 
-## Gates relevant to the next step
-- **G-PLAY(TC): PASS(scope)** at the E stage. Chrome 154 + Tampermonkey 5.5.0; controlled local MP4/WebM fixtures only; no general autoplay claim.
-  - Preferences are assigned exactly as saved, with no forced remute. autoplay=false stays idle. loop true/false work. Remember-volume works.
-  - A deliberate unmute persists for the current media; the next target starts muted per the saved preference.
-  - MP4 without activation: unmuted autoplay is blocked and the `updatePost` `play()` is rejected with NotAllowedError; a trusted Space press is a working Play fallback.
-  - WebM no-activation was not separately measured (activation carried over).
-  - Failure state with native link present, and close/stale cleanup, pass.
-- **IB11 V-VIEW browser evidence (TC): complete,** 11/11 evidence PASS (evaluator revision 1.3).
+## IB11 P stage: status (`IB11_P_STAGE.md`)
+
+| Item | Status |
+| --- | --- |
+| **P1 — V-D8** (native recovery link usable) | **COMPLETE, PASS(scope) in TC** |
+| V-D1 (durable failure state; same-ID generation guard as support) | NOT STARTED |
+| V-D4 (rotated Fit valid across resize) | NOT STARTED |
+| V-D5 (narrow viewer-key modifier guard) | NOT STARTED |
+| V-D6a (safe takeover on a synchronous build failure) | NOT STARTED |
+| V-D6b (communicated in-viewer build failure) | NOT STARTED |
+| V-D7 (staged placeholder; preserve apparent view on replacement) | NOT STARTED |
+| Focus ownership/return | NOT STARTED |
+
+**P1 detail:**
+- **Change** (`9aeab36`, `Booru_Enhancer.user.js:3595`): the fallback anchor declares `pointer-events:auto`; `.be-media-state` keeps `none`.
+- **Regression:** `tests/host/ib11/p1_native_link.cjs` 6/6. The V-D8 checks fail on `4d793a2` and on a mutant restoring `pointer-events: none`.
+- **Package verifier:** `verify_ib11_p1.cjs` 23/23; package `5842a1da…e718`.
+- **Regressions on `9aeab36`:**
+  - IB01–IB10 pass (IB07 blob pins only);
+  - IB11 E0 characterization 37/38, the G-PLAY verifier 36/37 and the V-VIEW verifier 65/66, each failing only its superseded `4d793a2` pin;
+  - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
+- **Real-Chrome qualification:** raw `ib11-p1-native.json` SHA-256 `5b23289a6a73776378466881578ce7644905484f19a6e9f854705e14c6fb0bb8` (not committed). `vview_evaluate.cjs --p1`: revision 1.3, exit 0, **V-D8 REPAIR QUALIFIED**.
+  - STAGECLOSE PASS / BEHAVIOR_OK: a trusted empty-stage click closes the viewer.
+  - NATIVE PASS / BEHAVIOR_OK: link `pointer-events` auto, container none; the hit test and a trusted click land on the anchor; not prevented; the viewer is not closed; navigation; destination reached.
+
+## Gates
+- **G-PLAY(TC): PASS(scope)** (E stage), as above.
+- **IB11 V-VIEW browser evidence (TC): complete.**
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
 
-## Verified
-- **IB11-P1 (V-D8) on `9aeab36`:**
-  - `tests/host/ib11/p1_native_link.cjs` 6/6; the V-D8 checks fail on `4d793a2` and on a mutant restoring `pointer-events: none`;
-  - `verify_ib11_p1.cjs --media` 23/23: the P1 package `5842a1da…e718` qualifies in simulation, the pre-repair artifact and the mutant do not, and the evidence faults are rejected;
-  - regressions: IB01–IB10 pass (known IB07 pins only);
-  - IB11 E0 characterization 37/38, the G-PLAY verifier 36/37 and the V-VIEW verifier 65/66, each failing only its superseded `4d793a2` pin;
-  - G-PLAY recovery 28/28 and V-VIEW recovery 32/32;
-  - historical result files restored.
-- **V-VIEW merged evaluation:** `vview_evaluate.cjs` revision 1.3; exit 0; evidencePass true; 11/11 PASS; no problems.
-  - **Raw files** (not committed; unmodified):
-    - original `ib11-vview-results.json` SHA-256 `ff2fce48…1599` (package `878a3cd3…`, revision 1.2): the source of VD7, VD6B, VD1, VD5SYN, VD4, VD5, G3, FOCUS_M, FOCUS_K;
-    - recovery `ib11-vview-recovery.json` SHA-256 `a222632a…37e4` (package `598ba6c5…`, revision 1.3): NATIVE from NATIVE_R attempt 1, VD6A from TAKEOVER attempt 1;
-    - G3 preflight `ib11-vview-g3-preflight.json` SHA-256 `9e434c09…8f07`: COMPLETE (separate provenance).
-  - **Findings:**
-    - DEFECT_CONFIRMED: VD7 (V-D7), VD6B (V-D6b), VD1 (V-D1), VD4 (V-D4), VD5 (V-D5), NATIVE (V-D8), VD6A (V-D6a);
-    - G3 BEHAVIOR_OK (native-only single);
-    - FOCUS_M and FOCUS_K OBSERVED;
-    - VD5SYN control only.
-- **G-PLAY merged evaluation:** `gplay_evaluate.cjs` revision 1.1; exit 0; 32/32 PASS. Raw files `13888dd9…0048` and `ebd4f57c…5a90` (not committed).
+## Verified (other)
 - **IB11 local tooling:**
-  - viewer characterization 38/38 (46/46 fault controls);
-  - `verify_ib11_gplay.cjs` 37/37; `verify_ib11_gplay_recovery.cjs` 28/28;
-  - `verify_ib11_vview.cjs` 66/66; `verify_ib11_vview_recovery.cjs` 32/32.
+  - viewer characterization 38/38 on `4d793a2` (37/38 on `9aeab36`, S0 pin);
+  - `verify_ib11_gplay` 37/37 and `verify_ib11_gplay_recovery` 28/28;
+  - `verify_ib11_vview` 66/66 and `verify_ib11_vview_recovery` 32/32 (pinned to `4d793a2`).
 - **IB10:** targeted PF live PASS (revision 1.2); live P 203/203 and controlled P 54/54 on `8324552`; E stage V3-C 54/54, V3-L 202/202, V3-R 16/16.
-- **Regressions on `4d793a2`** (`IB10_P_STAGE.md` §8): IB01–IB10 suites pass, except the known pins.
 - **IB09 live production conformance on `b9d133c`:** all four sessions PASS.
 
-## IB11 E-stage classification (`IB11_BASELINE.md` §15)
-- **A. Repairs already required by the Blueprint:**
-  - V-D7: staged placeholder;
-  - V-D1: durable failed state, with the same-ID generation guard (D4) as its supporting mechanism;
-  - V-D6a / V-D6b: safe takeover and build-failure communication with a native link;
-  - **V-D8:** a usable native link. Confirmed: the visible fallback inherits `pointer-events: none` (`:4916`, link at `:3591–3596`); a trusted in-box click hits `.be-viewer-stage` and closes the viewer (`:3417`); no navigation. **P1 repair at `9aeab36`; real-Chrome qualification pending.**
-  - V-D4: valid Fit with rotation across resize (acceptance items 9/10); scope confirmed by the owner at P1.
-- **B. Owner decision made:** V-D5, the narrow modifier guard.
-- **Resolved by evidence:** G3 (one native toggle; production not involved).
-
 ## Unresolved, parked, deferred
-- **Superseded attempts:** V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` rev 1.0 and `1662c903…` rev 1.1) stalled at G3 because of probe defects; none of their cells is used.
-- **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured.
+- **Superseded attempts:** V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` and `1662c903…`) stalled at G3 because of probe defects; none of their cells is used.
 - **R8 pack text:** not in the repository (UNVERIFIED); the Blueprint's IB11 item 9 was used instead.
+- **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured.
 - **IB10 limitations (non-blocking):**
   - unqualified video classes stay OPEN (fallback only);
   - the e926 MP4 ≥ 50 MB fallback is local-only;
@@ -128,11 +127,17 @@
   - the e926 20–50 MB band is thin;
   - TC only.
 - **IB09 / IB08 limitations:** as recorded in their completion records.
-- **Fixtures and raw files:** the IB10 fixtures are externally supplied and not tracked; the G-PLAY and V-VIEW raw results are not tracked (`.gitignore`).
+- **Fixtures:** the IB10 fixtures are externally supplied and not tracked.
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 - **Deferred:**
   - IB12 pagination, IB13 downloads, IB14 favorites/actions, IB16/IB17 Pixiv, IB18 other runtime cells;
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-**Active: IB11-P1 (V-D8 only), operator step.** Run the P1 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P1"; about 1 minute; `vview_server.cjs --p1`; package `5842a1da…`) and return `ib11-p1-native.json`. It is evaluated with `vview_evaluate.cjs --p1`, which must report **V-D8 REPAIR QUALIFIED** before V-D8 is marked repaired. Do not proceed to the next IB11 repair automatically. Do not start IB12.
+- **Handoff boundary.** P1 is closed. The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D1, V-D4, V-D5, V-D6a, V-D6b, V-D7, focus ownership/return.
+  - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
+- **Forbidden:**
+  - no batching of P items;
+  - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);
+  - no IB12 or later checkpoint before IB11 is complete;
+  - no production change without an assigned P item.
