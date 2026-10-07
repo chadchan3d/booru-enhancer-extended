@@ -4339,9 +4339,15 @@
 			if (!img) return;
 
 			BE.log.debug(`[Gallery] Viewer opening post #${img.dataset.bePostId || BE.adapters.active.getThumbPostId(img)}`);
+			const wasOpen = BE.modules.viewer.isOpen();
 			let opened = false;
 			try { opened = openViewerForThumb(img, thumb) === true; }
-			catch (err) { BE.log.error('[Gallery] viewer takeover failed before open', err); }
+			catch (err) {
+				BE.log.error('[Gallery] viewer takeover failed before open', err);
+				// V-D6a: abandon the failed takeover so the native navigation is not
+				// covered by a blank viewer shell.
+				if (!wasOpen) BE.modules.viewer.close();
+			}
 			if (!opened) return;
 			BE.modules.hover.endForViewer?.();
 			e.preventDefault();

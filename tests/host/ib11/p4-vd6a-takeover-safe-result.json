@@ -1,0 +1,114 @@
+{
+ "probe": "ib11-p4-vd6a",
+ "productionBlob": "f2328634aac5d4c597361699f71155f0eb11ac17",
+ "prior": "48e44d9",
+ "checks": 15,
+ "passed": 15,
+ "results": [
+  {
+   "name": "P4-1 [V-D6a] synchronous build throw on an ordinary takeover (stored volume 1.5, IndexSizeError): native navigation not cancelled and no viewer overlay left displayed",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P4-2 [V-D6a] no partial viewer state remains: no current post, empty stage (no media, no state text), and the late enrichment for the failed post is ignored",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P4-3 [V-D6a] the failed shell is not active: viewer keys stay inert afterwards (Escape / ArrowRight / f not prevented, no navigation, no favorite)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P4-4 [preserved] successful ordinary takeover (image card): viewer opens, native navigation cancelled, media = the card file, no takeover error",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-5 [preserved] successful ordinary takeover (video card, valid stored volume 0.5): viewer opens with a video at volume 0.5, cancelled, no error",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-6 [preserved] Ctrl / Meta / Shift / Alt / middle clicks stay native even with the failing state armed (no viewer, not cancelled, no build attempted)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-7 [preserved] viewer.enabled = false: ordinary click stays native (no viewer, not cancelled, no build attempted)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-8 [preserved] after a failed takeover, an ordinary click on an image card takes over normally",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-9 [out of scope, unchanged] V-D6b: an in-viewer ArrowRight onto the failing video still leaves the viewer open on it with an empty stage (not touched by P4)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-10 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-11 [preserved] V-D1: a late same-post update keeps the failure state and native link",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-12 [preserved] V-D5: Ctrl+F / Ctrl+D run no viewer command and are not prevented; unmodified f favorites",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-13 [preserved] close / cleanup: Escape on an open video hides the overlay, pauses and releases the video, empties the stage",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-14 [preserved] playback: Space plays a paused viewer video (togglePlayPause), prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P4-15 [preserved] no focus behavior: neither a successful nor a failed takeover moves focus (focus item not started)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}
