@@ -11,10 +11,7 @@
 - **P scope: frozen** (owner decisions below).
 - **P1 (V-D8): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §1–§2).
 - **P2 (V-D1): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §3–§4).
-- **P3 (V-D5): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §5):
-  - production repair committed at `48e44d9`;
-  - local qualification PASS: regression 16/16 and P3 package verifier 32/32;
-  - **real-Chrome qualification PENDING.**
+- **P3 (V-D5): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §5–§6).
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -29,7 +26,7 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P3 record commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P3 closure commit (documentation only).
 - **Production `Booru_Enhancer.user.js`:**
   - commit `48e44d98d01949001852984d8884966ddb6ae225` (IB11-P3, V-D5);
   - blob `f2b46eb443e153e03123742fb5d4baa4be761dd6`;
@@ -90,7 +87,7 @@
 | **P1 — V-D8** (native recovery link usable) | **COMPLETE, PASS(scope) in TC** |
 | **P2 — V-D1** (durable failure state across late same-post updates) | **COMPLETE, PASS(scope) in TC** |
 | V-D4 (rotated Fit valid across resize) | NOT STARTED |
-| **P3 — V-D5** (narrow viewer-key modifier guard) | **PARTIAL**: repair `48e44d9` locally qualified; real-Chrome qualification pending |
+| **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
 | V-D6a (safe takeover on a synchronous build failure) | NOT STARTED |
 | V-D6b (communicated in-viewer build failure) | NOT STARTED |
 | V-D7 (staged placeholder; preserve apparent view on replacement) | NOT STARTED |
@@ -135,8 +132,11 @@
   - G-PLAY 36/37, V-VIEW 65/66, P1 verifier 22/23 and P2 verifier 22/23, each failing only its superseded working-tree pin;
   - E0 characterization 35/38 and fault controls 43/46: S0 pin, C3 (V-D1 witness), **G2 (the V-D5 witness, now repaired: expected)**, and the G5 control anchor (re-anchored once: caught);
   - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
-- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p3`; `vview_evaluate.cjs --p3` must report **V-D5 REPAIR QUALIFIED**).
-  - Limitations: Ctrl+D's bookmark default is suppressed by the runner after the viewer's decision is measured, so no bookmark is made. Meta is covered locally only (Windows key).
+- **Real-Chrome qualification:** raw `ib11-p3-vd5.json` SHA-256 `6bdf64b04998703e247fc05d35832d832e73e87a95b786f00c33748c0fa45436` (not committed). `vview_evaluate.cjs --p3`: revision 1.3, exit 0, **V-D5 REPAIR QUALIFIED**.
+  - VD5 PASS / BEHAVIOR_OK: trusted Ctrl+F and Ctrl+D run no Favorite/Download/Open, are not viewer-prevented, and the viewer stays open.
+  - P3KEYS PASS / BEHAVIOR_OK: trusted Alt+O runs no command and is not prevented; trusted unmodified F runs Favorite once and D runs Download once, both prevented.
+  - No trusted input outside the prompts; no client error.
+  - Limitations: Ctrl+D's bookmark default was suppressed by the runner after the viewer's decision was measured, so no bookmark was made. Meta is covered locally only (Windows key).
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -171,10 +171,8 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Active: IB11-P3 (V-D5 only), operator step.**
-  - Run the P3 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P3"; about 2 minutes; `vview_server.cjs --p3`; package `d29d590b…`) and return `ib11-p3-vd5.json`.
-  - It is evaluated with `vview_evaluate.cjs --p3`, which must report **V-D5 REPAIR QUALIFIED** before V-D5 is marked COMPLETE.
-  - After P3 closes, the next eligible assignment is **one** remaining frozen item, chosen by the owner from: V-D4, V-D6a, V-D6b, V-D7, focus ownership/return.
+- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1) and P3 (V-D5) are closed.
+  - The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D4, V-D6a, V-D6b, V-D7, focus ownership/return.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;

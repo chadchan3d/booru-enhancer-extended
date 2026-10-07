@@ -5,7 +5,7 @@
 **Status:** **IB11 PARTIAL / NOT COMPLETE.**
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
-- **P3 (V-D5): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§5).
+- **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -447,6 +447,47 @@ IB11 remains **PARTIAL / NOT COMPLETE**.
 
 Historical result files rewritten by these runs were restored unedited.
 
-**P3 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D5 is not marked repaired until the P3 probe returns **V-D5 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P3".
+**P3 status at the time of the repair:** local qualification and regressions passed; real-Chrome qualification was pending. It is now closed (§6).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 6. P3 closure: real-Chrome qualification of the V-D5 repair
+
+**Raw result:** `ib11-p3-vd5.json`, SHA-256 `6bdf64b04998703e247fc05d35832d832e73e87a95b786f00c33748c0fa45436`. Verified; not committed (`.gitignore`); not modified.
+- Package `IB11_P3_VD5.user.js` (`d29d590b…f0d6`).
+- One attempt, page P3_VD5.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `c42b71db…5995`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompts (VD5 0, P3KEYS 0).
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p3 tests/browser/ib10/ib11-p3-vd5.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D5 REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**Per key (all trusted; viewer open before and after each):**
+
+| Key | Modifier fields | Favorite | Download | Open original | Viewer `defaultPrevented` | Runner suppressed browser default |
+| --- | --- | --- | --- | --- | --- | --- |
+| Ctrl+F | ctrl only | 0 | 0 | 0 | **false** | no (Chrome's Find received the shortcut) |
+| Ctrl+D | ctrl only | 0 | 0 | 0 | **false** | **yes** (no bookmark added) |
+| Alt+O | alt only | 0 | 0 | 0 | **false** | no |
+| F | none | **1** | 0 | 0 | true | no |
+| D | none | 0 | **1** | 0 | true | no |
+
+**VD5:** evidence **PASS**, finding **BEHAVIOR_OK**. **P3KEYS:** evidence **PASS**, finding **BEHAVIOR_OK**.
+
+**Limitation (as declared in §5):**
+- For Ctrl+D the evidence is the viewer's measured decision (no command, not prevented). Chrome's bookmark action was deliberately suppressed by the runner afterwards.
+- Meta chords were not exercised in real Chrome (the Windows key). They are covered by the local regression P3-3 only.
+
+**Conclusion:** **P3 / V-D5: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture).
+- Ctrl and Alt chords run no viewer command and are left to the browser (not prevented).
+- Unmodified F and D still run Favorite and Download once.
+
+**Production:** commit `48e44d98d01949001852984d8884966ddb6ae225`, blob `f2b46eb443e153e03123742fb5d4baa4be761dd6`, body SHA-256 `c42b71dbb7d660595be20095bac47cc1712a85381464d8327814895fa4745995`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D4, V-D6a, V-D6b, V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.
