@@ -1,0 +1,114 @@
+{
+ "probe": "ib11-p5-vd6b",
+ "productionBlob": "68e37d1c9071d2ae78ae44b31f0082cd51010992",
+ "prior": "fe1e06b",
+ "checks": 15,
+ "passed": 15,
+ "results": [
+  {
+   "name": "P5-1 [V-D6b] valid open image -> in-viewer ArrowRight onto the video target; the buildMedia volume seam throws IndexSizeError (1.5); the viewer stays open on the failing target and shows \"Media failed to load\" (not a blank stage)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P5-2 [V-D6b] the failure carries the failing target's native-post link, pointer-interactive and hit-tested at its centre (V-D8 semantics)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P5-3 [V-D6b] coherent viewer: no partial or resurrected media (no img/video in the viewer; the previous image detached), and the status names the failing target",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P5-4 [V-D6b] the communicated failure is durable: a late same-post update for the failing target keeps the failure text and native link (no blank)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P5-5 [preserved] after the in-viewer failure the viewer stays operable: ArrowLeft navigates back to the image (shown, no failure state) and Escape closes and cleans up",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-6 [preserved] successful in-viewer navigation (image -> image -> back) unchanged: media follows the target, no state, no build error",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-7 [preserved] successful in-viewer navigation onto a video (valid stored volume 0.5): a video at volume 0.5, no build error",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-8 [preserved] P4 / V-D6a: a failed takeover from a closed viewer still abandons the shell (seam threw; navigation not cancelled; overlay not displayed; no current post; no in-viewer failure state)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-9 [preserved] successful takeover: image and video cards open, navigation cancelled; modifier and viewer.enabled=false clicks stay native",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-10 [preserved] P1 / V-D8: a load failure shows the native link, pointer-interactive and hit-tested",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-11 [preserved] P2 / V-D1: a late same-post update keeps an established load-failure state and native link",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-12 [preserved] P3 / V-D5: Ctrl+F / Ctrl+D inert and not prevented; unmodified f favorites",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-13 [preserved] close / cleanup: Escape on an open video hides the overlay, pauses and releases the video, empties the stage",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-14 [preserved] playback: Space plays a paused viewer video (togglePlayPause), prevented",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P5-15 [preserved] no focus behavior: opening, and the in-viewer failure, move no focus (focus item not started)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}

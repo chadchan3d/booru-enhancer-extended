@@ -3675,14 +3675,25 @@
 			return el;
 		}
 
-		function replaceMedia(post, { preserveManualZoom = false } = {}) {
+		function replaceMedia(post, { preserveManualZoom = false, rethrowBuildError = false } = {}) {
 			const old = mediaEl;
 			if (!preserveManualZoom) manualZoom = false;
 			dragging = false;
 
 			stopMedia(old);
 			stage.innerHTML = '';
-			mediaEl = buildMedia(post);
+			try {
+				mediaEl = buildMedia(post);
+			} catch (err) {
+				// V-D6b: inside an open viewer, a synchronous build failure is shown
+				// as the failed state with its native link, never a blank stage. A
+				// takeover from a closed viewer rethrows (V-D6a: the caller abandons).
+				mediaEl = null;
+				if (rethrowBuildError) throw err;
+				BE.log.error('[Viewer] media build failed', err);
+				showMediaState('Media failed to load', mediaGeneration, 0, true);
+				return;
+			}
 			stage.appendChild(mediaEl);
 			if (mediaEl.tagName === 'VIDEO') {
 				showMediaState('Loading video…', mediaGeneration, 180);
@@ -3722,8 +3733,9 @@
 			zoom = 1;
 			manualZoom = false;
 
+			const wasOpen = isOpen();
 			overlay.style.display = 'flex';
-			replaceMedia(post);
+			replaceMedia(post, { rethrowBuildError: !wasOpen });
 			updateStatus(post);
 			BE.bus.emit('viewer:open', post);
 			return true;
