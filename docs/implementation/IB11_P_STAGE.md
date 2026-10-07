@@ -4,7 +4,7 @@
 
 **Status:** **IB11 PARTIAL / NOT COMPLETE.**
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
-- **P2 (V-D1): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§3).
+- **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -278,6 +278,46 @@ The `!mediaEl` and type-change paths still go through `replaceMedia`, which mana
 
 Historical result files rewritten by these runs were restored unedited.
 
-**P2 status: PARTIAL, NOT COMPLETE.** The production repair is committed, the local qualification and regressions pass, and **real-Chrome qualification is PENDING**. V-D1 is not marked repaired until the P2 probe returns **V-D1 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P2".
+**P2 status at the time of the repair:** local qualification and regressions passed; real-Chrome qualification was pending. It is now closed (§4).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 4. P2 closure: real-Chrome qualification of the V-D1 repair
+
+**Raw result:** `ib11-p2-vd1.json`, SHA-256 `d50158234cdf224b3ba8514988c38dc075a80749c80930eab942aeb20748aece`. Verified; not committed (`.gitignore`); not modified.
+- Package `IB11_P2_VD1.user.js` (`d38963eb…f07a`).
+- One attempt, page P2_VD1.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `a6d7bcc1…4839`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p2 tests/browser/ib10/ib11-p2-vd1.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D1 REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**VD1P2:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **Before the update:** a real failure (error event on the media) showing "Media failed to load" and the native `card-post` link.
+- **The update:** the late same-post update via `viewer.updatePost` with the cached post (the enrichment path), at t = 1171 ms.
+- **After the update,** at 0 ms and at 500 ms: still "Media failed to load" with the native link.
+- The failed media element and the link node are unchanged.
+
+**NATIVE (revision 1.3 rule, on the same viewer after the update):** evidence **PASS**, finding **BEHAVIOR_OK**. V-D8 and native recovery are preserved.
+- Link box x 976.7, y 445.6, w 101.1, h 16.9; destination = the card post (match).
+- Computed `pointer-events`: link **auto**, `.be-media-state` **none**.
+- `elementFromPoint` at the link centre → the anchor.
+- A trusted pointerdown and a trusted click at (1035, 456), inside the box, targeted the anchor.
+- Not prevented; the viewer stayed open.
+- The page navigated, and the controlled native destination recorded the arrival after the click.
+
+**Conclusion:** **P2 / V-D1: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture).
+- An established media-failure state and its native recovery link survive a late same-post update.
+- The link remains usable.
+- Same-post updates that start a new load are still applied (local P2-4 and P2-5).
+
+**Production:** commit `bef44372688b69968ee75507ff75895b165427ce`, blob `56c495e2c726a5a17f443d89d729fbd8f206eb46`, body SHA-256 `a6d7bcc18b3fb9d2f4383eca2d00ecd13494155d9bb1c82a8e6b518ff4834839`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D4, V-D5, V-D6a, V-D6b, V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.
