@@ -243,3 +243,30 @@ The package qualifies only V-D5. The V-VIEW, P1 and P2 packages are unchanged.
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p3 <ib11-p3-vd5.json>`. The verdict must be **V-D5 REPAIR QUALIFIED**.
 
 **Limitation:** Meta is not exercised in real Chrome on Windows. It is the Windows key, and Win+D shows the desktop. Meta chords are covered by the local regression (P3-3).
+
+---
+
+# IB11-P4: V-D6a repair qualification (real Chrome; about 1 minute)
+
+`IB11_P4_VD6A.user.js` (SHA-256 `8c9fd4997617564a7f20d70e7cdf0f66b7cdda106a3e92efe4d823d45ab6c7a2`) contains the **repaired** production (commit `fe1e06b`, blob `f232863`) unchanged, wrapped by the V-VIEW recorder and runner with **no runner patches**. The server's `--p4` mode serves the same TAKEOVER page used for the E-stage V-D6a evidence:
+- the page stores remembered volume 1.5, so building the viewer's video throws `IndexSizeError` synchronously;
+- one trusted ordinary click on the orange video card;
+- the page records the failure seam, whether navigation was cancelled, and the viewer overlay right after the failure and at page exit;
+- the native post page records its arrival.
+
+The package qualifies only V-D6a. The V-VIEW, P1, P2 and P3 packages are unchanged.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p4.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p4.cjs --media <fixture folder>` (27/27)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p4 --out <fixture folder>/ib11-p4-vd6a.json`. It prints "1 pages (IB11-P4 V-D6a qualification)".
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW, P1, P2 and P3 scripts**. Install and enable `IB11_P4_VD6A.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start`. Keep hands off until the yellow prompt.
+4. **At "Click the ORANGE-outlined video card once":** click it once. The page should change to "Native post page reached", then to the done page.
+5. **Return** `ib11-p4-vd6a.json`. If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>`. The verdict must be **V-D6a REPAIR QUALIFIED**.
+
+**Limitation:** the overlay is measured by the page, right after the click is dispatched and again at page exit. How long the old page stays visible before the next page commits is up to the browser.

@@ -1,0 +1,146 @@
+{
+ "probe": "ib11-p4-verification",
+ "p4Commit": "fe1e06b",
+ "p4Blob": "f2328634aac5d4c597361699f71155f0eb11ac17",
+ "repairBodySha256": "4fd694e7cb24509953559249c65e3b95e695793e1b250730a108d9bf216d282b",
+ "evaluatorRevision": "1.3",
+ "passed": 27,
+ "total": 27,
+ "results": [
+  {
+   "name": "P4 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P4 package executes the committed repair body byte for byte (fe1e06b / blob f232863, body 4fd694e7…282b); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner, unpatched (the TAKEOVER / VD6A cell as used for the E-stage evidence)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW (598ba6c5…), P1 (5842a1da…), P2 (d38963eb…) and P3 (d29d590b…) packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the failure seam is the package recorder (media volume setter), not a production change; the VD6A cell arms stored volume 1.5",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P4 plan: one page TAKEOVER with the one video card VD6A",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p4: page served; /posts/<id> records a TAKEOVER arrival; results file probe ib11-p4-vd6a",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D6a REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: the volume seam threw IndexSizeError from buildMedia; native navigation not cancelled; the native post reached",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: right after the failure no viewer shell or partial state remains (overlay not displayed, not open, no current post, empty stage); not displayed at page exit",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-P4 artifact 48e44d9 -> NOT QUALIFIED (VD6A evidence PASS, DEFECT_CONFIRMED: seam threw, navigation proceeded, overlay left shown with the failed post current)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: mutant without the failed-takeover cleanup -> NOT QUALIFIED (DEFECT_CONFIRMED, overlay left shown)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (programmatic) card click: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the seam did not throw: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: native navigation cancelled: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: overlay state at the failure not recorded: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: overlay displayed at the failure: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: failed post still current: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: stage not empty: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: overlay displayed at page exit: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: page did not leave: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no native destination arrival: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

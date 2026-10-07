@@ -6,6 +6,7 @@
 - **P1 (V-D8): COMPLETE, PASS(scope)** for TC (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), qualified in real Chrome (§2).
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
+- **P4 (V-D6a): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§7).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -491,3 +492,124 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 7. P4 — V-D6a: safe abandonment of a failed ordinary-click takeover
+
+**Pre-edit gate (synchronized):**
+- HEAD `1e96c5c3bab5c1e9ab3e6c2cafb2ee5d180f1211` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `48e44d9` / blob `f2b46eb` / body `c42b71db…5995`.
+- No mismatch with the assignment or the Ledger.
+
+**Baseline defect.** E0 A5 (local) and V-VIEW VD6A (real Chrome, recovery `a222632a…37e4`): with stored remembered volume 1.5, an ordinary click on a video card starts the takeover, and `buildMedia`'s `el.volume = vol` throws `IndexSizeError` synchronously. The gallery's catch correctly does not cancel the native navigation. But the overlay stays displayed with an empty stage and the failed post as current, over the page while the native navigation proceeds.
+
+**Root cause** (at `48e44d9`):
+- `viewer.open` sets `overlay.style.display = 'flex'` (`Booru_Enhancer.user.js:3725`) and then calls `replaceMedia` (`:3726`).
+- `replaceMedia` empties the stage and calls `buildMedia`, which throws (`:3637`).
+- The exception reaches `onGalleryClick`'s catch (`:4343–4344`). That catch only logs and returns without `preventDefault`, so nothing undoes the shell or the state that `open` had already set: the display, `currentPost`, `onNext` and `onPrev`.
+
+**Production change** (commit `fe1e06b92e7703692d38dc00cf09824cbfbfee9b`; `onGalleryClick` only, `:4342–4350`):
+- record `wasOpen = BE.modules.viewer.isOpen()` before the takeover attempt;
+- in the existing catch, after the existing log, call `BE.modules.viewer.close()` if the viewer was not open before.
+
+`close()` is the existing cleanup. It hides the overlay, clears the media state, stops and releases the media, empties the stage, and clears `currentPost` and `onNext`/`onPrev`. It moves focus only if focus is inside the overlay, which it never is during a takeover. The catch still does not cancel navigation, so the native path proceeds as before.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `f2328634aac5d4c597361699f71155f0eb11ac17` |
+| Production body SHA-256 | `4fd694e7cb24509953559249c65e3b95e695793e1b250730a108d9bf216d282b` |
+| Diff | 7 lines added, 1 changed (the one-line catch became a block: log, a 2-line comment, the guarded `close()`); `wasOpen` added before the attempt |
+
+**Why this is the minimum and stays in scope:**
+- **Ordinary-click takeover path only.** The change is in the catch that already owns "takeover failed before open".
+- **Successful takeover unchanged.** On success the catch is never entered.
+- **Bypass rules unchanged.** The modifier, middle-click and `viewer.enabled` checks return before the attempt.
+- **V-D6b untouched.** In-viewer navigation reaches `viewer.open` through `navigateBy` → `openViewerForThumb`, not through `onGalleryClick`, so it keeps its current behavior.
+- **`viewer.open` not redesigned.** The `wasOpen` guard keeps the cleanup from closing a viewer the user already had open.
+
+**Forbidden-scope audit.** No change to:
+- V-D6b, V-D4, V-D7, focus;
+- V-D1, V-D5, V-D8 (preservation only);
+- A4, C4, E6, G4;
+- playback;
+- successful takeover or bypass semantics;
+- IB12.
+
+**Permanent regression:** `tests/host/ib11/p4_vd6a_takeover_safe.cjs` **15/15** (result `p4-vd6a-takeover-safe-result.json`).
+- **Sources:** each check runs on the repair, the pre-P4 artifact `48e44d9`, and a **mutant** without the guarded `close()`.
+- **The seam** is production's own: stored volume 1.5 on a video card, an ordinary click, and the catch logging "[Gallery] viewer takeover failed before open" with an `IndexSizeError`.
+- **Diagnosis:** on all three sources the seam threw and navigation was not prevented. On the prior and the mutant the overlay stayed `flex` with post `101` current and an empty stage. On the repair it was `none` with no current post.
+
+| Check | Repair | Prior `48e44d9` | Mutant |
+| --- | --- | --- | --- |
+| P4-1 [V-D6a] seam threw; navigation not cancelled; no overlay displayed | **true** | **false** | **false** |
+| P4-2 [V-D6a] no partial state: no current post, empty stage; the late enrichment is ignored | **true** | **false** | **false** |
+| P4-3 [V-D6a] failed shell not active: Escape / ArrowRight / f afterwards not prevented, no action | **true** | **false** | **false** |
+| P4-4 successful image takeover: opens, cancelled, card file, no error | true | true | true |
+| P4-5 successful video takeover (volume 0.5): opens, volume 0.5, cancelled, no error | true | true | true |
+| P4-6 Ctrl / Meta / Shift / Alt / middle clicks native even with the failure armed (no build attempted) | true | true | true |
+| P4-7 `viewer.enabled = false`: ordinary click native (no build attempted) | true | true | true |
+| P4-8 after a failed takeover, an image card takes over normally | true | true | true |
+| P4-9 [out of scope, unchanged] V-D6b: in-viewer ArrowRight onto the failing video still leaves an open, empty viewer | true | true | true |
+| P4-10 V-D8 preserved: native link pointer-interactive and hit-tested | true | true | true |
+| P4-11 V-D1 preserved: late same-post update keeps the failure state and link | true | true | true |
+| P4-12 V-D5 preserved: Ctrl+F / Ctrl+D inert and not prevented; f favorites | true | true | true |
+| P4-13 close / cleanup: Escape hides, pauses and releases the video, empties the stage | true | true | true |
+| P4-14 playback: Space plays a paused viewer video | true | true | true |
+| P4-15 no focus behavior: neither a successful nor a failed takeover moves focus | true | true | true |
+
+**Real-browser qualification: required.** The defect concerns real takeover and native navigation in Chrome. Prepared package `tests/browser/ib11/IB11_P4_VD6A.user.js` (SHA-256 `8c9fd4997617564a7f20d70e7cdf0f66b7cdda106a3e92efe4d823d45ab6c7a2`):
+- **Build:** `build_ib11_p4.cjs` from `fe1e06b`; the body is byte-identical (`4fd694e7…282b`).
+- **Runner:** the V-VIEW runner **unpatched**. The TAKEOVER page and its VD6A cell are the ones that produced the E-stage V-D6a evidence. The seam is the package recorder's media `volume` setter, which records a throw from `buildMedia`; production is not hooked.
+- **Unchanged packages:** V-VIEW, P1, P2 and P3.
+- **Server:** `vview_server.cjs --p4` serves the TAKEOVER page (probe `ib11-p4-vd6a`).
+- **Evaluator:** `vview_evaluate.cjs --p4`. The verdict is **V-D6a REPAIR QUALIFIED** only if all of these hold:
+  - the revision-1.3 VD6A rule gives PASS / BEHAVIOR_OK: a trusted click, the seam threw from `buildMedia`, no overlay shown, and the destination reached;
+  - navigation was not cancelled and the page left;
+  - right after the failure the overlay is not displayed, the viewer is not open, there is no current post, and the stage is empty (no media, state or link);
+  - the overlay is not displayed at page exit;
+  - no trusted input fell outside the prompt, and identity is MATCH.
+
+**Local qualification: `verify_ib11_p4.cjs --media` 27/27** (`IB11_P4_VERIFICATION.json`; `IB11_P4_SHA256SUMS.txt`).
+- **Static:** fresh build; byte-identical body; unpatched runner; the pinned V-VIEW, P1, P2 and P3 packages unchanged; local scope; recorder seam and armed volume; plan; server `--p4` with arrival.
+- **Smoke:** the repair qualifies (seam `IndexSizeError` from `buildMedia`, not cancelled, no shell, arrival).
+- **Production faults (NOT QUALIFIED):** the probe on `48e44d9` (DEFECT_CONFIRMED, overlay left `flex` with the failed post current), and the mutant without the cleanup.
+- **Evidence faults (NOT QUALIFIED):**
+  - untrusted click; no seam; navigation cancelled;
+  - overlay state not recorded; overlay displayed; failed post current; stage not empty;
+  - overlay displayed at exit; page did not leave; no arrival;
+  - trusted input outside a prompt;
+  - wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `fe1e06b`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 67/67 |
+| IB11 P1 / P2 / P3 regressions | 6/6, 11/11, 16/16 (V-D8, V-D1, V-D5 preserved) |
+| IB11 P4 regression | 15/15 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1 / P2 / P3 package verifiers | 22/23, 22/23, 31/32 |
+| IB11 P4 package verifier | 27/27 |
+| IB11 E0 characterization | 34/38; fault controls 43/46 |
+
+**Pin, anchor and witness failures (expected; not behavioral):**
+- **Blob and working-tree pins,** each superseded by P4:
+  - G-PLAY and V-VIEW: `4d793a2`;
+  - P1, P2 and P3 verifiers: `039b99e`, `56c495e`, `f2b46eb`;
+  - E0 S0: `4d793a2`.
+- **E0 A5, the V-D6a defect witness:** it no longer holds because V-D6a is repaired. Measured on the repair: not prevented, overlay not `flex`, no media, no state. This is the expected change.
+  - Its two fault controls still count as caught, but only vacuously, because A5's defect oracle no longer holds without them. The P4 regression's mutant is now the sensitive fault control for V-D6a.
+- **E0 C3 and G2 (V-D1 and V-D5 witnesses) and the G5 control anchor:** as at P2/P3; unchanged.
+- **E0 A6 (V-D6b witness) still holds,** confirming that V-D6b is untouched. So do every other E0 check and every other defect witness (V-D4, V-D7).
+
+Historical result files rewritten by these runs were restored unedited.
+
+**P4 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D6a is not marked repaired until the P4 probe returns **V-D6a REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P4".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

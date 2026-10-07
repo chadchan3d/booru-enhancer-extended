@@ -91,6 +91,7 @@
 //        node vview_evaluate.cjs --p1 <ib11-p1-native.json>
 //        node vview_evaluate.cjs --p2 <ib11-p2-vd1.json>
 //        node vview_evaluate.cjs --p3 <ib11-p3-vd5.json>
+//        node vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -458,9 +459,48 @@ function evaluateP3(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P4 (V-D6a repair) qualification: the unchanged TAKEOVER page, one valid
+// attempt, identity MATCH. VD6A (revision-1.3 evidence rule): a trusted
+// ordinary click on the armed video card; the volume seam threw from
+// buildMedia; navigation not cancelled; the page left and the native
+// destination recorded the arrival; the revision-1.3 finding is BEHAVIOR_OK
+// (no overlay shown and destination reached). P4 additionally requires that
+// right after the failed takeover no viewer shell or partial state remains:
+// overlay not displayed, viewer not open, no current post, empty stage (no
+// media, no state, no link), and the overlay not displayed at page exit.
+// Verdict "V-D6a REPAIR QUALIFIED" only when all hold.
+function evaluateP4(doc) {
+  const out = { kind: 'ib11-p4', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p4-vd6a') { out.problems.push('not an ib11-p4-vd6a result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'TAKEOVER', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for TAKEOVER'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const c = (p.client.cells || {}).VD6A;
+  const v = evalCell('VD6A', c, ctxOf(doc, 'TAKEOVER'));
+  const o = (c && c.overlayAtClick) || {};
+  const shell = { display: o.display, open: o.open, currentId: o.currentId, children: o.children, media: !!o.media, state: o.state || '', link: o.link || '', overlayAtLeave: c && c.overlayAtLeave };
+  const reasons = [];
+  if (c && c.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+  if (c && c.defaultPrevented !== false) reasons.push('FAIL native navigation cancelled (or not measured)');
+  if (c && c.navigated !== true) reasons.push('FAIL the page did not leave for the native post');
+  const clean = o.display !== 'flex' && o.open === false && o.currentId == null && o.children === 0 && !o.media && !o.state && !o.link && c && c.overlayAtLeave !== 'flex';
+  out.cells.VD6A = { evidence: v.evidence === 'PASS' && !reasons.some((x) => x.startsWith('INVALID')) ? (reasons.length ? 'FAIL' : 'PASS') : v.evidence === 'PASS' ? 'INVALID' : v.evidence,
+    reasons: [...v.reasons, ...reasons], finding: { code: v.finding && v.finding.code === 'BEHAVIOR_OK' && clean ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { ...(v.finding && v.finding.detail), shellAfterFailure: shell, seamThrew: !!(c && (c.seam || []).some((x) => x.fromBuildMedia)), seamError: c && (c.seam || [])[0] && c.seam[0].name } } };
+  if (!out.problems.length && out.cells.VD6A.evidence === 'PASS' && out.cells.VD6A.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D6a REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p4') {
+    const r4 = evaluateP4(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r4.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r4, null, 1)); process.exitCode = r4.verdict === 'V-D6a REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p3') {
     const r3 = evaluateP3(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r3.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
