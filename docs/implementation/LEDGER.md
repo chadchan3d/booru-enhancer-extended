@@ -16,11 +16,8 @@
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
 - **P7 (V-D7): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §13–§15): attempt 1 NOT QUALIFIED (retained); corrected repair `7e4c643` qualified by attempt 2.
-- **P8 (focus ownership/return): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §16):
-  - production repair committed at `9d86484`;
-  - local qualification PASS: regression 25/25, focus attribution 8/8, P8 package verifier 34/34;
-  - **real-Chrome qualification PENDING.**
-- **No other P item remains.**
+- **P8 (focus ownership/return): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §16–§17).
+- **All frozen P items (P1–P8) are complete.** IB11 final closeout is not started.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -34,7 +31,7 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P8 record commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P8 closure commit (documentation only).
 - **Production `Booru_Enhancer.user.js`:**
   - commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047` (IB11-P8, focus ownership/return);
   - blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`;
@@ -106,7 +103,7 @@
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **COMPLETE, PASS(scope) in TC** (attempt 2; attempt 1 NOT QUALIFIED, retained) |
-| **P8 — Focus ownership/return** | **PARTIAL**: repair `9d86484` locally qualified; real-Chrome qualification pending |
+| **P8 — Focus ownership/return** | **COMPLETE, PASS(scope) in TC** |
 
 **P1 detail:**
 - **Change** (`9aeab36`, `Booru_Enhancer.user.js:3595`): the fallback anchor declares `pointer-events:auto`; `.be-media-state` keeps `none`.
@@ -264,7 +261,11 @@
   - P6 15/15, P7 28/29 (P7-23 focus-attributed), P8 25/25;
   - verifiers fail only their working-tree pins;
   - E0 26/38 and controls 38/46: F2 the intended flip; F1's control an anchor pin (re-anchored with D2 and D4: caught, 41/46).
-- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p8` → `tests/results/ib11-p8-focus.json`; `vview_evaluate.cjs --p8` must report **P8 FOCUS QUALIFIED**).
+- **Real-Chrome qualification:** raw `tests/results/ib11-p8-focus.json` SHA-256 `535cf475ad537653413ac71106b4153011c67a084a00be9226ba661306b18032` (git-ignored). Chrome 154 / Windows / Tampermonkey 5.5.0; identity MATCH. `vview_evaluate.cjs --p8`: revision 1.3, exit 0, **P8 FOCUS QUALIFIED**.
+  - **P8M** PASS / BEHAVIOR_OK: a trusted click opens the viewer with focus on Close (14 viewer controls). Tab wraps Close → "Previous (←)" and Shift+Tab wraps back to Close. Escape returns focus to the actual FOCUS_M invoker (immediately and at 300 ms; not body).
+  - **P8K** PASS / BEHAVIOR_OK: a trusted Enter on the FOCUS_K link opens the viewer with focus on Close. Shift+Tab moves natively to "Open original (o)", Tab goes back to Close, and Tab wraps to "Previous (←)", all inside. A click on Close returns focus to the FOCUS_K invoker.
+  - **No false return:** focus entered the viewer in both cells before the close.
+  - **Limitation:** focus inside native video controls is browser-managed.
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -299,11 +300,9 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Active: IB11-P8 (focus ownership/return only), operator step.**
-  - Run the P8 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P8"; about 2 minutes; trusted mouse and keyboard input; `vview_server.cjs --p8`; package `9e938f4f…`).
-  - Return `tests/results/ib11-p8-focus.json`.
-  - It is evaluated with `vview_evaluate.cjs --p8`, which must report **P8 FOCUS QUALIFIED** before P8 is marked COMPLETE.
-  - After that: a designer closure review. IB11 final closeout and IB12 need explicit assignment.
+- **Designer gate / handoff boundary.** All frozen IB11 P items are closed: P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a), P5 (V-D6b), P6 (V-D4), P7 (V-D7), P8 (focus ownership/return).
+  - The next step is the designer closure review, then the **IB11 final closeout**, which needs an explicit assignment.
+  - IB12 is not started.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;

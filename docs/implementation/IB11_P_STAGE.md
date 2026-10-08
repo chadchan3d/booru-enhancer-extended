@@ -10,7 +10,7 @@
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
 - **P7 (V-D7): COMPLETE, PASS(scope)** for TC, qualified in real Chrome by attempt 2; attempt 1 is retained as NOT QUALIFIED evidence (§13–§15).
-- **P8 (focus ownership/return): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§16).
+- **P8 (focus ownership/return): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§16, §17).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1520,6 +1520,55 @@ Historical result files rewritten by these runs were restored unedited.
 - Real-browser focus inside native video controls (shadow controls) is browser-managed. The trap handles the boundary elements of the viewer set only.
 - No dialog semantics or background `inert` are added (not part of the frozen decision).
 
-**P8 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification, attribution and regressions pass as classified. **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P8".
+**P8 status at the time of the repair:** local qualification, attribution and regressions passed as classified; real-Chrome qualification was pending. It is now closed (§17).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 17. P8 closure: real-Chrome qualification of focus ownership/return
+
+**Raw result:** `tests/results/ib11-p8-focus.json`, SHA-256 `535cf475ad537653413ac71106b4153011c67a084a00be9226ba661306b18032`. Git-ignored; not committed; not modified.
+- Package `IB11_P8_Focus.user.js` (`9e938f4f…d608`).
+- One valid attempt, page P8_FOCUS.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `7745efaf…f205`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p8 tests/results/ib11-p8-focus.json`.
+- **Exit 0.** Revision **1.3**, verdict **P8 FOCUS QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**P8M (mouse origin): PASS / BEHAVIOR_OK.**
+- **Open:** a trusted click on the FOCUS_M card opened the viewer.
+- **Acquisition:** focus moved into the overlay onto the **Close** button, not still on the invoker (14 viewer-owned focusable controls at that moment).
+- **Tab:** a trusted Tab, made while open, wrapped from Close to the first viewer control, "Previous (←)".
+- **Shift+Tab:** a trusted Shift+Tab, made while open, wrapped from the first control back to Close.
+- **Return:** a trusted Escape, made while open, closed the viewer. Focus returned to the actual FOCUS_M invoking link immediately and was still there after 300 ms (not `body`).
+
+**P8K (keyboard origin): PASS / BEHAVIOR_OK.**
+- **Open:** a trusted Enter on the actual FOCUS_K card link opened the viewer.
+- **Acquisition:** focus moved onto Close (not the invoker).
+- **Traversal:**
+  - a trusted Shift+Tab from Close moved natively inside the viewer, to "Open original (o)";
+  - a trusted Tab returned to Close;
+  - the next trusted Tab wrapped to "Previous (←)".
+  - No step left the overlay.
+- **Return:** a trusted click on Close, made while open, closed the viewer. Focus returned to the actual FOCUS_K invoking link immediately and after 300 ms (not `body`).
+
+**No false return:** in both cells focus demonstrably entered the viewer before the close, so the restored focus is a real return. It is not the pre-P8 condition, where focus never left the invoker.
+
+**Conclusion:** **P8 — focus ownership/return: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture), per the owner decision:
+- the viewer owns focus while open (initial focus: Close);
+- Tab and Shift+Tab stay within the viewer-owned controls;
+- closing restores the invoking element (mouse and keyboard origin).
+
+**Retained local evidence** (production unchanged since §16):
+- P8 regression 25/25;
+- focus attribution 8/8;
+- P8 package verifier 34/34;
+- the P1–P7 preservation classification (P7 staging set unchanged; the focus-attributed checks are P3-16, P4-15, P5-15, P7-23 and E0 F2).
+
+**Limitation:** focus movement inside native video controls (browser shadow internals) is browser-managed; the trap governs the boundaries of the viewer-owned set.
+
+**Production:** commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047`, blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`, body SHA-256 `7745efafde2013fa98329c0ff6c9dd9d94995098129b763b05b7abdccd8cf205`. This closure is documentation only.
+
+**All frozen IB11 P items (P1–P8) are now COMPLETE, PASS(scope) in TC.** IB11 itself remains **PARTIAL / NOT COMPLETE** until the IB11 final closeout, which needs an explicit assignment.
