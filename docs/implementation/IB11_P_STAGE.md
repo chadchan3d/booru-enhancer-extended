@@ -8,7 +8,7 @@
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
-- **P6 (V-D4): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§11).
+- **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -987,6 +987,52 @@ Historical result files rewritten by these runs were restored unedited.
 - The screenshot is operator-captured (Windows+PrtScn); the evaluator cannot inspect it, so its hash is recorded at closure.
 - Rotation-aware Fit applies wherever configured Fit is computed: resize refit, image readiness and the Fit button. The Fit button resets rotation first (E6), so its result is unchanged.
 
-**P6 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D4 is not marked repaired until the P6 probe returns **V-D4 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P6".
+**P6 status at the time of the repair:** local qualification and regressions passed; real-Chrome qualification was pending. It is now closed (§12).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 12. P6 closure: real-Chrome qualification of the V-D4 repair
+
+**Raw result:** `tests/results/ib11-p6-vd4.json`, SHA-256 `a8663e3472b1ef92466d3191f7fd461b6a0e719cf0eb0c9eef4c15e818d08be5`. The first raw result under the `tests/results/` convention. Verified; git-ignored, not committed; not modified.
+- Probe `ib11-p6-vd4`; package `IB11_P6_VD4.user.js` (`77f233fe…1055`).
+- One attempt, page P6_VD4.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `d445d442…b439`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D4 REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**VD4:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **Start:** the loaded fixture at 2000×1000; Fit mode `fit-both`; unrotated fit inside the stage (stage 1920×851, image 1654×827).
+- **Rotation:** applied by the viewer's Rotate right control; `rotate(90deg)` present after both resizes and at the screenshot step.
+- **Resizes:** both prompted resizes trusted. The window logged three trusted resize events during the F11 transitions (2560×1215, 2560×1272, 2560×1440).
+
+| Measurement | Stage | Fit area (stage − 24) | Rotated media | Overflow |
+| --- | --- | --- | --- | --- |
+| After resize 1 | 2560×1227 | 2536×1203 | 602×1203 | none (12 px margin top and bottom) |
+| After resize 2 | 2560×1395 | 2536×1371 | 686×1371 | none (12 px margin top and bottom) |
+
+- **Fit:** the rotated height equals the available Fit height in both states, which is the exchanged-dimension fit-both.
+- **Screenshot step:** the confirmation Enter was trusted, and the rotated fit (scale 0.6855, `rotate(90deg)`) was still on screen.
+
+**Supplemental visual evidence (not committed):** `tests/results/ib11-p6-vd4.png`, SHA-256 `c579e5d2a663483f4a40a6997c0cca7c9b92f69d2494af928466001d81690d67` (the operator's archived file; a re-encoded copy with different bytes is not authoritative).
+- **What it shows:** on the display running the viewer, the fixture image rotated upright (vertical), fully contained within the viewer stage, with the P6 screenshot prompt above it.
+- **Privacy:** it is a full multi-monitor capture that also shows unrelated desktop content. It must remain private and uncommitted; `tests/results/*` is git-ignored. It is described here only by its viewer region.
+
+**Preservation** (local; production unchanged since §11):
+- **Fit modes:** all four at 0° and 180° unchanged; original-size 1:1 (P6-7 to P6-9); the initial fit unchanged (P6-10).
+- **Manual transforms:** manual zoom and a real pan survive a resize without refit (P6-12); rotating alone does not refit (P6-11); flips are kept (P6-13).
+- **E6 unchanged:** the Fit button still resets rotation and flips, then fits unrotated (P6-14). Opening another post still resets rotation (P6-15).
+- **P1–P5:** regressions 6/6, 11/11, 16/16, 15/15, 15/15 on this production (V-D8, V-D1, V-D5, V-D6a, V-D6b). They cover successful takeover and navigation, close/cleanup, playback and focus.
+
+**Conclusion:** **P6 / V-D4: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture). Automatic configured Fit now fits the rendered orientation: a 90°-rotated image stays within the stage across real browser resizes.
+
+**Production:** commit `39a5ae126f573a04a10963287581b2c5704df890`, blob `0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6`, body SHA-256 `d445d442a9e937186de4d99eea9a958252d9850dcba272a8b5448d364333b439`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.
