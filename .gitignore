@@ -29,3 +29,6 @@ tests/browser/ib10/ib11-p4-vd6a.json
 tests/browser/ib11/ib11-p4-vd6a.json
 tests/browser/ib10/ib11-p5-vd6b.json
 tests/browser/ib11/ib11-p5-vd6b.json
+# Operator raw evidence from IB11-P6 on: everything under tests/results/ except its README.
+tests/results/*
+!tests/results/README.md

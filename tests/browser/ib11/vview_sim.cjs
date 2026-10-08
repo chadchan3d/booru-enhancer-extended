@@ -85,6 +85,7 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     ['F11 once', () => { env.vw = 1920; env.vh = 1080; w.dispatchEvent(new w.Event('resize')); }],
     ['F11 again', () => { env.vw = 1600; env.vh = 900; w.dispatchEvent(new w.Event('resize')); }],
     ['Right Arrow key', () => K(doc.activeElement, 'ArrowRight')],
+    ['Windows+PrtScn', () => K(doc.activeElement, 'Enter')],
     ['Alt+O', () => K(doc.activeElement, 'o', { altKey: true })],
     ['Press F once', () => K(doc.activeElement, 'f')],
     ['Press D once', () => K(doc.activeElement, 'd')],
@@ -161,17 +162,18 @@ function trustOperator(client) {
   if (c.P3KEYS) (c.P3KEYS.rows || []).forEach(T);
   if (c.VD6A) T(c.VD6A.click);
   if (c.VD6BP5) T(c.VD6BP5.key);
+  if (c.SHOT) T(c.SHOT.enter);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, nativeClick = 'center' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5 })) {
+  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5, p6 })) {
     const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

@@ -297,3 +297,31 @@ The stored volume is reset to 0.37 afterwards. The package qualifies only V-D6b.
 6. **Return** `ib11-p5-vd6b.json`. If a page shows INVALID, press F5 to retry.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>`. The verdict must be **V-D6b REPAIR QUALIFIED**.
+
+---
+
+# IB11-P6: V-D4 repair qualification (real Chrome; about 2 minutes)
+
+`IB11_P6_VD4.user.js` (SHA-256 `77f233fe68de1a88b6807a7ddbb0fe646ff5ad07a40fc53189b0bf0aea381055`) contains the **repaired** production (commit `39a5ae1`, blob `0a7f57f`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p6_vd4.js`). The P6 page repeats the V-VIEW VD4 steps:
+1. it opens the 2000×1000 fixture image in the viewer with Fit mode `fit-both` and measures the unrotated fit;
+2. it presses the viewer's own "Rotate right" control;
+3. it asks for **two real browser resizes** (F11 into full screen, then F11 out), measuring the stage and the rendered image after each;
+4. it keeps the rotated viewer open and asks for **one screenshot** (Windows+PrtScn), confirmed with Enter.
+
+The package qualifies only V-D4. The V-VIEW and P1–P5 packages are unchanged.
+
+**Results path (from P6 on):** operator results go under `tests/results/`. That folder is git-ignored except for its README. The P6 server writes `tests/results/ib11-p6-vd4.json` by default.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p6.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p6.cjs --media <fixture folder>` (30/30)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p6`. It prints "1 pages (IB11-P6 V-D4 qualification)" and writes `tests/results/ib11-p6-vd4.json`.
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P5 scripts**. Install and enable `IB11_P6_VD4.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start` in a normal (not full-screen, not maximised-to-full-screen) window. The viewer opens with the wide image and rotates it by itself. Keep hands off until the yellow prompt.
+4. **At "Press F11 once":** press F11. Then, at **"Press F11 again"**, press F11 again.
+5. **At "Press Windows+PrtScn once…":** press Windows+PrtScn once (Windows saves the whole screen to Pictures › Screenshots), then press Enter. **Do not click the page.**
+6. **Return** `tests/results/ib11-p6-vd4.json`. Copy the screenshot to `tests/results/ib11-p6-vd4.png` and return it too. If a page shows INVALID, press F5 to retry.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json`. The verdict must be **V-D4 REPAIR QUALIFIED**.

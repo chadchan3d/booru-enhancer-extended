@@ -93,6 +93,7 @@
 //        node vview_evaluate.cjs --p3 <ib11-p3-vd5.json>
 //        node vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>
 //        node vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>
+//        node vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -540,9 +541,58 @@ function evaluateP5(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P6 (V-D4 repair) qualification: one page P6_VD4, one valid attempt,
+// identity MATCH. VD4 (revision-1.3 rule): two trusted resizes; fit-both; the
+// wide fixture complete at its dimensions; non-zero stage/media rectangles;
+// unrotated fit inside the stage; rotate(90deg) present after each resize;
+// BEHAVIOR_OK = no overflow beyond the stage. P6 additionally requires, after
+// each resize, the rotated media to lie within the Fit area (stage minus 24 px
+// per axis, 2 px rounding tolerance) with the two resizes giving different
+// viewports; and the screenshot step completed (trusted Enter) with the
+// rotated fit still present. No trusted input outside a prompt. Verdict
+// "V-D4 REPAIR QUALIFIED" only when all hold. (The screenshot file itself is
+// returned by the operator; its SHA-256 is recorded at closure.)
+function evaluateP6(doc) {
+  const out = { kind: 'ib11-p6', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p6-vd4') { out.problems.push('not an ib11-p6-vd4 result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P6_VD4', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P6_VD4'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const cells = p.client.cells || {}; const c = cells.VD4;
+  const v = evalCell('VD4', c, ctxOf(doc, 'P6_VD4'));
+  const reasons = [];
+  const fitArea = (s) => { const m = s && s.media && s.media.rect; const st = s && s.stage; if (!m || !st) return null; return { mediaW: m.w, mediaH: m.h, availW: st.w - 24, availH: st.h - 24, inside: m.w <= st.w - 24 + 2 && m.h <= st.h - 24 + 2 }; };
+  const fa = { afterResize1: fitArea(c && c.sA), afterResize2: fitArea(c && c.sB) };
+  if (c) {
+    if (c.outsideTrusted) reasons.push('INVALID trusted input outside a prompt');
+    if (!c.sRot || !c.sRot.media || !/rotate\(90deg\)/.test(c.sRot.media.transform || '')) reasons.push('FAIL rotation not applied by the viewer control');
+    if (!(c.sA && c.sB && c.sA.stage && c.sB.stage) || (c.sA.stage.w === c.sB.stage.w && c.sA.stage.h === c.sB.stage.h)) reasons.push('FAIL the two resizes did not change the stage');
+  }
+  const sh = cells.SHOT;
+  if (!sh || !sh.enter || sh.enter.trusted !== true) reasons.push('INVALID screenshot step not completed (trusted Enter missing)');
+  else {
+    if (sh.outsideTrusted) reasons.push('INVALID trusted input outside a prompt (screenshot step)');
+    if (!sh.sC || !sh.sC.open || !sh.sC.media || !/rotate\(90deg\)/.test(sh.sC.media.transform || '')) reasons.push('FAIL the rotated fit was not on screen at the screenshot step');
+  }
+  const insideOk = !!(fa.afterResize1 && fa.afterResize1.inside && fa.afterResize2 && fa.afterResize2.inside);
+  const ev = [...v.reasons, ...reasons];
+  out.cells.VD4 = { evidence: ev.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (ev.length ? 'FAIL' : 'PASS'), reasons: ev,
+    finding: { code: v.finding && v.finding.code === 'BEHAVIOR_OK' && insideOk ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail: { ...(v.finding && v.finding.detail), fitArea: fa, mediaB: c && c.sB && c.sB.media && c.sB.media.rect, stageB: c && c.sB && c.sB.stage, viewports: c && (c.resizes || []).map((r) => ({ w: r.w, h: r.h, trusted: r.trusted })), screenshotState: sh && sh.sC && { open: sh.sC.open, transform: sh.sC.media && sh.sC.media.transform } } } };
+  if (!out.problems.length && out.cells.VD4.evidence === 'PASS' && out.cells.VD4.finding.code === 'BEHAVIOR_OK') out.verdict = 'V-D4 REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evaluateP6, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p6') {
+    const r6 = evaluateP6(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r6.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r6, null, 1)); process.exitCode = r6.verdict === 'V-D4 REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p5') {
     const r5 = evaluateP5(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r5.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');

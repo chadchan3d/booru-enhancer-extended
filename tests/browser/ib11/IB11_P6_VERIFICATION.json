@@ -1,0 +1,161 @@
+{
+ "probe": "ib11-p6-verification",
+ "p6Commit": "39a5ae1",
+ "p6Blob": "0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6",
+ "repairBodySha256": "d445d442a9e937186de4d99eea9a958252d9850dcba272a8b5448d364333b439",
+ "evaluatorRevision": "1.3",
+ "passed": 30,
+ "total": 30,
+ "results": [
+  {
+   "name": "P6 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P6 package executes the committed repair body byte for byte (39a5ae1 / blob 0a7f57f, body d445d442…b439); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P6 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW and P1-P5 packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the P6 cell: fit-both, the viewer's own Rotate right control, two prompted resizes, then the screenshot step (Windows+PrtScn, confirmed with Enter; no page click)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P6 plan: one page P6_VD4 with the wide image card VD4",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path: tests/results/ exists with a tracked README; ib11-p6-vd4.json and a screenshot there are git-ignored; the README is not",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p6 default output is tests/results/ib11-p6-vd4.json (directory created if missing)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p6: page served; results file probe ib11-p6-vd4 with the wide fixture dimensions",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D4 REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: after each resize the rotated media lies within the Fit area and the stage (no overflow), rotate(90deg) present; the screenshot step saw the rotated fit",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the same probe on the pre-P6 artifact 24ee7c2 -> NOT QUALIFIED (VD4 evidence PASS, DEFECT_CONFIRMED: rotated media exceeds the stage after both resizes)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: rotation-blind mutant -> NOT QUALIFIED (DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: untrusted (synthetic) resize: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: fit mode not fit-both: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: fixture not complete at 2000x1000: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: zero stage rectangle after resize 2: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotation missing after resize 1: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotation not applied by the control: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotated media overflows the stage after resize 2: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotated media exceeds the Fit area (inside the stage, beyond stage - 24): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the two resizes did not change the stage: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: screenshot step not completed: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: screenshot step untrusted: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotated fit not on screen at the screenshot step: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -8,6 +8,7 @@
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
+- **P6 (V-D4): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§11).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -849,3 +850,143 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 11. P6 — V-D4: configured Fit uses the rendered orientation
+
+**Pre-edit gate (synchronized):**
+- HEAD `46084ba452801d2f42341354a015ab54882794c3` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `24ee7c2` / blob `68e37d1` / body `062227fa…9f26`.
+- No mismatch with the assignment or the Ledger.
+
+**Baseline defect.** E0 E5 (local) and V-VIEW VD4 (real Chrome, `ff2fce48…`): a 2000×1000 image is fitted correctly unrotated, then rotated 90° with the viewer control. After a real resize, the automatic configured Fit scales it for the unrotated box, and the rotated image exceeds the available stage height.
+
+**Root cause** (at `24ee7c2`): `configuredFitScale()` (`Booru_Enhancer.user.js:3482`) divides the available stage (stage − 24 px per axis) by the **unrotated** `intrinsicSize()`. The rendered footprint at an odd quarter turn has width and height exchanged; `canPan()` (`:3534–3537`) already accounts for this. The resize handler (`:3426–3428`) calls `applyConfiguredFit()` whenever not in manual zoom.
+
+**Production change** (commit `39a5ae126f573a04a10963287581b2c5704df890`; `configuredFitScale` only):
+- it takes `intrinsicSize()`;
+- it computes `quarterTurns = Math.abs(Math.round(rotation / 90)) % 2`, the same rule as `canPan()`;
+- it uses the exchanged width and height when `quarterTurns` is 1.
+
+The mode logic (fit-both / fit-width / fit-height / original-size) is unchanged and now applies to the rendered orientation.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6` |
+| Production body SHA-256 | `d445d442a9e937186de4d99eea9a958252d9850dcba272a8b5448d364333b439` |
+| Diff | 5 insertions, 1 deletion |
+
+**Forbidden-scope audit.** No change to:
+- the Fit button (E6: it still resets rotation and flips, then fits);
+- rotation or flip controls, manual zoom, pan;
+- whether rotation triggers a refit (it does not);
+- V-D7, focus;
+- V-D1, V-D5, V-D6a/b, V-D8 (preservation only);
+- A4, C4, G4;
+- playback, the viewer architecture, IB12.
+
+**Permanent regression:** `tests/host/ib11/p6_vd4_rotated_fit.cjs` **15/15** (result `p6-vd4-rotated-fit-result.json`).
+- **Sources:** each check runs on the repair, the pre-P6 artifact `24ee7c2`, and a **mutant** that restores rotation-blind dimensions.
+- **Method:** rotation uses the viewer buttons, and the refit is production's window-resize handler. Every expected scale is computed from the stage, the natural size and the rotation by one stated rule; there is no fixture constant.
+- **Diagnosis** (2000×1000, fit-both, 90°, stage 1000×800, available 976×776):
+  - repair: scale 0.388, rotated footprint 388×776 (inside);
+  - prior and mutant: scale 0.488, footprint 488×976 (976 > 776, overflow).
+
+| Check | Repair | Prior `24ee7c2` | Mutant |
+| --- | --- | --- | --- |
+| P6-1 [V-D4] fit-both 90°: exchanged dimensions; footprint inside | **true** | **false** | **false** |
+| P6-2 [V-D4] fit-both 270° (3 right), −90° (1 left), −270° (3 left) | **true** | **false** | **false** |
+| P6-3 [V-D4] fit-width 90°: rendered width (= intrinsic height) fills the width | **true** | **false** | **false** |
+| P6-4 [V-D4] fit-height 90°: rendered height (= intrinsic width) fills the height | **true** | **false** | **false** |
+| P6-5 [V-D4] two successive resizes at 90° (1000×800, 1400×700) | **true** | **false** | **false** |
+| P6-6 [V-D4] portrait 1000×2000 at 90° (not only the landscape fixture) | **true** | **false** | **false** |
+| P6-7 0°: all four modes equal the unrotated calculation | true | true | true |
+| P6-8 180°: all four modes equal the unrotated calculation (no exchange) | true | true | true |
+| P6-9 original-size stays 1:1 at 90° and 270° | true | true | true |
+| P6-10 initial open fits the unrotated image | true | true | true |
+| P6-11 rotating alone does not refit | true | true | true |
+| P6-12 manual zoom and a real pan (30, 10) survive a rotated resize | true | true | true |
+| P6-13 flips kept through a rotated refit | true | true | true |
+| P6-14 E6 unchanged: Fit resets rotation and flips, then fits unrotated | true | true | true |
+| P6-15 opening another post resets rotation and fits unrotated | true | true | true |
+
+**Preservation of P1–P5 and viewer behavior:** their permanent regressions run unchanged against the new production:
+- P1 (V-D8): 6/6;
+- P2 (V-D1): 11/11;
+- P3 (V-D5): 16/16;
+- P4 (V-D6a): 15/15;
+- P5 (V-D6b): 15/15.
+
+Between them these cover successful takeover and navigation, close/cleanup, playback and focus.
+
+**Real-browser qualification: required** (a visual geometry defect). Prepared package `tests/browser/ib11/IB11_P6_VD4.user.js` (SHA-256 `77f233fe68de1a88b6807a7ddbb0fe646ff5ad07a40fc53189b0bf0aea381055`):
+- **Build:** `build_ib11_p6.cjs` from `39a5ae1`; the body is byte-identical (`d445d442…b439`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p6_vd4.js`). The V-VIEW and P1–P5 packages are unchanged.
+- **Page P6_VD4:** the V-VIEW VD4 steps on the loaded 2000×1000 `wide` fixture:
+  1. fit-both, with the unrotated fit measured;
+  2. the viewer's own "Rotate right" control;
+  3. two **trusted** resizes (F11 in, F11 out), with stage and rendered-media rectangles after each;
+  4. the viewer kept open for one operator screenshot (Windows+PrtScn, confirmed with a trusted Enter; no page click, so the stage-close behavior is not triggered), then measured again.
+- **Evaluator:** `vview_evaluate.cjs --p6`. The verdict is **V-D4 REPAIR QUALIFIED** only if all of these hold:
+  - the revision-1.3 VD4 rule gives PASS / BEHAVIOR_OK: trusted resizes, fit-both, the fixture complete at 2000×1000, non-zero rectangles, unrotated fit inside, `rotate(90deg)` after each resize, and no overflow beyond the stage;
+  - after each resize the rotated media lies within the Fit area (stage − 24 px per axis, 2 px rounding tolerance);
+  - the two resizes produced different stages, and the control applied the rotation;
+  - the screenshot step completed with the rotated fit on screen;
+  - no trusted input fell outside a prompt, and identity is MATCH.
+- **Visual evidence:** one screenshot of the repaired rotated fit, returned by the operator as `tests/results/ib11-p6-vd4.png` (git-ignored). Its SHA-256 is recorded at closure. Automatic capture is not available to a userscript.
+
+**Results-path convention, implemented with P6:**
+- `vview_server.cjs --p6` writes `tests/results/ib11-p6-vd4.json` by default and creates the folder if it is missing.
+- `.gitignore` ignores `tests/results/*` except the tracked `tests/results/README.md`, which documents the folder.
+- The runbook and evaluator use that path.
+- P1–P5 evidence is not moved.
+
+**Local qualification: `verify_ib11_p6.cjs --media` 30/30** (`IB11_P6_VERIFICATION.json`; `IB11_P6_SHA256SUMS.txt`).
+- **Static:** fresh build; byte-identical body; runner equals the V-VIEW runner plus exactly the P6 patches; the pinned V-VIEW and P1–P5 packages unchanged; local scope; the cell steps; plan; results path ignored with a tracked README; the server's default output path.
+- **Server:** `--p6` probe with the wide fixture dimensions.
+- **Smoke:** the repair qualifies.
+- **Production faults (NOT QUALIFIED):** the probe on `24ee7c2` (rotated media exceeds the stage after both resizes), and the rotation-blind mutant.
+- **Evidence faults (NOT QUALIFIED):**
+  - untrusted resize; wrong fit mode; incomplete fixture; zero rectangle;
+  - rotation missing after a resize; rotation not applied by the control;
+  - overflow beyond the stage; overflow beyond the Fit area only; stage unchanged by the resizes;
+  - trusted input outside a prompt;
+  - screenshot step missing, untrusted, or without the rotated fit;
+  - wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `39a5ae1`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 67/67 |
+| IB11 P1–P5 regressions | 6/6, 11/11, 16/16, 15/15, 15/15 |
+| IB11 P6 regression | 15/15 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1–P5 package verifiers | 22/23, 22/23, 31/32, 26/27, 31/32 |
+| IB11 P6 package verifier | 30/30 |
+| IB11 E0 characterization | 32/38; fault controls 41/46 |
+
+**Classification:**
+- **Superseded artifact/blob pins:**
+  - G-PLAY and V-VIEW: `4d793a2`;
+  - P1–P5 verifiers: `039b99e`, `56c495e`, `f2b46eb`, `f232863`, `68e37d1`;
+  - E0 S0: `4d793a2`;
+  - IB07 `item9`/`pagecount`.
+- **V-D4 witness change caused by the repair (intended):** E0 E5 no longer reports overflow. Measured on the repair: scale 0.388, rotated height 776 = the 776 px available, `rotate(90deg)`. Its repair-probe control ("fit uses the rotated box") no longer finds its anchor, which the repair replaced.
+- **Already-known witness flips and anchor failures:** A5, A6, C3 and G2 (repaired at P4, P5, P2 and P3); the A5-probe, C3-probe, G2-probe and G5 control anchors.
+- **Behavioral regressions:** none. Every other E0 check, including E4 and E6, and the remaining V-D7 witness still pass as before.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**Limitations:**
+- The screenshot is operator-captured (Windows+PrtScn); the evaluator cannot inspect it, so its hash is recorded at closure.
+- Rotation-aware Fit applies wherever configured Fit is computed: resize refit, image readiness and the Fit button. The Fit button resets rotation first (E6), so its result is unchanged.
+
+**P6 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D4 is not marked repaired until the P6 probe returns **V-D4 REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P6".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

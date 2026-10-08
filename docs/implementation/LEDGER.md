@@ -14,6 +14,10 @@
 - **P3 (V-D5): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §5–§6).
 - **P4 (V-D6a): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §7–§8).
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
+- **P6 (V-D4): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §11):
+  - production repair committed at `39a5ae1`;
+  - local qualification PASS: regression 15/15 and P6 package verifier 30/30;
+  - **real-Chrome qualification PENDING.**
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -28,12 +32,13 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P5 closure commit (documentation only).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P6 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `24ee7c299d1aac393f3a53f5a8151e423d6ac848` (IB11-P5, V-D6b);
-  - blob `68e37d1c9071d2ae78ae44b31f0082cd51010992`;
-  - production body SHA-256 `062227fa23a6b637098cf553b29a543e03bf342240354a61d1f587bd414d9f26`.
+  - commit `39a5ae126f573a04a10963287581b2c5704df890` (IB11-P6, V-D4);
+  - blob `0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6`;
+  - production body SHA-256 `d445d442a9e937186de4d99eea9a958252d9850dcba272a8b5448d364333b439`.
 - **Previous production artifacts:**
+  - `24ee7c2` / `68e37d1` / body `062227fa…9f26`: IB11-P5 (V-D6b; the P5 qualification artifact);
   - `fe1e06b` / `f232863` / body `4fd694e7…282b`: IB11-P4 (V-D6a; the P4 qualification artifact);
   - `48e44d9` / `f2b46eb` / body `c42b71db…5995`: IB11-P3 (V-D5; the P3 qualification artifact);
   - `bef4437` / `56c495e` / body `a6d7bcc1…4839`: IB11-P2 (V-D1; the P2 qualification artifact);
@@ -43,7 +48,7 @@
   - `b9d133c` / `22e843c`: IB09.
 - **Other branches:** `main` is the untouched published baseline. `origin/implementation/ib01-harness` is a separate branch; its PR state is not verified here.
 - **Raw evidence:** raw operator JSON is never committed (`.gitignore`); only SHA-256 values are recorded.
-  - **Results path (owner convention, from the next browser qualification on):** operator-produced result JSON goes under `tests/results/`. Existing raw files, P5 included, stay where they are. The next package adds the matching `.gitignore` entry and `--out` path.
+  - **Results path (owner convention, implemented at P6):** operator raw evidence (result JSON, screenshots) goes under `tests/results/`. Everything there is git-ignored except the tracked `tests/results/README.md`. `vview_server.cjs --p6` writes there by default. P1–P5 raw files stay where they were.
 
 ## Completed checkpoints (records in `docs/implementation/`)
 - **IB00–IB03:** PASS. IB02 is a local prerequisite only; IB03 is scoped to measured TC (Tampermonkey × Chromium) primitives.
@@ -91,7 +96,7 @@
 | --- | --- |
 | **P1 — V-D8** (native recovery link usable) | **COMPLETE, PASS(scope) in TC** |
 | **P2 — V-D1** (durable failure state across late same-post updates) | **COMPLETE, PASS(scope) in TC** |
-| V-D4 (rotated Fit valid across resize) | NOT STARTED |
+| **P6 — V-D4** (rotated Fit valid across resize) | **PARTIAL**: repair `39a5ae1` locally qualified; real-Chrome qualification pending |
 | **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
@@ -182,6 +187,21 @@
   - No client error or unrelated trusted input.
   - Preservation: successful takeover and navigation, P1–P4, close, playback and focus unchanged (P5 regression and P1–P4 regressions).
 
+**P6 detail:**
+- **Change** (`39a5ae1`, `configuredFitScale` only): at an odd quarter turn (same rule as `canPan()`) the intrinsic width and height are exchanged for the Fit geometry. The modes keep their meaning relative to the rendered orientation. E6 (the Fit button resets rotation), manual zoom/pan and the rotation controls are unchanged.
+- **Root cause:** Fit divided the available stage by the unrotated size. The resize refit at 90° therefore scaled 2000×1000 by 0.488 (footprint 488×976 > 776 available) instead of 0.388.
+- **Regression:** `tests/host/ib11/p6_vd4_rotated_fit.cjs` 15/15.
+  - The V-D4 checks fail on `24ee7c2` and on a rotation-blind mutant: fit-both at 90/270/−90/−270, fit-width and fit-height at 90, two resizes, and a portrait image.
+  - The preservation checks hold everywhere: 0° and 180° in all modes, original-size, initial fit, no refit on rotate, manual zoom/pan through a resize, flips, E6, open resets rotation.
+- **Package verifier:** `verify_ib11_p6.cjs` 30/30; package `77f233fe…1055` (VD4 steps with two trusted resizes, then one operator screenshot).
+- **Regressions on `39a5ae1`:**
+  - IB01–IB10 pass (IB07 blob pins only);
+  - P1–P5 regressions 6/6, 11/11, 16/16, 15/15, 15/15;
+  - G-PLAY 36/37, V-VIEW 65/66 and the P1–P5 verifiers, each failing only its superseded working-tree pin;
+  - E0 characterization 32/38 and controls 41/46: S0 pin; A5, A6, C3, G2 (repaired earlier); **E5 (the V-D4 witness, now repaired: expected; 0.388, rotated height 776)**; and the known control anchors plus E5's probe anchor;
+  - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
+- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p6` → `tests/results/ib11-p6-vd4.json`; `vview_evaluate.cjs --p6` must report **V-D4 REPAIR QUALIFIED**). The screenshot goes to `tests/results/ib11-p6-vd4.png`.
+
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
 - **IB11 V-VIEW browser evidence (TC): complete.**
@@ -215,9 +235,11 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a) and P5 (V-D6b) are closed.
-  - The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D4, V-D7, focus ownership/return.
-  - Its browser qualification writes the operator result JSON under `tests/results/`.
+- **Active: IB11-P6 (V-D4 only), operator step.**
+  - Run the P6 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P6"; about 2 minutes; `vview_server.cjs --p6`; package `77f233fe…`).
+  - Return `tests/results/ib11-p6-vd4.json` and the screenshot `tests/results/ib11-p6-vd4.png`.
+  - It is evaluated with `vview_evaluate.cjs --p6`, which must report **V-D4 REPAIR QUALIFIED** before V-D4 is marked COMPLETE.
+  - After P6 closes, the next eligible assignment is **one** remaining frozen item, chosen by the owner from: V-D7, focus ownership/return.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;
