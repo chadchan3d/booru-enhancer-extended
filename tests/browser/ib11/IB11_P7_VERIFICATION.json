@@ -1,0 +1,196 @@
+{
+ "probe": "ib11-p7-verification",
+ "p7Commit": "b856a62",
+ "p7Blob": "b88af3817e8aa3a813272a30115204f39854d58c",
+ "repairBodySha256": "8c964f02b72c133a40bc5d51df295eb91e6f0ee1f73c2dcf6ac2a09dcacc0ad5",
+ "evaluatorRevision": "1.3",
+ "passed": 37,
+ "total": 37,
+ "results": [
+  {
+   "name": "P7 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P7 package executes the committed repair body byte for byte (b856a62 / blob b88af38, body 8c964f02…0ad5); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P7 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW and P1-P6 packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the P7 page is automatic (no prompt) and measures the upgrade inside the original's own load (complete) after production's handler",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P7 plan: one page P7_VD7: VD7P (wide), VD7 and VD7X (slow originals with thumb placeholders)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path: --p7 defaults to tests/results/ib11-p7-vd7.json, which is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the simulator models the browser pending-request rule (a displayed image stays current until the new source completes)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p7: page served with distinct thumb sample/preview per card; VD7 thumb served; results file probe ib11-p7-vd7 with slow 1600x800 and thumb 160x80",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> V-D7 REPAIR QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke P7STAGE: VD7's own placeholder displayed at 300 and 1000 ms with the original pending; no blank frame; upgrade on the same element with the geometry kept",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke P7XFORM: rotation, both flips, pan and manual zoom kept; scale rescaled 160/1600; geometry kept",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the pre-P7 artifact 39a5ae1 -> NOT QUALIFIED (P7STAGE DEFECT_CONFIRMED: the slow original is the early media, no placeholder)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: no-placeholder mutant (direct original) -> NOT QUALIFIED (P7STAGE DEFECT_CONFIRMED, no placeholder)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: raw-zoom mutant (scale kept at the upgrade) -> NOT QUALIFIED (staging intact; P7STAGE and P7XFORM geometry jump x10, DEFECT_CONFIRMED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the previous target was not shown first: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: early media is another post's image: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: early media is the original (1600x800): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: original already complete at an early sample: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong target at an early sample: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: two media elements at an early sample: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a blank frame after the placeholder was shown: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no upgrade observed: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: upgrade on a different element: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: geometry jump at the upgrade (stage): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: state text left after the upgrade: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotation lost at the upgrade: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: flip lost at the upgrade: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: pan lost at the upgrade: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: raw scale kept at the upgrade: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: geometry drift 500 ms after the upgrade (transform): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: transforms not applied before the original completed: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

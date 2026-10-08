@@ -9,6 +9,7 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
+- **P7 (V-D7): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§13).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1036,3 +1037,189 @@ Historical result files rewritten by these runs were restored unedited.
 - focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 13. P7 — V-D7: staged image placeholder, then a ready upgrade that keeps the apparent view
+
+**Pre-edit gate (synchronized):**
+- HEAD `e9219c648b275bc3d4df6c85bf582a608908b470` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `39a5ae1` / blob `0a7f57f` / body `d445d442…b439`.
+- No mismatch with the assignment or the Ledger.
+
+**Baseline defect:**
+- **V-D7:** E0 B1 (local) and V-VIEW VD7 (real Chrome, `ff2fce48…`). An image target's single `<img>` pointed straight at the original (`buildMedia`, `Booru_Enhancer.user.js:3678` at `39a5ae1`). A slow original left the viewer without a usable placeholder; the early media was the slow original.
+- **E4 (owner decision P1: keep the apparent view):** a same-post in-place upgrade (`updatePost`, `:3786`) kept the raw zoom. A 300×150 → 3000×1500 upgrade therefore appeared 10× larger.
+
+**Source-selection rule** (`stagedPlaceholderUrl`, image targets only):
+- **When it applies:** only when the full URL is the target's own `originalUrl` (so not for metadata-pending targets).
+- **What it chooses:** a non-video `sampleUrl` distinct from the original, else a non-video `previewUrl` distinct from it; otherwise no staging, and the original loads directly as before.
+- **Sources:** the values come from the selected target's own post data (cached card data). Nothing is fetched or invented, and another post's image is never used.
+
+**Staging and upgrade lifecycle** (per element, `el.__beStage`):
+1. **`placeholder`:** the element opens on the placeholder. Its load is ordinary readiness (configured Fit when not manual).
+2. **`upgrading`:** once the placeholder is displayed, the original is requested **in place** (`el.src = original`). The browser keeps the current image displayed while a new source is pending, then switches and fires `load` in one task, so there is no blank stage.
+3. **Upgrade:** at the original's `load`, `onMediaUpgraded` runs.
+4. **`restored`:** if the original fails, the placeholder is restored (`el.src = placeholder`) and "Full image failed to load" is shown with the target's native-post link. This is the existing failure state; V-D8 makes the link pointer-usable, and V-D1 keeps it durable. The restored load only re-renders and does not clear the state.
+5. **`direct`:** if the placeholder itself fails, the original is loaded directly. A failure of that load is the ordinary "Media failed to load" with the native link.
+6. **Same-post enrichment upgrades** of an image that is already displayed follow the same `upgrading` path. A not-yet-displayed or failed element is still swapped directly, exactly as before (P2-4, P2-5 semantics).
+7. **Guards:** every step checks `el === mediaEl && generation === mediaGeneration`. A closed viewer or another target ignores late readiness.
+
+**Transform and apparent-view rule** (`onMediaUpgraded`):
+- `zoom *= min(placeholderW / fullW, placeholderH / fullH)`, using the displayed sizes before and after.
+- Pan (the `translate()` offset in screen pixels), rotation, flips and the manual/fit mode are kept.
+- Configured Fit is **not** invoked at the upgrade.
+- A later real resize still refits a non-manual view, rotation-aware since P6.
+- For a same-aspect placeholder the rendered size is identical. For a different aspect ratio, the existing transform model cannot keep both dimensions, so the bounded rule keeps the upgraded image within the placeholder's footprint (the smaller ratio). This is recorded as a limitation for designer review.
+
+**Production change** (commit `b856a623d02581f89f50938bfd1f30590267708e`):
+- `stagedPlaceholderUrl` and `onMediaUpgraded` (new, `:3620`, `:3632`);
+- the image branch of `buildMedia` (`:3691–3729`);
+- the image branch of `updatePost` (`:3838–3850`).
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `b88af3817e8aa3a813272a30115204f39854d58c` |
+| Production body SHA-256 | `8c964f02b72c133a40bc5d51df295eb91e6f0ee1f73c2dcf6ac2a09dcacc0ad5` |
+| Diff | 66 insertions, 3 deletions |
+
+**Forbidden-scope audit.** No change to:
+- focus or dialog/ARIA;
+- E6 (the Fit button still resets);
+- A4, C4, G4;
+- playback policy;
+- video staging (video targets are never staged, and their poster and loading behavior are unchanged);
+- download/favorite, IB12;
+- any generalized rendition framework.
+
+**Permanent regression:** `tests/host/ib11/p7_vd7_staged_placeholder.cjs` **26/26** (result `p7-vd7-staged-placeholder-result.json`).
+- **Sources:** each check runs on four sources:
+  - the repair;
+  - the pre-P7 artifact `39a5ae1`;
+  - the **no-placeholder** mutant (direct original restored);
+  - the **raw-zoom** mutant (the upgrade keeps the numeric zoom: the apparent-size jump).
+- **Harness:** it models the browser's pending-request rule (the displayed size changes only when a load completes). Apparent geometry is the displayed size × zoom, exchanged at odd quarter turns, plus the pan offset.
+
+| Check | Repair | Prior | No-placeholder | Raw-zoom |
+| --- | --- | --- | --- | --- |
+| P7-1 opens on the target's own distinct sample; one media; right target | true | **false** | **false** | true |
+| P7-2 placeholder shown, original requested in place but not presented early | true | **false** | **false** | true |
+| P7-3 non-manual upgrade: same element, same apparent size and position | true | **false** | **false** | **false** |
+| P7-4 no configured refit at the upgrade (stage changed silently) | true | **false** | **false** | **false** |
+| P7-5 a later real resize still refits a non-manual view | true | **false** | **false** | true |
+| P7-6 manual zoom, pan, rotation, both flips survive in apparent screen space | true | **false** | **false** | **false** |
+| P7-7 close before the original is ready: closed and inert | true | **false** | **false** | true |
+| P7-8 navigation away before the old original is ready: new target untouched | true | **false** | **false** | true |
+| P7-9 original fails: placeholder restored, "Full image failed to load", pointer-usable native link | true | **false** | **false** | true |
+| P7-10 enrichment upgrade 300×150 → 3000×1500 (E4): same element, no 10× jump | true | **false** | true | **false** |
+| P7-24 staged failure durable under a late same-post update (V-D1) | true | **false** | **false** | true |
+| P7-25 staged failure link hit-tested; click not prevented; viewer stays open (V-D8) | true | **false** | **false** | true |
+| P7-26 failing placeholder → direct original; its failure is the ordinary state + link | true | **false** | **false** | true |
+| P7-11 to P7-23 preservation (below) | true | true | true | true |
+
+**Preservation checks (P7-11 to P7-23):**
+- no distinct placeholder → direct load;
+- metadata-pending → sample with "Loading media…";
+- video poster and "Loading video…";
+- ordinary image failure and native link (V-D8);
+- V-D1, V-D5, V-D6a, V-D6b;
+- P6 rotation-aware Fit and all four Fit modes;
+- manual zoom/pan across a resize, and E6;
+- in-viewer navigation and close;
+- playback (Space plays; close releases);
+- focus unchanged.
+
+**Closed P1–P6 regressions and the E0 characterization: staging attribution.** Their checks open a card and assert that the displayed media **is** the original file, or they simulate "the image failed" by firing one `error` on the opened element, which is now the placeholder. Those assertions no longer model the lifecycle. They were **not edited**.
+
+`tests/host/ib11/p7_staging_attribution.cjs` runs each suite unmodified, as-is and again with **only** the placeholder selection disabled (`p7_neutral_staging_preload.cjs`), and restores their result files byte for byte. **7/7 attributed.**
+
+| Suite | As-is | Staging neutralized | Failures attributed to staging |
+| --- | --- | --- | --- |
+| P1 (V-D8) | 1/6 | 6/6 | P1-1, P1-2, P1-3, P1-4, P1-6 |
+| P2 (V-D1) | 6/11 | 11/11 | P2-1, P2-2, P2-3, P2-6, P2-11 |
+| P3 (V-D5) | 14/16 | 16/16 | P3-14, P3-15 |
+| P4 (V-D6a) | 12/15 | 15/15 | P4-4, P4-10, P4-11 |
+| P5 (V-D6b) | 11/15 | 15/15 | P5-1, P5-6, P5-10, P5-11 |
+| P6 (V-D4) | 15/15 | 15/15 | none |
+| E0 characterization | 27/38 | 31/38 (exactly the pre-P7 set S0, A5, A6, C3, E5, G2 plus E4) | A1, B1, C1, D1 |
+| IB10 P-stage (run separately) | 64/67 | 67/67 | the three "IB09 still-image class … hover timelines identical to b9d133c" checks (their viewer sequence now requests the sample first) |
+
+The behaviors those failing checks guarded are re-asserted on the **staged** path in the P7 regression:
+- V-D8: P7-9, P7-25;
+- V-D1: P7-24;
+- V-D6b: P7-18;
+- the takeover and navigation targets: P7-1, P7-8, P7-21.
+
+**Real-browser qualification: required** (apparent screen geometry). Prepared package `tests/browser/ib11/IB11_P7_VD7.user.js` (SHA-256 `da6b9f8896fa20e544d332523fe745fefdbdac1e9e4686a92f27de82f97d798a`):
+- **Build:** `build_ib11_p7.cjs` from `b856a62`; the body is byte-identical (`8c964f02…0ad5`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p7_vd7.js`). The V-VIEW and P1–P6 packages are unchanged.
+- **Simulator:** `vview_sim.cjs` now models the browser's pending-request rule. All earlier package verifiers still pass apart from their superseded pins.
+- **Page P7_VD7 (automatic, no prompts, real layout):**
+  - **P7STAGE:** VD7P → ArrowRight → VD7.
+    - At 300 ms and 1000 ms: the viewer is open on VD7 with exactly one media element showing **VD7's own** thumb (first source VD7-thumb, 160×80, non-zero area), and the original pending (not complete; the upgrade comes later).
+    - No blank animation frame once displayed.
+    - The upgrade, measured inside the original's own load: the complete 1600×800 original on the same element and target.
+    - Rendered geometry before the upgrade, at it and 500 ms after: within max(2 px, 0.5 %) in size and 2 px at the centre. No state text.
+  - **P7XFORM:** on VD7X's displayed thumb, the viewer controls apply Rotate right, Flip horizontal, Flip vertical and Zoom out ×2 (a manual zoom by the viewer's clamp rule; Zoom in is capped at 8), plus a pan.
+    - At the upgrade and 500 ms after: the same rotation, flips and pan, the scale × 160/1600, the same rendered geometry, and no blank frame.
+- **Evaluator:** `vview_evaluate.cjs --p7`; the verdict is **V-D7 REPAIR QUALIFIED** only if both cells are PASS / BEHAVIOR_OK.
+- **Screenshot:** not required, because apparent-view continuity is measured from layout geometry. None is requested.
+
+**Local qualification: `verify_ib11_p7.cjs --media` 37/37** (`IB11_P7_VERIFICATION.json`; `IB11_P7_SHA256SUMS.txt`).
+- **Static:** fresh build; byte-identical body; exact patches; pinned packages unchanged; scope; automatic page with the upgrade measured in the original's own load; plan; results path ignored; the simulator's pending model.
+- **Server:** `--p7` with distinct thumbs.
+- **Smoke:** the repair qualifies.
+- **Production faults (NOT QUALIFIED):**
+  - `39a5ae1`: the slow original is the early media;
+  - the no-placeholder mutant: the same;
+  - the raw-zoom mutant: staging intact, ×10 geometry jump in both cells.
+- **Evidence faults (21, all NOT QUALIFIED):**
+  - the previous target not shown first; early media from another post, or the original; original already complete; wrong target; two media; a blank frame;
+  - no upgrade; upgrade on a different element; geometry jump; state text left;
+  - rotation, flip or pan lost; raw scale kept; drift at 500 ms; transforms after completion;
+  - trusted input; wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `b856a62`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 64/67; the 3 failures staging-attributed (67/67 neutralized) |
+| IB11 P1–P5 regressions | 1/6, 6/11, 14/16, 12/15, 11/15; every failure staging-attributed (all full passes neutralized) |
+| IB11 P6 regression | 15/15 |
+| IB11 P7 regression | 26/26 |
+| IB11 staging attribution | 7/7 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1–P6 package verifiers | 22/23, 22/23, 31/32, 26/27, 31/32, 29/30 |
+| IB11 P7 package verifier | 37/37 |
+| IB11 E0 characterization | 27/38; fault controls 39/46 |
+
+**Classification:**
+- **Superseded artifact/blob pins:**
+  - G-PLAY and V-VIEW: `4d793a2`;
+  - P1–P6 verifiers: `039b99e`, `56c495e`, `f2b46eb`, `f232863`, `68e37d1`, `0a7f57f`;
+  - E0 S0;
+  - IB07 `item9`/`pagecount`.
+- **Intended witness flips:**
+  - **E0 B1 (V-D7)** no longer reports direct-original/no-placeholder behavior: the opened media is the target's sample.
+  - **E0 E4** no longer reports the raw-scale 10× jump: the scale is rescaled and the apparent size is kept.
+- **E3 remains valid:** rotation and flip survive the same-element upgrade (it passes).
+- **Staging-attributed (not behavioral regressions; attribution above):** E0 A1, C1, D1; P1–P5 as listed; IB10's three timeline checks.
+- **E0 fault controls 39/46:**
+  - **New anchor pins:** D2 "readiness guard removed" (its anchor now also opens `onMediaUpgraded`, so it matches twice) and D4 "URL changes not applied in place" (the branch was restructured). Re-anchored once in a temporary copy, both are **caught** (41/46).
+  - **Remaining uncaught (known from earlier P items):** the A5, C3, E5 and G2 repair-probe anchors, and G5.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**Limitations:**
+- **Aspect ratio:** for a placeholder whose aspect ratio differs from the original's, only one dimension can be preserved, so the upgraded image stays within the placeholder footprint. This is for designer review.
+- **Sequential loading:** the original is requested only after the placeholder is displayed, so a target whose placeholder loads slowly starts its original later.
+- **Background download:** a superseded original (viewer closed, target changed) keeps downloading under browser control; its readiness is ignored.
+- **Closed regressions:** the P1–P5 regressions and parts of E0 no longer model the staged lifecycle for their opening-source and single-error assumptions. They are kept unedited; P7 and the attribution tool carry the evidence.
+
+**P7 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification, attribution and regressions pass as classified. **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P7".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

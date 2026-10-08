@@ -1,0 +1,198 @@
+{
+ "probe": "ib11-p7-staging-attribution",
+ "results": [
+  {
+   "suite": "p1_native_link",
+   "asIs": {
+    "passed": 1,
+    "total": 6,
+    "failed": [
+     "P1-1 failure fallback present: \"Open native post\" to the card native post, inside the failure state",
+     "P1-2 the fallback anchor is pointer-interactive (computed pointer-events not none) while the media-state container stays pointer-events:none",
+     "P1-3 hit-testing at the centre of the visible link resolves to the fallback anchor",
+     "P1-4 a click on the displayed words targets the anchor, is not prevented (native navigation proceeds) and is not treated as a stage-close click (viewer stays open)",
+     "P1-6 failure-state presentation unchanged apart from pointer-events (text, underline, spacing, colour inheritance)"
+    ]
+   },
+   "neutral": {
+    "passed": 6,
+    "total": 6,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [
+    "P1-1 failure fallback present: \"Open native post\" to the card native post, inside the failure state",
+    "P1-2 the fallback anchor is pointer-interactive (computed pointer-events not none) while the media-state container stays pointer-events:none",
+    "P1-3 hit-testing at the centre of the visible link resolves to the fallback anchor",
+    "P1-4 a click on the displayed words targets the anchor, is not prevented (native navigation proceeds) and is not treated as a stage-close click (viewer stays open)",
+    "P1-6 failure-state presentation unchanged apart from pointer-events (text, underline, spacing, colour inheritance)"
+   ],
+   "attributed": true
+  },
+  {
+   "suite": "p2_vd1_failure_durable",
+   "asIs": {
+    "passed": 6,
+    "total": 11,
+    "failed": [
+     "P2-1 [V-D1] a late same-post update with unchanged data (the open-time enrichment arriving after the failure) keeps the failure text and native link; the failed media element is unchanged",
+     "P2-2 [V-D1] superseded same-post work: open A, move to B, back to A, A fails; two late deliveries of the same cached post for A keep the failure state and link",
+     "P2-3 [V-D1 + V-D8] after the late same-post update the native link is still usable: hit test at its centre = the link; a click there targets it, is not prevented and does not close the viewer",
+     "P2-6 [preserved] a late update for a different post is ignored (post-ID guard): target and media unchanged",
+     "P2-11 [preserved] native-navigation fallback on a fresh failure (no late update): failure text and native link to the card post, link pointer-interactive (V-D8)"
+    ]
+   },
+   "neutral": {
+    "passed": 11,
+    "total": 11,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [
+    "P2-1 [V-D1] a late same-post update with unchanged data (the open-time enrichment arriving after the failure) keeps the failure text and native link; the failed media element is unchanged",
+    "P2-2 [V-D1] superseded same-post work: open A, move to B, back to A, A fails; two late deliveries of the same cached post for A keep the failure state and link",
+    "P2-3 [V-D1 + V-D8] after the late same-post update the native link is still usable: hit test at its centre = the link; a click there targets it, is not prevented and does not close the viewer",
+    "P2-6 [preserved] a late update for a different post is ignored (post-ID guard): target and media unchanged",
+    "P2-11 [preserved] native-navigation fallback on a fresh failure (no late update): failure text and native link to the card post, link pointer-interactive (V-D8)"
+   ],
+   "attributed": true
+  },
+  {
+   "suite": "p3_vd5_modifier_guard",
+   "asIs": {
+    "passed": 14,
+    "total": 16,
+    "failed": [
+     "P3-14 [preserved] V-D1: a late same-post update keeps the failure state and native link",
+     "P3-15 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre"
+    ]
+   },
+   "neutral": {
+    "passed": 16,
+    "total": 16,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [
+    "P3-14 [preserved] V-D1: a late same-post update keeps the failure state and native link",
+    "P3-15 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre"
+   ],
+   "attributed": true
+  },
+  {
+   "suite": "p4_vd6a_takeover_safe",
+   "asIs": {
+    "passed": 12,
+    "total": 15,
+    "failed": [
+     "P4-4 [preserved] successful ordinary takeover (image card): viewer opens, native navigation cancelled, media = the card file, no takeover error",
+     "P4-10 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre",
+     "P4-11 [preserved] V-D1: a late same-post update keeps the failure state and native link"
+    ]
+   },
+   "neutral": {
+    "passed": 15,
+    "total": 15,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [
+    "P4-4 [preserved] successful ordinary takeover (image card): viewer opens, native navigation cancelled, media = the card file, no takeover error",
+    "P4-10 [preserved] V-D8: the native link is pointer-interactive and hit-tested at its centre",
+    "P4-11 [preserved] V-D1: a late same-post update keeps the failure state and native link"
+   ],
+   "attributed": true
+  },
+  {
+   "suite": "p5_vd6b_inviewer_failure",
+   "asIs": {
+    "passed": 11,
+    "total": 15,
+    "failed": [
+     "P5-1 [V-D6b] valid open image -> in-viewer ArrowRight onto the video target; the buildMedia volume seam throws IndexSizeError (1.5); the viewer stays open on the failing target and shows \"Media failed to load\" (not a blank stage)",
+     "P5-6 [preserved] successful in-viewer navigation (image -> image -> back) unchanged: media follows the target, no state, no build error",
+     "P5-10 [preserved] P1 / V-D8: a load failure shows the native link, pointer-interactive and hit-tested",
+     "P5-11 [preserved] P2 / V-D1: a late same-post update keeps an established load-failure state and native link"
+    ]
+   },
+   "neutral": {
+    "passed": 15,
+    "total": 15,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [
+    "P5-1 [V-D6b] valid open image -> in-viewer ArrowRight onto the video target; the buildMedia volume seam throws IndexSizeError (1.5); the viewer stays open on the failing target and shows \"Media failed to load\" (not a blank stage)",
+    "P5-6 [preserved] successful in-viewer navigation (image -> image -> back) unchanged: media follows the target, no state, no build error",
+    "P5-10 [preserved] P1 / V-D8: a load failure shows the native link, pointer-interactive and hit-tested",
+    "P5-11 [preserved] P2 / V-D1: a late same-post update keeps an established load-failure state and native link"
+   ],
+   "attributed": true
+  },
+  {
+   "suite": "p6_vd4_rotated_fit",
+   "asIs": {
+    "passed": 15,
+    "total": 15,
+    "failed": []
+   },
+   "neutral": {
+    "passed": 15,
+    "total": 15,
+    "failed": []
+   },
+   "knownBeforeP7": [],
+   "stagingAttributed": [],
+   "attributed": true
+  },
+  {
+   "suite": "viewer_baseline",
+   "asIs": {
+    "passed": 27,
+    "total": 38,
+    "failed": [
+     "S0 production under test is blob 002bdfd1a88adf8ed851df7ed768e6189e2bc958 (4d793a2)",
+     "A1 plain left click on a card: viewer takes over synchronously (opened, native navigation cancelled), target = the clicked card, media = card original file",
+     "A5 [DEFECT V-D6a] synchronous failure during takeover (stored remembered volume 1.5 on a video card): native navigation is NOT cancelled (correct), but the overlay is left displayed with an empty stage",
+     "A6 [DEFECT V-D6b] synchronous failure during in-viewer navigation (ArrowRight to a video card while the stored volume is 1.5): the viewer stays open on the new target with an empty stage, no message and no native link (blank, uncommunicated failure)",
+     "B1 [DEFECT V-D7] image card: the viewer loads the original file directly (no staged thumbnail/sample placeholder) and shows no loading state while it loads",
+     "C1 image failure after takeover: \"Media failed to load\" plus an \"Open native post\" link to the card post; the link click is not intercepted",
+     "C3 [DEFECT V-D1] a later same-ID metadata update with an unchanged URL (late enrichment) erases the failed state and its native link; the failed media stays (blank, uncommunicated failure)",
+     "D1 rapid different-post navigation: a late metadata update for the previous post is ignored (post-ID guard)",
+     "E4 [FINDING] manual zoom is absolute to native pixels: across a placeholder (300x150) -> original (3000x1500) upgrade the scale is kept, so the apparent size jumps 10x; pan is kept",
+     "E5 [DEFECT V-D4] fit ignores rotation: a 2000x1000 image rotated 90 deg and refit on resize is scaled for the unrotated box and overflows the 776 px available height",
+     "G2 [DEFECT V-D5] viewer keys ignore modifiers: Ctrl+F toggles Favorite (an account mutation path) and blocks the browser's Find; Ctrl+D downloads; Ctrl+O opens the original"
+    ]
+   },
+   "neutral": {
+    "passed": 31,
+    "total": 38,
+    "failed": [
+     "S0 production under test is blob 002bdfd1a88adf8ed851df7ed768e6189e2bc958 (4d793a2)",
+     "A5 [DEFECT V-D6a] synchronous failure during takeover (stored remembered volume 1.5 on a video card): native navigation is NOT cancelled (correct), but the overlay is left displayed with an empty stage",
+     "A6 [DEFECT V-D6b] synchronous failure during in-viewer navigation (ArrowRight to a video card while the stored volume is 1.5): the viewer stays open on the new target with an empty stage, no message and no native link (blank, uncommunicated failure)",
+     "C3 [DEFECT V-D1] a later same-ID metadata update with an unchanged URL (late enrichment) erases the failed state and its native link; the failed media stays (blank, uncommunicated failure)",
+     "E4 [FINDING] manual zoom is absolute to native pixels: across a placeholder (300x150) -> original (3000x1500) upgrade the scale is kept, so the apparent size jumps 10x; pan is kept",
+     "E5 [DEFECT V-D4] fit ignores rotation: a 2000x1000 image rotated 90 deg and refit on resize is scaled for the unrotated box and overflows the 776 px available height",
+     "G2 [DEFECT V-D5] viewer keys ignore modifiers: Ctrl+F toggles Favorite (an account mutation path) and blocks the browser's Find; Ctrl+D downloads; Ctrl+O opens the original"
+    ]
+   },
+   "knownBeforeP7": [
+    "S0",
+    "A5",
+    "A6",
+    "C3",
+    "E5",
+    "G2",
+    "E4"
+   ],
+   "stagingAttributed": [
+    "A1 plain left click on a card: viewer takes over synchronously (opened, native navigation cancelled), target = the clicked card, media = card original file",
+    "B1 [DEFECT V-D7] image card: the viewer loads the original file directly (no staged thumbnail/sample placeholder) and shows no loading state while it loads",
+    "C1 image failure after takeover: \"Media failed to load\" plus an \"Open native post\" link to the card post; the link click is not intercepted",
+    "D1 rapid different-post navigation: a late metadata update for the previous post is ignored (post-ID guard)"
+   ],
+   "attributed": true
+  }
+ ]
+}

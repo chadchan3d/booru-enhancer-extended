@@ -325,3 +325,32 @@ The package qualifies only V-D4. The V-VIEW and P1–P5 packages are unchanged.
 6. **Return** `tests/results/ib11-p6-vd4.json`. Copy the screenshot to `tests/results/ib11-p6-vd4.png` and return it too. If a page shows INVALID, press F5 to retry.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json`. The verdict must be **V-D4 REPAIR QUALIFIED**.
+
+---
+
+# IB11-P7: V-D7 repair qualification (real Chrome; automatic, about 30 seconds)
+
+`IB11_P7_VD7.user.js` (SHA-256 `da6b9f8896fa20e544d332523fe745fefdbdac1e9e4686a92f27de82f97d798a`) contains the **repaired** production (commit `b856a62`, blob `b88af38`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p7_vd7.js`). The P7 page runs by itself; there are no prompts.
+
+**Fixture:** the page has three cards:
+- VD7P, a quick 2000×1000 image;
+- VD7 and VD7X, each with a 160×80 thumb as its sample/preview and a slow 1600×800 original (the original takes about 9 s).
+
+**What the page does:**
+1. **P7STAGE:** it opens VD7P, then moves to VD7 with ArrowRight inside the viewer. It records what is displayed at 300 ms and 1000 ms, checks every animation frame for a blank stage, and measures the rendered image inside the original's load (the upgrade) and 500 ms later.
+2. **P7XFORM:** it opens VD7X. While the thumb is shown, it applies Rotate right, Flip horizontal, Flip vertical, Zoom out ×2 and a pan with the viewer's own controls. It then measures the same way.
+
+No screenshot is needed: the apparent view is measured from real layout geometry.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p7.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p7.cjs --media <fixture folder>` (37/37)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p7`. It prints "1 pages (IB11-P7 V-D7 qualification)" and writes `tests/results/ib11-p7-vd7.json`.
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P6 scripts**. Install and enable `IB11_P7_VD7.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start` in a normal window. Keep the tab **in front and visible**: Chrome throttles animation frames in background tabs. Do not touch the page or resize the window.
+4. **Wait** for "P7 RECORDED" (about 30 seconds). If a page shows INVALID, press F5 to retry.
+5. **Return** `tests/results/ib11-p7-vd7.json`.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p7 tests/results/ib11-p7-vd7.json`. The verdict must be **V-D7 REPAIR QUALIFIED**.

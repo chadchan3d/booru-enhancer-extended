@@ -94,6 +94,7 @@
 //        node vview_evaluate.cjs --p4 <ib11-p4-vd6a.json>
 //        node vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>
 //        node vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json
+//        node vview_evaluate.cjs --p7 tests/results/ib11-p7-vd7.json
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -585,9 +586,89 @@ function evaluateP6(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evaluateP6, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P7 (V-D7 repair) qualification: one automatic page P7_VD7, one valid
+// attempt, identity MATCH, no trusted input. The displayed image is its
+// natural size (thumb 160x80 vs slow original 1600x800). Geometry tolerance:
+// rendered width/height within max(2 px, 0.5 %), centre within 2 px.
+//  P7STAGE (in-viewer navigation from VD7P onto VD7): at 300 ms and 1000 ms
+//   the viewer is open on VD7 with exactly one media element showing VD7's
+//   own thumb (first source VD7-thumb, not VD7P), non-zero area, the original
+//   requested but not complete; no blank frame once displayed; the upgrade
+//   (inside the original's load) shows the complete 1600x800 original on the
+//   same element and target, with the pre-upgrade rendered geometry kept at
+//   the upgrade and 500 ms later; no state text.
+//  P7XFORM (VD7X): rotation 90, horizontal and vertical flips, manual zoom
+//   (two Zoom out steps, by the viewer's own clamp rule min(8, max(0.05, z - 0.25))) and a pan applied before the
+//   original completed; at the upgrade the same rotation, flips and pan, the
+//   scale rescaled by 160/1600, and the rendered geometry kept (at the
+//   upgrade and 500 ms later); no blank frame.
+// Verdict "V-D7 REPAIR QUALIFIED" only when both cells hold.
+function evaluateP7(doc) {
+  const out = { kind: 'ib11-p7', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p7-vd7') { out.problems.push('not an ib11-p7-vd7 result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P7_VD7', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P7_VD7'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const cells = p.client.cells || {};
+  const tf = (s) => { const g = (re) => { const m = re.exec(s || ''); return m ? Number(m[1]) : null; }; return { tx: g(/translate\((-?[\d.]+)px/), ty: g(/translate\(-?[\d.]+px, (-?[\d.]+)px/), scale: g(/ scale\((-?[\d.]+)\)/), rot: g(/rotate\((-?[\d.]+)deg\)/), fx: g(/scaleX\((-?[\d.]+)\)/), fy: g(/scaleY\((-?[\d.]+)\)/) }; };
+  const geom = (a, b) => { if (!a || !b) return { ok: false }; const tol = (v) => Math.max(2, 0.005 * Math.abs(v)); const dw = b.w - a.w; const dh = b.h - a.h; const dc = Math.hypot(b.cx - a.cx, b.cy - a.cy);
+    return { ok: a.w > 0 && a.h > 0 && Math.abs(dw) <= tol(a.w) && Math.abs(dh) <= tol(a.h) && dc <= 2, dw, dh, dc, before: { w: a.w, h: a.h }, after: { w: b.w, h: b.h } }; };
+  const req = (label) => (doc.requests || []).filter((r) => r.page === 'P7_VD7' && r.label === label);
+  const doneWall = (label) => { const r = req(label).find((q) => q.status === 200 && (q.writes || []).length); return r ? r.writes[r.writes.length - 1][0] : null; };
+  const isThumb = (s) => !!s && s.nw === 160 && s.nh === 80; const isFull = (s) => !!s && s.nw === 1600 && s.nh === 800 && s.complete === true;
+
+  // ---- P7STAGE ----
+  { const c = cells.P7STAGE; const R = []; let ok = false; let detail = null;
+    if (!c) R.push('INVALID no P7STAGE record');
+    else {
+      if (c.outsideTrusted) R.push('INVALID trusted input outside a prompt');
+      if (!c.prevOk || !c.prev || c.prev.currentId !== c.prevId || c.prev.nw !== 2000) R.push('INVALID the previous target (VD7P) was not shown complete first');
+      if (!c.upgrade) R.push('INVALID the original never completed (no upgrade observed)');
+      if (!req('VD7-slow').some((r) => r.status === 200)) R.push('FAIL slow original not requested from the fixture server');
+      const s = c.samples || [];
+      const early = s.map((x) => ({ at: x.at, open: x.open, target: x.currentId === c.targetId, single: x.inStage === 1 && x.inOverlay === 1, placeholder: isThumb(x) && x.firstLabel === 'VD7-thumb' && !!x.rect && x.rect.w > 0 && x.rect.h > 0,
+        originalPending: x.srcLabel === 'VD7-slow' && x.complete === false && (!c.upgrade || c.upgrade.t > x.t) && (doneWall('VD7-slow') === null || doneWall('VD7-slow') > x.wall) }));
+      const u = c.upgrade || {}; const a = c.after || {};
+      const upgraded = isFull(u) && u.srcLabel === 'VD7-slow' && u.currentId === c.targetId && u.inStage === 1 && u.inOverlay === 1 && c.sameElement === true && isFull(a) && a.currentId === c.targetId && a.inStage === 1 && !a.state;
+      const g1 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, u.rect); const g2 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, a.rect);
+      const noBlank = !!c.frames && c.frames.blank === 0 && c.frames.frames > 0;
+      ok = s.length === 2 && early.every((x) => x.open && x.target && x.single && x.placeholder && x.originalPending) && upgraded && g1.ok && g2.ok && noBlank && isThumb(c.beforeUpgrade);
+      detail = { early, firstShownMs: c.frames && c.frames.firstShownMs, frames: c.frames, upgraded, geometryAtUpgrade: g1, geometryAfter500: g2, upgradeTransform: u.transform };
+    }
+    out.cells.P7STAGE = { evidence: R.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (R.length ? 'FAIL' : 'PASS'), reasons: R, finding: { code: ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail } };
+  }
+  // ---- P7XFORM ----
+  { const c = cells.P7XFORM; const R = []; let ok = false; let detail = null;
+    if (!c) R.push('INVALID no P7XFORM record');
+    else {
+      if (c.outsideTrusted) R.push('INVALID trusted input outside a prompt');
+      if (!c.upgrade) R.push('INVALID the original never completed (no upgrade observed)');
+      const f = tf(c.fitted && c.fitted.transform); const t = tf(c.transformed && c.transformed.transform); const u = tf(c.upgrade && c.upgrade.transform); const a = tf(c.after && c.after.transform);
+      const applied = c.phOk && isThumb(c.fitted) && isThumb(c.transformed) && c.earlyComplete === false && t.rot === 90 && t.fx === -1 && t.fy === -1 && (t.tx !== 0 || t.ty !== 0) && t.scale !== null && f.scale !== null && Math.abs(t.scale - [1, 2].reduce((z) => Math.min(8, Math.max(0.05, z - 0.25)), f.scale)) <= 1e-6 && t.scale !== f.scale;
+      const kept = (x) => x.rot === t.rot && x.fx === t.fx && x.fy === t.fy && x.tx === t.tx && x.ty === t.ty && x.scale !== null && Math.abs(x.scale - t.scale * 160 / 1600) <= 1e-3 * t.scale;
+      const upgraded = isFull(c.upgrade) && c.upgrade.currentId === c.targetId && c.sameElement === true && isFull(c.after) && c.after.inStage === 1;
+      const g1 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, c.upgrade && c.upgrade.rect); const g2 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, c.after && c.after.rect);
+      const noBlank = !!c.frames && c.frames.blank === 0 && c.frames.frames > 0;
+      ok = applied && upgraded && kept(u) && kept(a) && g1.ok && g2.ok && noBlank && isThumb(c.beforeUpgrade);
+      detail = { applied, transformBefore: c.transformed && c.transformed.transform, transformAtUpgrade: c.upgrade && c.upgrade.transform, fittedScale: f.scale, scaleBefore: t.scale, scaleAtUpgrade: u.scale, upgraded, geometryAtUpgrade: g1, geometryAfter500: g2, frames: c.frames };
+    }
+    out.cells.P7XFORM = { evidence: R.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (R.length ? 'FAIL' : 'PASS'), reasons: R, finding: { code: ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail } };
+  }
+  if (!out.problems.length && ['P7STAGE', 'P7XFORM'].every((k) => out.cells[k].evidence === 'PASS' && out.cells[k].finding.code === 'BEHAVIOR_OK')) out.verdict = 'V-D7 REPAIR QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evaluateP6, evaluateP7, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p7') {
+    const r7 = evaluateP7(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r7.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r7, null, 1)); process.exitCode = r7.verdict === 'V-D7 REPAIR QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p6') {
     const r6 = evaluateP6(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r6.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');

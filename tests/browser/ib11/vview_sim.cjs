@@ -52,13 +52,15 @@ function images(w, env, pageId, requests) {
   Object.defineProperty(IP, 'naturalHeight', { configurable: true, get() { return this.__img ? this.__img.nh : 0; } });
   const d = Object.getOwnPropertyDescriptor(IP, 'src');
   Object.defineProperty(IP, 'src', { configurable: true, get() { return d.get.call(this); }, set(v) {
-    d.set.call(this, v); const el = this; const s = st(el); s.complete = false; s.nw = 0; s.nh = 0; const g = ++s.gen;
+    // Browser pending-request rule: an image that is displayed stays the current
+    // image (its natural size) until the new source is completely available.
+    d.set.call(this, v); const el = this; const s = st(el); const pending = s.complete && s.nw > 0; s.complete = false; if (!pending) { s.nw = 0; s.nh = 0; } const g = ++s.gen;
     const m = /\/vview\/img\/[0-9a-f]+\/([A-Z0-9_]+)-(thumb|wide|slow|fail)\.png/.exec(String(v));
     if (!m) { s.complete = true; return; }
     const kind = m[2]; const at = (ms, fn) => w.setTimeout(() => { if (s.gen === g) fn(); }, ms);
     requests.push({ page: pageId, label: `${m[1]}-${kind}`, status: kind === 'fail' ? 404 : 200, end: 'complete' });
-    if (kind === 'fail') at(50, () => { s.complete = true; el.dispatchEvent(new w.Event('error')); });
-    else if (kind === 'slow') { at(env.slowHeaderMs, () => { s.nw = 1600; s.nh = 800; }); at(env.slowCompleteMs, () => { s.complete = true; el.dispatchEvent(new w.Event('load')); }); }
+    if (kind === 'fail') at(50, () => { s.complete = true; s.nw = 0; s.nh = 0; el.dispatchEvent(new w.Event('error')); });
+    else if (kind === 'slow') { at(env.slowHeaderMs, () => { if (!pending) { s.nw = 1600; s.nh = 800; } }); at(env.slowCompleteMs, () => { s.complete = true; s.nw = 1600; s.nh = 800; el.dispatchEvent(new w.Event('load')); }); }
     else { const [nw, nh] = kind === 'thumb' ? [160, 80] : [2000, 1000]; at(kind === 'thumb' ? 20 : 50, () => { s.complete = true; s.nw = nw; s.nh = nh; el.dispatchEvent(new w.Event('load')); }); }
   } });
   const VP = w.HTMLVideoElement.prototype;
@@ -165,15 +167,15 @@ function trustOperator(client) {
   if (c.SHOT) T(c.SHOT.enter);
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, nativeClick = 'center' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, p7 = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5, p6 })) {
+  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5, p6, p7 })) {
     const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

@@ -15,6 +15,10 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §7–§8).
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
+- **P7 (V-D7): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §13):
+  - production repair committed at `b856a62`;
+  - local qualification PASS: regression 26/26, staging attribution 7/7, P7 package verifier 37/37;
+  - **real-Chrome qualification PENDING.**
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -29,12 +33,13 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P6 closure commit (documentation only).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P7 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `39a5ae126f573a04a10963287581b2c5704df890` (IB11-P6, V-D4);
-  - blob `0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6`;
-  - production body SHA-256 `d445d442a9e937186de4d99eea9a958252d9850dcba272a8b5448d364333b439`.
+  - commit `b856a623d02581f89f50938bfd1f30590267708e` (IB11-P7, V-D7);
+  - blob `b88af3817e8aa3a813272a30115204f39854d58c`;
+  - production body SHA-256 `8c964f02b72c133a40bc5d51df295eb91e6f0ee1f73c2dcf6ac2a09dcacc0ad5`.
 - **Previous production artifacts:**
+  - `39a5ae1` / `0a7f57f` / body `d445d442…b439`: IB11-P6 (V-D4; the P6 qualification artifact);
   - `24ee7c2` / `68e37d1` / body `062227fa…9f26`: IB11-P5 (V-D6b; the P5 qualification artifact);
   - `fe1e06b` / `f232863` / body `4fd694e7…282b`: IB11-P4 (V-D6a; the P4 qualification artifact);
   - `48e44d9` / `f2b46eb` / body `c42b71db…5995`: IB11-P3 (V-D5; the P3 qualification artifact);
@@ -97,7 +102,7 @@
 | **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
-| V-D7 (staged placeholder; preserve apparent view on replacement) | NOT STARTED |
+| **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **PARTIAL**: repair `b856a62` locally qualified; real-Chrome qualification pending |
 | Focus ownership/return | NOT STARTED |
 
 **P1 detail:**
@@ -205,6 +210,29 @@
   - **Supplemental visual evidence:** `tests/results/ib11-p6-vd4.png` SHA-256 `c579e5d2a663483f4a40a6997c0cca7c9b92f69d2494af928466001d81690d67` (git-ignored, not committed). It shows the fixture rotated upright and contained in the viewer. It is a multi-monitor capture with unrelated private desktop content, so it must remain private.
   - **Preservation:** Fit modes at 0°/180°, original-size, manual zoom/pan, rotation/flips, E6 (Fit resets rotation and flips) and P1–P5 all unchanged (P6 regression and P1–P5 regressions).
 
+**P7 detail:**
+- **Change** (`b856a62`; `buildMedia` image branch, `updatePost` image branch, new `stagedPlaceholderUrl` and `onMediaUpgraded`):
+  - an image target with a distinct non-video sample (else preview) opens on it;
+  - once it is displayed, the original is requested in place (the browser keeps the placeholder shown until the original is ready);
+  - at the original's load the zoom is rescaled so the apparent view is kept (pan, rotation, flips and the manual/fit mode kept; no refit);
+  - a failed original restores the placeholder with "Full image failed to load" and the native link;
+  - metadata-pending, video and no-placeholder targets are unchanged.
+- **Regression:** `tests/host/ib11/p7_vd7_staged_placeholder.cjs` 26/26 on the repair, `39a5ae1`, a no-placeholder mutant and a raw-zoom mutant.
+  - The staging checks fail on the prior and the no-placeholder mutant.
+  - The apparent-view checks fail on the prior and the raw-zoom mutant.
+  - 13 preservation checks hold on all four.
+- **Staging attribution:** `p7_staging_attribution.cjs` 7/7.
+  - The closed P1–P5 regressions (unedited) fail only assertions that the opened media is the original or that one error on it is the target failure.
+  - With only the placeholder selection disabled, they all pass fully, and E0 fails exactly its pre-P7 set plus E4. IB10's 3 timeline checks behave the same way (67/67 neutralized).
+- **Package verifier:** `verify_ib11_p7.cjs` 37/37; package `da6b9f88…798a` (automatic; real-layout geometry; no screenshot needed).
+- **Regressions on `b856a62`:**
+  - IB01–IB09 pass (IB07 blob pins only);
+  - P6 15/15, P7 26/26;
+  - verifiers fail only their working-tree pins;
+  - E0 27/38 and controls 39/46: **B1 and E4 are the intended V-D7 flips**; A1, C1 and D1 are staging-attributed; D2 and D4 are new anchor pins (re-anchored: caught); E3 still valid;
+  - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
+- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p7` → `tests/results/ib11-p7-vd7.json`; `vview_evaluate.cjs --p7` must report **V-D7 REPAIR QUALIFIED**).
+
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
 - **IB11 V-VIEW browser evidence (TC): complete.**
@@ -238,9 +266,11 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a), P5 (V-D6b) and P6 (V-D4) are closed.
-  - The next eligible assignment is **one** remaining frozen IB11 P item, chosen and assigned explicitly by the owner from: V-D7, focus ownership/return.
-  - Its browser evidence goes under `tests/results/` (git-ignored).
+- **Active: IB11-P7 (V-D7 only), operator step.**
+  - Run the P7 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P7"; automatic, about 30 seconds, tab kept visible; `vview_server.cjs --p7`; package `da6b9f88…`).
+  - Return `tests/results/ib11-p7-vd7.json`.
+  - It is evaluated with `vview_evaluate.cjs --p7`, which must report **V-D7 REPAIR QUALIFIED** before V-D7 is marked COMPLETE.
+  - After P7 closes, the only remaining frozen item is focus ownership/return; it needs an explicit owner assignment.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;
