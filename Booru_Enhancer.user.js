@@ -3374,6 +3374,7 @@
 		let viewerOwner = null;
 		let returnFocusOrigin = null;
 		let returnFocusFallback = null;
+		let closeBtn = null;
 
 		function init() {
 			viewerOwner = BE.ownership.create();
@@ -3409,7 +3410,7 @@
 			mkBtn('⭳', 'Download (d)', () => currentPost && BE.modules.downloader.downloadPost(currentPost));
 			mkBtn('★', 'Favorite (f)', () => currentPost && BE.modules.favorites.toggle(currentPost));
 			mkBtn('⤢', 'Open original (o)', () => currentPost && openOriginalInNewTab(currentPost));
-			mkBtn('✕', 'Close (Esc)', close);
+			closeBtn = mkBtn('✕', 'Close (Esc)', close);
 			overlay.appendChild(bar);
 
 			statusEl = BE.dom.create('div', { class: 'be-viewer-status' });
@@ -3436,8 +3437,57 @@
 			if (url) window.open(url, '_blank', 'noopener');
 		}
 
+		// IB11 focus: an element that is rendered (no display:none or hidden
+		// ancestor, not visibility:hidden), without layout queries.
+		function isRendered(el) {
+			if (!el || !el.isConnected) return false;
+			for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+				if (n.hidden) return false;
+				const cs = getComputedStyle(n);
+				if (cs.display === 'none') return false;
+				if (n === el && cs.visibility === 'hidden') return false;
+			}
+			return true;
+		}
+
+		// The viewer-owned focus set, from the current viewer DOM in tab order
+		// (all tabindex >= 0 here, so document order).
+		function viewerFocusables() {
+			if (!overlay) return [];
+			return [...overlay.querySelectorAll('button, a[href], input, select, textarea, video[controls], audio[controls], [tabindex]')]
+				.filter((el) => el.tabIndex >= 0 && !el.disabled && isRendered(el));
+		}
+
+		// A focus target outside the viewer that focus may return to.
+		function usableReturnTarget(el) {
+			return !!el && el.nodeType === 1 && el !== document.body && el !== document.documentElement
+				&& typeof el.focus === 'function' && !(overlay && overlay.contains(el)) && !el.disabled && isRendered(el);
+		}
+
+		// Tab / Shift+Tab stay within the viewer-owned controls while open; the
+		// browser moves focus between them, the boundaries wrap.
+		function trapTab(e) {
+			const items = viewerFocusables();
+			if (!items.length) { e.preventDefault(); return; }
+			const first = items[0];
+			const last = items[items.length - 1];
+			const active = document.activeElement;
+			if (!items.includes(active)) {
+				e.preventDefault();
+				(e.shiftKey ? last : first).focus();
+			} else if (!e.shiftKey && active === last) {
+				e.preventDefault();
+				first.focus();
+			} else if (e.shiftKey && active === first) {
+				e.preventDefault();
+				last.focus();
+			}
+		}
+
 		function onKeydown(e) {
 			if (!overlay || overlay.style.display !== 'flex') return;
+			// IB11 focus trap: unmodified Tab / Shift+Tab only (V-D5: modified chords are not handled).
+			if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey && !e.altKey) { trapTab(e); return; }
 			// V-D5: Ctrl/Meta/Alt chords belong to the browser/OS, never to viewer commands.
 			if (e.ctrlKey || e.metaKey || e.altKey) return;
 			const keys = {
@@ -3802,8 +3852,15 @@
 
 		function open(post, navigation = {}, context = {}) {
 			if (!overlay) init();
-			returnFocusOrigin = context.origin?.isConnected ? context.origin : null;
-			returnFocusFallback = context.fallback?.isConnected ? context.fallback : null;
+			const wasOpen = isOpen();
+			// Return targets: an explicit context wins. Without one, a new session
+			// returns to the element focused before it opened; an open viewer keeps
+			// its existing targets.
+			const before = document.activeElement;
+			if (context.origin) returnFocusOrigin = context.origin.isConnected ? context.origin : null;
+			else if (!wasOpen) returnFocusOrigin = usableReturnTarget(before) ? before : null;
+			if (context.fallback) returnFocusFallback = context.fallback.isConnected ? context.fallback : null;
+			else if (!wasOpen) returnFocusFallback = null;
 			viewerOwner?.setFocusTargets(returnFocusOrigin, returnFocusFallback);
 			currentPost = post;
 			onNext = navigation.next || null;
@@ -3817,10 +3874,13 @@
 			zoom = 1;
 			manualZoom = false;
 
-			const wasOpen = isOpen();
 			overlay.style.display = 'flex';
 			replaceMedia(post, { rethrowBuildError: !wasOpen });
 			updateStatus(post);
+			// The viewer owns focus once the takeover succeeded (a synchronous build
+			// failure above rethrows first): a new session focuses Close; an open
+			// viewer keeps its focused control and only reclaims escaped focus.
+			if (closeBtn && (!wasOpen || !overlay.contains(document.activeElement))) closeBtn.focus({ preventScroll: true });
 			BE.bus.emit('viewer:open', post);
 			return true;
 		}
@@ -3884,7 +3944,8 @@
 
 		function close() {
 			const active = document.activeElement;
-			const shouldReturnFocus = !!overlay && !!active && overlay.contains(active);
+			// Focus is the viewer's while open; a click on the empty stage blurs it to body first.
+			const shouldReturnFocus = !!overlay && (!active || active === document.body || overlay.contains(active));
 			if (overlay) overlay.style.display = 'none';
 			clearMediaState();
 			stopMedia(mediaEl);
@@ -3895,8 +3956,8 @@
 			onPrev = null;
 			dragging = false;
 			if (shouldReturnFocus) {
-				if (returnFocusOrigin?.isConnected) returnFocusOrigin.focus();
-				else if (returnFocusFallback?.isConnected) returnFocusFallback.focus();
+				if (usableReturnTarget(returnFocusOrigin)) returnFocusOrigin.focus({ preventScroll: true });
+				else if (usableReturnTarget(returnFocusFallback)) returnFocusFallback.focus({ preventScroll: true });
 			}
 			returnFocusOrigin = null;
 			returnFocusFallback = null;
