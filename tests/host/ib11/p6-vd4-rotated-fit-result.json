@@ -1,0 +1,114 @@
+{
+ "probe": "ib11-p6-vd4",
+ "productionBlob": "0a7f57f2cbcd080d3ae91f86f6edddab1f3e50c6",
+ "prior": "24ee7c2",
+ "checks": 15,
+ "passed": 15,
+ "results": [
+  {
+   "name": "P6-1 [V-D4] fit-both, 2000x1000 rotated 90 deg, resize to 1000x800: scale from the exchanged dimensions; the rotated footprint is inside the available stage",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-2 [V-D4] fit-both at 270 deg (three right turns), -90 deg (one left turn) and -270 deg (three left turns): exchanged dimensions, inside the stage",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-3 [V-D4] fit-width at 90 deg: the rendered width (intrinsic height) fills the available width",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-4 [V-D4] fit-height at 90 deg: the rendered height (intrinsic width) fills the available height",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-5 [V-D4] two successive resizes at 90 deg (1000x800, then 1400x700): each refit uses the exchanged dimensions and stays inside the stage",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-6 [V-D4] a portrait 1000x2000 image at 90 deg (fit-both, 1000x800): exchanged dimensions (not only the landscape fixture)",
+   "repair": true,
+   "prior": false,
+   "mutant": false,
+   "pass": true
+  },
+  {
+   "name": "P6-7 [preserved] 0 deg: fit-both / fit-width / fit-height / original-size after a resize equal the ordinary unrotated calculation",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-8 [preserved] 180 deg (two right turns): every mode equals the unrotated calculation (no exchange)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-9 [preserved] original-size stays 1:1 at 90 and 270 deg after a resize",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-10 [preserved] initial open: the loaded unrotated image is fitted with the ordinary calculation",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-11 [preserved] rotating alone does not refit (the scale is unchanged until a resize)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-12 [preserved] manual zoom and pan survive a resize while rotated: no automatic refit; rotation kept",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-13 [preserved] flips are kept through a rotated refit (transform composition unchanged)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-14 [preserved] E6 unchanged: the Fit button resets rotation and flips, then fits the unrotated image",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  },
+  {
+   "name": "P6-15 [preserved] opening another post resets rotation to 0 and fits it unrotated (navigation/open semantics unchanged)",
+   "repair": true,
+   "prior": true,
+   "mutant": true,
+   "pass": true
+  }
+ ]
+}

@@ -3482,7 +3482,11 @@
 		function configuredFitScale() {
 			if (!stage || !mediaEl) return 1;
 
-			const { width, height } = intrinsicSize();
+			const intrinsic = intrinsicSize();
+			// V-D4: fit the rendered orientation; an odd quarter turn exchanges width and height.
+			const quarterTurns = Math.abs(Math.round(rotation / 90)) % 2;
+			const width = quarterTurns ? intrinsic.height : intrinsic.width;
+			const height = quarterTurns ? intrinsic.width : intrinsic.height;
 			if (!(width > 0) || !(height > 0)) return 1;
 
 			const rect = stage.getBoundingClientRect();
