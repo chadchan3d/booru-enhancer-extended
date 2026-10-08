@@ -5,8 +5,9 @@
 // opened media is THE target failure, no longer model the current lifecycle.
 // This runs each closed suite unmodified twice:
 //   as-is    - against the working-tree production (staging active);
-//   neutral  - against the same production with ONLY the placeholder
-//              selection disabled (p7_neutral_staging_preload.cjs).
+//   neutral  - against the same production with the staging disabled (no
+//              placeholder at open; enrichment upgrades swap directly):
+//              p7_neutral_staging_preload.cjs.
 // Attribution holds when every neutral run passes completely (for the E0
 // characterization: when its neutral failures are exactly the set already
 // known before P7), i.e. each additional as-is failure is caused by the
@@ -24,10 +25,9 @@ const SUITES = [
   ['p4_vd6a_takeover_safe', 'p4-vd6a-takeover-safe-result.json'],
   ['p5_vd6b_inviewer_failure', 'p5-vd6b-inviewer-failure-result.json'],
   ['p6_vd4_rotated_fit', 'p6-vd4-rotated-fit-result.json'],
-  // E0: before P7 (at 39a5ae1) it already failed S0 (pin) and the repaired
-  // witnesses A5, A6, C3, E5, G2. E4 (the raw-zoom witness) is the intended P7
-  // apparent-view flip; it does not depend on staging, so it also fails here.
-  ['viewer_baseline', 'viewer-baseline-result.json', ['S0', 'A5', 'A6', 'C3', 'E5', 'G2', 'E4']],
+  // E0: before P7 (at 39a5ae1) it already failed exactly S0 (pin) and the
+  // repaired witnesses A5, A6, C3, E5, G2.
+  ['viewer_baseline', 'viewer-baseline-result.json', ['S0', 'A5', 'A6', 'C3', 'E5', 'G2']],
 ];
 const PRELOAD = path.join(__dirname, 'p7_neutral_staging_preload.cjs');
 const run = (suite, neutral) => {

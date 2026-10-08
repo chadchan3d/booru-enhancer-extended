@@ -1,46 +1,93 @@
 {
  "probe": "ib11-p7-vd7",
- "productionBlob": "b88af3817e8aa3a813272a30115204f39854d58c",
+ "productionBlob": "5da8fd9d69a65af6009fed66a0874bb8b96ce64b",
  "prior": "39a5ae1",
- "checks": 26,
- "passed": 26,
+ "preCorrection": "b856a62",
+ "checks": 29,
+ "passed": 29,
  "results": [
   {
    "name": "P7-1 [V-D7 staging] a card click opens on the selected target's distinct sample (not the original, not another post); one media element; viewer on the target",
    "repair": true,
    "prior": false,
+   "preCorrection": true,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
   {
-   "name": "P7-2 [V-D7 staging] once the placeholder is shown the original is requested in place; the placeholder stays displayed (not presented as ready early); no state; target unchanged",
+   "name": "P7-2 [V-D7 Chrome semantics] cached placeholder: after its load and the frame queued at open, the displayed element still holds the placeholder (src, natural size, complete), fitted for the placeholder (not shrunk to the original's metadata); the original is fetched by a detached preload",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": false
    },
    "pass": true
   },
   {
-   "name": "P7-3 [V-D7 view] non-manual upgrade: the original replaces the placeholder on the same element with the same apparent size and position (no blank, no jump); target unchanged",
+   "name": "P7-27 [V-D7 Chrome semantics] uncached placeholder behaves the same: still the placeholder, fitted for it, after its load and the queued frame",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
+   "noPlaceholder": false,
+   "rawZoom": true,
+   "inPlace": false,
+   "expected": {
+    "prior": false,
+    "preCorrection": false,
+    "noPlaceholder": false,
+    "rawZoom": true,
+    "inPlace": false
+   },
+   "pass": true
+  },
+  {
+   "name": "P7-29 [V-D7 Chrome semantics] while the original downloads (its header arrives before completion) the displayed image is still the placeholder at the same apparent view; no progressive original replaces it",
+   "repair": true,
+   "prior": false,
+   "preCorrection": false,
+   "noPlaceholder": false,
+   "rawZoom": true,
+   "inPlace": false,
+   "expected": {
+    "prior": false,
+    "preCorrection": false,
+    "noPlaceholder": false,
+    "rawZoom": true,
+    "inPlace": false
+   },
+   "pass": true
+  },
+  {
+   "name": "P7-3 [V-D7 view] non-manual upgrade: the original replaces the placeholder on the same element, with the same apparent size and position at every step (fitted placeholder, during download, after); target unchanged",
+   "repair": true,
+   "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": false,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": false
+    "rawZoom": false,
+    "inPlace": false
    },
    "pass": true
   },
@@ -48,12 +95,16 @@
    "name": "P7-4 [V-D7 view] no configured refit at the upgrade: with the stage changed silently (no resize event), the upgrade keeps the placeholder's apparent size instead of fitting the new stage",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": false,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": false
+    "rawZoom": false,
+    "inPlace": false
    },
    "pass": true
   },
@@ -61,25 +112,33 @@
    "name": "P7-5 [V-D7 staging] after the upgrade a real resize still refits a non-manual view (configured Fit, rotation-aware)",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
   {
-   "name": "P7-6 [V-D7 view] manual zoom, pan, rotation, horizontal and vertical flips applied to the placeholder survive the upgrade in apparent screen space (scale rescaled, view identical)",
+   "name": "P7-6 [V-D7 view] manual zoom, pan, rotation, horizontal and vertical flips applied to the placeholder before the original is ready survive the download and the upgrade in apparent screen space",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": false,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": false
+    "rawZoom": false,
+    "inPlace": false
    },
    "pass": true
   },
@@ -87,12 +146,16 @@
    "name": "P7-7 [V-D7 staging] close before the original is ready: the viewer stays closed and inert when the original later completes",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
@@ -100,51 +163,84 @@
    "name": "P7-8 [V-D7 staging] rapid navigation away before the old original is ready: its late readiness does not replace the new target's view",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
   {
-   "name": "P7-9 [V-D7 staging] the original fails while the placeholder is shown: the placeholder is restored and stays visible, \"Full image failed to load\" is shown with the target's pointer-usable native link; nothing blank",
+   "name": "P7-9 [V-D7 staging] the original fails while the placeholder is shown: the placeholder stays displayed at the same view, \"Full image failed to load\" is shown with the target's pointer-usable native link; nothing blank",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": false
    },
    "pass": true
   },
   {
-   "name": "P7-10 [V-D7 view] same-post upgrade by enrichment (metadata-pending sample 300x150 -> original 3000x1500, manual zoom): same element, apparent size kept (no 10x jump), rotation kept",
+   "name": "P7-10 [V-D7 view] same-post upgrade by enrichment (metadata-pending sample 300x150 -> original 3000x1500, manual zoom): the sample stays displayed during the download; same element at the end; apparent size kept (no 10x jump); rotation kept",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": true,
    "rawZoom": false,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": true,
-    "rawZoom": false
+    "rawZoom": false,
+    "inPlace": false
    },
    "pass": true
   },
   {
-   "name": "P7-24 [V-D7 staging + V-D1] the staged-upgrade failure is durable: a late same-post update with unchanged data keeps the restored placeholder, \"Full image failed to load\" and the link",
+   "name": "P7-28 [V-D7 robustness] if the browser does not reuse the preloaded original (a refetch), the placeholder box is retained while pending and the apparent view is still kept when the element completes",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
-   "rawZoom": true,
+   "rawZoom": false,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": false,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": false,
+    "inPlace": null
+   },
+   "pass": true
+  },
+  {
+   "name": "P7-24 [V-D7 staging + V-D1] the staged-upgrade failure is durable: a late same-post update with unchanged data keeps the placeholder, \"Full image failed to load\" and the link",
+   "repair": true,
+   "prior": false,
+   "preCorrection": false,
+   "noPlaceholder": false,
+   "rawZoom": true,
+   "inPlace": false,
+   "expected": {
+    "prior": false,
+    "preCorrection": null,
+    "noPlaceholder": false,
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
@@ -152,12 +248,16 @@
    "name": "P7-25 [V-D7 staging + V-D8] the staged-upgrade failure link is hit-tested at its centre, and a click there targets it, is not prevented and does not close the viewer",
    "repair": true,
    "prior": false,
+   "preCorrection": false,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": false,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
@@ -165,12 +265,16 @@
    "name": "P7-26 [V-D7 staging] a failing placeholder is not a target failure: the original is loaded directly (no state); if the original then fails, the ordinary \"Media failed to load\" with the native link",
    "repair": true,
    "prior": false,
+   "preCorrection": true,
    "noPlaceholder": false,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": false,
+    "preCorrection": null,
     "noPlaceholder": false,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": null
    },
    "pass": true
   },
@@ -178,12 +282,16 @@
    "name": "P7-11 [preserved] no distinct placeholder (sample = preview = original): direct original load, unchanged",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -191,12 +299,16 @@
    "name": "P7-12 [preserved] metadata-pending target: sample shown with \"Loading media…\" after 220 ms (no staging)",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -204,12 +316,16 @@
    "name": "P7-13 [preserved] video card: VIDEO with the preview as poster, \"Loading video…\" after 180 ms, cleared at loadeddata (no image staging)",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -217,12 +333,16 @@
    "name": "P7-14 [preserved] ordinary image failure without a placeholder: \"Media failed to load\" with the pointer-usable native link (V-D8)",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -230,12 +350,16 @@
    "name": "P7-15 [preserved] V-D1: a late same-post update keeps an established failure state and link",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -243,12 +367,16 @@
    "name": "P7-16 [preserved] V-D5: Ctrl+F does not favorite and is not prevented; f favorites",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -256,12 +384,16 @@
    "name": "P7-17 [preserved] V-D6a: a failed takeover (stored volume 1.5, video card) abandons the shell; navigation not cancelled",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -269,12 +401,16 @@
    "name": "P7-18 [preserved] V-D6b: from an open image, ArrowRight onto a video with volume 1.5 shows the failure with the target's native link",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -282,12 +418,16 @@
    "name": "P7-19 [preserved] P6 / V-D4 and all four configured Fit modes: after a direct load, each mode matches its formula; a 90-degree resize refit uses the exchanged dimensions",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -295,12 +435,16 @@
    "name": "P7-20 [preserved] manual zoom and pan survive an ordinary resize; E6: the Fit button resets rotation and flips",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -308,12 +452,16 @@
    "name": "P7-21 [preserved] successful in-viewer navigation and close: ArrowRight moves to the next target, Escape closes and empties the stage",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -321,12 +469,16 @@
    "name": "P7-22 [preserved] playback: Space plays a paused viewer video; Escape pauses and releases it",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   },
@@ -334,12 +486,16 @@
    "name": "P7-23 [preserved] focus unchanged: opening the viewer and the staged upgrade move no focus",
    "repair": true,
    "prior": true,
+   "preCorrection": true,
    "noPlaceholder": true,
    "rawZoom": true,
+   "inPlace": true,
    "expected": {
     "prior": true,
+    "preCorrection": true,
     "noPlaceholder": true,
-    "rawZoom": true
+    "rawZoom": true,
+    "inPlace": true
    },
    "pass": true
   }

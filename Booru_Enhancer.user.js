@@ -3625,16 +3625,55 @@
 			return '';
 		}
 
-		// V-D7: the better image replaced the displayed one in place (the old
-		// image stayed shown until the new one was ready). Keep the apparent
-		// on-screen view: rescale so it occupies the previous rendered size;
-		// pan, rotation, flips and the manual/fit mode are kept; no refit.
+		// V-D7: the better image replaced the displayed one in place. Keep the
+		// apparent on-screen view: rescale so it occupies the previous rendered
+		// size; pan, rotation, flips and the manual/fit mode are kept; no refit.
 		function onMediaUpgraded(el, generation, [pw, ph]) {
 			if (el !== mediaEl || generation !== mediaGeneration) return;
 			clearMediaState();
 			const { width: fw, height: fh } = intrinsicSize(el);
 			if (pw > 0 && ph > 0 && fw > 0 && fh > 0) zoom *= Math.min(pw / fw, ph / fh);
 			render();
+		}
+
+		// V-D7: download the better image in a detached element; the displayed
+		// placeholder (and its natural size) stays untouched until it is
+		// completely loaded and decoded. A failure keeps the placeholder and
+		// shows the failure state with the native link.
+		function startFullPreload(el, generation, st) {
+			st.phase = 'preloading';
+			const pre = document.createElement('img');
+			st.preload = pre;
+			const current = () => el === mediaEl && generation === mediaGeneration && el.__beStage === st && st.preload === pre;
+			pre.addEventListener('load', () => {
+				if (!current()) return;
+				Promise.resolve(pre.decode ? pre.decode().catch(() => {}) : null).then(() => {
+					if (!current()) return;
+					st.preload = null;
+					swapToFull(el, generation, st);
+				});
+			});
+			pre.addEventListener('error', () => {
+				if (!current()) return;
+				st.preload = null;
+				st.phase = 'failed';
+				showMediaState('Full image failed to load', generation, 0, true);
+			});
+			pre.src = st.full;
+		}
+
+		// The image is already loaded in this document, so the browser switches
+		// the element synchronously: rescale in the same task (no frame between).
+		function swapToFull(el, generation, st) {
+			const prev = [el.naturalWidth, el.naturalHeight];
+			el.src = st.full;
+			if (el.complete && el.naturalWidth > 0) {
+				st.phase = 'done';
+				onMediaUpgraded(el, generation, prev);
+			} else {
+				st.phase = 'upgrading';
+				st.prev = prev;
+			}
 		}
 
 		function buildMedia(post) {
@@ -3691,32 +3730,21 @@
 				el.decoding = 'async';
 				el.fetchPriority = 'high';
 				// V-D7 staging (el.__beStage): 'placeholder' -> once shown, the
-				// original is requested in place ('upgrading'); if it fails the
-				// placeholder is restored ('restored') with the failure state.
+				// original preloads detached ('preloading') -> swapped in when
+				// ready ('done'); its failure keeps the placeholder ('failed').
 				const placeholder = stagedPlaceholderUrl(post, url);
 				el.__beStage = placeholder ? { placeholder, full: url, phase: 'placeholder' } : null;
 				el.addEventListener('load', () => {
 					const st = el.__beStage;
+					if (st && st.phase === 'done') return;
 					if (st && st.phase === 'upgrading') { st.phase = 'done'; onMediaUpgraded(el, generation, st.prev); return; }
-					if (st && st.phase === 'restored') { if (el === mediaEl && generation === mediaGeneration) render(); return; }
 					onMediaReady(el, generation);
-					if (st && st.phase === 'placeholder' && el === mediaEl && generation === mediaGeneration) {
-						st.phase = 'upgrading';
-						st.prev = [el.naturalWidth, el.naturalHeight];
-						el.src = st.full;
-					}
+					if (st && st.phase === 'placeholder' && el === mediaEl && generation === mediaGeneration) startFullPreload(el, generation, st);
 				});
 				el.addEventListener('error', () => {
 					if (el !== mediaEl || generation !== mediaGeneration) return;
 					const st = el.__beStage;
 					if (st && st.phase === 'placeholder') { st.phase = 'direct'; el.src = st.full; return; }
-					if (st && st.phase === 'upgrading') {
-						st.phase = 'restored';
-						el.src = st.placeholder;
-						showMediaState('Full image failed to load', generation, 0, true);
-						return;
-					}
-					if (st && st.phase === 'restored') return;
 					showMediaState('Media failed to load', generation, 0, true);
 				});
 				if (placeholder) {
@@ -3840,11 +3868,12 @@
 					const st = mediaEl.__beStage;
 					if (st && st.phase === 'placeholder') {
 						st.full = nextUrl;
+					} else if (mediaEl.naturalWidth > 0 && mediaEl.naturalHeight > 0) {
+						const next = { placeholder: mediaEl.getAttribute('src'), full: nextUrl, phase: 'placeholder' };
+						mediaEl.__beStage = next;
+						startFullPreload(mediaEl, mediaGeneration, next);
 					} else {
-						const [w0, h0] = [mediaEl.naturalWidth, mediaEl.naturalHeight];
-						mediaEl.__beStage = w0 > 0 && h0 > 0
-							? { placeholder: st && st.phase === 'upgrading' ? st.placeholder : mediaEl.getAttribute('src'), full: nextUrl, phase: 'upgrading', prev: [w0, h0] }
-							: null;
+						mediaEl.__beStage = null;
 						mediaEl.src = nextUrl;
 					}
 				}
