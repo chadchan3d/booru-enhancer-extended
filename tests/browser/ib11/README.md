@@ -330,25 +330,29 @@ The package qualifies only V-D4. The V-VIEW and P1–P5 packages are unchanged.
 
 # IB11-P7: V-D7 repair qualification (real Chrome; automatic, about 30 seconds)
 
-`IB11_P7_VD7.user.js` (SHA-256 `da6b9f8896fa20e544d332523fe745fefdbdac1e9e4686a92f27de82f97d798a`) contains the **repaired** production (commit `b856a62`, blob `b88af38`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p7_vd7.js`). The P7 page runs by itself; there are no prompts.
+`IB11_P7_VD7.user.js` (SHA-256 `2fee6862a9f6c540cf8dcdfd8be5ecc19cfec5b0892bf8e10a38f31f7f6251ab`) contains the **corrected** repair (commit `7e4c643`, blob `5da8fd9`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p7_vd7.js`). This is the second P7 package. The first (`da6b9f88…`, production `b856a62`) produced the attempt-1 result `b28fbf3d…72d2`, which was NOT QUALIFIED.
+
+The page runs by itself; there are no prompts.
 
 **Fixture:** the page has three cards:
 - VD7P, a quick 2000×1000 image;
-- VD7 and VD7X, each with a 160×80 thumb as its sample/preview and a slow 1600×800 original (the original takes about 9 s).
+- VD7, a slow 1600×800 original (about 9 s) whose placeholder is the 160×80 card thumbnail, already loaded by the page;
+- VD7X, a slow original whose placeholder is an 800×400 image fetched by the viewer.
 
 **What the page does:**
-1. **P7STAGE:** it opens VD7P, then moves to VD7 with ArrowRight inside the viewer. It records what is displayed at 300 ms and 1000 ms, checks every animation frame for a blank stage, and measures the rendered image inside the original's load (the upgrade) and 500 ms later.
-2. **P7XFORM:** it opens VD7X. While the thumb is shown, it applies Rotate right, Flip horizontal, Flip vertical, Zoom out ×2 and a pan with the viewer's own controls. It then measures the same way.
+1. **P7STAGE:** it opens VD7P, then moves to VD7 with ArrowRight inside the viewer. It records the viewer at 300 ms and 1000 ms, and every animation frame until 500 ms after the original arrives.
+2. **P7XFORM:** it opens VD7X and waits until the placeholder is painted at its fitted size. It then applies Rotate right, Flip horizontal, Flip vertical, Zoom in ×2 and a pan before the original arrives, and measures the same way.
 
-No screenshot is needed: the apparent view is measured from real layout geometry.
+**How the placeholder is measured:** by its real on-screen rectangle against the expected fitted size, never by `naturalWidth`. In Chrome, an image whose source is still loading reports a natural size of 0.
 
 **Local qualification:**
 - `node tests/browser/ib11/build_ib11_p7.cjs --check`
-- `node tests/browser/ib11/verify_ib11_p7.cjs --media <fixture folder>` (37/37)
+- `node tests/browser/ib11/verify_ib11_p7.cjs --media <fixture folder>` (45/45)
 
 **Operator steps:**
-1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p7`. It prints "1 pages (IB11-P7 V-D7 qualification)" and writes `tests/results/ib11-p7-vd7.json`.
-2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P6 scripts**. Install and enable `IB11_P7_VD7.user.js`.
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p7`. It writes `tests/results/ib11-p7-vd7.json`.
+   - **The first attempt's file is at that same path.** Move it aside first (for example, rename it to `tests/results/ib11-p7-vd7-attempt1.json`; its SHA-256 is recorded) so the new run does not overwrite it.
+2. **Prepare Tampermonkey:** disable every other script, including the V-VIEW and P1–P6 scripts **and the first P7 script**. Install and enable this `IB11_P7_VD7.user.js`, replacing the first one.
 3. **Open** `http://127.0.0.1:8797/vview/start` in a normal window. Keep the tab **in front and visible**: Chrome throttles animation frames in background tabs. Do not touch the page or resize the window.
 4. **Wait** for "P7 RECORDED" (about 30 seconds). If a page shows INVALID, press F5 to retry.
 5. **Return** `tests/results/ib11-p7-vd7.json`.

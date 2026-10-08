@@ -15,10 +15,11 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §7–§8).
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
-- **P7 (V-D7): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §13):
-  - production repair committed at `b856a62`;
-  - local qualification PASS: regression 26/26, staging attribution 7/7, P7 package verifier 37/37;
-  - **real-Chrome qualification PENDING.**
+- **P7 (V-D7): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §13–§14):
+  - real-Chrome attempt 1 (raw `b28fbf3d…72d2`, production `b856a62`) NOT QUALIFIED;
+  - production corrected at `7e4c643` (detached preload; the placeholder is kept until the original is ready);
+  - local qualification PASS: regression 29/29 (Chrome semantics), staging attribution 7/7, P7 package verifier 45/45;
+  - **second real-Chrome run PENDING.**
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -35,10 +36,11 @@
 ## Current state
 - **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P7 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `b856a623d02581f89f50938bfd1f30590267708e` (IB11-P7, V-D7);
-  - blob `b88af3817e8aa3a813272a30115204f39854d58c`;
-  - production body SHA-256 `8c964f02b72c133a40bc5d51df295eb91e6f0ee1f73c2dcf6ac2a09dcacc0ad5`.
+  - commit `7e4c643b018794ba1026f42faa4109ebda5a548c` (IB11-P7 correction, V-D7);
+  - blob `5da8fd9d69a65af6009fed66a0874bb8b96ce64b`;
+  - production body SHA-256 `822a5a20e1a387340618c08267b8bd7a09b2bf1ce0ab463ad371a99a4b37780d`.
 - **Previous production artifacts:**
+  - `b856a62` / `b88af38` / body `8c964f02…0ad5`: IB11-P7 first repair (the P7 attempt-1 artifact; NOT QUALIFIED);
   - `39a5ae1` / `0a7f57f` / body `d445d442…b439`: IB11-P6 (V-D4; the P6 qualification artifact);
   - `24ee7c2` / `68e37d1` / body `062227fa…9f26`: IB11-P5 (V-D6b; the P5 qualification artifact);
   - `fe1e06b` / `f232863` / body `4fd694e7…282b`: IB11-P4 (V-D6a; the P4 qualification artifact);
@@ -102,7 +104,7 @@
 | **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
-| **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **PARTIAL**: repair `b856a62` locally qualified; real-Chrome qualification pending |
+| **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **PARTIAL**: attempt 1 NOT QUALIFIED; corrected repair `7e4c643` locally qualified; second real-Chrome run pending |
 | Focus ownership/return | NOT STARTED |
 
 **P1 detail:**
@@ -211,27 +213,30 @@
   - **Preservation:** Fit modes at 0°/180°, original-size, manual zoom/pan, rotation/flips, E6 (Fit resets rotation and flips) and P1–P5 all unchanged (P6 regression and P1–P5 regressions).
 
 **P7 detail:**
-- **Change** (`b856a62`; `buildMedia` image branch, `updatePost` image branch, new `stagedPlaceholderUrl` and `onMediaUpgraded`):
-  - an image target with a distinct non-video sample (else preview) opens on it;
-  - once it is displayed, the original is requested in place (the browser keeps the placeholder shown until the original is ready);
-  - at the original's load the zoom is rescaled so the apparent view is kept (pan, rotation, flips and the manual/fit mode kept; no refit);
-  - a failed original restores the placeholder with "Full image failed to load" and the native link;
+- **Change** (`b856a62`, corrected by `7e4c643`):
+  - an image target with a distinct non-video sample (else preview) opens on that placeholder;
+  - once it is displayed, the original is downloaded in a **detached preload**, and the placeholder element stays untouched;
+  - when the original is completely loaded and decoded, it is assigned to the displayed element (Chrome reuses it synchronously), and the zoom is rescaled in the same task, so the apparent view is kept (pan, rotation, flips and the manual/fit mode kept; no refit);
+  - a failed original keeps the placeholder with "Full image failed to load" and the native link;
   - metadata-pending, video and no-placeholder targets are unchanged.
-- **Regression:** `tests/host/ib11/p7_vd7_staged_placeholder.cjs` 26/26 on the repair, `39a5ae1`, a no-placeholder mutant and a raw-zoom mutant.
-  - The staging checks fail on the prior and the no-placeholder mutant.
-  - The apparent-view checks fail on the prior and the raw-zoom mutant.
-  - 13 preservation checks hold on all four.
+- **Attempt 1** (raw `b28fbf3db1f5dcbe14f2f3f69d71c84d758469679b8f1ede1bd015d7660b72d2`, production `b856a62`): NOT QUALIFIED.
+  - Chrome reads 0×0 for a pending in-place `src`, so the frame queued at open fitted the painted 160×80 placeholder to the 1600×800 metadata (scale 1.50375, 240.6×120.3).
+  - Chrome painted the progressive original once its header arrived, and the upgrade then shrank the original 10×.
+  - The probe's `naturalWidth === 160` wait could never succeed.
+- **Regression:** `tests/host/ib11/p7_vd7_staged_placeholder.cjs` 29/29 under Chrome's measured image semantics. The Chrome-semantics checks fail on `b856a62` and an in-place mutant; staging and apparent-view checks fail on `39a5ae1`, the no-placeholder and raw-zoom mutants; 13 preservation checks hold everywhere.
 - **Staging attribution:** `p7_staging_attribution.cjs` 7/7.
-  - The closed P1–P5 regressions (unedited) fail only assertions that the opened media is the original or that one error on it is the target failure.
-  - With only the placeholder selection disabled, they all pass fully, and E0 fails exactly its pre-P7 set plus E4. IB10's 3 timeline checks behave the same way (67/67 neutralized).
-- **Package verifier:** `verify_ib11_p7.cjs` 37/37; package `da6b9f88…798a` (automatic; real-layout geometry; no screenshot needed).
-- **Regressions on `b856a62`:**
+  - The closed P1–P5 regressions and E0 are unedited.
+  - The neutral run (all staging disabled) passes them fully, and E0 fails exactly its pre-P7 set.
+  - E3 is staging-attributed: its harness cannot complete a detached preload.
+  - E4 passes as-is for the same reason; the apparent-view repair is proven by P7-3, P7-6 and P7-10 and the browser cell.
+  - IB10: 67/67 neutralized.
+- **Package verifier:** `verify_ib11_p7.cjs` 45/45; second package `2fee6862…51ab`. VD7X now has an 800×400 placeholder; the placeholder is judged by its layout footprint; painted frames are compared. The verifier rejects `b856a62`, the first-attempt probe logic, and transforms captured after completion.
+- **Regressions on `7e4c643`:**
   - IB01–IB09 pass (IB07 blob pins only);
-  - P6 15/15, P7 26/26;
+  - P6 15/15, P7 29/29;
   - verifiers fail only their working-tree pins;
-  - E0 27/38 and controls 39/46: **B1 and E4 are the intended V-D7 flips**; A1, C1 and D1 are staging-attributed; D2 and D4 are new anchor pins (re-anchored: caught); E3 still valid;
-  - G-PLAY recovery 28/28; V-VIEW recovery 32/32.
-- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p7` → `tests/results/ib11-p7-vd7.json`; `vview_evaluate.cjs --p7` must report **V-D7 REPAIR QUALIFIED**).
+  - E0 27/38 and controls 39/46: B1 the intended flip; A1, C1, D1, E3 staging-attributed; D2 and D4 anchor pins (re-anchored: caught).
+- **Real-Chrome qualification:** second run PENDING (`vview_server.cjs --p7` → `tests/results/ib11-p7-vd7.json`; move the attempt-1 file aside first). `vview_evaluate.cjs --p7` must report **V-D7 REPAIR QUALIFIED**.
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -267,8 +272,8 @@
 
 ## Next
 - **Active: IB11-P7 (V-D7 only), operator step.**
-  - Run the P7 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P7"; automatic, about 30 seconds, tab kept visible; `vview_server.cjs --p7`; package `da6b9f88…`).
-  - Return `tests/results/ib11-p7-vd7.json`.
+  - Run the **second** P7 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P7"; automatic, about 30 seconds, tab kept visible; `vview_server.cjs --p7`; package `2fee6862…`).
+  - Move the attempt-1 result aside first, then return the new `tests/results/ib11-p7-vd7.json`.
   - It is evaluated with `vview_evaluate.cjs --p7`, which must report **V-D7 REPAIR QUALIFIED** before V-D7 is marked COMPLETE.
   - After P7 closes, the only remaining frozen item is focus ownership/return; it needs an explicit owner assignment.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.

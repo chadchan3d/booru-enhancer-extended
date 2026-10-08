@@ -587,21 +587,28 @@ function evaluateP6(doc) {
 }
 
 // IB11-P7 (V-D7 repair) qualification: one automatic page P7_VD7, one valid
-// attempt, identity MATCH, no trusted input. The displayed image is its
-// natural size (thumb 160x80 vs slow original 1600x800). Geometry tolerance:
-// rendered width/height within max(2 px, 0.5 %), centre within 2 px.
-//  P7STAGE (in-viewer navigation from VD7P onto VD7): at 300 ms and 1000 ms
-//   the viewer is open on VD7 with exactly one media element showing VD7's
-//   own thumb (first source VD7-thumb, not VD7P), non-zero area, the original
-//   requested but not complete; no blank frame once displayed; the upgrade
-//   (inside the original's load) shows the complete 1600x800 original on the
-//   same element and target, with the pre-upgrade rendered geometry kept at
-//   the upgrade and 500 ms later; no state text.
-//  P7XFORM (VD7X): rotation 90, horizontal and vertical flips, manual zoom
-//   (two Zoom out steps, by the viewer's own clamp rule min(8, max(0.05, z - 0.25))) and a pan applied before the
-//   original completed; at the upgrade the same rotation, flips and pan, the
-//   scale rescaled by 160/1600, and the rendered geometry kept (at the
-//   upgrade and 500 ms later); no blank frame.
+// attempt, identity MATCH, no trusted input. Real Chrome: a pending in-place
+// src reads naturalWidth 0 while the old image stays painted, so a displayed
+// placeholder is judged by its real layout rectangle against the fit-both
+// footprint of the placeholder (160x80 thumb for VD7, 800x400 for VD7X) in the
+// measured stage, never by naturalWidth. Tolerance: max(2 px, 0.5 %) per side,
+// 2 px at the centre. "Original not complete" comes from the fixture server's
+// streaming log (last write after the observation) when present, else from
+// the page's upgrade time.
+//  P7STAGE (VD7P -> ArrowRight -> VD7): at 300 ms and 1000 ms the viewer is
+//   open on VD7 with exactly one media element whose first source was VD7's
+//   thumb, painted at the fitted thumb footprint, the original not complete;
+//   no blank frame once shown; the last painted placeholder frame is still the
+//   fitted thumb; the first painted full-image frame and the state 500 ms
+//   after it keep that geometry; the upgrade is the complete 1600x800 original
+//   on the same element and target; no state text.
+//  P7XFORM (VD7X): the retained 800x400 placeholder is reached and painted at
+//   its fitted footprint; rotation 90, both flips, manual zoom (two Zoom in
+//   steps by the viewer's clamp rule) and a pan are applied while it is still
+//   the placeholder and before the original completes; the last placeholder
+//   frame carries exactly those transforms; the first full-image frame keeps
+//   rotation, flips and pan, scale x 800/1600 and the geometry (and 500 ms
+//   later); no blank frame.
 // Verdict "V-D7 REPAIR QUALIFIED" only when both cells hold.
 function evaluateP7(doc) {
   const out = { kind: 'ib11-p7', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
@@ -614,11 +621,15 @@ function evaluateP7(doc) {
   if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
   const cells = p.client.cells || {};
   const tf = (s) => { const g = (re) => { const m = re.exec(s || ''); return m ? Number(m[1]) : null; }; return { tx: g(/translate\((-?[\d.]+)px/), ty: g(/translate\(-?[\d.]+px, (-?[\d.]+)px/), scale: g(/ scale\((-?[\d.]+)\)/), rot: g(/rotate\((-?[\d.]+)deg\)/), fx: g(/scaleX\((-?[\d.]+)\)/), fy: g(/scaleY\((-?[\d.]+)\)/) }; };
-  const geom = (a, b) => { if (!a || !b) return { ok: false }; const tol = (v) => Math.max(2, 0.005 * Math.abs(v)); const dw = b.w - a.w; const dh = b.h - a.h; const dc = Math.hypot(b.cx - a.cx, b.cy - a.cy);
-    return { ok: a.w > 0 && a.h > 0 && Math.abs(dw) <= tol(a.w) && Math.abs(dh) <= tol(a.h) && dc <= 2, dw, dh, dc, before: { w: a.w, h: a.h }, after: { w: b.w, h: b.h } }; };
-  const req = (label) => (doc.requests || []).filter((r) => r.page === 'P7_VD7' && r.label === label);
-  const doneWall = (label) => { const r = req(label).find((q) => q.status === 200 && (q.writes || []).length); return r ? r.writes[r.writes.length - 1][0] : null; };
-  const isThumb = (s) => !!s && s.nw === 160 && s.nh === 80; const isFull = (s) => !!s && s.nw === 1600 && s.nh === 800 && s.complete === true;
+  const nearPx = (a, b) => typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) <= Math.max(2, 0.005 * Math.abs(b));
+  const geom = (a, b) => { if (!a || !b) return { ok: false }; const dc = Math.hypot(b.cx - a.cx, b.cy - a.cy);
+    return { ok: a.w > 0 && a.h > 0 && nearPx(b.w, a.w) && nearPx(b.h, a.h) && dc <= 2, dw: b.w - a.w, dh: b.h - a.h, dc, before: { w: a.w, h: a.h }, after: { w: b.w, h: b.h } }; };
+  const fitFoot = (stageRect, [pw, ph]) => { if (!stageRect) return null; const z = Math.min((stageRect.w - 24) / pw, (stageRect.h - 24) / ph); return { w: pw * z, h: ph * z, z }; };
+  const atFoot = (r, f) => !!r && !!f && r.w > 0 && r.h > 0 && nearPx(r.w, f.w) && nearPx(r.h, f.h);
+  const lastWrite = (label) => { const r = (doc.requests || []).find((q) => q.page === 'P7_VD7' && q.label === label && q.status === 200 && (q.writes || []).length); return r ? r.writes[r.writes.length - 1][0] : null; };
+  const notYet = (label, obs, upgrade) => { const lw = lastWrite(label); return lw !== null ? obs.wall < lw : (!!upgrade && upgrade.t > obs.t); };
+  const isFull = (s) => !!s && s.nw === 1600 && s.nh === 800 && s.complete === true && /-slow$/.test(s.srcLabel || '');
+  const blankOk = (f) => !!f && f.frames > 0 && f.blank === 0;
 
   // ---- P7STAGE ----
   { const c = cells.P7STAGE; const R = []; let ok = false; let detail = null;
@@ -627,16 +638,16 @@ function evaluateP7(doc) {
       if (c.outsideTrusted) R.push('INVALID trusted input outside a prompt');
       if (!c.prevOk || !c.prev || c.prev.currentId !== c.prevId || c.prev.nw !== 2000) R.push('INVALID the previous target (VD7P) was not shown complete first');
       if (!c.upgrade) R.push('INVALID the original never completed (no upgrade observed)');
-      if (!req('VD7-slow').some((r) => r.status === 200)) R.push('FAIL slow original not requested from the fixture server');
       const s = c.samples || [];
-      const early = s.map((x) => ({ at: x.at, open: x.open, target: x.currentId === c.targetId, single: x.inStage === 1 && x.inOverlay === 1, placeholder: isThumb(x) && x.firstLabel === 'VD7-thumb' && !!x.rect && x.rect.w > 0 && x.rect.h > 0,
-        originalPending: x.srcLabel === 'VD7-slow' && x.complete === false && (!c.upgrade || c.upgrade.t > x.t) && (doneWall('VD7-slow') === null || doneWall('VD7-slow') > x.wall) }));
+      const early = s.map((x) => ({ at: x.at, open: x.open, target: x.currentId === c.targetId, single: x.inStage === 1 && x.inOverlay === 1, ownPlaceholder: x.firstLabel === 'VD7-thumb',
+        fittedFootprint: atFoot(x.rect, fitFoot(x.stageRect, [160, 80])), notFull: !x.full && !isFull(x), originalPending: notYet('VD7-slow', x, c.upgrade), rect: x.rect && { w: x.rect.w, h: x.rect.h } }));
+      const f = c.frames || {}; const lp = f.lastPlaceholder; const ff = f.firstFull; const st = s.length ? s[s.length - 1].stageRect : null;
+      const lastPlaceholderFitted = !!lp && atFoot(lp.rect, fitFoot(st, [160, 80]));
       const u = c.upgrade || {}; const a = c.after || {};
-      const upgraded = isFull(u) && u.srcLabel === 'VD7-slow' && u.currentId === c.targetId && u.inStage === 1 && u.inOverlay === 1 && c.sameElement === true && isFull(a) && a.currentId === c.targetId && a.inStage === 1 && !a.state;
-      const g1 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, u.rect); const g2 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, a.rect);
-      const noBlank = !!c.frames && c.frames.blank === 0 && c.frames.frames > 0;
-      ok = s.length === 2 && early.every((x) => x.open && x.target && x.single && x.placeholder && x.originalPending) && upgraded && g1.ok && g2.ok && noBlank && isThumb(c.beforeUpgrade);
-      detail = { early, firstShownMs: c.frames && c.frames.firstShownMs, frames: c.frames, upgraded, geometryAtUpgrade: g1, geometryAfter500: g2, upgradeTransform: u.transform };
+      const upgraded = isFull(u) && u.currentId === c.targetId && u.inStage === 1 && u.inOverlay === 1 && c.sameElement === true && isFull(a) && a.currentId === c.targetId && a.inStage === 1 && !a.state;
+      const g1 = geom(lp && lp.rect, ff && ff.rect); const g2 = geom(lp && lp.rect, a.rect);
+      ok = s.length === 2 && early.every((x) => x.open && x.target && x.single && x.ownPlaceholder && x.fittedFootprint && x.notFull && x.originalPending) && blankOk(f) && lastPlaceholderFitted && !!ff && upgraded && g1.ok && g2.ok;
+      detail = { early, firstShownMs: f.firstShownMs, frames: { frames: f.frames, blank: f.blank }, lastPlaceholderFitted, lastPlaceholder: lp && { rect: lp.rect, transform: lp.transform }, firstFull: ff && { rect: ff.rect, transform: ff.transform }, upgraded, geometryFirstFullFrame: g1, geometryAfter500: g2 };
     }
     out.cells.P7STAGE = { evidence: R.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (R.length ? 'FAIL' : 'PASS'), reasons: R, finding: { code: ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail } };
   }
@@ -646,14 +657,18 @@ function evaluateP7(doc) {
     else {
       if (c.outsideTrusted) R.push('INVALID trusted input outside a prompt');
       if (!c.upgrade) R.push('INVALID the original never completed (no upgrade observed)');
-      const f = tf(c.fitted && c.fitted.transform); const t = tf(c.transformed && c.transformed.transform); const u = tf(c.upgrade && c.upgrade.transform); const a = tf(c.after && c.after.transform);
-      const applied = c.phOk && isThumb(c.fitted) && isThumb(c.transformed) && c.earlyComplete === false && t.rot === 90 && t.fx === -1 && t.fy === -1 && (t.tx !== 0 || t.ty !== 0) && t.scale !== null && f.scale !== null && Math.abs(t.scale - [1, 2].reduce((z) => Math.min(8, Math.max(0.05, z - 0.25)), f.scale)) <= 1e-6 && t.scale !== f.scale;
-      const kept = (x) => x.rot === t.rot && x.fx === t.fx && x.fy === t.fy && x.tx === t.tx && x.ty === t.ty && x.scale !== null && Math.abs(x.scale - t.scale * 160 / 1600) <= 1e-3 * t.scale;
+      const fs0 = c.fittedShot || {}; const tr = c.transformed || {}; const fr = c.frames || {}; const lp = fr.lastPlaceholder; const ff = fr.firstFull;
+      const fitOk = c.phOk === true && fs0.currentId === c.targetId && fs0.inStage === 1 && fs0.firstLabel === 'VD7X-mid' && !fs0.full && atFoot(fs0.rect, fitFoot(fs0.stageRect, [800, 400])) && notYet('VD7X-slow', fs0, c.upgrade);
+      const f = tf(fs0.transform); const t = tf(tr.transform);
+      const wantScale = f.scale === null ? null : [1, 2].reduce((z) => Math.min(8, Math.max(0.05, z + 0.25)), f.scale);
+      const applied = fitOk && !tr.full && !isFull(tr) && tr.firstLabel === 'VD7X-mid' && notYet('VD7X-slow', tr, c.upgrade) && t.rot === 90 && t.fx === -1 && t.fy === -1 && (t.tx !== 0 || t.ty !== 0) && t.scale !== null && wantScale !== null && Math.abs(t.scale - wantScale) <= 1e-6;
+      const l = tf(lp && lp.transform); const u = tf(ff && ff.transform); const a = tf(c.after && c.after.transform);
+      const heldUntilUpgrade = !!lp && lp.transform === tr.transform;
+      const kept = (x) => x.rot === t.rot && x.fx === t.fx && x.fy === t.fy && x.tx === t.tx && x.ty === t.ty && x.scale !== null && t.scale !== null && Math.abs(x.scale - t.scale * 800 / 1600) <= 1e-3 * t.scale;
       const upgraded = isFull(c.upgrade) && c.upgrade.currentId === c.targetId && c.sameElement === true && isFull(c.after) && c.after.inStage === 1;
-      const g1 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, c.upgrade && c.upgrade.rect); const g2 = geom(c.beforeUpgrade && c.beforeUpgrade.rect, c.after && c.after.rect);
-      const noBlank = !!c.frames && c.frames.blank === 0 && c.frames.frames > 0;
-      ok = applied && upgraded && kept(u) && kept(a) && g1.ok && g2.ok && noBlank && isThumb(c.beforeUpgrade);
-      detail = { applied, transformBefore: c.transformed && c.transformed.transform, transformAtUpgrade: c.upgrade && c.upgrade.transform, fittedScale: f.scale, scaleBefore: t.scale, scaleAtUpgrade: u.scale, upgraded, geometryAtUpgrade: g1, geometryAfter500: g2, frames: c.frames };
+      const g1 = geom(lp && lp.rect, ff && ff.rect); const g2 = geom(lp && lp.rect, c.after && c.after.rect);
+      ok = applied && heldUntilUpgrade && !!ff && kept(u) && kept(a) && upgraded && g1.ok && g2.ok && blankOk(fr);
+      detail = { fitOk, applied, heldUntilUpgrade, fittedScale: f.scale, wantScale, transformBefore: tr.transform, lastPlaceholderTransform: lp && lp.transform, firstFullTransform: ff && ff.transform, upgraded, geometryFirstFullFrame: g1, geometryAfter500: g2, frames: { frames: fr.frames, blank: fr.blank, firstShownMs: fr.firstShownMs }, lastPlaceholderLevel: l.scale };
     }
     out.cells.P7XFORM = { evidence: R.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (R.length ? 'FAIL' : 'PASS'), reasons: R, finding: { code: ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail } };
   }

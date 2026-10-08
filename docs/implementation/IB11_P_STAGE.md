@@ -9,7 +9,7 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
-- **P7 (V-D7): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§13).
+- **P7 (V-D7): PARTIAL, NOT COMPLETE.** Attempt 1 in real Chrome was NOT QUALIFIED. The production repair was corrected and re-qualified locally; the second real-Chrome run is pending (§13, §14).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1223,3 +1223,97 @@ Historical result files rewritten by these runs were restored unedited.
 **P7 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification, attribution and regressions pass as classified. **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P7".
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 14. P7 attempt 1 (NOT QUALIFIED) and the correction
+
+**Attempt 1 raw result:** `tests/results/ib11-p7-vd7.json`, SHA-256 `b28fbf3db1f5dcbe14f2f3f69d71c84d758469679b8f1ede1bd015d7660b72d2`. Valid evidence, kept unmodified and not committed.
+- Package `da6b9f88…` (production `b856a62`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0; identity MATCH; `error: null`.
+- `vview_evaluate.cjs --p7`: exit 1, **NOT QUALIFIED** (P7STAGE and P7XFORM evidence PASS, both DEFECT_CONFIRMED).
+
+**What real Chrome established** (stage 2560×1227):
+- **A pending in-place `src` reads 0×0.** Once production assigned the slow original to the `<img>` showing the placeholder, Chrome kept painting the placeholder but reported `naturalWidth`/`naturalHeight` 0, `complete` false, and the original as the `src`. At 300 ms and 1000 ms the target was 8002, the first rendition was `VD7-thumb`, and the rendered rectangle was 240.6×120.3 at transform scale 1.50375.
+- **The placeholder was misfitted.** Scale 1.50375 fits the 1600×800 original, not the 160×80 placeholder. The frame queued at open (`replaceMedia`'s `requestAnimationFrame` fit) ran after the placeholder's load handler had already switched `src`. `intrinsicSize()` therefore fell back to the post's 1600×800 metadata, and the painted placeholder shrank about 10×.
+- **The progressive original replaced the placeholder early.** From about 1.5 s (the fixture's header delay; `firstShownMs` 1524) the element reported `naturalWidth` 1600 before completion, with a 2406×1203 layout box. Chrome painted the progressively loading original from then on.
+- **The upgrade shrank the original.** At completion `onMediaUpgraded` multiplied the (misfitted) scale by 0.1, leaving the full image at 240.6×120.3.
+- **Images already loaded in the document are reused.** Each thumb was requested from the server exactly once, although the card and the viewer placeholder both used it (and despite `Cache-Control: no-store`). `VD7-slow` was requested 3 ms after the in-viewer navigation.
+- **The probe also had a measurement fault.** P7XFORM waited for `naturalWidth === 160`, a state Chrome never reports once the original is pending. So `phOk` was false, the transforms landed after the original had completed (fitted state 1600×800, `earlyComplete` true), and `beforeUpgrade` was null.
+
+**Correction (production, P7 only)** (commit `7e4c643b018794ba1026f42faa4109ebda5a548c`):
+- **Why not only an intrinsic-size fallback:** that would have fixed the misfit, but not the progressive replacement at header time.
+- **Detached preload:** `startFullPreload` downloads the original in a detached `<img>`. The displayed placeholder element (its `src`, natural size and painted box) stays untouched. The frame queued at open therefore fits the placeholder's real size.
+- **Swap when ready:** after the preload's `load` and `decode()`, `swapToFull` assigns the original to the displayed element. Chrome reuses the image just loaded in the document, so the switch is synchronous, and `onMediaUpgraded` rescales in the same task. The apparent view is kept with no intermediate frame, and configured Fit is not invoked.
+- **Refetch fallback:** if a browser did not reuse the image, the element would pend; the rescale is then applied at its `load`.
+- **Failure:** a failed preload keeps the placeholder untouched and shows "Full image failed to load" with the native link (the restore step is no longer needed). A failing placeholder still falls back to a direct load.
+- **Enrichment:** same-post enrichment upgrades of a displayed image use the same preload.
+- **Unchanged:** guards (element, generation, stage object, current preload); the source-selection rule; metadata-pending, video and no-placeholder targets.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `5da8fd9d69a65af6009fed66a0874bb8b96ce64b` |
+| Production body SHA-256 | `822a5a20e1a387340618c08267b8bd7a09b2bf1ce0ab463ad371a99a4b37780d` |
+| Diff vs `b856a62` | 52 insertions, 23 deletions (image branch of `buildMedia`, the enrichment branch of `updatePost`, new `startFullPreload` / `swapToFull`) |
+
+**Regression rewritten to Chrome's measured image semantics:** `tests/host/ib11/p7_vd7_staged_placeholder.cjs` **29/29**.
+- **Image model:**
+  - an image already loaded in the document is reused synchronously (load queued at 0 ms);
+  - a fetched `src` reads 0×0 with the painted box retained;
+  - the header switches to the progressive original;
+  - frames run after queued loads;
+  - the sample may be cached or fetched.
+- **Sources:** the repair, `39a5ae1`, the **first-attempt `b856a62`**, the no-placeholder and raw-zoom mutants, and an **in-place** mutant (the detached preload removed; the original assigned to the displayed element at once).
+- **Chrome-semantics checks:** the existing staging and apparent-view assertions are kept, and new checks are added:
+  - P7-2: a cached placeholder is still the placeholder, fitted for itself, after the queued frame;
+  - P7-27: the same for an uncached placeholder;
+  - P7-29: no progressive original is painted while it downloads;
+  - P7-28: the refetch fallback keeps the view.
+  - All of them fail on `b856a62` and on the in-place mutant.
+- **The other mutants:** the staging checks fail on `39a5ae1` and the no-placeholder mutant; the apparent-view checks fail on the raw-zoom mutant. 13 preservation checks hold on all six sources.
+
+**Staging attribution (re-run on `7e4c643`): 7/7.** The neutral preload now also disables the enrichment preload, so it is the repair minus all staging. Closed P1–P5 regressions as before: 1/6, 6/11, 14/16, 12/15, 11/15 as-is; all full passes neutralized. P6 15/15 both ways. In E0:
+- **Neutralized:** it fails exactly the pre-P7 set S0, A5, A6, C3, E5, G2.
+- **As-is, staging-attributed:** A1, B1, C1, D1 and **E3**. E3's harness never completes a detached preload, so its same-element upgrade cannot occur.
+- **E4 passes as-is** for the same reason (its harness cannot observe the upgrade). That is not evidence of a jump; the apparent-view repair is proven by P7-3, P7-6 and P7-10 and by the browser P7XFORM cell.
+- **IB10:** 64/67 as-is, 67/67 neutralized.
+
+**Browser probe corrections (second package, `IB11_P7_VD7.user.js`, SHA-256 `2fee6862a9f6c540cf8dcdfd8be5ecc19cfec5b0892bf8e10a38f31f7f6251ab`):**
+- **Fixture:** VD7X now has an 800×400 placeholder (`mid`), served by the fixture server. A zoomed thumb is capped at 8×, which left no reliable pan room. This also gives an uncached placeholder (VD7's thumb is the page's own card thumbnail) and a 2× upgrade next to the 10× one.
+- **No `naturalWidth` waits:** the retained placeholder is the conjunction of:
+  - the right target and exactly one viewer media element;
+  - the target's placeholder as the first rendition;
+  - not the completed original;
+  - a non-zero real layout rectangle at the fitted footprint of the placeholder in the measured stage.
+- **Frame watcher:** a painted element counts as visible by its layout rectangle (not by `naturalWidth`). Every frame records the last painted placeholder state and the first painted full-image state, and these two painted states are compared. A DOM state that was never painted is not used.
+- **P7XFORM:** it waits for the retained-placeholder state, then applies the transforms (the pan via pointer events, which needs the placeholder to exceed the stage). The evaluator requires the transforms to be in place before completion (fixture streaming log) and held in the last painted placeholder frame.
+- **Simulator** (`vview_sim.cjs`): models the measured Chrome semantics (reuse of loaded images including card thumbnails, 0×0 pending with the painted box retained, progressive header).
+- **Server and evaluator:** the server accepts an optional per-card placeholder kind. `evaluateP7` is rewritten to these rules.
+
+**Local qualification: `verify_ib11_p7.cjs --media` 45/45.**
+- **Static:** includes "the probe never waits on a placeholder's naturalWidth" and the simulator's Chrome model.
+- **Production faults (NOT QUALIFIED):**
+  - `39a5ae1`;
+  - **`b856a62`**: the placeholder is painted far below its fitted footprint, as Chrome showed, and the progressive original appears at the old zoom;
+  - the no-placeholder, raw-zoom and in-place mutants.
+- **Probe-logic fault:** the first-attempt probe logic (waiting on `naturalWidth`) against `b856a62` gives NOT QUALIFIED, because the transforms were not applied before completion.
+- **25 evidence faults,** including:
+  - a placeholder painted at a tenth of its footprint;
+  - a progressive original as the last placeholder frame;
+  - transforms captured after the original completed;
+  - transforms not held until the upgrade.
+
+**Regressions on `7e4c643`:**
+- IB01–IB09 pass (IB07 blob pins only); IB10 64/67 (staging-attributed).
+- P1–P5 as attributed; P6 15/15; P7 29/29.
+- Verifiers fail only their working-tree pins; P7 verifier 45/45.
+- **E0 27/38, fault controls 39/46:**
+  - B1 is the intended V-D7 flip;
+  - A1, C1, D1, E3 are staging-attributed;
+  - D2 and D4 are anchor pins (re-anchored to `7e4c643`: both caught, 41/46);
+  - the remaining uncaught controls are known from earlier P items.
+- Historical result files rewritten by these runs were restored unedited.
+
+**Limitations (in addition to §13):**
+- E3 and E4 in the historical E0 harness cannot exercise the detached preload; see the attribution above.
+- The aspect-ratio limitation is unchanged.
+
+**P7 status: PARTIAL, NOT COMPLETE.** The second real-Chrome run is **PENDING**. P7 is not marked complete until a fresh result reports **V-D7 REPAIR QUALIFIED**.

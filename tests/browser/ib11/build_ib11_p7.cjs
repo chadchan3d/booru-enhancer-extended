@@ -12,8 +12,8 @@ const path = require('path');
 const b = require('./build_ib11_vview.cjs');
 const { mustReplace } = require('../../host/ib09/dwell_prototype.cjs');
 
-const P7_COMMIT = 'b856a62';
-const P7_EXPECTED_BLOB = 'b88af3817e8aa3a813272a30115204f39854d58c';
+const P7_COMMIT = '7e4c643';
+const P7_EXPECTED_BLOB = '5da8fd9d69a65af6009fed66a0874bb8b96ce64b';
 const OUT = path.join(__dirname, 'IB11_P7_VD7.user.js');
 const P7 = fs.readFileSync(path.join(__dirname, 'p7_vd7.js'), 'utf8').replace(/\r\n/g, '\n');
 const PATCHES = [

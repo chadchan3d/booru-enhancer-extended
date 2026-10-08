@@ -24,7 +24,8 @@ function layout(w, env) {
     const shown = ov && ov.style.display === 'flex';
     if (this.classList && this.classList.contains('be-viewer-stage')) return shown ? R(0, 0, env.vw, env.vh - TOOLBAR) : R(0, 0, 0, 0);
     if (shown && this.parentElement && this.parentElement.classList && this.parentElement.classList.contains('be-viewer-stage') && /^(IMG|VIDEO)$/.test(this.tagName)) {
-      const nw = this.tagName === 'IMG' ? this.naturalWidth : this.videoWidth; const nh = this.tagName === 'IMG' ? this.naturalHeight : this.videoHeight;
+      // a pending image keeps its painted box (Chrome) although its natural size reads 0
+      const nw = this.tagName === 'IMG' ? (this.naturalWidth || (this.__img && this.__img.lw) || 0) : this.videoWidth; const nh = this.tagName === 'IMG' ? (this.naturalHeight || (this.__img && this.__img.lh) || 0) : this.videoHeight;
       if (!nw || !nh) return R((env.vw) / 2, (env.vh - TOOLBAR) / 2, 0, 0);
       const t = parse(this.style.transform); const q = Math.abs(Math.round(t.r / 90)) % 2;
       const bw = (q ? nh : nw) * t.z; const bh = (q ? nw : nh) * t.z;
@@ -44,24 +45,36 @@ function layout(w, env) {
   Object.defineProperty(w, 'innerWidth', { configurable: true, get: () => env.vw });
   Object.defineProperty(w, 'innerHeight', { configurable: true, get: () => env.vh });
 }
+// Image loading as measured in real Chrome (IB11-P7 first attempt): an image
+// already loaded in the document (including the page's card thumbnails) is
+// reused synchronously when assigned (natural size at once; load queued);
+// a source that must be fetched reads naturalWidth/Height 0 and complete
+// false while the previously painted image keeps its box (lw/lh) until the
+// new image's dimensions arrive (header), after which the progressively
+// loading image is painted at its own size.
 function images(w, env, pageId, requests) {
   const IP = w.HTMLImageElement.prototype;
-  const st = (el) => (el.__img = el.__img || { complete: false, nw: 0, nh: 0, gen: 0 });
+  const DIM = { thumb: [160, 80], mid: [800, 400], wide: [2000, 1000], slow: [1600, 800] };
+  const avail = new Map();
+  const RE = /\/vview\/img\/[0-9a-f]+\/([A-Z0-9_]+)-(thumb|wide|slow|fail|mid)\.png/;
+  const st = (el) => (el.__img = el.__img || { complete: false, nw: 0, nh: 0, lw: 0, lh: 0, gen: 0 });
   Object.defineProperty(IP, 'complete', { configurable: true, get() { return this.__img ? this.__img.complete : true; } });
   Object.defineProperty(IP, 'naturalWidth', { configurable: true, get() { return this.__img ? this.__img.nw : 0; } });
   Object.defineProperty(IP, 'naturalHeight', { configurable: true, get() { return this.__img ? this.__img.nh : 0; } });
   const d = Object.getOwnPropertyDescriptor(IP, 'src');
   Object.defineProperty(IP, 'src', { configurable: true, get() { return d.get.call(this); }, set(v) {
-    // Browser pending-request rule: an image that is displayed stays the current
-    // image (its natural size) until the new source is completely available.
-    d.set.call(this, v); const el = this; const s = st(el); const pending = s.complete && s.nw > 0; s.complete = false; if (!pending) { s.nw = 0; s.nh = 0; } const g = ++s.gen;
-    const m = /\/vview\/img\/[0-9a-f]+\/([A-Z0-9_]+)-(thumb|wide|slow|fail)\.png/.exec(String(v));
+    d.set.call(this, v); const el = this; const s = st(el); const g = ++s.gen; const url = d.get.call(this);
+    const m = RE.exec(String(url));
     if (!m) { s.complete = true; return; }
     const kind = m[2]; const at = (ms, fn) => w.setTimeout(() => { if (s.gen === g) fn(); }, ms);
+    if (!avail.has(url) && DIM[kind] && [...w.document.querySelectorAll('article img')].some((i) => i !== el && i.src === url)) avail.set(url, DIM[kind]); // a card thumbnail the page already loaded
+    if (avail.has(url)) { const [aw, ah] = avail.get(url); s.complete = true; s.nw = aw; s.nh = ah; s.lw = 0; s.lh = 0; at(0, () => el.dispatchEvent(new w.Event('load'))); return; }
+    if (s.nw > 0) { s.lw = s.nw; s.lh = s.nh; } s.nw = 0; s.nh = 0; s.complete = false;
     requests.push({ page: pageId, label: `${m[1]}-${kind}`, status: kind === 'fail' ? 404 : 200, end: 'complete' });
-    if (kind === 'fail') at(50, () => { s.complete = true; s.nw = 0; s.nh = 0; el.dispatchEvent(new w.Event('error')); });
-    else if (kind === 'slow') { at(env.slowHeaderMs, () => { if (!pending) { s.nw = 1600; s.nh = 800; } }); at(env.slowCompleteMs, () => { s.complete = true; s.nw = 1600; s.nh = 800; el.dispatchEvent(new w.Event('load')); }); }
-    else { const [nw, nh] = kind === 'thumb' ? [160, 80] : [2000, 1000]; at(kind === 'thumb' ? 20 : 50, () => { s.complete = true; s.nw = nw; s.nh = nh; el.dispatchEvent(new w.Event('load')); }); }
+    const done = (dims) => { s.complete = true; s.nw = dims[0]; s.nh = dims[1]; s.lw = 0; s.lh = 0; avail.set(url, dims); el.dispatchEvent(new w.Event('load')); };
+    if (kind === 'fail') at(50, () => { s.complete = true; s.nw = 0; s.nh = 0; s.lw = 0; s.lh = 0; el.dispatchEvent(new w.Event('error')); });
+    else if (kind === 'slow') { at(env.slowHeaderMs, () => { s.nw = 1600; s.nh = 800; s.lw = 0; s.lh = 0; }); at(env.slowCompleteMs, () => done([1600, 800])); }
+    else at(kind === 'thumb' ? 20 : (kind === 'mid' ? 30 : 50), () => done(DIM[kind]));
   } });
   const VP = w.HTMLVideoElement.prototype;
   Object.defineProperty(VP, 'videoWidth', { configurable: true, get() { return this.hasAttribute('src') ? 1280 : 0; } });

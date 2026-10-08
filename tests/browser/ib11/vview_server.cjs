@@ -29,8 +29,9 @@
 // revision-1.3 NATIVE) for IB11_P2_VD1.user.js; output probe ib11-p2-vd1.
 // IB11-P3 (--p3): one page P3_VD5 (trusted Ctrl+F, Ctrl+D, Alt+O, unmodified
 // F and D) for IB11_P3_VD5.user.js; output probe ib11-p3-vd5.
-// IB11-P7 (--p7): one automatic page P7_VD7 (VD7P quick image, VD7 and VD7X slow
-// originals with thumb placeholders) for IB11_P7_VD7.user.js; output probe
+// IB11-P7 (--p7): one automatic page P7_VD7 (VD7P quick image; VD7 a slow original
+// with the 160x80 thumb as placeholder; VD7X a slow original with an 800x400
+// placeholder) for IB11_P7_VD7.user.js; output probe
 // ib11-p7-vd7, written by default to tests/results/ib11-p7-vd7.json.
 // IB11-P6 (--p6): one page P6_VD4 (the wide image card VD4) for
 // IB11_P6_VD4.user.js; output probe ib11-p6-vd4, written by default to
@@ -67,10 +68,12 @@ function images() {
     thumb: png(160, 80, () => [90, 140, 200]),
     wide: png(2000, 1000, (x) => (x < 1000 ? [200, 120, 60] : [60, 160, 90])),
     slow: png(1600, 800, () => [rnd(), rnd(), rnd()]),
+    // IB11-P7: an 800x400 placeholder (checkerboard) for the P7 transform cell
+    mid: png(800, 400, (x, y) => (((x >> 5) + (y >> 5)) & 1 ? [230, 200, 60] : [60, 90, 200])),
   };
   return Object.fromEntries(Object.entries(out).map(([k, b]) => [k, { buf: b, size: b.length, sha256: crypto.createHash('sha256').update(b).digest('hex') }]));
 }
-const DIMS = { thumb: [160, 80], wide: [2000, 1000], slow: [1600, 800] };
+const DIMS = { thumb: [160, 80], wide: [2000, 1000], slow: [1600, 800], mid: [800, 400] };
 
 // ---- plan ----
 // Card roles per page, in DOM order. FOCUS_K is first so one Tab reaches it.
@@ -84,14 +87,14 @@ const RECOVERY_CELLS = ['NATIVE', 'VD6A'];
 function plan({ preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, p7 = false } = {}) {
   let id = 8000;
   const mk = (pageId, cards) => ({ token: crypto.randomBytes(8).toString('hex'), id: pageId,
-    cards: cards.map(([role, kind, media]) => ({ role, kind, media, id: String(++id) })) });
+    cards: cards.map(([role, kind, media, ph]) => ({ role, kind, media, id: String(++id), ...(ph ? { ph } : {}) })) });
   if (p1) return [mk('P1_NATIVE', [['NATIVE', 'img', 'fail']])];
   if (p2) return [mk('P2_VD1', [['NATIVE', 'img', 'fail']])];
   if (p3) return [mk('P3_VD5', [['VD5', 'img', 'wide']])];
   if (p4) return [mk('TAKEOVER', TAKEOVER_CARDS)];
   if (p5) return [mk('P5_VD6B', [['VD6B_A', 'img', 'wide'], ['NATIVE', 'video', 'webm']])];
   if (p6) return [mk('P6_VD4', [['VD4', 'img', 'wide']])];
-  if (p7) return [mk('P7_VD7', [['VD7P', 'img', 'wide'], ['VD7', 'img', 'slow'], ['VD7X', 'img', 'slow']])];
+  if (p7) return [mk('P7_VD7', [['VD7P', 'img', 'wide'], ['VD7', 'img', 'slow'], ['VD7X', 'img', 'slow', 'mid']])];
   if (recovery) return [mk('NATIVE_R', [['NATIVE', 'img', 'fail']]), mk('TAKEOVER', TAKEOVER_CARDS)];
   return preflight ? [mk('G3PRE', PREFLIGHT_CARDS)] : [mk('MAIN', MAIN_CARDS), mk('TAKEOVER', TAKEOVER_CARDS)];
 }
@@ -102,7 +105,7 @@ function page(pg, port, sizes) {
     const file = c.media === 'webm' ? `/vview/video/${pg.token}/${c.role}.webm` : `/vview/img/${pg.token}/${c.role}-${c.media}.png`;
     const size = c.media === 'webm' ? sizes.webm : (sizes[c.media] || 1000);
     const [w, h] = c.media === 'webm' ? [1280, 720] : (DIMS[c.media] || [2000, 1000]);
-    return `<article class="thumbnail" data-id="${c.id}" data-vview-role="${c.role}" data-file-ext="${ext}" data-width="${w}" data-height="${h}" data-size="${size}" data-file-url="${file}" data-sample-url="/vview/img/${pg.token}/${c.role}-thumb.png" data-preview-url="/vview/img/${pg.token}/${c.role}-thumb.png"><a href="/posts/${c.id}" class="thm-link"><img src="/vview/img/${pg.token}/${c.role}-thumb.png" alt="card ${c.role}"></a></article>`;
+    return `<article class="thumbnail" data-id="${c.id}" data-vview-role="${c.role}" data-file-ext="${ext}" data-width="${w}" data-height="${h}" data-size="${size}" data-file-url="${file}" data-sample-url="/vview/img/${pg.token}/${c.role}-${c.ph || 'thumb'}.png" data-preview-url="/vview/img/${pg.token}/${c.role}-${c.ph || 'thumb'}.png"><a href="/posts/${c.id}" class="thm-link"><img src="/vview/img/${pg.token}/${c.role}-thumb.png" alt="card ${c.role}"></a></article>`;
   };
   const css = Object.entries(OUTLINE).map(([role, color]) => `article[data-vview-role="${role}"]{outline:8px solid ${color};outline-offset:2px}`).join('');
   return `<!doctype html><html><head><meta charset="utf-8"><title>IB11 V-VIEW</title><style>body{padding-top:190px}${css}</style></head><body data-user-is-anonymous="true">
@@ -175,7 +178,7 @@ function createServer({ mediaDir, port = PORT, out = null, preflight = false, re
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': body.length });
       return res.end(body);
     }
-    let m = /^\/vview\/img\/([0-9a-f]{16})\/([A-Z0-9_]+)-(thumb|wide|slow|fail)\.png$/.exec(p);
+    let m = /^\/vview\/img\/([0-9a-f]{16})\/([A-Z0-9_]+)-(thumb|wide|slow|fail|mid)\.png$/.exec(p);
     if (m) { const pg = byToken.get(m[1]); if (!pg) { res.writeHead(404); return res.end(); } return serveImage(req, res, pg, m[2], m[3]); }
     m = /^\/vview\/video\/([0-9a-f]{16})\/([A-Z0-9_]+)\.webm$/.exec(p);
     if (m) { const pg = byToken.get(m[1]); if (!pg) { res.writeHead(404); return res.end(); } return serveVideo(req, res, pg, m[2]); }
