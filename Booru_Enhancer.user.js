@@ -3615,6 +3615,28 @@
 			else render();
 		}
 
+		// V-D7: a distinct, non-video lower rendition of THIS target (sample,
+		// else preview) to show while its original loads; '' = load directly.
+		function stagedPlaceholderUrl(post, fullUrl) {
+			if (!post?.originalUrl || fullUrl !== post.originalUrl) return '';
+			for (const u of [post.sampleUrl, post.previewUrl]) {
+				if (u && u !== fullUrl && guessMediaType(u) !== 'video') return u;
+			}
+			return '';
+		}
+
+		// V-D7: the better image replaced the displayed one in place (the old
+		// image stayed shown until the new one was ready). Keep the apparent
+		// on-screen view: rescale so it occupies the previous rendered size;
+		// pan, rotation, flips and the manual/fit mode are kept; no refit.
+		function onMediaUpgraded(el, generation, [pw, ph]) {
+			if (el !== mediaEl || generation !== mediaGeneration) return;
+			clearMediaState();
+			const { width: fw, height: fh } = intrinsicSize(el);
+			if (pw > 0 && ph > 0 && fw > 0 && fh > 0) zoom *= Math.min(pw / fw, ph / fh);
+			render();
+		}
+
 		function buildMedia(post) {
 			const type = inferMediaType(post);
 			const isVideo = type === 'video';
@@ -3668,10 +3690,40 @@
 			} else {
 				el.decoding = 'async';
 				el.fetchPriority = 'high';
-				el.addEventListener('load', () => onMediaReady(el, generation));
-				el.addEventListener('error', () => {
-					if (el === mediaEl && generation === mediaGeneration) showMediaState('Media failed to load', generation, 0, true);
+				// V-D7 staging (el.__beStage): 'placeholder' -> once shown, the
+				// original is requested in place ('upgrading'); if it fails the
+				// placeholder is restored ('restored') with the failure state.
+				const placeholder = stagedPlaceholderUrl(post, url);
+				el.__beStage = placeholder ? { placeholder, full: url, phase: 'placeholder' } : null;
+				el.addEventListener('load', () => {
+					const st = el.__beStage;
+					if (st && st.phase === 'upgrading') { st.phase = 'done'; onMediaUpgraded(el, generation, st.prev); return; }
+					if (st && st.phase === 'restored') { if (el === mediaEl && generation === mediaGeneration) render(); return; }
+					onMediaReady(el, generation);
+					if (st && st.phase === 'placeholder' && el === mediaEl && generation === mediaGeneration) {
+						st.phase = 'upgrading';
+						st.prev = [el.naturalWidth, el.naturalHeight];
+						el.src = st.full;
+					}
 				});
+				el.addEventListener('error', () => {
+					if (el !== mediaEl || generation !== mediaGeneration) return;
+					const st = el.__beStage;
+					if (st && st.phase === 'placeholder') { st.phase = 'direct'; el.src = st.full; return; }
+					if (st && st.phase === 'upgrading') {
+						st.phase = 'restored';
+						el.src = st.placeholder;
+						showMediaState('Full image failed to load', generation, 0, true);
+						return;
+					}
+					if (st && st.phase === 'restored') return;
+					showMediaState('Media failed to load', generation, 0, true);
+				});
+				if (placeholder) {
+					setupDrag(el);
+					el.src = placeholder;
+					return el;
+				}
 			}
 
 			setupDrag(el);
@@ -3783,7 +3835,18 @@
 					try { mediaEl.load(); } catch { /* noop */ }
 					if (BE.settings.get('viewer.autoplayVideo')) mediaEl.play().catch(() => {});
 				} else {
-					mediaEl.src = nextUrl;
+					// V-D7: a displayed image stays shown until the better one is
+					// ready, then the apparent view is kept (onMediaUpgraded).
+					const st = mediaEl.__beStage;
+					if (st && st.phase === 'placeholder') {
+						st.full = nextUrl;
+					} else {
+						const [w0, h0] = [mediaEl.naturalWidth, mediaEl.naturalHeight];
+						mediaEl.__beStage = w0 > 0 && h0 > 0
+							? { placeholder: st && st.phase === 'upgrading' ? st.placeholder : mediaEl.getAttribute('src'), full: nextUrl, phase: 'upgrading', prev: [w0, h0] }
+							: null;
+						mediaEl.src = nextUrl;
+					}
 				}
 			} else if (!manualZoom) {
 				applyConfiguredFit();
