@@ -7,7 +7,7 @@
 - **P2 (V-D1): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§3, §4).
 - **P3 (V-D5): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§5, §6).
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
-- **P5 (V-D6b): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§9).
+- **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -793,6 +793,59 @@ Historical result files rewritten by these runs were restored unedited.
 - The failure text is the existing generic "Media failed to load" (the same text as a load failure).
 - The `updatePost` rebuild path shares the in-viewer handling (P5-4).
 
-**P5 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification and regressions pass. **Real-Chrome qualification is PENDING.** V-D6b is not marked repaired until the P5 probe returns **V-D6b REPAIR QUALIFIED**. The operator step is in `tests/browser/ib11/README.md`, "IB11-P5".
+**P5 status at the time of the repair:** local qualification and regressions passed; real-Chrome qualification was pending. It is now closed (§10).
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 10. P5 closure: real-Chrome qualification of the V-D6b repair
+
+**Raw result:** `ib11-p5-vd6b.json`, SHA-256 `341d4be9b334d9de5e153c18fb1122bc34b31e769b8405f538acee924ac931dc`. Verified; not committed (`.gitignore`); not modified or relocated.
+- Probe `ib11-p5-vd6b`; package `IB11_P5_VD6B.user.js` (`2f5495a4…299b`).
+- One attempt, page P5_VD6B.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `062227fa…9f26`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p5 tests/browser/ib10/ib11-p5-vd6b.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D6b REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**VD6BP5:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **Start:** a valid loaded image on fixture post 8001 (status `#8001`).
+- **Navigation:** one trusted, unmodified ArrowRight.
+- **Failure:** the `buildMedia` seam threw `IndexSizeError` with the stored value 1.5. The selection moved to the failing fixture post 8002.
+- **At 50 ms and at 1000 ms:** the viewer is open on 8002, with no stage media, "Media failed to load", and the `card-post` native link.
+- **Coherence:**
+  - zero img/video elements in the overlay;
+  - the previous image disconnected;
+  - the status `#8002`;
+  - the link path `/posts/8002` (the failing target).
+
+**NATIVE (revision-1.3 rule, the same viewer after the failure):** evidence **PASS**, finding **BEHAVIOR_OK**.
+- Link box x 1296.7, y 605.1, w 101.1, h 16.9.
+- Computed `pointer-events` auto.
+- `elementFromPoint` at the link centre → the anchor.
+- A trusted click at (1326, 620) inside the box targeted the anchor; it was not prevented.
+- The page navigated, and the controlled destination recorded the P5_VD6B / NATIVE arrival.
+
+**Preservation** (local; production unchanged since §9):
+- **Viewer after the failure:** remains operable; back to the image and close work (P5-5).
+- **Successful in-viewer navigation:** image and video (P5-6, P5-7).
+- **Successful takeover and bypasses:** P5-9.
+- **P1 / V-D8:** 6/6 and P5-10; also the real-Chrome NATIVE above.
+- **P2 / V-D1:** 11/11 and P5-11.
+- **P3 / V-D5:** 16/16 and P5-12.
+- **P4 / V-D6a:** 15/15 and P5-8 (a failed takeover still abandons the shell and does not cancel navigation).
+- **Close/cleanup, playback and focus:** unchanged (P5-13 to P5-15).
+
+**Limitation:** the failure text is the existing generic "Media failed to load".
+
+**Conclusion:** **P5 / V-D6b: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture). A synchronous media-build failure during navigation inside an open viewer is now communicated on the failing target, with a usable native-post link, instead of a blank stage.
+
+**Production:** commit `24ee7c299d1aac393f3a53f5a8151e423d6ac848`, blob `68e37d1c9071d2ae78ae44b31f0082cd51010992`, body SHA-256 `062227fa23a6b637098cf553b29a543e03bf342240354a61d1f587bd414d9f26`. This closure is documentation only.
+
+**Remaining frozen P items, all NOT STARTED:**
+- V-D4, V-D7;
+- focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.
