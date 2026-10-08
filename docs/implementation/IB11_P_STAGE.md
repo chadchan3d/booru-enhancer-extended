@@ -9,7 +9,7 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§7, §8).
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
-- **P7 (V-D7): PARTIAL, NOT COMPLETE.** Attempt 1 in real Chrome was NOT QUALIFIED. The production repair was corrected and re-qualified locally; the second real-Chrome run is pending (§13, §14).
+- **P7 (V-D7): COMPLETE, PASS(scope)** for TC, qualified in real Chrome by attempt 2; attempt 1 is retained as NOT QUALIFIED evidence (§13–§15).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1316,4 +1316,68 @@ Historical result files rewritten by these runs were restored unedited.
 - E3 and E4 in the historical E0 harness cannot exercise the detached preload; see the attribution above.
 - The aspect-ratio limitation is unchanged.
 
-**P7 status: PARTIAL, NOT COMPLETE.** The second real-Chrome run is **PENDING**. P7 is not marked complete until a fresh result reports **V-D7 REPAIR QUALIFIED**.
+**P7 status at the time of the correction:** local qualification passed; the second real-Chrome run was pending. It is now closed (§15).
+
+## 15. P7 closure: real-Chrome qualification of the corrected V-D7 repair
+
+**Attempt history:**
+
+| Attempt | Raw file | SHA-256 | Production | Verdict |
+| --- | --- | --- | --- | --- |
+| 1 | `tests/results/ib11-p7-vd7-attempt1.json` | `b28fbf3db1f5dcbe14f2f3f69d71c84d758469679b8f1ede1bd015d7660b72d2` | `b856a62` (package `da6b9f88…`) | **NOT QUALIFIED** (retained evidence, §14) |
+| 2 | `tests/results/ib11-p7-vd7.json` | `c5d9f11aa828e681f404511afd2ae67b213e6b4d0c30132edeeef7af9b244ab7` | `7e4c643` (package `2fee6862…`) | **V-D7 REPAIR QUALIFIED** |
+
+Both raw files are git-ignored, not committed and not modified.
+
+**Attempt 2:**
+- One attempt, page P7_VD7.
+- Identity `MATCH_EXPECTED_ARTIFACT` (body `822a5a20…780d`).
+- Chrome 154 / Windows / Tampermonkey 5.5.0.
+- `error: null`; no trusted input outside the prompts.
+
+**Authoritative evaluation:** `node tests/browser/ib11/vview_evaluate.cjs --p7 tests/results/ib11-p7-vd7.json`.
+- **Exit 0.** Revision **1.3**, verdict **V-D7 REPAIR QUALIFIED**.
+- No problems; 0 invalid attempts.
+
+**P7STAGE:** evidence **PASS**, finding **BEHAVIOR_OK** (stage 2560×1227).
+- **At 300 ms and 1000 ms:**
+  - target 8002 and exactly one viewer media element;
+  - the target's own `VD7-thumb` (160×80) as the retained placeholder, painted at its fitted footprint 2406×1203 (configured Fit scale 15.0375);
+  - the original still pending; no blank stage.
+- **Upgrade:**
+  - the complete 1600×800 `VD7-slow` on the same element and target;
+  - the scale changed to 1.50375 while the rendered rectangle stayed exactly 2406×1203 and the centre exactly (1280, 613.5);
+  - identical 500 ms later; no state text.
+- **Frames:** 1765 frames, 0 blank. The last painted placeholder and the first painted full image are both 2406×1203 (delta 0 px).
+
+**P7XFORM:** evidence **PASS**, finding **BEHAVIOR_OK**.
+- **Before completion:** the retained 800×400 `VD7X-mid` placeholder of target 8003 at its fitted scale 3.0075. While it was still displayed, rotation 90°, both flips (−1, −1), manual zoom to 3.5075 (two Zoom in steps) and a pan (40, −25) were applied, and they were held in the last painted placeholder frame.
+- **At the upgrade:** the complete 1600×800 `VD7X-slow` on the same element and target.
+  - The scale went to 1.75375, keeping the apparent size across the 2× intrinsic change.
+  - Rotation, flips and pan were unchanged.
+  - The rendered rectangle stayed exactly 1403×2806 with the same centre; identical 500 ms later.
+- **Frames:** 1759 frames, 0 blank.
+- **Extent:** the transformed image deliberately extends beyond the stage. This is the user's manual zoom/pan/rotation view being preserved, not a configured-Fit result.
+
+**Conclusion:** **P7 / V-D7: COMPLETE, PASS(scope)** for the qualified TC cell (Chrome 154 + Tampermonkey 5.5.0, local controlled fixture). An image target opens on its own placeholder; the placeholder stays painted, at its own fit, while the original downloads; the original replaces it on the same element with the apparent on-screen view preserved (fit or manual, including rotation, flips and pan), without a blank frame or a configured refit.
+
+**Local evidence** (production unchanged since §14):
+- P7 regression 29/29 (Chrome image semantics; faults: `39a5ae1`, `b856a62`, no-placeholder, raw-zoom, in-place);
+- staging attribution 7/7;
+- P7 package verifier 45/45;
+- P6 15/15.
+
+**Preservation classification:**
+- The closed P1–P6 regression files are unchanged.
+- Their changed checks (P1–P5) and the E0 checks A1, B1 (the intended V-D7 flip), C1, D1 and E3 are historical/staging-attributed: they pass completely with staging disabled.
+- P7's preservation regression carries the protected behaviors forward on current production: V-D1, V-D5, V-D6a, V-D6b, V-D8, P6/V-D4 and the Fit modes, manual zoom/pan, E6, video, metadata-pending, navigation, close, playback and focus.
+
+**Settled designer decisions (not open items):**
+1. **Closed regressions:** the P1–P6 regression files stay untouched. Tests whose assumptions changed because P7 introduced staged image loading are historical/staging-attributed, and P7's current-production preservation regression carries the protected behavior forward.
+2. **Aspect ratio:** placeholder/full aspect-ratio differences are an accepted P7 limitation. Exact two-axis apparent-geometry preservation is qualified for compatible (same-aspect) replacement. With differing aspect ratios, bounded containment under the existing uniform-scale transform is acceptable; no new transform architecture is authorized.
+
+**Production:** commit `7e4c643b018794ba1026f42faa4109ebda5a548c`, blob `5da8fd9d69a65af6009fed66a0874bb8b96ce64b`, body SHA-256 `822a5a20e1a387340618c08267b8bd7a09b2bf1ce0ab463ad371a99a4b37780d`. This closure is documentation only.
+
+**Remaining frozen P item, NOT STARTED:** focus ownership/return.
+
+IB11 remains **PARTIAL / NOT COMPLETE**.

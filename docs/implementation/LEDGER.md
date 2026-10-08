@@ -15,11 +15,7 @@
 - **P4 (V-D6a): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §7–§8).
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
-- **P7 (V-D7): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §13–§14):
-  - real-Chrome attempt 1 (raw `b28fbf3d…72d2`, production `b856a62`) NOT QUALIFIED;
-  - production corrected at `7e4c643` (detached preload; the placeholder is kept until the original is ready);
-  - local qualification PASS: regression 29/29 (Chrome semantics), staging attribution 7/7, P7 package verifier 45/45;
-  - **second real-Chrome run PENDING.**
+- **P7 (V-D7): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §13–§15): attempt 1 NOT QUALIFIED (retained); corrected repair `7e4c643` qualified by attempt 2.
 - **All other P items: NOT STARTED.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
@@ -34,7 +30,7 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P7 record commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P7 closure commit (documentation only).
 - **Production `Booru_Enhancer.user.js`:**
   - commit `7e4c643b018794ba1026f42faa4109ebda5a548c` (IB11-P7 correction, V-D7);
   - blob `5da8fd9d69a65af6009fed66a0874bb8b96ce64b`;
@@ -104,7 +100,7 @@
 | **P3 — V-D5** (narrow viewer-key modifier guard) | **COMPLETE, PASS(scope) in TC** |
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
-| **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **PARTIAL**: attempt 1 NOT QUALIFIED; corrected repair `7e4c643` locally qualified; second real-Chrome run pending |
+| **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **COMPLETE, PASS(scope) in TC** (attempt 2; attempt 1 NOT QUALIFIED, retained) |
 | Focus ownership/return | NOT STARTED |
 
 **P1 detail:**
@@ -236,7 +232,15 @@
   - P6 15/15, P7 29/29;
   - verifiers fail only their working-tree pins;
   - E0 27/38 and controls 39/46: B1 the intended flip; A1, C1, D1, E3 staging-attributed; D2 and D4 anchor pins (re-anchored: caught).
-- **Real-Chrome qualification:** second run PENDING (`vview_server.cjs --p7` → `tests/results/ib11-p7-vd7.json`; move the attempt-1 file aside first). `vview_evaluate.cjs --p7` must report **V-D7 REPAIR QUALIFIED**.
+- **Real-Chrome qualification:**
+  - **Attempt 1:** raw `b28fbf3db1f5dcbe14f2f3f69d71c84d758469679b8f1ede1bd015d7660b72d2` (production `b856a62`): NOT QUALIFIED, retained.
+  - **Attempt 2:** raw `c5d9f11aa828e681f404511afd2ae67b213e6b4d0c30132edeeef7af9b244ab7` (production `7e4c643`, package `2fee6862…`). `vview_evaluate.cjs --p7`: revision 1.3, exit 0, **V-D7 REPAIR QUALIFIED**.
+    - P7STAGE: the target's own 160×80 thumb painted at its fitted 2406×1203 (scale 15.0375) at 300 ms and 1000 ms with the original pending. The upgrade to 1600×800 happened on the same element and target at scale 1.50375 with the rectangle exactly 2406×1203 and centre (1280, 613.5); identical 500 ms later. 1765 frames, 0 blank.
+    - P7XFORM: on the retained 800×400 placeholder, rotation 90°, both flips, manual zoom 3.5075 and pan (40, −25) were applied before completion. At the upgrade the scale was 1.75375 with everything else kept, and the rectangle exactly 1403×2806 with the same centre; identical 500 ms later. 1759 frames, 0 blank.
+    - Identity MATCH; no client error; no trusted outside input.
+- **Settled designer decisions:**
+  - The closed P1–P6 regression files stay untouched; their staging-changed assumptions are historical/staging-attributed, and P7's preservation regression carries the protected behavior forward.
+  - Differing placeholder/full aspect ratios are an accepted limitation: exact two-axis preservation is qualified for same-aspect replacement, and bounded containment under the uniform-scale transform is acceptable otherwise. No new transform architecture.
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -271,11 +275,9 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Active: IB11-P7 (V-D7 only), operator step.**
-  - Run the **second** P7 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P7"; automatic, about 30 seconds, tab kept visible; `vview_server.cjs --p7`; package `2fee6862…`).
-  - Move the attempt-1 result aside first, then return the new `tests/results/ib11-p7-vd7.json`.
-  - It is evaluated with `vview_evaluate.cjs --p7`, which must report **V-D7 REPAIR QUALIFIED** before V-D7 is marked COMPLETE.
-  - After P7 closes, the only remaining frozen item is focus ownership/return; it needs an explicit owner assignment.
+- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a), P5 (V-D6b), P6 (V-D4) and P7 (V-D7) are closed.
+  - The only remaining frozen IB11 P item is **focus ownership/return**; it needs an explicit owner assignment.
+  - Its browser evidence goes under `tests/results/` (git-ignored).
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;
