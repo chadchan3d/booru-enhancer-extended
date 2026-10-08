@@ -95,7 +95,10 @@ function makeDriver(w, env, pageId, arrivals, skip) {
   // package loaded, so it never passes through page-level play()/pause() wrappers
   // - like Chrome's native controls, which do not call page JavaScript.
   const toggle = (v) => { if (v.paused) w.__uaPlay.call(v).catch(() => {}); else w.__uaPause.call(v); };
-  const focusables = () => [...doc.querySelectorAll('a[href], button')].filter((x) => x.isConnected);
+  const shown = (el) => { for (let n = el; n && n.nodeType === 1; n = n.parentElement) { if (n.hidden || w.getComputedStyle(n).display === 'none') return false; } return true; };
+  const focusables = () => [...doc.querySelectorAll('a[href], button')].filter((x) => x.isConnected && shown(x));
+  // a browser Tab: dispatched to the focused element, then the native move unless prevented
+  const tabMove = (shift) => { const a = doc.activeElement; const e = K(a, 'Tab', shift ? { shiftKey: true } : {}); if (e.defaultPrevented) return; const f = focusables(); const i = f.indexOf(a); const n = shift ? f[(i <= 0 ? f.length : i) - 1] : f[(i + 1) % f.length]; if (n) n.focus(); };
   const RULES = [
     ['F11 once', () => { env.vw = 1920; env.vh = 1080; w.dispatchEvent(new w.Event('resize')); }],
     ['F11 again', () => { env.vw = 1600; env.vh = 900; w.dispatchEvent(new w.Event('resize')); }],
@@ -115,7 +118,8 @@ function makeDriver(w, env, pageId, arrivals, skip) {
     ['PINK', () => { const im = art('FOCUS_M').querySelector('img'); pdown(im); click(im); }],
     ['Escape', () => K(doc.activeElement, 'Escape')],
     ['BLUE', () => { const l = art('FOCUS_K').querySelector('a'); l.focus(); w.setTimeout(() => { K(l, 'Enter'); click(l); }, 50); }],
-    ['Tab once', () => { const a = doc.activeElement; K(a, 'Tab'); const f = focusables(); const i = f.indexOf(a); const n = f[(i + 1) % f.length]; if (n) n.focus(); }],
+    ['Shift and press Tab', () => tabMove(true)],
+    ['Tab once', () => tabMove(false)],
     ['Close', () => { const b = [...doc.querySelectorAll('.be-viewer-btn')].find((x) => x.title.startsWith('Close')); b.focus(); click(b); }],
     // Recovery NATIVE: the operator clicks where the link visibly is; the event
     // goes to whatever the browser hit-tests there.
@@ -178,17 +182,19 @@ function trustOperator(client) {
   if (c.VD6A) T(c.VD6A.click);
   if (c.VD6BP5) T(c.VD6BP5.key);
   if (c.SHOT) T(c.SHOT.enter);
+  if (c.P8M) { T(c.P8M.pointer); T(c.P8M.click); T(c.P8M.escape); (c.P8M.steps || []).forEach(T); }
+  if (c.P8K) { T(c.P8K.enter); T(c.P8K.closeClick); (c.P8K.steps || []).forEach(T); }
   return client;
 }
-async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, p7 = false, nativeClick = 'center' } = {}) {
+async function smoke(source, { skip = [], forceIdentity = false, nativeControl = 'focus', spaceMode = 'native', preflight = false, recovery = false, p1 = false, p2 = false, p3 = false, p4 = false, p5 = false, p6 = false, p7 = false, p8 = false, nativeClick = 'center' } = {}) {
   const pages = []; const arrivals = []; const requests = []; const uis = [];
-  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5, p6, p7 })) {
+  for (const pg of srv.plan({ preflight, recovery, p1, p2, p3, p4, p5, p6, p7, p8 })) {
     const r = await runPage(pg, source, { skip, nativeControl, spaceMode, nativeClick, maxMs: preflight ? 120000 : 300000 });
     const cl = trustOperator(r.client);
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p8 ? 'ib11-p8-focus' : p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

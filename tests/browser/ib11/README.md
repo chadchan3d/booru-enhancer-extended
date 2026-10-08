@@ -358,3 +358,42 @@ The page runs by itself; there are no prompts.
 5. **Return** `tests/results/ib11-p7-vd7.json`.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p7 tests/results/ib11-p7-vd7.json`. The verdict must be **V-D7 REPAIR QUALIFIED**.
+
+---
+
+# IB11-P8: focus ownership/return qualification (real Chrome; about 2 minutes)
+
+`IB11_P8_Focus.user.js` (SHA-256 `9e938f4ffd2f4239ceeeabf5ad2b69da1e1343efaa439745c69a6c2da1b6d608`) contains the **repaired** production (commit `9d86484`, blob `8453be9`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p8_focus.js`).
+
+**Fixture:** the page has three cards: a blue card (FOCUS_K, first in the page), a pink card (FOCUS_M), and a third card (page controls behind the overlay).
+
+**What the page records:** every step records which element has focus, as a descriptor plus flags:
+- the viewer's Close (✕) button;
+- the first viewer control;
+- the actual invoking card link;
+- the page body.
+
+It also records whether the viewer was open when the input arrived. All focus input is yours (trusted).
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p8.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p8.cjs --media <fixture folder>` (34/34)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p8`. It prints "1 pages (IB11-P8 focus qualification)" and writes `tests/results/ib11-p8-focus.json`.
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P7 scripts**. Install and enable `IB11_P8_Focus.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start` in a normal window. Keep hands off until the first yellow prompt.
+4. **Mouse part:**
+   - At **"Click the PINK-outlined card once"**, click the pink card.
+   - At **"Press Tab once"**, press Tab.
+   - At **"Hold Shift and press Tab once"**, press Shift+Tab.
+   - At **"Press Escape once"**, press Escape.
+5. **Keyboard part:**
+   - At **"Press Tab until the BLUE-outlined card is focused, then press Enter"**, press Tab until the panel says the blue card is focused, then press Enter.
+   - Then, at each prompt: **Shift+Tab**, **Tab**, **Tab** (the prompts start with "Keyboard check").
+   - At **"Click the ✕ (Close) button"**, click the last toolbar button.
+6. **Return** `tests/results/ib11-p8-focus.json` when the page shows "P8 RECORDED". If a page shows INVALID, press F5 to retry.
+
+Press only the keys asked for, once each. The page does not need a screenshot.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p8 tests/results/ib11-p8-focus.json`. The verdict must be **P8 FOCUS QUALIFIED**.

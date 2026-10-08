@@ -16,7 +16,11 @@
 - **P5 (V-D6b): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §9–§10).
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
 - **P7 (V-D7): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §13–§15): attempt 1 NOT QUALIFIED (retained); corrected repair `7e4c643` qualified by attempt 2.
-- **All other P items: NOT STARTED.**
+- **P8 (focus ownership/return): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §16):
+  - production repair committed at `9d86484`;
+  - local qualification PASS: regression 25/25, focus attribution 8/8, P8 package verifier 34/34;
+  - **real-Chrome qualification PENDING.**
+- **No other P item remains.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -30,12 +34,13 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P7 closure commit (documentation only).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P8 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `7e4c643b018794ba1026f42faa4109ebda5a548c` (IB11-P7 correction, V-D7);
-  - blob `5da8fd9d69a65af6009fed66a0874bb8b96ce64b`;
-  - production body SHA-256 `822a5a20e1a387340618c08267b8bd7a09b2bf1ce0ab463ad371a99a4b37780d`.
+  - commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047` (IB11-P8, focus ownership/return);
+  - blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`;
+  - production body SHA-256 `7745efafde2013fa98329c0ff6c9dd9d94995098129b763b05b7abdccd8cf205`.
 - **Previous production artifacts:**
+  - `7e4c643` / `5da8fd9` / body `822a5a20…780d`: IB11-P7 corrected repair (the P7 qualification artifact);
   - `b856a62` / `b88af38` / body `8c964f02…0ad5`: IB11-P7 first repair (the P7 attempt-1 artifact; NOT QUALIFIED);
   - `39a5ae1` / `0a7f57f` / body `d445d442…b439`: IB11-P6 (V-D4; the P6 qualification artifact);
   - `24ee7c2` / `68e37d1` / body `062227fa…9f26`: IB11-P5 (V-D6b; the P5 qualification artifact);
@@ -101,7 +106,7 @@
 | **P4 — V-D6a** (safe takeover on a synchronous build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **COMPLETE, PASS(scope) in TC** (attempt 2; attempt 1 NOT QUALIFIED, retained) |
-| Focus ownership/return | NOT STARTED |
+| **P8 — Focus ownership/return** | **PARTIAL**: repair `9d86484` locally qualified; real-Chrome qualification pending |
 
 **P1 detail:**
 - **Change** (`9aeab36`, `Booru_Enhancer.user.js:3595`): the fallback anchor declares `pointer-events:auto`; `.be-media-state` keeps `none`.
@@ -242,6 +247,25 @@
   - The closed P1–P6 regression files stay untouched; their staging-changed assumptions are historical/staging-attributed, and P7's preservation regression carries the protected behavior forward.
   - Differing placeholder/full aspect ratios are an accepted limitation: exact two-axis preservation is qualified for same-aspect replacement, and bounded containment under the uniform-scale transform is acceptable otherwise. No new transform architecture.
 
+**P8 detail:**
+- **Change** (`9d86484`, viewer module only):
+  - **Acquisition:** after a successful new open, focus moves to the viewer's Close (✕) button. A failed initial takeover rethrows first, so no focus is stolen. An open viewer keeps its focused control and only reclaims escaped focus.
+  - **Trap:** unmodified Tab / Shift+Tab wrap at the boundaries of the viewer focus set, read from the current viewer DOM (the native link included when present). Ctrl/Meta/Alt+Tab are not handled (the V-D5 guard is unchanged).
+  - **Return:** close restores the origin, else the fallback, else nothing. A stage click that blurred focus to body is now covered.
+  - **Implicit origin:** a context-less new open returns to the pre-open focused element; an open viewer keeps its targets.
+  - **Not added:** dialog/ARIA/inert.
+- **Regression:** `tests/host/ib11/p8_focus_ownership.cjs` 25/25 on the repair, `7e4c643` and seven single-obligation mutants (no acquisition, trap, restore, implicit origin; origin replaced; focus before build; modified Tab trapped). Every return check requires focus to have been in the viewer.
+- **Attribution:** `p8_focus_attribution.cjs` 8/8.
+  - The closed suites are unedited and fail only the recorded P7 staging sets plus the pre-focus "no focus change" checks P3-16, P4-15, P5-15, P7-23 and E0 F2 (the intended flip).
+  - The P7 staging attribution is unchanged (7/7 with focus neutralized).
+- **Package verifier:** `verify_ib11_p8.cjs` 34/34; package `9e938f4f…d608` (mouse-origin and keyboard-origin cells, all trusted).
+- **Regressions on `9d86484`:**
+  - IB01–IB09 pass (IB07 blob pins only); IB10 64/67 (P7-attributed);
+  - P6 15/15, P7 28/29 (P7-23 focus-attributed), P8 25/25;
+  - verifiers fail only their working-tree pins;
+  - E0 26/38 and controls 38/46: F2 the intended flip; F1's control an anchor pin (re-anchored with D2 and D4: caught, 41/46).
+- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p8` → `tests/results/ib11-p8-focus.json`; `vview_evaluate.cjs --p8` must report **P8 FOCUS QUALIFIED**).
+
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
 - **IB11 V-VIEW browser evidence (TC): complete.**
@@ -275,9 +299,11 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Designer gate / handoff boundary.** P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a), P5 (V-D6b), P6 (V-D4) and P7 (V-D7) are closed.
-  - The only remaining frozen IB11 P item is **focus ownership/return**; it needs an explicit owner assignment.
-  - Its browser evidence goes under `tests/results/` (git-ignored).
+- **Active: IB11-P8 (focus ownership/return only), operator step.**
+  - Run the P8 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P8"; about 2 minutes; trusted mouse and keyboard input; `vview_server.cjs --p8`; package `9e938f4f…`).
+  - Return `tests/results/ib11-p8-focus.json`.
+  - It is evaluated with `vview_evaluate.cjs --p8`, which must report **P8 FOCUS QUALIFIED** before P8 is marked COMPLETE.
+  - After that: a designer closure review. IB11 final closeout and IB12 need explicit assignment.
   - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
 - **Forbidden:**
   - no batching of P items;

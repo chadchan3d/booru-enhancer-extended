@@ -10,6 +10,7 @@
 - **P5 (V-D6b): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§9, §10).
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
 - **P7 (V-D7): COMPLETE, PASS(scope)** for TC, qualified in real Chrome by attempt 2; attempt 1 is retained as NOT QUALIFIED evidence (§13–§15).
+- **P8 (focus ownership/return): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§16).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1381,3 +1382,144 @@ Both raw files are git-ignored, not committed and not modified.
 **Remaining frozen P item, NOT STARTED:** focus ownership/return.
 
 IB11 remains **PARTIAL / NOT COMPLETE**.
+
+## 16. P8 — viewer focus ownership and focus return
+
+**Pre-edit gate (synchronized):**
+- HEAD `d39dd0847d51701e6567e070528a0a1007b25a59` = origin, clean.
+- Blueprint blob `432768c5…` (unchanged).
+- Production `7e4c643` / blob `5da8fd9` / body `822a5a20…780d`.
+- No mismatch with the assignment or the Ledger.
+
+**Confirmed baseline** (V-VIEW FOCUS_M / FOCUS_K, real Chrome; E0 F1/F2):
+- **Opening moves no focus.** Mouse origin: focus stays on the invoking card link. Keyboard origin: Tab and Enter leave focus on the link.
+- **Tab escapes.** Three Tabs reach card controls behind the visible overlay.
+- **Return only appears to work.** `open()` never took focus (`Booru_Enhancer.user.js:3803–3810` at `7e4c643`). `close()` restored focus only when the active element was inside the overlay (`:3887`, `:3897–3900`).
+
+**Production change** (commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047`; viewer module only):
+- **Initial focus target:** the existing Close (✕) toolbar button (`closeBtn`). After a successful closed → open transition, `open()` focuses it once `replaceMedia` has succeeded. A synchronous initial build failure rethrows before that (P4 / V-D6a), so an abandoned viewer never takes focus. An already-open viewer keeps its focused control and reclaims focus to Close only if it has escaped. Media or metadata updates (`updatePost`) do not move focus.
+- **Tab / Shift+Tab boundary rule:** `onKeydown` handles an **unmodified** Tab or Shift+Tab before the unchanged V-D5 Ctrl/Meta/Alt guard (`trapTab`).
+  - From the last viewer control, Tab wraps to the first; from the first, Shift+Tab wraps to the last.
+  - From a control outside the set, Tab focuses the first (Shift+Tab the last).
+  - Otherwise the browser's native move is left alone.
+  - Ctrl/Meta/Alt+Tab are not handled.
+- **Dynamic focusable-set rule:** `viewerFocusables()` reads the **current** overlay DOM, in document order: buttons, `a[href]`, inputs, `video[controls]`/`audio[controls]` and `[tabindex]`, keeping those with `tabIndex >= 0`, not disabled, and rendered (no `hidden` or `display:none` ancestor, not `visibility:hidden`). It uses no layout queries, so a present native recovery link joins the set (stage first, then the toolbar ending with Close).
+- **Return-origin/fallback rule:** `close()` restores focus when it is inside the viewer, or lost to `body`. A press on the empty stage blurs focus to `body` first, so that close path is now covered. It restores to the origin if it is a usable target (connected, rendered, focusable, not body/html/the viewer, not disabled), else to the fallback, else to nothing (no invented target, no throw). `context.origin` / `context.fallback` and `viewerOwner.setFocusTargets` are kept.
+- **Implicit origin for context-less new opens:**
+  - When `open()` gets no `context.origin` on a **new** session, the element focused before it opened becomes the return origin, if it is a usable target (not body/html, the viewer, hidden or disconnected). Example: the post-page toolbar's `viewer.open(post)`.
+  - On an **open** viewer, a context-less call keeps the existing origin and fallback.
+  - Explicit `context.origin` and `context.fallback` behave as before.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `8453be9447820978b7d4a2886ea9ae2bf4e87c10` |
+| Production body SHA-256 | `7745efafde2013fa98329c0ff6c9dd9d94995098129b763b05b7abdccd8cf205` |
+| Diff | 68 insertions, 7 deletions |
+
+**Forbidden-scope audit:**
+- **Not added:** `role="dialog"`, `aria-modal`, `inert`, or any page tabindex rewriting.
+- **`BE.ownership` not broadened:** `setFocusTargets` is reused.
+- **No change to:** P1–P7 behavior, A4, C4, E6, G4, playback policy, staging, renditions, download/favorite, pagination, IB12.
+
+**Permanent regression:** `tests/host/ib11/p8_focus_ownership.cjs` **25/25** (result `p8-focus-ownership-result.json`).
+- **Harness:** the browser's native Tab move is applied after dispatch unless prevented, over the whole page, so an untrapped Tab escapes to the card controls behind the overlay. A stage press blurs to `body` first.
+- **Sources:** the repair, the prior `7e4c643`, and seven single-obligation mutants:
+  - no acquisition, no trap, no restore;
+  - no implicit origin, origin replaced while open;
+  - focus taken before the build, modified Tab trapped.
+- **Return checks:** every return check also requires that focus was inside the viewer, so the prior's never-left focus is not accepted as a return.
+
+| Check | Must fail on |
+| --- | --- |
+| P8-1 mouse-origin open moves focus into the viewer | prior, no-acquire |
+| P8-2 initial focus = Close (mouse and keyboard origin) | prior, no-acquire |
+| P8-3 Tab from the last (Close) wraps to the first | prior, no-trap |
+| P8-4 Shift+Tab from the first wraps to Close | prior, no-trap |
+| P8-5 two full Tab and Shift+Tab cycles never leave the viewer and visit every control | prior, no-trap |
+| P8-6 a present native recovery link joins the focus set (first) without escape | prior, no-trap |
+| P8-7 Escape restores the origin (after owning focus) | prior, no-acquire, no-restore |
+| P8-8 Close (✕) restores the origin | prior, no-restore |
+| P8-9 stage click (focus blurred to body) restores the origin | prior, no-restore |
+| P8-10 removed origin → the connected fallback | prior, no-restore |
+| P8-11 neither origin nor fallback: nothing invented, no throw | (holds everywhere) |
+| P8-12 a context-less `viewer.open()` returns to the pre-open focused element | prior, no-implicit, no-restore |
+| P8-13 a context-less operation on an open viewer keeps the origin | prior, origin-replaced |
+| P8-14 a synchronous initial takeover failure takes no focus (no focusin in the viewer) | early-focus |
+| P8-15 in-viewer navigation keeps the focused Next button; escaped focus is reclaimed to Close | prior |
+| P8-16 Ctrl/Meta/Alt(+Shift)+Tab not handled, not prevented | trap-all |
+| P8-17 Tab is not intercepted while closed | (holds everywhere) |
+| P8-18 to P8-25 preservation (below) | (hold everywhere) |
+
+**Preservation checks P8-18 to P8-25:**
+- V-D5 (and the unmodified f / Escape / arrows);
+- V-D8 link hit test and click (not prevented, viewer open);
+- V-D1; V-D6b; P6 rotated Fit; P7 staging;
+- Space playback while Close is focused (Close not activated);
+- E6 and the Fit, zoom and flip controls;
+- close and dispose cleanup (keys inert after dispose).
+
+**Attribution of the closed regressions** (`tests/host/ib11/p8_focus_attribution.cjs` **8/8**; the closed suites are unedited).
+- **Method:** each suite runs as-is, with only the P8 focus acquisition disabled (`p8_neutral_focus_preload.cjs`), and with focus and P7 staging both disabled.
+- **Focus-only neutralization** leaves exactly the recorded P7 staging-attributed sets. The P7 classification is unchanged, and `p7_staging_attribution.cjs` reproduces 7/7 with focus neutralized for its child runs.
+- **Both neutralized,** P1–P6 pass fully and E0 fails exactly its pre-P7 set. (The P7 regression needs staging; it passes 29/29 with focus neutralized.)
+- **The only focus-attributed checks** are the pre-focus assertions that opening moves no focus: **P3-16, P4-15, P5-15, P7-23** and **E0 F2**. F2 is the intended witness flip: focus now moves into the viewer.
+
+**Real-browser qualification: required.** Prepared package `tests/browser/ib11/IB11_P8_Focus.user.js` (SHA-256 `9e938f4ffd2f4239ceeeabf5ad2b69da1e1343efaa439745c69a6c2da1b6d608`):
+- **Build:** `build_ib11_p8.cjs` from `9d86484`; the body is byte-identical (`7745efaf…f205`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p8_focus.js`). The V-VIEW and P1–P7 packages are unchanged.
+- **Page P8_FOCUS:** cards FOCUS_K (blue, first), FOCUS_M (pink) and VD5 (page controls).
+  - **P8M (mouse origin):** a trusted click on the pink card (the invoking link is captured at the click); then trusted Tab, trusted Shift+Tab and a trusted Escape.
+  - **P8K (keyboard origin):** trusted Tabs to the blue card and a trusted Enter (the invoker is captured at the Enter); then trusted Shift+Tab, Tab, Tab; then a trusted click on ✕.
+  - **Recorded per step:** the focused element's descriptor, and flags for Close, the first viewer control, the invoker and body; whether the viewer was open when the input arrived.
+- **Simulator:** `vview_sim.cjs` dispatches Tab to the focused element and makes the native move only when not prevented (over rendered controls).
+- **Evaluator:** `vview_evaluate.cjs --p8`. The verdict is **P8 FOCUS QUALIFIED** only when both cells hold:
+  - **P8M:** focus on Close after open (not the invoker); Tab wraps to the first control; Shift+Tab wraps back to Close; Escape (made while open) returns focus to the actual invoking link.
+  - **P8K:** focus on Close after open; Shift+Tab stays inside (a native move); Tab back to Close; Tab wraps to the first; ✕ returns focus to the invoking link.
+  - Every input trusted; no trusted input outside a prompt; identity MATCH.
+
+**Local qualification: `verify_ib11_p8.cjs --media` 34/34** (`IB11_P8_VERIFICATION.json`; `IB11_P8_SHA256SUMS.txt`).
+- **Static:** fresh build; byte-identical body; exact patches; pinned packages unchanged; scope; probe captures; plan; results path; simulator Tab.
+- **Server:** `--p8`.
+- **Smoke:** the repair qualifies.
+- **Production faults (NOT QUALIFIED):**
+  - `7e4c643`: focus never enters; Tab reaches the cards. Its apparent return is refused.
+  - the no-acquire, no-trap and no-restore mutants.
+- **Evidence faults (NOT QUALIFIED):**
+  - initial focus on the card; focus that never left yet "returned";
+  - Tab, Shift+Tab or the keyboard wrap escaping behind the overlay;
+  - close result `body`, or not the invoking element; the claimed invoker in another card;
+  - an untrusted Tab or Enter; a Tab or Escape captured after the viewer closed; a modified Tab used as evidence;
+  - trusted outside input; wrong identity; duplicate attempts; wrong result type.
+
+**Regressions on `9d86484`:**
+
+| Suite | Result |
+| --- | --- |
+| IB01, IB02 (21), IB03 (11), IB05, IB06 | exit 0 |
+| IB07 | exclusion and Gelbooru (14) exit 0; `item9` and `pagecount` exit 1 on their IB07 blob pin only |
+| IB08 | 66/66, 24/24, 12/12, 14/14 |
+| IB09 P-stage | 111/111 |
+| IB10 P-stage | 64/67 (the three P7 staging-attributed timeline checks; unchanged) |
+| IB11 P1–P5 regressions | 1/6, 6/11, 13/16, 11/15, 10/15 (P7 staging set, plus P3-16, P4-15, P5-15 focus-attributed) |
+| IB11 P6 / P7 regressions | 15/15; 28/29 (P7-23 focus-attributed) |
+| IB11 P8 regression | 25/25 |
+| IB11 G-PLAY | 36/37; recovery 28/28 |
+| IB11 V-VIEW | 65/66; recovery 32/32 |
+| IB11 P1–P7 package verifiers | each fails only its superseded working-tree pin (P7 44/45) |
+| IB11 P8 package verifier | 34/34 |
+| IB11 E0 characterization | 26/38; fault controls 38/46 |
+
+**E0 classification:**
+- **F2** is the intended focus witness flip.
+- **F1 still passes**: focus moved by the page outside the viewer is left alone.
+- **Fault control F1 "no focus return"** is a new anchor pin: the line it targets was rewritten. Re-anchored in a temporary copy together with D2 and D4, all three are **caught** (41/46). The remaining uncaught controls (the A5, C3, E5 and G2 probes, and G5) are known from earlier P items.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**Limitations:**
+- Real-browser focus inside native video controls (shadow controls) is browser-managed. The trap handles the boundary elements of the viewer set only.
+- No dialog semantics or background `inert` are added (not part of the frozen decision).
+
+**P8 status: PARTIAL, NOT COMPLETE.** The production repair is committed, and the local qualification, attribution and regressions pass as classified. **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P8".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

@@ -95,6 +95,7 @@
 //        node vview_evaluate.cjs --p5 <ib11-p5-vd6b.json>
 //        node vview_evaluate.cjs --p6 tests/results/ib11-p6-vd4.json
 //        node vview_evaluate.cjs --p7 tests/results/ib11-p7-vd7.json
+//        node vview_evaluate.cjs --p8 tests/results/ib11-p8-focus.json
 const fs = require('fs');
 
 const REVISION = '1.3';
@@ -676,9 +677,81 @@ function evaluateP7(doc) {
   return out;
 }
 
-module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evaluateP6, evaluateP7, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
+// IB11-P8 (focus ownership/return) qualification: one page P8_FOCUS, one
+// valid attempt, identity MATCH, every operator input trusted, no trusted
+// input outside a prompt.
+//  P8M (mouse origin): a trusted click on the pink card whose invoking element
+//   is a link in that card; the viewer opens on it and focus is then INSIDE the
+//   viewer on its Close button (so a later "return" cannot be focus that never
+//   left); a trusted unmodified Tab, made while open with Close focused, lands
+//   on the first viewer control; a trusted Shift+Tab, made while open from that
+//   first control, lands on Close; a trusted Escape made while open closes, and
+//   focus is then the actual invoking element (not body).
+//  P8K (keyboard origin): a trusted Enter on the blue card's link (the
+//   invoker) opens it; focus is then Close; Shift+Tab from Close stays inside
+//   the viewer (a native move, not Close); Tab returns to Close; Tab from Close
+//   wraps to the first viewer control; a trusted click on Close (made while
+//   open) closes, and focus is then the invoking element.
+// Any step whose focus left the viewer fails. Verdict "P8 FOCUS QUALIFIED".
+function evaluateP8(doc) {
+  const out = { kind: 'ib11-p8', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
+  if (!doc || doc.probe !== 'ib11-p8-focus') { out.problems.push('not an ib11-p8-focus result'); return out; }
+  const invalid = [];
+  const p = pick(doc, 'P8_FOCUS', out.problems, invalid);
+  out.invalidAttempts = invalid;
+  if (!p) { if (!out.problems.length) out.problems.push('no valid attempt for P8_FOCUS'); return out; }
+  out.runtime = p.client.runtime;
+  if (p.client.identity !== 'MATCH_EXPECTED_ARTIFACT') out.problems.push(`identity ${p.client.identity}`);
+  const cells = p.client.cells || {};
+  const unmod = (s) => !!s && !s.ctrlKey && !s.metaKey && !s.altKey;
+  const inside = (a) => !!a && a.open === true && a.inOverlay === true && !a.isBody;
+  const stepOk = (s, shift) => !!s && isTrusted(s) && s.key === 'Tab' && !!s.shiftKey === shift && unmod(s) && s.openAtCapture === true && !!s.after;
+  const judge = (id, c, role, openInputs, check) => {
+    const R = []; let ok = false; let detail = null;
+    if (!c) R.push(`INVALID no ${id} record`);
+    else {
+      if (c.outsideTrusted) R.push('INVALID trusted input outside a prompt');
+      if (!openInputs.every((x) => isTrusted(x))) R.push('INVALID an operator input was not trusted (synthetic input is not browser evidence)');
+      if (!c.invoker || c.invoker.card !== role || c.invoker.tag !== 'A') R.push(`FAIL the invoking element is not the ${role} card link`);
+      if (!c.opened) R.push('FAIL the viewer did not open on the target');
+      const r = check(c); ok = r.ok; detail = r.detail;
+    }
+    out.cells[id] = { evidence: R.some((x) => x.startsWith('INVALID')) ? 'INVALID' : (R.length ? 'FAIL' : 'PASS'), reasons: R, finding: { code: ok ? 'BEHAVIOR_OK' : 'DEFECT_CONFIRMED', detail } };
+  };
+  const m = cells.P8M;
+  judge('P8M', m, 'FOCUS_M', m ? [m.pointer, m.click, m.escape, ...(m.steps || [])] : [], (c) => {
+    const st = c.steps || []; const t = st.find((x) => x.label === 'tab'); const s = st.find((x) => x.label === 'shiftTab');
+    const acquired = inside(c.afterOpen300) && c.afterOpen300.isClose === true && !c.afterOpen300.isInvoker;
+    const tabWrap = stepOk(t, false) && t.active && t.active.inOverlay && inside(t.after) && t.after.isFirst === true;
+    const shiftWrap = stepOk(s, true) && inside(s.after) && s.after.isClose === true;
+    const closed = isTrusted(c.escape) && c.escape.openAtCapture === true && !!c.afterClose300 && c.afterClose300.open === false;
+    const returned = closed && c.afterClose300.isInvoker === true && !c.afterClose300.isBody && c.afterClose300.active && c.afterClose300.active.card === 'FOCUS_M';
+    return { ok: acquired && tabWrap && shiftWrap && returned, detail: { acquired, afterOpen: c.afterOpen300 && c.afterOpen300.active, tabWrap, tabAfter: t && t.after && t.after.active, shiftWrap, shiftAfter: s && s.after && s.after.active, closed, returned, afterClose: c.afterClose300 && c.afterClose300.active } };
+  });
+  const k = cells.P8K;
+  judge('P8K', k, 'FOCUS_K', k ? [k.enter, k.closeClick, ...(k.steps || [])] : [], (c) => {
+    const st = c.steps || []; const s = st.find((x) => x.label === 'shiftTab'); const t1 = st.find((x) => x.label === 'tab1'); const t2 = st.find((x) => x.label === 'tab2');
+    const viaEnter = isTrusted(c.enter) && c.enter.key === 'Enter' && !!c.enter.active && c.enter.active.card === 'FOCUS_K';
+    const acquired = inside(c.afterOpen300) && c.afterOpen300.isClose === true && !c.afterOpen300.isInvoker;
+    const nativeInside = stepOk(s, true) && inside(s.after) && s.after.isClose === false;
+    const backToClose = stepOk(t1, false) && inside(t1.after) && t1.after.isClose === true;
+    const wrap = stepOk(t2, false) && inside(t2.after) && t2.after.isFirst === true;
+    const closed = isTrusted(c.closeClick) && c.closeClick.openAtCapture === true && !!c.afterClose300 && c.afterClose300.open === false;
+    const returned = closed && c.afterClose300.isInvoker === true && !c.afterClose300.isBody && c.afterClose300.active && c.afterClose300.active.card === 'FOCUS_K';
+    return { ok: viaEnter && acquired && nativeInside && backToClose && wrap && returned, detail: { viaEnter, acquired, nativeInside, shiftAfter: s && s.after && s.after.active, backToClose, wrap, wrapAfter: t2 && t2.after && t2.after.active, closed, returned, afterClose: c.afterClose300 && c.afterClose300.active } };
+  });
+  if (!out.problems.length && ['P8M', 'P8K'].every((x) => out.cells[x].evidence === 'PASS' && out.cells[x].finding.code === 'BEHAVIOR_OK')) out.verdict = 'P8 FOCUS QUALIFIED';
+  return out;
+}
+
+module.exports = { evaluate, evaluatePreflight, evaluateP1, evaluateP2, evaluateP3, evaluateP4, evaluateP5, evaluateP6, evaluateP7, evaluateP8, evalCell, REVISION, MAIN_CELLS, TAKEOVER_CELLS, overflow };
 
 if (require.main === module) {
+  if (process.argv[2] === '--p8') {
+    const r8 = evaluateP8(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
+    r8.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
+    console.log(JSON.stringify(r8, null, 1)); process.exitCode = r8.verdict === 'P8 FOCUS QUALIFIED' ? 0 : 1; return;
+  }
   if (process.argv[2] === '--p7') {
     const r7 = evaluateP7(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')));
     r7.sha256 = require('crypto').createHash('sha256').update(fs.readFileSync(process.argv[3])).digest('hex');
