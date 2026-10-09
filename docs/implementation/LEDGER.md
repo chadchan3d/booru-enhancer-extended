@@ -28,11 +28,15 @@
   - Raw `a7dbf863…e93c` (private; designer-accepted).
   - Evaluator: PREMISE ESTABLISHED. A at ordinal 0 → C at ordinal 45, entirely off-screen; after Escape, focus was on C while `scrollY` stayed 0 and C stayed invisible.
   - This does not pass Tier 1 or Tier 2.
-- **IB12-P1** (Tier-0 last-viewed viewer return): **PARTIAL — NOT COMPLETE** (`IB12_P_STAGE.md` §1).
+- **IB12-P1** (Tier-0 last-viewed viewer return): **COMPLETE, PASS(scope) in TC** (`IB12_P_STAGE.md` §1–§2).
   - Production `ba6e600` / blob `c6d6655` / body `62f05376…099f`.
   - On close: the last viewed card, else the original opener, else the native fallback. One nearest-edge instant `scrollIntoView` only if the card is entirely off-screen.
   - Regression 4/4 (the prior fails the defect checks). P8-13 is P1-attributed (fault-control masking).
-  - Confirmation package `43dada0a…598c`, verifier 11/11. **Real-Chrome confirmation PENDING.**
+  - Confirmation package `43dada0a…598c`, verifier 11/11.
+  - **Real Chrome** (Chrome 154 / Windows / Tampermonkey 5.5.0; designer-accepted; raw private, not present locally): **P1 TIER0 QUALIFIED**.
+    - A was ordinal 0 → C was ordinal 28, off-screen.
+    - After Escape: `scrollY` 0 → 384, fixed through 1000 ms; C 0.9 visible; focus on C.
+    - Exactly one `scrollIntoView`, after close, on C. Nothing scrolled while the viewer was open.
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
@@ -380,9 +384,8 @@
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
 - **Active: IB12 — Tiered place restoration and bounded traditional append, E0 baseline recorded** (`IB12_BASELINE.md`).
-  - **Operator step: IB12-P1 confirmation** (`tests/browser/ib12/README.md`, "IB12-P1"; under one minute; logged-out e621 `/posts`; package `43dada0a…598c`). Return `tests/results/ib12-p1-e621-tier0.json`.
-  - It is evaluated with `evaluate_ib12_p1.cjs`, which must report **P1 TIER0 QUALIFIED** before P1 closes.
-  - G1–G3 remain ruled but untouched. Tier 1/2 remain OPEN. No other IB12 item has started.
+  - **P1 is closed:** COMPLETE, PASS(scope) in TC. **No other IB12 item is active; the next step awaits designer assignment.**
+  - G1, G2 and G3 remain ruled IB12 defects and are unrepaired. Tier 1 and Tier 2 remain OPEN. IB12 is not complete.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;

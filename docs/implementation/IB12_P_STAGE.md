@@ -62,6 +62,50 @@ No mutant matrix (v1.1).
 
 **Not in P1:** Tier 1/2, BFCache/Back, append, duplicate URLs, page addressing; G1–G3 (ruled IB12 defects, untouched); Rule34; IB13; Pixiv.
 
-**P1 status: PARTIAL — NOT COMPLETE** (browser confirmation pending).
+**P1 status at preparation (`20929d8`):** PARTIAL — NOT COMPLETE, browser confirmation pending. See §2.
 
 **Provenance:** no donor code; original to this repository (MIT).
+
+## 2. P1 closure: real-Chrome confirmation
+
+**Synchronized identity:**
+- HEAD `20929d882f55d2d0e34233c1a577f14b5dbda559`.
+- Production `ba6e600` / blob `c6d6655` / body `62f05376…099f`.
+- Package `IB12_P1_e621_Tier0.user.js` SHA-256 `43dada0abd3791b733ea6bd1dfbb1e4d6cd0801c4a713653e57312e14683598c`.
+
+Documentation only.
+
+**Raw result:** private, not committed. It is **not present** in this working tree (`tests/results/ib12-p1-e621-tier0.json`), so no raw SHA-256 is recorded and the file was not recreated. The facts below are the designer-accepted browser facts.
+
+**Run facts:**
+- **Run:** probe `ib12-p1-e621-tier0`; e621.net `/posts`, logged out; production body identity `MATCH_EXPECTED_ARTIFACT`; Chrome 154 / Windows / Tampermonkey 5.5.0; viewport 1920×953.
+- **Navigation:** A was ordinal 0. C was ordinal 28, after 28 viewer steps, and entirely outside the original viewport before close.
+- **Before close:** `scrollY` 0; C visible fraction 0. The close was via Escape.
+- **After close**, at sync / frame / 250 ms / 1000 ms:
+  - `scrollY` 384 at every sample;
+  - C connected;
+  - C visible fraction 0.9;
+  - focus on C's native origin, inside C.
+- **Correction:** `scrollIntoViewCalls` = 1 (`viewerOpen` false, `isCOrigin` true); `scrollEventsAfterClose` = 1.
+- **Clean run:** no operator input after close; no production log errors; no probe errors; complete.
+
+**Committed evaluator verdict (`evaluate_ib12_p1.cjs`): P1 TIER0 QUALIFIED.**
+
+**This confirms:**
+- no scrolling while the viewer was open;
+- exactly one bounded close-time correction, on the correct target C;
+- C becomes usefully visible, and focus returns to C;
+- no repeated correction.
+
+**Retained:**
+- the change in production `ba6e600`; local regression 4/4;
+- the original-opener fallback (last viewed → opener → native fallback → nothing);
+- the one-shot nearest-edge instant correction;
+- no Tier-1 or session-anchor machinery.
+- **P8-13:** its REPLACE-ORIGIN fault control is masked by the valid opener fallback. That control rests on an obsolete assumption (no opener fallback), not a product regression.
+
+**P1 — Tier-0 last-viewed viewer return: COMPLETE, PASS(scope) in TC** (e621 `/posts`, logged out; Tampermonkey × Chrome).
+
+IB12 is not complete:
+- Tier 1 and Tier 2 remain OPEN;
+- G1–G3 remain ruled IB12 defects and are unrepaired.
