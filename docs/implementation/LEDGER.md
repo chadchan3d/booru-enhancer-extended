@@ -1,7 +1,9 @@
 # Ledger
 
 ## Blueprint in force
-`docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added. It is the controlling specification (AGENTS.md); where an instruction conflicts with it, the Blueprint wins.
+`docs/implementation/Final_Implementation_Blueprint.md`, **Version 1.1 (9 October 2026)**, qualification-proportionality amendment commit `1a15eeb0a50cd1e07178564613d3f80858376b17`, blob `fe2b98cd2f294fef4ed2cd0053dc9d13bff05be6`. It is the controlling specification (AGENTS.md); where an instruction conflicts with it, the Blueprint wins.
+
+**Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
 **IB11 — Existing viewer hardening: PARTIAL / BLOCKED** (final closeout audit, `IB11_CLOSEOUT_AUDIT.md`): all P items are complete, but **Blueprint item 12 "failure screenshots" was not found**. E0 D5 was ruled an IB11 defect and is P9 (active).
@@ -331,6 +333,7 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
+- **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **Active: IB11-P9 (E0 D5 only), operator step.**
   - Run P9 real-Chrome **attempt 2** with the corrected package (`tests/browser/ib11/README.md`, "IB11-P9"; automatic, about 15 seconds, tab kept visible; `vview_server.cjs --p9`; package `34449b66…d43d`).
   - First move attempt 1 aside unchanged; do not edit or delete it.
