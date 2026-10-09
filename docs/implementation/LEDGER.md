@@ -6,6 +6,25 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
+**IB12 — Tiered place restoration and bounded traditional append: ACTIVE at E0 baseline** (`IB12_BASELINE.md`). PARTIAL—NOT COMPLETE.
+- Source inspection only; **no production change**; production remains `ac3c9e8`.
+- **G-PLACE-T: OPEN** for every route and tier; no pass yet.
+- **Current behaviour:**
+  - focus return only (`preventScroll`), with no last-viewed identity or scroll correction;
+  - no session anchor;
+  - appended cards carry no native-page association;
+  - **zero production `pushState`/`replaceState` writes** (the SPA watcher only wraps them).
+- **Route classification:**
+  - rule34.xxx listing (`pid`): Tier 0/1 candidate; Tier 2 candidate, evidence needed;
+  - gelbooru.com: same, needing its own host confirmation;
+  - e621/e926: Tier 0 candidate; Tier 1/2 evidence needed (no native next link observed in IB07);
+  - non-admitted hosts: evidence needed.
+- **Gaps found in source:**
+  - G1: loop termination leaves the paginator hidden;
+  - G2: a duplicate-only page stalls with the paginator hidden;
+  - G3: appended cards get no action bar or IB08 rendition (owner argument missing; designer classification needed).
+- **Proposed first V4-T route:** rule34.xxx logged-out listing (`IB12_BASELINE.md` §5). Not built.
+
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
 - Item 12 is SATISFIED(scope) through structured real-browser failure evidence. Literal failure screenshots were not produced and are not an independent gate under v1.1.
@@ -38,7 +57,6 @@
   - original-file source.
 - **All other recognized video classes:** poster/View fallback; their G-VIDEO stays OPEN.
 
-**IB12 is not started.** It is the next checkpoint.
 
 ## Current state
 - **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closure commit.
@@ -315,6 +333,7 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
+- **G-PLACE-T:** OPEN for all routes/tiers (IB12 E0 baseline only).
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -344,16 +363,18 @@
 - **Fixtures:** the IB10 fixtures are externally supplied and not tracked.
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 - **Deferred:**
-  - IB12 pagination, IB13 downloads, IB14 favorites/actions (optional), IB16/IB17 Pixiv (**core release scope**), IB18 other runtime cells;
+  - IB13 downloads, IB14 favorites/actions (optional), IB16/IB17 Pixiv (**core release scope**), IB18 other runtime cells;
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
-- **Next checkpoint: IB12 — Tiered place restoration and bounded traditional append.** It is not started; it begins only on assignment.
+- **Active: IB12 — Tiered place restoration and bounded traditional append, E0 baseline recorded** (`IB12_BASELINE.md`).
+  - **The next step awaits designer review of the baseline:** the first V4-T route (rule34.xxx proposed), the G3 classification, and whether G1/G2 enter IB12 P.
+  - No probe is built; no browser run; no production change.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
   - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);
-  - one checkpoint at a time (§11); do not begin IB12 without its assignment;
+  - one checkpoint at a time (§11); no IB13+ and no Pixiv route work in IB12;
   - no production change without an assigned P item.
