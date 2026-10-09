@@ -1,0 +1,176 @@
+{
+ "probe": "ib11-p9-verification",
+ "p9Commit": "ac3c9e8",
+ "p9Blob": "db5484396de60a90711e3b566fb8f6bbc10b3181",
+ "repairBodySha256": "d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127",
+ "evaluatorRevision": "1.3",
+ "passed": 33,
+ "total": 33,
+ "results": [
+  {
+   "name": "P9 package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P9 package executes the committed repair body byte for byte (ac3c9e8 / blob db54843, body d64df2a6…8127); the working tree is that blob",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "runner = the V-VIEW runner + exactly the declared P9 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the evidence-pinned V-VIEW and P1-P8 packages are unchanged",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: local fixture server only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "probe: automatic; the manual view is applied before the update through the production enrichment path (viewer.updatePost) for the SAME post id; metadata is observed by its event",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "P9 plan: one page P9_D5 with the targets P9 and P9F (video fixture cards)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path: --p9 defaults to tests/results/ib11-p9-d5.json, which is git-ignored; the placeholder is 320x180 (16:9 like the 1280x720 fixture video)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "server --p9: page served; the 320x180 placeholder and the fixture video are served; results file probe ib11-p9-d5",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke (revision 1.3): repaired production -> P9 D5 QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke P9MAN: manual view applied before the update; IMG -> VIDEO for the same target; rotation, flips, pan kept; scale x 320/1280; rendered rectangle and centre kept after the metadata and 1000 ms later; no blank frame",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke P9FIT: without a manual view the video is fitted by fit-both",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: the pre-P9 artifact 9d86484 -> NOT QUALIFIED (P9MAN DEFECT_CONFIRMED: the manual view is refitted; the control still fits)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: refit mutant (the manual view is never kept) -> NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault: raw-scale mutant (manual kept without the apparent-view rescale) -> NOT QUALIFIED (x4 apparent jump)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the image representation was never displayed: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the video never reported its size: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the manual view was applied after the update (not before readiness): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the target changed: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the image was not replaced by a video: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: rotation lost: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a flip lost: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: pan lost: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: raw scale kept: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: geometry jump after the metadata: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a later refit (1000 ms): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: a blank frame: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: state text left after the rebuild: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the fitted control did not fit: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong production artifact: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: duplicate valid attempts: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong result type: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

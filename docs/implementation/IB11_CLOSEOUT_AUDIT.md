@@ -4,7 +4,7 @@
 
 **Result: IB11 remains PARTIAL / BLOCKED. It is NOT marked complete.**
 - **Blocker (Step 7, Blueprint item 12): ITEM 12 FAILURE-SCREENSHOT ARTIFACT NOT FOUND.**
-- **Open designer question (Step 4, item 10):** E0 D5, an unfrozen finding (see §4). It is not a blocker by itself; it needs a classification.
+- **E0 D5:** the designer ruled it an IB11 defect, so it became **P9, active** (`IB11_P_STAGE.md` §18). The repair is committed at `ac3c9e8`; real-Chrome qualification is pending. P9 must close before IB11 can be closed.
 - **Everything else audited** (items 1–11 and 13–14, the item-9 required tests, item-8 preservation, item-10 acceptance, gates, scope, current-production regressions) is supported as recorded below, within the TC scope.
 
 ## 0. Synchronized starting identity
@@ -100,7 +100,7 @@ No mismatch.
 | Native navigation usable after failure | P1/P2/P5 BRW; P7-25, P8-19 REG | SATISFIED(scope) |
 | Playback wording matches evidence | Recorded as G-PLAY(TC) PASS(scope): no general autoplay claim; the WebM no-activation limitation stated | SATISFIED(scope) |
 
-**Open question for the designer (not decided here): E0 D5, an unfrozen FINDING.**
+**E0 D5 (follow-up): designer ruling: an IB11 defect, now P9 (active).** The original audit text follows.
 - **The finding:** when metadata reveals that an image placeholder is actually a video, the element is rebuilt as `<video>`. Rotation and flip are kept, but manual zoom and pan are discarded (a refit). It still passes on current production.
 - **Why it matters:** the owner decisions froze A4, C4, E6 and G4 as unchanged, and froze the placeholder→full *image* replacement rule (P7). D5 (an element-type change) was never classified. Whether it is an "invalid transform reset" under item 10 is a designer decision. No production change was made.
 
@@ -196,10 +196,10 @@ Playback integration was not changed by IB11 P. No hover-class result disables t
 
 ## 11. Decision required from the designer
 
-1. **Item 12 failure screenshots:**
+1. **Item 12 failure screenshots** (still open; not started, by assignment):
    - approve capturing them (for example a controlled, viewer-only, sanitized capture of a failure state); or
    - rule that the recorded structured failure evidence satisfies item 12.
    - Until then IB11 cannot be marked COMPLETE.
-2. **E0 D5:** classify it (owner-frozen unchanged, acceptable under item 10, or a P item).
+2. **E0 D5:** ruled an IB11 defect, now **P9 (active)**. The repair is committed at `ac3c9e8`, with production blob `db54843…`. Real-Chrome qualification is pending.
 
-IB11 stays **PARTIAL / BLOCKED**. IB12 is not started.
+IB11 stays **PARTIAL / BLOCKED** (item 12 failure screenshots; P9 pending). IB12 is not started.

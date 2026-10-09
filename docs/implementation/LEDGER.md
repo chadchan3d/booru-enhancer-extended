@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added. It is the controlling specification (AGENTS.md); where an instruction conflicts with it, the Blueprint wins.
 
 ## Current milestone
-**IB11 — Existing viewer hardening: PARTIAL / BLOCKED** (final closeout audit, `IB11_CLOSEOUT_AUDIT.md`): all P items are complete, but **Blueprint item 12 "failure screenshots" was not found**. An unfrozen finding (E0 D5) also needs designer classification.
+**IB11 — Existing viewer hardening: PARTIAL / BLOCKED** (final closeout audit, `IB11_CLOSEOUT_AUDIT.md`): all P items are complete, but **Blueprint item 12 "failure screenshots" was not found**. E0 D5 was ruled an IB11 defect and is P9 (active).
 - **E stage: complete for TC** (`IB11_BASELINE.md`).
   - G-PLAY(TC) E → PASS(scope).
   - V-VIEW browser evidence: 11/11 evidence PASS.
@@ -17,7 +17,11 @@
 - **P6 (V-D4): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §11–§12).
 - **P7 (V-D7): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §13–§15): attempt 1 NOT QUALIFIED (retained); corrected repair `7e4c643` qualified by attempt 2.
 - **P8 (focus ownership/return): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §16–§17).
-- **All frozen P items (P1–P8) are complete.** IB11 final closeout is not started.
+- **All frozen P items (P1–P8) are complete.**
+- **P9 (E0 D5, designer ruling: an IB11 defect): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §18):
+  - production repair committed at `ac3c9e8`;
+  - local qualification PASS: regression 12/12, attribution 9/9, P9 package verifier 33/33;
+  - **real-Chrome qualification PENDING.**
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -31,12 +35,13 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closeout-audit commit (documentation only).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P9 record commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047` (IB11-P8, focus ownership/return);
-  - blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`;
-  - production body SHA-256 `7745efafde2013fa98329c0ff6c9dd9d94995098129b763b05b7abdccd8cf205`.
+  - commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3` (IB11-P9, E0 D5);
+  - blob `db5484396de60a90711e3b566fb8f6bbc10b3181`;
+  - production body SHA-256 `d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127`.
 - **Previous production artifacts:**
+  - `9d86484` / `8453be9` / body `7745efaf…f205`: IB11-P8 (the P8 qualification artifact);
   - `7e4c643` / `5da8fd9` / body `822a5a20…780d`: IB11-P7 corrected repair (the P7 qualification artifact);
   - `b856a62` / `b88af38` / body `8c964f02…0ad5`: IB11-P7 first repair (the P7 attempt-1 artifact; NOT QUALIFIED);
   - `39a5ae1` / `0a7f57f` / body `d445d442…b439`: IB11-P6 (V-D4; the P6 qualification artifact);
@@ -104,6 +109,7 @@
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **COMPLETE, PASS(scope) in TC** (attempt 2; attempt 1 NOT QUALIFIED, retained) |
 | **P8 — Focus ownership/return** | **COMPLETE, PASS(scope) in TC** |
+| **P9 — E0 D5** (manual view kept across a same-target image → video rebuild) | **PARTIAL**: repair `ac3c9e8` locally qualified; real-Chrome qualification pending |
 
 **P1 detail:**
 - **Change** (`9aeab36`, `Booru_Enhancer.user.js:3595`): the fallback anchor declares `pointer-events:auto`; `.be-media-state` keeps `none`.
@@ -267,6 +273,20 @@
   - **No false return:** focus entered the viewer in both cells before the close.
   - **Limitation:** focus inside native video controls is browser-managed.
 
+**P9 detail:**
+- **Change** (`ac3c9e8`):
+  - a same-target image → video rebuild with a **manual** view keeps manual mode, pan, rotation and flips;
+  - at the video's `loadedmetadata`, a one-shot transfer bound to that element and generation rescales the zoom so the video occupies the image's apparent size (the P7 rule);
+  - non-manual changes keep configured Fit;
+  - `replaceMedia`/`close` clear the transfer;
+  - differing aspect ratios use bounded containment.
+- **Root cause:** the type-change branch called `replaceMedia(post)` (manual mode reset), and the video's `loadedmetadata`/queued frame then refitted and zeroed the pan.
+- **Regression:** `p9_d5_type_change_transform.cjs` 12/12. Faults: `9d86484`, refit, raw-scale, stale-gen.
+- **Attribution:** `p9_d5_attribution.cjs` 9/9 (the only change is the repaired E0 D5). The P8/P7 attributions reproduce with P9 neutralized.
+- **Package verifier:** `verify_ib11_p9.cjs` 33/33; package `5f5100bd…9fd5` (automatic; P9MAN manual view + P9FIT control).
+- **Regressions on `ac3c9e8`:** as at P8, plus E0 D5 (the intended flip) and its repair-probe anchor; P8 verifier 33/34 (pin).
+- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p9` → `tests/results/ib11-p9-d5.json`; `vview_evaluate.cjs --p9` must report **P9 D5 QUALIFIED**).
+
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
 - **IB11 V-VIEW browser evidence (TC): complete.**
@@ -300,12 +320,11 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Designer gate: IB11 closeout audit BLOCKED** (`IB11_CLOSEOUT_AUDIT.md`).
-  - **Blocker: ITEM 12 FAILURE-SCREENSHOT ARTIFACT NOT FOUND.** No failure screenshot exists in the repository, its history, `tests/results/` or `tests/browser/ib10/`. Failure evidence is structured JSON only, and the P6 screenshot is repaired-Fit evidence (private).
-  - **Needs a designer decision:** approve a controlled, sanitized failure-screenshot capture, or rule on whether the structured failure evidence satisfies item 12.
-  - **Also needs a decision:** E0 D5. Manual zoom and pan are discarded when an image placeholder is rebuilt as a video (rotation and flip kept). It is an unfrozen finding; is it an invalid transform reset under item 10?
-  - **Supported:** everything else (items 1–11, 13–14; the item-9 tests; item-8 preservation; gates; scope; current-production regressions, with no drift).
-  - IB11 is not marked complete. IB12 is not started.
+- **Active: IB11-P9 (E0 D5 only), operator step.**
+  - Run the P9 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P9"; automatic, about 15 seconds, tab kept visible; `vview_server.cjs --p9`; package `5f5100bd…`).
+  - Return `tests/results/ib11-p9-d5.json`.
+  - It is evaluated with `vview_evaluate.cjs --p9`, which must report **P9 D5 QUALIFIED** before P9 closes.
+- **Still open for IB11 closure:** Blueprint item 12 failure screenshots (`IB11_CLOSEOUT_AUDIT.md`; not started, by assignment). IB12 is not started.
 - **Forbidden:**
   - no batching of P items;
   - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);

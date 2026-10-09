@@ -11,6 +11,7 @@
 - **P6 (V-D4): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§11, §12).
 - **P7 (V-D7): COMPLETE, PASS(scope)** for TC, qualified in real Chrome by attempt 2; attempt 1 is retained as NOT QUALIFIED evidence (§13–§15).
 - **P8 (focus ownership/return): COMPLETE, PASS(scope)** for TC, qualified in real Chrome (§16, §17).
+- **P9 (E0 D5, image → video view transfer): PARTIAL, NOT COMPLETE.** The production repair is committed and locally qualified; real-Chrome qualification is pending (§18).
 - No other P item has started.
 
 ## 0. Owner decisions and frozen P scope (recorded at P1)
@@ -1572,3 +1573,103 @@ Historical result files rewritten by these runs were restored unedited.
 **Production:** commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047`, blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`, body SHA-256 `7745efafde2013fa98329c0ff6c9dd9d94995098129b763b05b7abdccd8cf205`. This closure is documentation only.
 
 **All frozen IB11 P items (P1–P8) are now COMPLETE, PASS(scope) in TC.** IB11 itself remains **PARTIAL / NOT COMPLETE** until the IB11 final closeout, which needs an explicit assignment.
+
+## 18. P9 — E0 D5: keep a manual view across a same-target image → video rebuild
+
+**Designer ruling (closeout audit follow-up):** E0 D5 is an **IB11 defect** and becomes P9.
+- The selected target has not changed; only its representation has.
+- Item 2 requires transformations to be preserved, item 9 requires transforms across replacement, and item 10 forbids an invalid transform reset.
+
+**Pre-edit gate (synchronized):**
+- HEAD `85b4ad26e58a244e84b0c669ff621966c66d9f67` = origin, clean (the closeout audit commit `85b4ad2`).
+- Blueprint blob `432768c5…` (unchanged).
+- Production `9d86484` / blob `8453be9` / body `7745efaf…f205`.
+- No mismatch.
+
+**Root cause** (at `9d86484`):
+- When metadata reveals that an open viewer's image target is a video, `updatePost` takes the type-change branch (`Booru_Enhancer.user.js:3909–3912`) and calls `replaceMedia(post)`. That resets `manualZoom` to false (`:3814`).
+- The new video's `loadedmetadata` handler (`:3755–3758`) and `replaceMedia`'s queued frame then run `applyConfiguredFit()`. That replaces the zoom and zeroes the pan.
+- Rotation and flips survive because nothing resets them.
+
+**Production change** (commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3`; viewer module only):
+- **Trigger:** in the type-change branch, if the view is **manual** and the change is **image → video**, call `replaceMedia(post, { preserveManualZoom: true })` and set a one-shot transfer record `typeTransfer = { el, generation, prev }`, where `prev` is the outgoing image's displayed natural size.
+- **Application:** `applyTypeTransfer`, called first in the video's `loadedmetadata` handler. It applies only when the record matches that element and media generation, and only in manual mode. It rescales `zoom *= min(prevW / videoW, prevH / videoH)`, so the video occupies the image's apparent size (the P7 rule). Pan, rotation and flips are untouched.
+- **Clearing:** `replaceMedia` (any later rebuild, e.g. navigation) and `close()` clear the record.
+- **Unchanged:**
+  - a non-manual change keeps ordinary configured Fit;
+  - other type changes keep their previous behavior;
+  - P7's `onMediaUpgraded` is untouched.
+- **Differing aspect ratios:** bounded containment (the smaller ratio keeps the video within the image's footprint), the accepted P7 limitation.
+
+| Artifact | Value |
+| --- | --- |
+| Blob | `db5484396de60a90711e3b566fb8f6bbc10b3181` |
+| Production body SHA-256 | `d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127` |
+| Diff | 23 insertions, 1 deletion |
+
+**Forbidden-scope audit.** No change to:
+- A4, C4, E6, G4;
+- playback, focus, P7 staging, hover eligibility, renditions, downloads/favorites;
+- IB12.
+
+No new architecture: one viewer-local transfer record and one helper.
+
+**Permanent regression:** `tests/host/ib11/p9_d5_type_change_transform.cjs` **12/12** (the P7 Chrome image harness, with videos reporting their size at metadata).
+- **Sources:** the repair, the prior `9d86484`, and three mutants:
+  - **refit:** the manual view is never kept (the old reset);
+  - **raw-scale:** manual kept without the apparent-view rescale;
+  - **stale-gen:** the transfer is neither cleared on replacement nor bound to its element/generation.
+
+| Check | Must fail on |
+| --- | --- |
+| P9-1 the same target is rebuilt IMG → VIDEO (no image left) | (holds everywhere) |
+| P9-2 manual view kept in apparent space: rendered size and centre, rotation, both flips, pan; zoom ×300/1600 | prior, refit, raw-scale |
+| P9-3 manual mode kept: a later resize does not refit; no configured Fit at video readiness | prior, refit |
+| P9-4 same result when the video size is known before the queued frame (cached/ready video) | prior, refit, raw-scale |
+| P9-5 differing aspect (300×150 → 640×480): bounded containment, one side matching, centre, rotation, flips | prior, refit, raw-scale |
+| P9-6 a pending transfer never reaches a later target (navigate, zoom manually, its metadata) | stale-gen |
+| P9-7 close before the video is ready: closed and inert | (holds everywhere) |
+| P9-8 the replacement video fails: "Video failed to load" with the native link, on the target | (holds everywhere) |
+| P9-9 non-manual change keeps ordinary configured Fit | (holds everywhere) |
+| P9-10 P7 image → image staged upgrade keeps the apparent view | (holds everywhere) |
+| P9-11 playback preferences on the rebuilt video; Space plays | (holds everywhere) |
+| P9-12 P6 rotated Fit for a video | (holds everywhere) |
+
+**Prior-production oracle:** `9d86484` fails P9-2 to P9-5. Its manual view is refitted; in the browser smoke, the rendered rectangle halves and the pan is lost.
+
+**Attribution** (`tests/host/ib11/p9_d5_attribution.cjs` **9/9**; closed suites unedited):
+- With only P9 neutralized (`p9_neutral_d5_preload.cjs`), every closed suite (P1–P8 and E0) gives exactly its recorded P8-era failure set.
+- The only as-is change is **E0 D5** (the repaired finding: the intended flip).
+- The P8 focus attribution (8/8) and the P7 staging attribution (7/7) reproduce with P9 neutralized.
+
+**Real-browser qualification: required.** Prepared package `tests/browser/ib11/IB11_P9_D5.user.js` (SHA-256 `5f5100bdd75b4fe934504c1e0e6f8199c8e7edd54e22073fdd1f9232953b9fd5`):
+- **Build:** `build_ib11_p9.cjs` from `ac3c9e8`; the body is byte-identical (`d64df2a6…8127`).
+- **Runner:** the V-VIEW runner plus declared runner-only patches (`p9_d5.js`). The V-VIEW and P1–P8 packages are unchanged.
+- **Page P9_D5** (automatic, real layout): two controlled targets open as a 320×180 image (16:9, like the 1280×720 fixture video). The same post is then delivered as a video through `viewer.updatePost`.
+  - **P9MAN:** a manual view (Rotate right, both flips, Zoom in ×2, a pan) is applied before the update. After the video's metadata (observed by its event) and 1000 ms later, the cell records the target, element type, intrinsic sizes, transform, rendered rectangle and centre, recorder media index, and blank frames.
+  - **P9FIT:** the same change without a manual view.
+- **Server:** `vview_server.cjs --p9` serves an added 320×180 `v169` placeholder kind.
+- **Evaluator:** `vview_evaluate.cjs --p9`. The verdict is **P9 D5 QUALIFIED** only if:
+  - **P9MAN:** the manual view was applied before the update; the same target was rebuilt IMG → VIDEO (1280×720); rotation, flips and pan were kept with the scale ×320/1280; the rectangle and centre were kept after the metadata and at 1000 ms; there was no state text and no blank frame;
+  - **P9FIT:** the video was fitted by fit-both.
+
+**Local qualification: `verify_ib11_p9.cjs --media` 33/33.**
+- **Production faults (NOT QUALIFIED):** `9d86484` (P9MAN DEFECT_CONFIRMED; the control still fits), the refit mutant, the raw-scale mutant.
+- **18 evidence faults** are rejected.
+
+**Regressions on `ac3c9e8`:**
+- IB01–IB09 pass (IB07 blob pins only); IB10 64/67 (P7 staging-attributed).
+- P1–P5 as attributed; P6 15/15; P7 28/29 (P7-23 focus-attributed); P8 25/25; P9 12/12.
+- Verifiers fail only their superseded working-tree pins (P8 now 33/34); P9 verifier 33/33.
+- **E0 25/38, fault controls 37/46:**
+  - **D5 is the intended flip.**
+  - D5's repair-probe control is now an anchor pin (the line it targeted was rewritten; D5 itself is repaired).
+  - The other uncaught controls are known.
+
+Historical result files rewritten by these runs were restored unedited.
+
+**Limitation:** differing image/video aspect ratios use bounded containment, not exact two-axis preservation, as accepted for P7.
+
+**P9 status: PARTIAL, NOT COMPLETE.** **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P9".
+
+**Provenance:** no donor code; all changes are original to this repository (MIT).

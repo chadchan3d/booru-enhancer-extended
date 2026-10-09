@@ -397,3 +397,26 @@ It also records whether the viewer was open when the input arrived. All focus in
 Press only the keys asked for, once each. The page does not need a screenshot.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p8 tests/results/ib11-p8-focus.json`. The verdict must be **P8 FOCUS QUALIFIED**.
+
+---
+
+# IB11-P9: E0 D5 image → video view qualification (real Chrome; automatic, about 15 seconds)
+
+`IB11_P9_D5.user.js` (SHA-256 `5f5100bdd75b4fe934504c1e0e6f8199c8e7edd54e22073fdd1f9232953b9fd5`) contains the **repaired** production (commit `ac3c9e8`, blob `db54843`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p9_d5.js`). The page runs by itself; there are no prompts.
+
+**What the page does:** for each of two controlled targets, it opens the target as an **image** (a 320×180 placeholder, the same 16:9 aspect as the 1280×720 fixture video). It then delivers the **same post** as a **video** through the production enrichment path (`viewer.updatePost`).
+- **P9MAN:** before the update, it applies a manual view (Rotate right, both flips, Zoom in ×2, a pan) with the viewer controls. After the video's metadata it measures the transform and the rendered rectangle, and again 1000 ms later.
+- **P9FIT:** the same change without a manual view; the video must be fitted normally.
+
+**Local qualification:**
+- `node tests/browser/ib11/build_ib11_p9.cjs --check`
+- `node tests/browser/ib11/verify_ib11_p9.cjs --media <fixture folder>` (33/33)
+
+**Operator steps:**
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p9`. It prints "1 pages (IB11-P9 D5 qualification)" and writes `tests/results/ib11-p9-d5.json`.
+2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P8 scripts**. Install and enable `IB11_P9_D5.user.js`.
+3. **Open** `http://127.0.0.1:8797/vview/start` in a normal window. Keep the tab in front and visible. Do not touch the page or resize the window.
+4. **Wait** for "P9 RECORDED" (about 15 seconds). If a page shows INVALID, press F5 to retry.
+5. **Return** `tests/results/ib11-p9-d5.json`.
+
+**Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p9 tests/results/ib11-p9-d5.json`. The verdict must be **P9 D5 QUALIFIED**.
