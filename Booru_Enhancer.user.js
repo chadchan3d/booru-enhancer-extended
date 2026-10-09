@@ -3375,6 +3375,8 @@
 		let returnFocusOrigin = null;
 		let returnFocusFallback = null;
 		let closeBtn = null;
+		// P9: a pending same-target image -> video view transfer { el, generation, prev: [w, h] }.
+		let typeTransfer = null;
 
 		function init() {
 			viewerOwner = BE.ownership.create();
@@ -3754,6 +3756,7 @@
 				}
 				el.addEventListener('loadedmetadata', () => {
 					if (el !== mediaEl || generation !== mediaGeneration) return;
+					applyTypeTransfer(el, generation);
 					if (!manualZoom) applyConfiguredFit();
 					else render();
 				});
@@ -3809,8 +3812,22 @@
 			return el;
 		}
 
+		// P9: once the replacement video's size is known, keep the outgoing image's
+		// apparent manual view (the P7 rule: rescale to the previous rendered size;
+		// pan, rotation and flips are kept). One-shot, bound to that element and generation.
+		function applyTypeTransfer(el, generation) {
+			const t = typeTransfer;
+			if (!t || t.el !== el || t.generation !== generation) return;
+			typeTransfer = null;
+			const [pw, ph] = t.prev;
+			const vw = el.videoWidth;
+			const vh = el.videoHeight;
+			if (manualZoom && pw > 0 && ph > 0 && vw > 0 && vh > 0) zoom *= Math.min(pw / vw, ph / vh);
+		}
+
 		function replaceMedia(post, { preserveManualZoom = false, rethrowBuildError = false } = {}) {
 			const old = mediaEl;
+			typeTransfer = null;
 			if (!preserveManualZoom) manualZoom = false;
 			dragging = false;
 
@@ -3907,7 +3924,11 @@
 			const currentElementType = mediaEl.tagName === 'VIDEO' ? 'video' : 'image';
 			const wantedElementType = nextType === 'video' ? 'video' : 'image';
 			if (currentElementType !== wantedElementType || previousType !== nextType) {
-				replaceMedia(post);
+				// P9: the same target revealed as a video keeps a deliberate manual view.
+				const prev = [mediaEl.naturalWidth || 0, mediaEl.naturalHeight || 0];
+				const keepView = manualZoom && currentElementType === 'image' && wantedElementType === 'video';
+				replaceMedia(post, { preserveManualZoom: keepView });
+				if (keepView && mediaEl && mediaEl.tagName === 'VIDEO') typeTransfer = { el: mediaEl, generation: mediaGeneration, prev };
 				return;
 			}
 
@@ -3950,6 +3971,7 @@
 			clearMediaState();
 			stopMedia(mediaEl);
 			mediaEl = null;
+			typeTransfer = null;
 			if (stage) stage.innerHTML = '';
 			currentPost = null;
 			onNext = null;

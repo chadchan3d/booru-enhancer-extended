@@ -1,0 +1,189 @@
+{
+ "probe": "ib11-p9-d5",
+ "productionBlob": "db5484396de60a90711e3b566fb8f6bbc10b3181",
+ "prior": "9d86484",
+ "checks": 12,
+ "passed": 12,
+ "results": [
+  {
+   "name": "P9-1 [D5] the same target is rebuilt IMG -> VIDEO when metadata reveals a video (no image left in the stage)",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-2 [D5] the manual view survives the rebuild in apparent screen space: same rendered size and centre, rotation, both flips and pan kept; the zoom number changes with the intrinsic size",
+   "repair": true,
+   "prior": false,
+   "refit": false,
+   "rawScale": false,
+   "staleGen": true,
+   "expected": {
+    "prior": false,
+    "refit": false,
+    "rawScale": false,
+    "staleGen": null
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-3 [D5] manual mode survives: a later resize does not refit, and no configured Fit replaces the view at video readiness",
+   "repair": true,
+   "prior": false,
+   "refit": false,
+   "rawScale": false,
+   "staleGen": true,
+   "expected": {
+    "prior": false,
+    "refit": false,
+    "rawScale": null,
+    "staleGen": null
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-4 [D5] the same result when the video size is known before the frame queued at the rebuild (an already-ready / cached video)",
+   "repair": true,
+   "prior": false,
+   "refit": false,
+   "rawScale": false,
+   "staleGen": true,
+   "expected": {
+    "prior": false,
+    "refit": false,
+    "rawScale": false,
+    "staleGen": null
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-5 [D5] differing aspect ratio (300x150 image -> 640x480 video): bounded containment - within the image's apparent footprint, one side matching; pan, rotation, flips kept",
+   "repair": true,
+   "prior": false,
+   "refit": false,
+   "rawScale": false,
+   "staleGen": true,
+   "expected": {
+    "prior": false,
+    "refit": false,
+    "rawScale": false,
+    "staleGen": null
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-6 [D5 staleness] a pending transfer never reaches a later target: after navigating to another video and zooming it manually, its own metadata does not rescale it",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": false,
+   "expected": {
+    "prior": null,
+    "refit": null,
+    "rawScale": null,
+    "staleGen": false
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-7 [D5 staleness] close before the video is ready: closed and inert; the late metadata changes nothing",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-8 [D5 failure] the replacement video fails: \"Video failed to load\" with the target's native link (P5/V-D8 behavior); the viewer stays on the target; nothing resurrected",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-9 [D5 control] a non-manual (fitted) image -> video change keeps ordinary configured Fit for the video",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-10 [preserved] P7: image -> image staged upgrade keeps the apparent view (manual zoom, rotation)",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-11 [preserved] video playback preferences on the rebuilt video: autoplay/loop/mute reflect the settings; Space plays a paused video",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  },
+  {
+   "name": "P9-12 [preserved] P6: a non-manual rotated video refits on resize with the exchanged dimensions",
+   "repair": true,
+   "prior": true,
+   "refit": true,
+   "rawScale": true,
+   "staleGen": true,
+   "expected": {
+    "prior": true,
+    "refit": true,
+    "rawScale": true,
+    "staleGen": true
+   },
+   "pass": true
+  }
+ ]
+}
