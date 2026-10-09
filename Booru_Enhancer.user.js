@@ -4746,6 +4746,8 @@
 			if (visitedPageIdentities.has(nextIdentity)) {
 				state = 'EXHAUSTED';
 				BE.log.info(`[Gallery] Pagination loop detected (identity "${nextIdentity}" already visited). Stopping.`);
+				// IB12-P2 (G1): automatic append has stopped; native pagination is the recovery path.
+				restorePaginatorVisibility();
 				return;
 			}
 
@@ -4854,14 +4856,14 @@
 					BE.log.info('[Gallery] No more pages. Next URL not found in response.');
 					restorePaginatorVisibility();
 				} else if (inserted === 0) {
-					// Requirement 10: a page can be fetched successfully yet
-					// contain zero *unique* posts (fully overlapping page).
-					// Continue the chain (the loop guard above still protects
-					// against A→B→A / repeated-URL loops), but don't spin
-					// forever if this keeps happening with no forward progress.
-					BE.log.debug('[Gallery] page contained no new posts; continuing pagination chain');
-					state = 'IDLE';
-					hidePaginatorIfPresent();
+					// IB12-P2 (G2): a page fetched successfully yet with zero *unique*
+					// posts is no forward progress. Nothing was appended, so the sentinel
+					// may stay intersecting and never trigger again: stop automatic append
+					// for this page context and reveal native pagination instead of
+					// chasing the next URL. Readable content stays as it is.
+					BE.log.info('[Gallery] page contained no new posts; stopping automatic append');
+					state = 'EXHAUSTED';
+					restorePaginatorVisibility();
 				} else {
 					BE.log.debug(`[Gallery] next URL detected: ${nextPageUrl}`);
 					state = 'IDLE';

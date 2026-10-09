@@ -1,0 +1,40 @@
+{
+ "test": "ib12-p2-append-liveness",
+ "productionBlob": "5d0b1cf16ca9d75575b29615cb6de5d703ebfef0",
+ "passed": 4,
+ "total": 4,
+ "results": [
+  {
+   "name": "P2-1 [G1] visited-page loop after a successful append: no request for the visited page, append terminal, paginator revealed, appended cards kept",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P2-2 [G2] a zero-unique-post page with a further next URL: exactly that one request, no chase on later triggers, append terminal, paginator revealed, readable content kept",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P2-3 normal append: unique posts appended, paginator hidden after the demonstrated success, still eligible (the next trigger fetches the next page)",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  },
+  {
+   "name": "P2-4 ordinary failure/end after a successful append still reveals the paginator and keeps appended cards: 404, malformed page, empty page, no next link",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  }
+ ]
+}
