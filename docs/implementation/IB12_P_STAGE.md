@@ -152,3 +152,46 @@ No mutant matrix (v1.1).
 **P2 — append liveness / native paginator recovery: COMPLETE, PASS(scope)** (local deterministic evidence, per assignment). G1 and G2 are resolved; G3 remains unrepaired.
 
 **Provenance:** no donor code; original to this repository (MIT).
+
+## 4. P3 — appended-card enhancement parity (G3)
+
+**Root cause:** `loadNextPage` kept its own partial enhancer for appended cards. It manually added `be-thumb-wrap`, `be-thumb-img`, `data-be-post-id` and `position: relative`, then called `buildThumbActions(clonedWrap, clonedImg)` and `applySiteThumbMedia(clonedImg, clonedWrap)` **without an owner**. Both functions return early without an owner, so:
+- appended cards had no action bar;
+- appended cards had no admitted IB08 rendition;
+- appended cards had no card owner, so their mutations sat outside the ownership lifecycle.
+
+The `owner` parameter arrived with `edeabcd` (IB04 ownership), and this call site was never updated. This is an append-integration defect; it does not reopen IB04 or IB08.
+
+**Repair** — production commit `466a48092ed280d9f66b54623ccd9bf4231953d1`, blob `3be0e1f849909a3b394c256b12dc09376f44df12`, body SHA-256 `9fa6ab28d88d367947ef5807761218f9e5264ba2fd8194da5a1338bb322236b3`.
+- **Canonical path reused:** after the native clone is attached to the live gallery, `loadNextPage` now calls `enhanceThumbnail(clonedImg)`. That gives the card the same treatment as an initial card: card owner, owned classes and position, owned post ID, the action bar, admitted rendition via `applySiteThumbMedia(…, owner)` with `thumbRenditionByWrap` provenance, and native hover-attribute handling.
+- **Removed:** the redundant manual class, post-ID and position writes, and the two owner-less calls.
+- **Kept:** the clone sanitation that removes a copied `.be-thumb-actions` node before enhancement.
+- **Unchanged:** duplicate filtering, page identity, the request flow, P2 liveness, paginator behaviour, page association, history, settings and the metadata-fetch policy. Host-specific behaviour stays governed by the existing functions; the IB08 scope is not broadened.
+
+**Adjacent no-owner call — not changed:** `enrichThumbnails` still calls `applySiteThumbMedia(img, getWrapperForImg(img))` without an owner (the per-post metadata loop). That call returns `NATIVE_OUT_OF_SCOPE` immediately, for initial and appended cards alike. It is a pre-existing no-op and not needed for parity: appended cards now get their admitted rendition from `enhanceThumbnail` (P3-3). It is recorded as a separate pre-existing limitation, and enrichment is not redesigned.
+
+**Regression:** `tests/host/ib12/p3_appended_card_parity.cjs` **5/5**. It runs real production in jsdom on an e621 listing using the IB08 card pattern, with a route-table `GM_xmlhttpRequest` and a triggerable observer.
+
+| Check | Prior `3fcbf15` |
+| --- | --- |
+| P3-1 [G3] the appended card is present, with enhancer classes and post ID, and exactly one action bar whose action surface equals an initial card's | **fails** (no bar) |
+| P3-2 [G3] owner lifecycle: re-enhancing does not duplicate the bar; gallery disposal removes the bar and reverts the owned classes and post ID, while the appended card stays | **fails** (unowned manual classes survive disposal) |
+| P3-3 [G3] admitted e621 rendition parity: appended = initial = `OWNED_SAMPLE` (WebP srcset = the card's sample); disposal restores the native WebP srcset | **fails** (no rendition) |
+| P3-4 out-of-scope context (not logged out): the appended card makes no rendition mutation | passes |
+| P3-5 [preserved] P2: normal append stays live; a zero-unique page stops append and reveals the paginator | passes |
+
+No mutant matrix (v1.1).
+
+**Suite on the P3 working tree:**
+- **Identical to the P2 record**, including:
+  - IB08 rendition 66/66 and the disposal suites 24/24, 12/12, 14/14;
+  - IB09 111/111;
+  - IB12-P1 4/4 and P2 4/4;
+  - the same historical/attributed classifications and package-verifier pins (no new pin failure).
+- Historical result files rewritten by the run were restored unedited.
+
+**Browser qualification:** not required. Owner lifecycle, the action bar and IB08 rendition semantics are already qualified; P3 is a call-site integration repair, established locally by the regression.
+
+**P3 — appended-card enhancement parity: COMPLETE, PASS(scope)** (local deterministic evidence, per assignment). G3 is resolved.
+
+**Provenance:** no donor code; original to this repository (MIT).

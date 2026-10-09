@@ -7,7 +7,7 @@
 
 ## Current milestone
 **IB12 — Tiered place restoration and bounded traditional append: ACTIVE** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`, `IB12_P_STAGE.md`). PARTIAL—NOT COMPLETE.
-- E0 was source inspection only (production `ac3c9e8`). P1 changed production to `ba6e600`; **P2 changed it to `3fcbf15`.**
+- E0 was source inspection only (production `ac3c9e8`). P1 changed production to `ba6e600` and P2 to `3fcbf15`; **P3 changed it to `466a480`.**
 - **G-PLACE-T: (e621, Tier 0) E: PASS**; every other route and tier (including e621 Tier 1/2) OPEN.
 - **Behaviour at E0 (`ac3c9e8`; P1 changes viewer return):**
   - focus return only (`preventScroll`), with no last-viewed identity or scroll correction;
@@ -19,7 +19,7 @@
   - gelbooru.com: same, needing its own host confirmation;
   - e621/e926: Tier 0 candidate; Tier 1/2 evidence needed (no native next link observed in IB07);
   - non-admitted hosts: evidence needed.
-- **Designer rulings (`IB12_E_STAGE.md` §1):** G1 and G2 were **resolved by P2**; G3 is still unrepaired.
+- **Designer rulings (`IB12_E_STAGE.md` §1):** G1 and G2 were **resolved by P2**; G3 was **resolved by P3**.
   - **G1** (loop termination leaves the paginator hidden): IB12 defect;
   - **G2** (a duplicate-only page stalls append with the paginator hidden): IB12 defect; preferred repair: stop the chain and reveal native pagination;
   - **G3** (appended cards bypass owner-based enhancement): IB12 append-integration defect, not a reopening of IB04/IB08; the repair reuses the established owner path.
@@ -41,6 +41,11 @@
   - Production `3fcbf15` / blob `5d0b1cf` / body `4a18aa76…6d9c`.
   - **Loop:** reveals the paginator. **Zero-unique page:** `EXHAUSTED` + paginator revealed, no chase. Readable content kept; preference untouched.
   - Regression 4/4 (the prior `ba6e600` fails G1 and G2). Suite unchanged apart from the IB12-P1 package verifier's working-tree pin.
+- **IB12-P3** (appended-card enhancement parity, G3): **COMPLETE, PASS(scope)** (`IB12_P_STAGE.md` §4; local deterministic evidence).
+  - Production `466a480` / blob `3be0e1f` / body `9fa6ab28…36b3`.
+  - Appended clones now go through the canonical `enhanceThumbnail` path: owner, action bar, admitted IB08 rendition, disposal revert.
+  - Regression 5/5 (the prior `3fcbf15` fails the three G3 checks). Suite identical to P2.
+  - Pre-existing limitation, untouched: the owner-less `applySiteThumbMedia` call in `enrichThumbnails` is a no-op for all cards.
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
@@ -76,12 +81,13 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P2 commits.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P3 commits.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `3fcbf152efa61b0aac929ddbec169acd11ec6a48` (IB12-P2, append liveness);
-  - blob `5d0b1cf16ca9d75575b29615cb6de5d703ebfef0`;
-  - production body SHA-256 `4a18aa7619b4a9d97a41222ca4dc1f3452b522357cf15a474c96575126326d9c`.
+  - commit `466a48092ed280d9f66b54623ccd9bf4231953d1` (IB12-P3, appended-card parity);
+  - blob `3be0e1f849909a3b394c256b12dc09376f44df12`;
+  - production body SHA-256 `9fa6ab28d88d367947ef5807761218f9e5264ba2fd8194da5a1338bb322236b3`.
 - **Previous production artifacts:**
+  - `3fcbf15` / `5d0b1cf` / body `4a18aa76…6d9c`: IB12-P2;
   - `ba6e600` / `c6d6655` / body `62f05376…099f`: IB12-P1 (the P1 confirmation artifact);
   - `ac3c9e8` / `db54843` / body `d64df2a6…8127`: IB11-P9 (the P9 artifact; IB11 final production; the IB12-E1 artifact);
   - `9d86484` / `8453be9` / body `7745efaf…f205`: IB11-P8 (the P8 qualification artifact);
@@ -388,9 +394,9 @@
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
-- **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1 COMPLETE, P2 COMPLETE).
-  - P1 stays COMPLETE, PASS(scope) in TC. **P2 is COMPLETE, PASS(scope)**: G1 and G2 resolved.
-  - **G3 remains unrepaired.** Tier 1 and Tier 2 remain OPEN. IB12 is not complete.
+- **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
+  - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). **P3 COMPLETE, PASS(scope)** (G3).
+  - Tier 1 and Tier 2 remain OPEN. IB12 is not complete.
   - **No other IB12 item is active; the next step awaits designer assignment.**
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
