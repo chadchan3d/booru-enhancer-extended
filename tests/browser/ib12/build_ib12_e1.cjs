@@ -18,18 +18,18 @@ const HOST = 'e621.net';
 const OUT = path.join(__dirname, 'IB12_E1_e621_Tier0.user.js');
 const REPO = path.resolve(__dirname, '../../..');
 
-function productionSource() {
-  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
-  if (blob !== EXPECTED_PRODUCTION_BLOB) throw new Error('production blob at COMMIT is not the expected artifact');
-  return execFileSync('git', ['-C', REPO, 'show', `${COMMIT}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+function productionSource(commit = COMMIT, expectedBlob = EXPECTED_PRODUCTION_BLOB) {
+  const blob = execFileSync('git', ['-C', REPO, 'rev-parse', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8' }).trim();
+  if (blob !== expectedBlob) throw new Error('production blob at COMMIT is not the expected artifact');
+  return execFileSync('git', ['-C', REPO, 'show', `${commit}:Booru_Enhancer.user.js`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 }
 
-function deriveMeta(meta) {
+function deriveMeta(meta, name = '// @name         Booru Enhancer Extended — IB12 E1 e621 Tier-0 Viewer Return Check (E stage)', namespace = '// @namespace    https://github.com/chadchan3d/booru-enhancer-extended/ib12-e1-e621-tier0') {
   const kept = meta.split('\n').filter((line) => !/^\/\/ @(match|connect|downloadURL|updateURL)\b/.test(line));
   const out = [];
   for (const line of kept) {
-    if (/^\/\/ @name\s/.test(line)) out.push('// @name         Booru Enhancer Extended — IB12 E1 e621 Tier-0 Viewer Return Check (E stage)');
-    else if (/^\/\/ @namespace\s/.test(line)) out.push('// @namespace    https://github.com/chadchan3d/booru-enhancer-extended/ib12-e1-e621-tier0');
+    if (/^\/\/ @name\s/.test(line)) out.push(name);
+    else if (/^\/\/ @namespace\s/.test(line)) out.push(namespace);
     else if (/^\/\/ @run-at\s/.test(line)) {
       out.push(`// @match        *://${HOST}/*`);
       out.push(`// @connect      ${HOST}`);
@@ -39,16 +39,18 @@ function deriveMeta(meta) {
   return out.join('\n');
 }
 
-function build() {
-  const source = productionSource();
+// opts (later IB12 packages): commit/expectedBlob/expectedBodySha (production), postambleTransform, name, namespace.
+function build(opts = {}) {
+  const source = productionSource(opts.commit, opts.expectedBlob);
   if (source.includes('\r')) throw new Error('production blob is not LF');
   const { meta, body } = split(source);
   const bodySha = crypto.createHash('sha256').update(body, 'utf8').digest('hex');
-  if (bodySha !== EXPECTED_BODY_SHA256) throw new Error('production body is not the expected artifact');
+  if (bodySha !== (opts.expectedBodySha || EXPECTED_BODY_SHA256)) throw new Error('production body is not the expected artifact');
   if (body.includes(POSTAMBLE_MARKER) || body.includes('IB07P_PRODUCTION_BODY')) throw new Error('marker or wrapper name collides with body');
-  const postamble = fs.readFileSync(path.join(__dirname, 'ib12e1_postamble.js'), 'utf8').replace(/\r\n/g, '\n');
+  const e1Postamble = fs.readFileSync(path.join(__dirname, 'ib12e1_postamble.js'), 'utf8').replace(/\r\n/g, '\n');
+  const postamble = opts.postambleTransform ? opts.postambleTransform(e1Postamble) : e1Postamble;
   if (!postamble.startsWith(POSTAMBLE_MARKER)) throw new Error('postamble must start with its marker');
-  const text = deriveMeta(meta) + BODY_START + WRAP_OPEN + body + WRAP_CLOSE + postamble.replace('__EXPECTED_BODY_SHA256__', bodySha);
+  const text = (opts.name ? deriveMeta(meta, opts.name, opts.namespace) : deriveMeta(meta)) + BODY_START + WRAP_OPEN + body + WRAP_CLOSE + postamble.replace('__EXPECTED_BODY_SHA256__', bodySha);
   return { text, body, bodySha, meta, postamble };
 }
 

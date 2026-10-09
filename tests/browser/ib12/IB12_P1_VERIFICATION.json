@@ -1,0 +1,66 @@
+{
+ "probe": "ib12-p1-verification",
+ "commit": "ba6e600",
+ "blob": "c6d6655fb6d38c6fb4c2e9bb59f47c756c461913",
+ "bodySha256": "62f053761191678ab709b79025319d2be7794422b0f8f856422651a21882099f",
+ "packageSha256": "43dada0abd3791b733ea6bd1dfbb1e4d6cd0801c4a713653e57312e14683598c",
+ "passed": 11,
+ "total": 11,
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "executed body = committed P1 production ba6e600 byte for byte (blob c6d6655) = the working tree",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recorder = the E1 recorder + exactly the declared P1 patches",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the E1 package is unchanged (439bdd87…6d0a; fresh build identical)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: @match e621.net only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recorder: no history, scroll, focus, network, storage, settings or event-cancelling call; scrollIntoView appears only in the pass-through counter (never called directly)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path tests/results/ib12-p1-e621-tier0.json is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: P1 close semantics (one nearest-edge correction at close, focus C) -> P1 TIER0 QUALIFIED; one scrollIntoView recorded on C's origin after close",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: sanitized - no URL and no post ID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: pre-P1 semantics (focus C, no scroll) -> NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: a repeated correction 300 ms after close -> NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -64,6 +64,20 @@
 - **PREMISE ESTABLISHED** → **G-PLACE-T(e621, Tier 0) E: PASS** — current behaviour establishes the bounded Tier-0 correction premise. This is not a pass for Tier 1 or Tier 2.
 - If Chrome already brings C usefully into view, record that and stop; no repair is invented.
 
-**Status:** **G-PLACE-T(e621, Tier 0): PENDING** (operator run). Production unchanged at `ac3c9e8`. No Tier-0 implementation; G1–G3 not repaired; no Rule34 Tier 2, IB13 or Pixiv work.
+**Status at preparation (`f3f09ec`):** G-PLACE-T(e621, Tier 0) PENDING the operator run.
+
+### E1 result (real Chrome) — designer accepted
+
+- **Raw:** `tests/results/ib12-e1-e621-tier0.json`, SHA-256 `a7dbf863177e3878ddd9cb850aaf837b5cf3c38ab65f492f1e2248d8950be93c`. Private and not committed.
+  - **UNVERIFIED locally:** the file is not present in this working tree, so it was not re-hashed or re-evaluated here. The values below are as the designer relayed them.
+- **Run facts:**
+  - e621.net `/posts`, logged out; production identity MATCH; Chrome 154 / Windows / Tampermonkey 5.5.0.
+  - A was ordinal 0. After viewer navigation, C was ordinal 45, entirely outside the original viewport.
+  - Before close: `scrollY` 0; C visible fraction 0.
+  - After Escape, through 1000 ms: `scrollY` 0; C connected; C visible fraction 0; focus on C's native origin, inside C.
+  - No input after close; no production or probe errors; complete.
+- **Committed evaluator verdict:** **PREMISE ESTABLISHED**.
+
+**G-PLACE-T(e621, Tier 0) E: PASS** — current behaviour establishes the bounded Tier-0 correction premise. Tier 1 and Tier 2 remain OPEN. E1 is not rerun.
 
 **Provenance:** no donor code; original to this repository (MIT).

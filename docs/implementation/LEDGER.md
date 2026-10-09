@@ -9,7 +9,7 @@
 **IB12 — Tiered place restoration and bounded traditional append: ACTIVE, E stage** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`). PARTIAL—NOT COMPLETE.
 - Source inspection only; **no production change**; production remains `ac3c9e8`.
 - **G-PLACE-T: OPEN** for every route and tier; no pass yet.
-- **Current behaviour:**
+- **Behaviour at E0 (`ac3c9e8`; P1 changes viewer return):**
   - focus return only (`preventScroll`), with no last-viewed identity or scroll correction;
   - no session anchor;
   - appended cards carry no native-page association;
@@ -24,10 +24,15 @@
   - **G2** (a duplicate-only page stalls append with the paginator hidden): IB12 defect; preferred repair: stop the chain and reveal native pagination;
   - **G3** (appended cards bypass owner-based enhancement): IB12 append-integration defect, not a reopening of IB04/IB08; the repair reuses the established owner path.
 - **Route order:** the first product target is **e621 `/posts`, Tier 0 only**. Rule34 remains the preferred first Tier-2/page-addressable route (not started).
-- **IB12-E1** (e621 Tier-0 viewer return check): prepared.
-  - Package `tests/browser/ib12/IB12_E1_e621_Tier0.user.js` (`439bdd87…6d0a`): unchanged `ac3c9e8` body plus an observe-only recorder.
-  - Verifier 15/15.
-  - **G-PLACE-T(e621, Tier 0): PENDING** (operator run).
+- **IB12-E1** (e621 Tier-0 viewer return check): **G-PLACE-T(e621, Tier 0) E: PASS** (`IB12_E_STAGE.md` §2).
+  - Raw `a7dbf863…e93c` (private; designer-accepted).
+  - Evaluator: PREMISE ESTABLISHED. A at ordinal 0 → C at ordinal 45, entirely off-screen; after Escape, focus was on C while `scrollY` stayed 0 and C stayed invisible.
+  - This does not pass Tier 1 or Tier 2.
+- **IB12-P1** (Tier-0 last-viewed viewer return): **PARTIAL — NOT COMPLETE** (`IB12_P_STAGE.md` §1).
+  - Production `ba6e600` / blob `c6d6655` / body `62f05376…099f`.
+  - On close: the last viewed card, else the original opener, else the native fallback. One nearest-edge instant `scrollIntoView` only if the card is entirely off-screen.
+  - Regression 4/4 (the prior fails the defect checks). P8-13 is P1-attributed (fault-control masking).
+  - Confirmation package `43dada0a…598c`, verifier 11/11. **Real-Chrome confirmation PENDING.**
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
@@ -65,10 +70,11 @@
 ## Current state
 - **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closure commit.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3` (IB11-P9, E0 D5);
-  - blob `db5484396de60a90711e3b566fb8f6bbc10b3181`;
-  - production body SHA-256 `d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127`.
+  - commit `ba6e600fb799504c68afe2ca8bed38f4bbe71963` (IB12-P1, Tier-0 viewer return);
+  - blob `c6d6655fb6d38c6fb4c2e9bb59f47c756c461913`;
+  - production body SHA-256 `62f053761191678ab709b79025319d2be7794422b0f8f856422651a21882099f`.
 - **Previous production artifacts:**
+  - `ac3c9e8` / `db54843` / body `d64df2a6…8127`: IB11-P9 (the P9 artifact; IB11 final production; the IB12-E1 artifact);
   - `9d86484` / `8453be9` / body `7745efaf…f205`: IB11-P8 (the P8 qualification artifact);
   - `7e4c643` / `5da8fd9` / body `822a5a20…780d`: IB11-P7 corrected repair (the P7 qualification artifact);
   - `b856a62` / `b88af38` / body `8c964f02…0ad5`: IB11-P7 first repair (the P7 attempt-1 artifact; NOT QUALIFIED);
@@ -337,7 +343,7 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
-- **G-PLACE-T:** OPEN for all routes/tiers; **(e621, Tier 0) PENDING** the IB12-E1 operator run.
+- **G-PLACE-T:** **(e621, Tier 0) E: PASS**; all other routes/tiers (including e621 Tier 1/2) OPEN.
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -374,9 +380,9 @@
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
 - **Active: IB12 — Tiered place restoration and bounded traditional append, E0 baseline recorded** (`IB12_BASELINE.md`).
-  - **Operator step: IB12-E1** (`tests/browser/ib12/README.md`, "IB12-E1"; under one minute; logged-out e621 `/posts`). Return `tests/results/ib12-e1-e621-tier0.json`.
-  - It is evaluated with `evaluate_ib12_e1.cjs`. **PREMISE ESTABLISHED** → G-PLACE-T(e621, Tier 0) E: PASS (not Tier 1/2).
-  - No Tier-0 implementation and no G1–G3 repair until then. No production change.
+  - **Operator step: IB12-P1 confirmation** (`tests/browser/ib12/README.md`, "IB12-P1"; under one minute; logged-out e621 `/posts`; package `43dada0a…598c`). Return `tests/results/ib12-p1-e621-tier0.json`.
+  - It is evaluated with `evaluate_ib12_p1.cjs`, which must report **P1 TIER0 QUALIFIED** before P1 closes.
+  - G1–G3 remain ruled but untouched. Tier 1/2 remain OPEN. No other IB12 item has started.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
