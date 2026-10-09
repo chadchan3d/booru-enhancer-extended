@@ -4,7 +4,7 @@
 `docs/implementation/Final_Implementation_Blueprint.md`, Version 1.0 (26 September 2026), commit `4c81cde`, blob `432768c5ccf3bddba5a1cdc8ce74303a95d95f6a`, SHA-256 `747b297b…8a9f`. Unchanged since it was added. It is the controlling specification (AGENTS.md); where an instruction conflicts with it, the Blueprint wins.
 
 ## Current milestone
-**IB11 — Existing viewer hardening: PARTIAL, NOT COMPLETE.**
+**IB11 — Existing viewer hardening: PARTIAL / BLOCKED** (final closeout audit, `IB11_CLOSEOUT_AUDIT.md`): all P items are complete, but **Blueprint item 12 "failure screenshots" was not found**. An unfrozen finding (E0 D5) also needs designer classification.
 - **E stage: complete for TC** (`IB11_BASELINE.md`).
   - G-PLAY(TC) E → PASS(scope).
   - V-VIEW browser evidence: 11/11 evidence PASS.
@@ -31,7 +31,7 @@
 **IB12 is not started.**
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P8 closure commit (documentation only).
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closeout-audit commit (documentation only).
 - **Production `Booru_Enhancer.user.js`:**
   - commit `9d864845d482f74cc565cf0c6b4ff92ccef7a047` (IB11-P8, focus ownership/return);
   - blob `8453be9447820978b7d4a2886ea9ae2bf4e87c10`;
@@ -300,10 +300,12 @@
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
-- **Designer gate / handoff boundary.** All frozen IB11 P items are closed: P1 (V-D8), P2 (V-D1), P3 (V-D5), P4 (V-D6a), P5 (V-D6b), P6 (V-D4), P7 (V-D7), P8 (focus ownership/return).
-  - The next step is the designer closure review, then the **IB11 final closeout**, which needs an explicit assignment.
-  - IB12 is not started.
-  - Each follows the P1 pattern: a minimal production change, a permanent regression that fails on the prior artifact, a fault control, regressions, and real-browser qualification where needed.
+- **Designer gate: IB11 closeout audit BLOCKED** (`IB11_CLOSEOUT_AUDIT.md`).
+  - **Blocker: ITEM 12 FAILURE-SCREENSHOT ARTIFACT NOT FOUND.** No failure screenshot exists in the repository, its history, `tests/results/` or `tests/browser/ib10/`. Failure evidence is structured JSON only, and the P6 screenshot is repaired-Fit evidence (private).
+  - **Needs a designer decision:** approve a controlled, sanitized failure-screenshot capture, or rule on whether the structured failure evidence satisfies item 12.
+  - **Also needs a decision:** E0 D5. Manual zoom and pan are discarded when an image placeholder is rebuilt as a video (rotation and flip kept). It is an unfrozen finding; is it an invalid transform reset under item 10?
+  - **Supported:** everything else (items 1–11, 13–14; the item-9 tests; item-8 preservation; gates; scope; current-production regressions, with no drift).
+  - IB11 is not marked complete. IB12 is not started.
 - **Forbidden:**
   - no batching of P items;
   - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);
