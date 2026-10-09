@@ -109,3 +109,46 @@ Documentation only.
 IB12 is not complete:
 - Tier 1 and Tier 2 remain OPEN;
 - G1–G3 remain ruled IB12 defects and are unrepaired.
+
+## 3. P2 — append liveness / native paginator recovery (G1 + G2)
+
+**Invariant:** automatic append must never stop making useful forward progress while leaving native pagination hidden.
+
+**Defects** (ruled IB12 defects, `IB12_E_STAGE.md` §1):
+- **G1:** a next-page identity already in `visitedPageIdentities` set `EXHAUSTED` and returned **without** restoring the native paginator.
+- **G2:** a successfully fetched page with zero unique posts and a further next URL returned to `IDLE` and **hid** the paginator. Nothing had been appended, so the sentinel could stay intersecting with no new IntersectionObserver transition, and append could stall indefinitely with native pagination hidden. If the observer did fire again, the next URL was chased.
+
+**Repair** — production commit `3fcbf152efa61b0aac929ddbec169acd11ec6a48`, blob `5d0b1cf16ca9d75575b29615cb6de5d703ebfef0`, body SHA-256 `4a18aa7619b4a9d97a41222ca4dc1f3452b522357cf15a474c96575126326d9c`. Two branches of `loadNextPage` changed:
+- **Loop branch:** after `state = 'EXHAUSTED'`, it now calls `restorePaginatorVisibility()` (`IB12-P2 (G1)`).
+- **Zero-progress branch** (`inserted === 0` with a next URL): `state = 'EXHAUSTED'` + `restorePaginatorVisibility()`, replacing `IDLE` + `hidePaginatorIfPresent()` (`IB12-P2 (G2)`). The next URL is not chased (designer ruling: no duplicate-page chasing).
+- **What it reuses:** the existing terminal state `EXHAUSTED` ("automatic append has stopped for this page context"); no new state or architecture. The sentinel's observer only calls `loadNextPage` in `IDLE`, so no further automatic request is made.
+- **What it doesn't touch:** readable appended content, the stored `gallery.infiniteScroll` preference (a runtime stop, not a settings change), history/URLs, page association, retries, recovery UI and G3.
+- **Starting-page identity:** not seeded. The deterministic loop regression does not need it. Pre-fetch loop prediction (A→B→A fetching A once) is left to the page-addressable Tier-2 work, as allowed.
+
+**Regression:** `tests/host/ib12/p2_append_liveness.cjs` **4/4**.
+- It runs real production in jsdom on an e621 listing with a native `#paginator`.
+- `GM_xmlhttpRequest` answers listing pages from a route table and counts them; the IntersectionObserver is a triggerable stub.
+- "Terminal" means further triggers dispatch no request.
+
+| Check | Prior `ba6e600` |
+| --- | --- |
+| P2-1 [G1] after a successful append, a next page that loops to a visited identity: no request for it; terminal; paginator visible; appended cards kept | **fails** (paginator stays hidden) |
+| P2-2 [G2] a zero-unique-post page with a further next URL: exactly that one request; no chase on later triggers; terminal; paginator visible; readable content kept | **fails** (paginator hidden; chases the next page on re-trigger) |
+| P2-3 normal append: unique posts appended; paginator hidden after success; still eligible (the next trigger fetches the next page) | passes |
+| P2-4 ordinary failure/end after a successful append — 404, malformed page, empty page, no next link: paginator revealed, appended cards kept, no repeat request | passes |
+
+No mutant matrix (v1.1).
+
+**Suite on the P2 working tree:**
+- **Identical to the P1 record:** IB01–IB09 (IB07 blob pins); IB10 64/67; E0 25/38, controls 37/46; IB11 P1–P5 as attributed; P6 15/15; P7 28/29; P8 24/25 (P8-13 P1-attributed); P9 12/12; recoveries 28/28 and 32/32; the IB11 package verifiers (pins only); IB12-E1 verifier 14/15 (pin).
+- **IB12-P1 regression 4/4** (P1 behaviour preserved).
+- **New:** the IB12-P1 package verifier is 10/11; its one failure is its superseded working-tree pin to `ba6e600`.
+- Historical result files rewritten by the run were restored unedited.
+
+**Browser qualification:** not required. Paginator class state, append state, request count and inserted-node preservation are established deterministically. No browser-specific behaviour is involved beyond the IntersectionObserver re-trigger, which the repair no longer depends on.
+
+**Accepted limitation:** after a zero-progress page, automatic append stays stopped for that page context, even if a later native page would have had new posts. The user continues with the native paginator.
+
+**P2 — append liveness / native paginator recovery: COMPLETE, PASS(scope)** (local deterministic evidence, per assignment). G1 and G2 are resolved; G3 remains unrepaired.
+
+**Provenance:** no donor code; original to this repository (MIT).
