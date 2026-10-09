@@ -6150,7 +6150,7 @@ IB11V_PRODUCTION_BODY(IB11V_LOCATION);
   }
   // [IB11-P9] D5 qualification (automatic; real layout). A controlled target
   // opens as a metadata-pending IMAGE (a 320x180 placeholder, the same 16:9
-  // aspect as the 1280x720 fixture video); the production enrichment path
+  // aspect as the pinned fixture video, decoded 640x360); the production enrichment path
   // (viewer.updatePost) then delivers the SAME post as a VIDEO.
   //  P9MAN: before the video exists, a deliberate manual view is applied with
   //   the viewer controls (Rotate right, Flip horizontal, Flip vertical, Zoom in

@@ -751,8 +751,11 @@ function evaluateP8(doc) {
 //  P9MAN: the same target opened as a 320x180 image (displayed); a manual view
 //   (rotation 90, both flips, two Zoom in steps by the viewer's clamp rule, a
 //   pan) applied before the update; after the update the target is unchanged,
-//   the stage holds one VIDEO (the image replaced) with the 1280x720 metadata;
-//   the transform keeps rotation, flips and pan with the scale x 320/1280; the
+//   the stage holds one VIDEO (the image replaced) whose browser-reported size
+//   is the pinned fixture's decoded size (webm_fixture.cjs: the SHA-256-pinned
+//   WebM decodes to 640x360; the results file must name that pinned WebM and,
+//   when it records parsed dimensions, the same ones); the transform keeps
+//   rotation, flips and pan with scale_new = scale_old x 320 / videoWidth; the
 //   rendered rectangle and centre equal the image's (after the metadata and
 //   1000 ms later: no later refit); no state text, no blank frame.
 //  P9FIT: without a manual view the video is fitted by fit-both in the stage
@@ -761,6 +764,11 @@ function evaluateP8(doc) {
 function evaluateP9(doc) {
   const out = { kind: 'ib11-p9', revision: REVISION, verdict: 'NOT QUALIFIED', problems: [], cells: {} };
   if (!doc || doc.probe !== 'ib11-p9-d5') { out.problems.push('not an ib11-p9-d5 result'); return out; }
+  const { PINNED_WEBM_SHA256, PINNED_WEBM_DIMS } = require('./webm_fixture.cjs');
+  const [VW, VH] = PINNED_WEBM_DIMS;
+  const wf = (doc.fixtures || {}).webm || {};
+  if (wf.sha256 !== PINNED_WEBM_SHA256) out.problems.push('the video fixture is not the pinned WebM');
+  if (wf.dims && String(wf.dims) !== String(PINNED_WEBM_DIMS)) out.problems.push(`the recorded fixture dimensions ${wf.dims} are not the pinned WebM's ${PINNED_WEBM_DIMS}`);
   const invalid = [];
   const p = pick(doc, 'P9_D5', out.problems, invalid);
   out.invalidAttempts = invalid;
@@ -772,7 +780,7 @@ function evaluateP9(doc) {
   const nearPx = (a, b) => typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) <= Math.max(2, 0.005 * Math.abs(b));
   const geom = (a, b) => { if (!a || !b) return { ok: false }; const dc = Math.hypot(b.cx - a.cx, b.cy - a.cy); return { ok: a.w > 0 && a.h > 0 && nearPx(b.w, a.w) && nearPx(b.h, a.h) && dc <= 2, dw: b.w - a.w, dh: b.h - a.h, dc, before: { w: a.w, h: a.h }, after: { w: b.w, h: b.h } }; };
   const isImg = (s) => !!s && s.tag === 'IMG' && s.nw === 320 && s.nh === 180;
-  const isVid = (s, id) => !!s && s.tag === 'VIDEO' && s.nw === 1280 && s.nh === 720 && s.currentId === id && s.inStage === 1 && s.open === true && !s.state;
+  const isVid = (s, id) => !!s && s.tag === 'VIDEO' && s.nw === VW && s.nh === VH && s.currentId === id && s.inStage === 1 && s.open === true && !s.state;
   const judge = (id, c, check) => {
     const R = []; let ok = false; let detail = null;
     if (!c) R.push(`INVALID no ${id} record`);
@@ -788,7 +796,7 @@ function evaluateP9(doc) {
     const f = tf(c.fitted.transform); const b = tf(c.before.transform); const a = tf(c.after && c.after.transform); const a2 = tf(c.after1000 && c.after1000.transform);
     const wantScale = f.scale === null ? null : [1, 2].reduce((z) => Math.min(8, Math.max(0.05, z + 0.25)), f.scale);
     const applied = c.manual === true && isImg(c.before) && b.rot === 90 && b.fx === -1 && b.fy === -1 && (b.tx !== 0 || b.ty !== 0) && b.scale !== null && wantScale !== null && Math.abs(b.scale - wantScale) <= 1e-6 && c.before.t <= c.tUpdate;
-    const kept = (x) => x.rot === b.rot && x.fx === b.fx && x.fy === b.fy && x.tx === b.tx && x.ty === b.ty && x.scale !== null && Math.abs(x.scale - b.scale * 320 / 1280) <= 1e-3 * b.scale;
+    const kept = (x) => x.rot === b.rot && x.fx === b.fx && x.fy === b.fy && x.tx === b.tx && x.ty === b.ty && x.scale !== null && Math.abs(x.scale - b.scale * 320 / VW) <= 1e-3 * b.scale;
     const rebuilt = c.imageReplaced === true && c.sameElementAfter === true && isVid(c.after, c.targetId) && isVid(c.after1000, c.targetId) && c.before.currentId === c.targetId;
     const g1 = geom(c.before.rect, c.after && c.after.rect); const g2 = geom(c.before.rect, c.after1000 && c.after1000.rect);
     const noBlank = !!c.frames && c.frames.frames > 0 && c.frames.blank === 0;
@@ -796,8 +804,8 @@ function evaluateP9(doc) {
   });
   judge('P9FIT', cells.P9FIT, (c) => {
     const a = tf(c.after && c.after.transform); const s = c.after && c.after.stageRect;
-    const z = s ? Math.min((s.w - 24) / 1280, (s.h - 24) / 720) : null;
-    const fitOk = c.manual === false && isVid(c.after, c.targetId) && a.rot === 0 && a.tx === 0 && a.ty === 0 && z !== null && a.scale !== null && Math.abs(a.scale - z) <= 1e-3 * z && !!c.after.rect && nearPx(c.after.rect.w, 1280 * z) && nearPx(c.after.rect.h, 720 * z);
+    const z = s ? Math.min((s.w - 24) / VW, (s.h - 24) / VH) : null;
+    const fitOk = c.manual === false && isVid(c.after, c.targetId) && a.rot === 0 && a.tx === 0 && a.ty === 0 && z !== null && a.scale !== null && Math.abs(a.scale - z) <= 1e-3 * z && !!c.after.rect && nearPx(c.after.rect.w, VW * z) && nearPx(c.after.rect.h, VH * z);
     const noBlank = !!c.frames && c.frames.frames > 0 && c.frames.blank === 0;
     return { ok: fitOk && c.imageReplaced === true && noBlank, detail: { fitOk, expectedScale: z, scaleAfter: a.scale, rect: c.after && c.after.rect, frames: c.frames } };
   });

@@ -4,11 +4,16 @@
 //   1. static: package current; executed body byte-identical to the committed
 //      P9 repair (ac3c9e8); runner = V-VIEW runner + exactly the declared P9
 //      patches; the evidence-pinned V-VIEW and P1-P8 packages unchanged; scope;
-//      results path; the 320x180 placeholder has the fixture video's aspect;
+//      results path; the pinned fixture WebM is parsed independently from its
+//      bytes (SHA-256 pinned; decoded 640x360 = webm_fixture.cjs PINNED_WEBM_DIMS)
+//      and the 320x180 placeholder has its aspect;
 //   2. server (--media): the P9 page and probe;
 //   3. smoke (jsdom + vview_sim.cjs): the repaired production qualifies;
 //   4. faults: the pre-P9 artifact (9d86484) and the refit and raw-scale mutants
-//      are NOT QUALIFIED; evidence faults are rejected.
+//      are NOT QUALIFIED; the stale-generation mutant is run and classified (its
+//      fault needs a second rebuild, which the host regression P9 covers);
+//      evidence faults are rejected, including wrong fixture identity, wrong
+//      intrinsic dimensions, and wrong geometry with the correct dimensions.
 // Usage: node verify_ib11_p9.cjs --media <fixture folder>
 const fs = require('fs');
 const path = require('path');
@@ -25,6 +30,7 @@ const { mustReplace } = require('../../host/ib09/dwell_prototype.cjs');
 const h = require(path.resolve(__dirname, '../../host/ib07/item9_harness.cjs'));
 
 const results = [];
+let staleGen = null;
 const check = (name, ok, detail = '') => results.push({ name, pass: !!ok, detail: ok ? '' : String(detail).slice(0, 900) });
 const REPO = path.resolve(__dirname, '../../..');
 const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
@@ -34,6 +40,9 @@ const git = (...a) => execFileSync('git', ['-C', REPO, ...a], { encoding: 'utf8'
 const REPAIR_BODY_SHA = 'd64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127';
 const REFIT = (x) => mustReplace(x, "\t\t\t\tconst keepView = manualZoom && currentElementType === 'image' && wantedElementType === 'video';\n", '\t\t\t\tconst keepView = false;\n');
 const RAW_SCALE = (x) => mustReplace(x, '\t\t\tif (manualZoom && pw > 0 && ph > 0 && vw > 0 && vh > 0) zoom *= Math.min(pw / vw, ph / vh);\n', '');
+const STALE_GEN = (x) => mustReplace(mustReplace(x, '\t\t\tif (!t || t.el !== el || t.generation !== generation) return;\n', '\t\t\tif (!t) return;\n'), '\t\t\tconst old = mediaEl;\n\t\t\ttypeTransfer = null;\n', '\t\t\tconst old = mediaEl;\n');
+const { PINNED_WEBM_SHA256, PINNED_WEBM_DIMS, webmVideoDims, decodedSize } = require('./webm_fixture.cjs');
+const [VW, VH] = PINNED_WEBM_DIMS;
 
 // ---- 1. static ----
 const PKG = fs.readFileSync(p9.OUT, 'utf8');
@@ -53,7 +62,11 @@ const pp = srv.plan({ p9: true });
 check('P9 plan: one page P9_D5 with the targets P9 and P9F (video fixture cards)', pp.length === 1 && pp[0].id === 'P9_D5' && pp[0].cards.map((c) => `${c.role}:${c.kind}`).join() === 'P9:video,P9F:video', JSON.stringify(pp));
 const ign = (f) => { try { execFileSync('git', ['-C', REPO, 'check-ignore', '-q', f]); return true; } catch { return false; } };
 const srvSrc = fs.readFileSync(path.join(__dirname, 'vview_server.cjs'), 'utf8');
-check('results path: --p9 defaults to tests/results/ib11-p9-d5.json, which is git-ignored; the placeholder is 320x180 (16:9 like the 1280x720 fixture video)', srvSrc.includes("p9 ? path.resolve(__dirname, '../../results/ib11-p9-d5.json')") && ign('tests/results/ib11-p9-d5.json') && srv.DIMS.v169.join() === '320,180' && 320 / 180 === 1280 / 720);
+check('results path: --p9 defaults to tests/results/ib11-p9-d5.json, which is git-ignored', srvSrc.includes("p9 ? path.resolve(__dirname, '../../results/ib11-p9-d5.json')") && ign('tests/results/ib11-p9-d5.json'));
+{
+  const wb = fs.readFileSync(path.join(__dirname, '../ib10/ib10_v3c_fixture.webm')); const d = webmVideoDims(wb);
+  check(`fixture: the pinned WebM (SHA-256 467649…4a61) parsed from its own track header decodes to ${VW}x${VH} = PINNED_WEBM_DIMS (the single fixture fact the evaluator and simulator use); the 320x180 placeholder has the same aspect`, sha(wb) === PINNED_WEBM_SHA256 && String(decodedSize(d)) === String(PINNED_WEBM_DIMS) && srv.DIMS.v169.join() === '320,180' && 320 * VH === 180 * VW, JSON.stringify(d));
+}
 
 async function serverChecks(mediaDir) {
   const port = 18807; const out = path.join(require('os').tmpdir(), `ib11-p9-${process.pid}.json`);
@@ -65,7 +78,7 @@ async function serverChecks(mediaDir) {
   await fetch(`${base}/vview/result`, { method: 'POST', body: JSON.stringify({ token: pg.token, identity: 'MATCH_EXPECTED_ARTIFACT', error: null, cells: {} }) });
   await new Promise((r) => s.server.close(r));
   let file = null; try { file = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); } catch { file = null; }
-  check('server --p9: page served; the 320x180 placeholder and the fixture video are served; results file probe ib11-p9-d5', /"page":"P9_D5"/.test(html) && imOk && vdOk && file && file.probe === 'ib11-p9-d5' && String(file.fixtures.v169.dims) === '320,180', JSON.stringify(file && file.probe));
+  check('server --p9: page served; the 320x180 placeholder and the fixture video are served; results file probe ib11-p9-d5', /"page":"P9_D5"/.test(html) && imOk && vdOk && file && file.probe === 'ib11-p9-d5' && String(file.fixtures.v169.dims) === '320,180' && file.fixtures.webm.sha256 === PINNED_WEBM_SHA256 && String(file.fixtures.webm.dims) === String(PINNED_WEBM_DIMS), JSON.stringify(file && file.fixtures));
 }
 
 async function main() {
@@ -76,14 +89,20 @@ async function main() {
   const r = evaluateP9(clone(doc));
   check(`smoke (revision ${REVISION}): repaired production -> P9 D5 QUALIFIED`, r.verdict === 'P9 D5 QUALIFIED', JSON.stringify(r).slice(0, 900));
   const m = r.cells.P9MAN.finding.detail;
-  check('smoke P9MAN: manual view applied before the update; IMG -> VIDEO for the same target; rotation, flips, pan kept; scale x 320/1280; rendered rectangle and centre kept after the metadata and 1000 ms later; no blank frame', m && m.applied && m.rebuilt && m.geometryAfterMetadata.ok && m.geometryAfter1000.ok && Math.abs(m.scaleAfter - m.scaleBefore / 4) < 1e-6 && m.frames.blank === 0, JSON.stringify(m));
+  check(`smoke P9MAN: manual view applied before the update; IMG -> VIDEO for the same target; rotation, flips, pan kept; scale x 320/${VW}; rendered rectangle and centre kept after the metadata and 1000 ms later; no blank frame`, m && m.applied && m.rebuilt && m.geometryAfterMetadata.ok && m.geometryAfter1000.ok && Math.abs(m.scaleAfter - m.scaleBefore * 320 / VW) < 1e-5 * m.scaleBefore && m.frames.blank === 0, JSON.stringify(m));
   check('smoke P9FIT: without a manual view the video is fitted by fit-both', r.cells.P9FIT.finding.detail.fitOk, JSON.stringify(r.cells.P9FIT));
 
   // ---- faults: production ----
   const prod = async (name, text, pred, force = true) => { const { doc: dd } = await smoke(text, { p9: true, forceIdentity: force }); const rr = evaluateP9(dd); check(name, rr.verdict === 'NOT QUALIFIED' && pred(rr), JSON.stringify(rr.cells).slice(0, 700)); };
   await prod('fault: the pre-P9 artifact 9d86484 -> NOT QUALIFIED (P9MAN DEFECT_CONFIRMED: the manual view is refitted; the control still fits)', p9.buildP9({ commit: '9d86484', expectedBlob: '8453be9447820978b7d4a2886ea9ae2bf4e87c10' }).text, (rr) => rr.cells.P9MAN.finding.code === 'DEFECT_CONFIRMED' && !rr.cells.P9MAN.finding.detail.geometryAfterMetadata.ok && rr.cells.P9FIT.finding.code === 'BEHAVIOR_OK', false);
   await prod('fault: refit mutant (the manual view is never kept) -> NOT QUALIFIED', p9.buildP9({ bodyTransform: REFIT }).text, (rr) => rr.cells.P9MAN.finding.code === 'DEFECT_CONFIRMED');
-  await prod('fault: raw-scale mutant (manual kept without the apparent-view rescale) -> NOT QUALIFIED (x4 apparent jump)', p9.buildP9({ bodyTransform: RAW_SCALE }).text, (rr) => rr.cells.P9MAN.finding.code === 'DEFECT_CONFIRMED' && !rr.cells.P9MAN.finding.detail.geometryAfterMetadata.ok);
+  await prod(`fault: raw-scale mutant (manual kept without the apparent-view rescale) -> NOT QUALIFIED (x${VW / 320} apparent jump)`, p9.buildP9({ bodyTransform: RAW_SCALE }).text, (rr) => rr.cells.P9MAN.finding.code === 'DEFECT_CONFIRMED' && !rr.cells.P9MAN.finding.detail.geometryAfterMetadata.ok);
+  {
+    // the stale-generation fault only shows on a SECOND rebuild of the same viewer (host regression P9); the browser
+    // flow has one rebuild per target, so this records how the package classifies it rather than requiring a rejection
+    const { doc: dd } = await smoke(p9.buildP9({ bodyTransform: STALE_GEN }).text, { p9: true, forceIdentity: true }); const rr = evaluateP9(dd);
+    staleGen = rr.verdict;
+  }
   // ---- faults: evidence ----
   const ef = (name, f) => { const dd = clone(doc); f(dd, dd.pages[0].client.cells); const rr = evaluateP9(dd); check(`fault evidence: ${name}: NOT QUALIFIED`, rr.verdict === 'NOT QUALIFIED', JSON.stringify({ p: rr.problems, m: rr.cells.P9MAN && rr.cells.P9MAN.reasons })); };
   ef('the image representation was never displayed', (dd, c) => { c.P9MAN.imgOk = false; });
@@ -101,6 +120,13 @@ async function main() {
   ef('state text left after the rebuild', (dd, c) => { c.P9MAN.after.state = 'Loading video…'; });
   ef('the fitted control did not fit', (dd, c) => { c.P9FIT.after.transform = c.P9FIT.after.transform.replace(/ scale\([^)]*\)/, ' scale(2)'); });
   ef('trusted input outside a prompt', (dd, c) => { c.P9MAN.outsideTrusted = 1; });
+  ef('the video fixture is not the pinned WebM', (dd) => { dd.fixtures.webm.sha256 = '0'.repeat(64); });
+  ef('no fixture identity recorded', (dd) => { delete dd.fixtures.webm; });
+  ef('the recorded fixture dimensions are not the pinned ones (1280x720)', (dd) => { dd.fixtures.webm.dims = [1280, 720]; });
+  ef('wrong intrinsic video dimensions reported (1280x720, geometry recomputed to match them)', (dd, c) => { for (const k of ['after', 'after1000']) { c.P9MAN[k].nw = 1280; c.P9MAN[k].nh = 720; c.P9FIT[k].nw = 1280; c.P9FIT[k].nh = 720; } c.P9MAN.after.transform = c.P9MAN.after.transform.replace(/ scale\(([^)]*)\)/, (_, v) => ` scale(${(Number(v) / 2).toFixed(5)})`); });
+  ef('correct dimensions, wrong kept scale (x320/1280)', (dd, c) => { const bs = Number(/ scale\(([^)]*)\)/.exec(c.P9MAN.before.transform)[1]); for (const k of ['after', 'after1000']) c.P9MAN[k].transform = c.P9MAN[k].transform.replace(/ scale\([^)]*\)/, ` scale(${(bs / 4).toFixed(5)})`); });
+  ef('correct dimensions, wrong rendered rectangle (half size)', (dd, c) => { c.P9MAN.after.rect.w /= 2; c.P9MAN.after.rect.h /= 2; });
+  ef('correct dimensions, fitted control laid out for 1280x720', (dd, c) => { c.P9FIT.after.rect.w *= 0.5; c.P9FIT.after.rect.h *= 0.5; });
   ef('wrong production artifact', (dd) => { dd.pages[0].client.identity = 'MISMATCH'; });
   ef('duplicate valid attempts', (dd) => { dd.pages.push({ ...clone(dd.pages[0]), attempt: 2 }); });
   { const rr = evaluateP9({ probe: 'ib11-p8-focus' }); check('fault evidence: wrong result type: NOT QUALIFIED', rr.verdict === 'NOT QUALIFIED'); }
@@ -108,7 +134,8 @@ async function main() {
   const passed = results.filter((x) => x.pass).length;
   for (const x of results) console.log(`${x.pass ? 'PASS' : 'FAIL'}  ${x.name}${x.pass ? '' : `  -- ${x.detail}`}`);
   console.log(`\n${passed}/${results.length} checks passed`);
-  fs.writeFileSync(path.join(__dirname, 'IB11_P9_VERIFICATION.json'), `${JSON.stringify({ probe: 'ib11-p9-verification', p9Commit: p9.P9_COMMIT, p9Blob: p9.P9_EXPECTED_BLOB, repairBodySha256: REPAIR_BODY_SHA, evaluatorRevision: REVISION, passed, total: results.length, results }, null, 1)}\n`);
+  console.log(`stale-generation mutant (classified, not required): ${staleGen}`);
+  fs.writeFileSync(path.join(__dirname, 'IB11_P9_VERIFICATION.json'), `${JSON.stringify({ probe: 'ib11-p9-verification', p9Commit: p9.P9_COMMIT, p9Blob: p9.P9_EXPECTED_BLOB, repairBodySha256: REPAIR_BODY_SHA, evaluatorRevision: REVISION, fixture: { sha256: PINNED_WEBM_SHA256, dims: PINNED_WEBM_DIMS }, staleGenMutant: staleGen, passed, total: results.length, results }, null, 1)}\n`);
   process.exitCode = passed === results.length ? 0 : 1;
 }
 process.exitCode = 2;

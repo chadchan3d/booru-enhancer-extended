@@ -4,8 +4,16 @@
  "p9Blob": "db5484396de60a90711e3b566fb8f6bbc10b3181",
  "repairBodySha256": "d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127",
  "evaluatorRevision": "1.3",
- "passed": 33,
- "total": 33,
+ "fixture": {
+  "sha256": "467649067aecd56d4d49ca9885eb87a6df5150af1bae6f565a1dba8b3eeb4a61",
+  "dims": [
+   640,
+   360
+  ]
+ },
+ "staleGenMutant": "P9 D5 QUALIFIED",
+ "passed": 41,
+ "total": 41,
  "results": [
   {
    "name": "P9 package matches a fresh build",
@@ -43,7 +51,12 @@
    "detail": ""
   },
   {
-   "name": "results path: --p9 defaults to tests/results/ib11-p9-d5.json, which is git-ignored; the placeholder is 320x180 (16:9 like the 1280x720 fixture video)",
+   "name": "results path: --p9 defaults to tests/results/ib11-p9-d5.json, which is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fixture: the pinned WebM (SHA-256 467649…4a61) parsed from its own track header decodes to 640x360 = PINNED_WEBM_DIMS (the single fixture fact the evaluator and simulator use); the 320x180 placeholder has the same aspect",
    "pass": true,
    "detail": ""
   },
@@ -58,7 +71,7 @@
    "detail": ""
   },
   {
-   "name": "smoke P9MAN: manual view applied before the update; IMG -> VIDEO for the same target; rotation, flips, pan kept; scale x 320/1280; rendered rectangle and centre kept after the metadata and 1000 ms later; no blank frame",
+   "name": "smoke P9MAN: manual view applied before the update; IMG -> VIDEO for the same target; rotation, flips, pan kept; scale x 320/640; rendered rectangle and centre kept after the metadata and 1000 ms later; no blank frame",
    "pass": true,
    "detail": ""
   },
@@ -78,7 +91,7 @@
    "detail": ""
   },
   {
-   "name": "fault: raw-scale mutant (manual kept without the apparent-view rescale) -> NOT QUALIFIED (x4 apparent jump)",
+   "name": "fault: raw-scale mutant (manual kept without the apparent-view rescale) -> NOT QUALIFIED (x2 apparent jump)",
    "pass": true,
    "detail": ""
   },
@@ -154,6 +167,41 @@
   },
   {
    "name": "fault evidence: trusted input outside a prompt: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the video fixture is not the pinned WebM: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: no fixture identity recorded: NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: the recorded fixture dimensions are not the pinned ones (1280x720): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: wrong intrinsic video dimensions reported (1280x720, geometry recomputed to match them): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: correct dimensions, wrong kept scale (x320/1280): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: correct dimensions, wrong rendered rectangle (half size): NOT QUALIFIED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fault evidence: correct dimensions, fitted control laid out for 1280x720: NOT QUALIFIED",
    "pass": true,
    "detail": ""
   },

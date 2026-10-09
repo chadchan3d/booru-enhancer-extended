@@ -10,6 +10,7 @@ const { webcrypto } = require('crypto');
 const { TextEncoder } = require('util');
 const srv = require('./vview_server.cjs');
 const { mediaSim } = require('./gplay_sim.cjs');
+const { PINNED_WEBM_SHA256, PINNED_WEBM_DIMS } = require('./webm_fixture.cjs');
 const hh = require('../../host/ib09/hover_harness.cjs');
 const h = require(path.resolve(__dirname, '../../host/ib07/item9_harness.cjs'));
 
@@ -77,8 +78,9 @@ function images(w, env, pageId, requests) {
     else at(kind === 'thumb' ? 20 : (kind === 'mid' || kind === 'v169' ? 30 : 50), () => done(DIM[kind]));
   } });
   const VP = w.HTMLVideoElement.prototype;
-  Object.defineProperty(VP, 'videoWidth', { configurable: true, get() { return this.hasAttribute('src') ? 1280 : 0; } });
-  Object.defineProperty(VP, 'videoHeight', { configurable: true, get() { return this.hasAttribute('src') ? 720 : 0; } });
+  // the pinned fixture WebM's decoded size (webm_fixture.cjs), as real Chrome reports it
+  Object.defineProperty(VP, 'videoWidth', { configurable: true, get() { return this.hasAttribute('src') ? PINNED_WEBM_DIMS[0] : 0; } });
+  Object.defineProperty(VP, 'videoHeight', { configurable: true, get() { return this.hasAttribute('src') ? PINNED_WEBM_DIMS[1] : 0; } });
 }
 
 // Operator driver: answers each prompt once (unless skipped).
@@ -194,7 +196,7 @@ async function smoke(source, { skip = [], forceIdentity = false, nativeControl =
     if (cl && forceIdentity) cl.identity = 'MATCH_EXPECTED_ARTIFACT';
     pages.push({ page: pg.id, attempt: 1, client: cl }); arrivals.push(...r.arrivals); requests.push(...r.requests); uis.push({ page: pg.id, ...r.ui });
   }
-  return { doc: { probe: p9 ? 'ib11-p9-d5' : p8 ? 'ib11-p8-focus' : p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] } }, pages, arrivals, requests }, uis };
+  return { doc: { probe: p9 ? 'ib11-p9-d5' : p8 ? 'ib11-p8-focus' : p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview'), version: '1.0.0', fixtures: { slow: { dims: [1600, 800] }, wide: { dims: [2000, 1000] }, thumb: { dims: [160, 80] }, ...(p9 ? { webm: { sha256: PINNED_WEBM_SHA256, dims: PINNED_WEBM_DIMS } } : {}) }, pages, arrivals, requests }, uis };
 }
 
 module.exports = { smoke, runPage, trustOperator };

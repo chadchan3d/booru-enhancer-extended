@@ -20,8 +20,9 @@
 - **All frozen P items (P1–P8) are complete.**
 - **P9 (E0 D5, designer ruling: an IB11 defect): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §18):
   - production repair committed at `ac3c9e8`;
-  - local qualification PASS: regression 12/12, attribution 9/9, P9 package verifier 33/33;
-  - **real-Chrome qualification PENDING.**
+  - local qualification PASS: regression 12/12, attribution 9/9, P9 package verifier 41/41 (corrected tooling, §19);
+  - **real-Chrome attempt 1: NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR.** Raw result retained unchanged (SHA-256 `1ba15c0c…181f`). The tooling assumed a 1280×720 fixture video; the pinned WebM decodes to 640×360. The tooling is corrected (§19); production is unchanged;
+  - **real-Chrome attempt 2 PENDING** (corrected package `34449b66…d43d`).
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -284,8 +285,18 @@
 - **Regression:** `p9_d5_type_change_transform.cjs` 12/12. Faults: `9d86484`, refit, raw-scale, stale-gen.
 - **Attribution:** `p9_d5_attribution.cjs` 9/9 (the only change is the repaired E0 D5). The P8/P7 attributions reproduce with P9 neutralized.
 - **Package verifier:** `verify_ib11_p9.cjs` 33/33; package `5f5100bd…9fd5` (automatic; P9MAN manual view + P9FIT control).
+- **Attempt 1** (`1ba15c0c…181f`): **NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR.**
+  - P9MAN: the scale went 7.18333 → 3.59167 (×320/640) with the rectangle and centre unchanged and 0 blank frames.
+  - P9FIT: fit-both for 640×360.
+  - The evaluator, simulator, verifier and documentation hard-coded 1280×720 (taken from the card metadata).
+- **Tooling correction** (§19): `webm_fixture.cjs` is the one fixture fact (pinned SHA `467649…4a61`, decoded 640×360, parsed from the file's track header).
+  - The evaluator requires the pinned fixture identity, uses ×320/640, and fits P9FIT to 640×360.
+  - The server records the parsed dimensions; the simulator reports them.
+  - Verifier **41/41**; package `34449b66…d43d` (runner comment only; production body identical).
+  - The corrected evaluator reads attempt 1 as QUALIFIED. That is proof of the rule, not a qualification.
+  - The stale-gen mutant is caught only by host regression P9-6; the browser flow is classified QUALIFIED.
 - **Regressions on `ac3c9e8`:** as at P8, plus E0 D5 (the intended flip) and its repair-probe anchor; P8 verifier 33/34 (pin).
-- **Real-Chrome qualification:** PENDING (`vview_server.cjs --p9` → `tests/results/ib11-p9-d5.json`; `vview_evaluate.cjs --p9` must report **P9 D5 QUALIFIED**).
+- **Real-Chrome qualification:** attempt 2 PENDING (`vview_server.cjs --p9` → `tests/results/ib11-p9-d5.json`; `vview_evaluate.cjs --p9` must report **P9 D5 QUALIFIED**).
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
@@ -321,8 +332,9 @@
 
 ## Next
 - **Active: IB11-P9 (E0 D5 only), operator step.**
-  - Run the P9 real-Chrome qualification (`tests/browser/ib11/README.md`, "IB11-P9"; automatic, about 15 seconds, tab kept visible; `vview_server.cjs --p9`; package `5f5100bd…`).
-  - Return `tests/results/ib11-p9-d5.json`.
+  - Run P9 real-Chrome **attempt 2** with the corrected package (`tests/browser/ib11/README.md`, "IB11-P9"; automatic, about 15 seconds, tab kept visible; `vview_server.cjs --p9`; package `34449b66…d43d`).
+  - First move attempt 1 aside unchanged; do not edit or delete it.
+  - Return the new `tests/results/ib11-p9-d5.json`.
   - It is evaluated with `vview_evaluate.cjs --p9`, which must report **P9 D5 QUALIFIED** before P9 closes.
 - **Still open for IB11 closure:** Blueprint item 12 failure screenshots (`IB11_CLOSEOUT_AUDIT.md`; not started, by assignment). IB12 is not started.
 - **Forbidden:**

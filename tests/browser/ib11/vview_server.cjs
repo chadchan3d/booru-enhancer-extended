@@ -54,6 +54,7 @@ const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { MEDIA, verifyMedia } = require('../ib10/v3c_server.cjs');
+const { webmVideoDims, decodedSize } = require('./webm_fixture.cjs');
 
 const PORT = 8797;
 const SLOW = { headerDelayMs: 1500, bytesPerSecond: 512 * 1024, chunk: 16 * 1024 };
@@ -133,7 +134,8 @@ function createServer({ mediaDir, port = PORT, out = null, preflight = false, re
   const attempts = []; const arrivals = []; const requests = [];
   const write = () => {
     const doc = { probe: p9 ? 'ib11-p9-d5' : p8 ? 'ib11-p8-focus' : p7 ? 'ib11-p7-vd7' : p6 ? 'ib11-p6-vd4' : p5 ? 'ib11-p5-vd6b' : p4 ? 'ib11-p4-vd6a' : p3 ? 'ib11-p3-vd5' : p2 ? 'ib11-p2-vd1' : p1 ? 'ib11-p1-native' : (recovery ? 'ib11-vview-recovery' : (preflight ? 'ib11-vview-g3-preflight' : 'ib11-vview')), version: '1.0.0', recoveryCells: recovery ? RECOVERY_CELLS : undefined, slowTransport: SLOW,
-      fixtures: { webm: { size: media.webm.size, sha256: media.webm.sha256 }, ...Object.fromEntries(Object.entries(imgs).map(([k, v]) => [k, { size: v.size, sha256: v.sha256, dims: DIMS[k] }])) },
+      // the WebM's decoded size is parsed from the verified bytes (the card data-width/height is page metadata only)
+      fixtures: { webm: { size: media.webm.size, sha256: media.webm.sha256, dims: decodedSize(webmVideoDims(fs.readFileSync(media.webm.path))) }, ...Object.fromEntries(Object.entries(imgs).map(([k, v]) => [k, { size: v.size, sha256: v.sha256, dims: DIMS[k] }])) },
       pages: attempts, arrivals, requests };
     if (out) fs.writeFileSync(out, `${JSON.stringify(doc, null, 1)}\n`);
     return doc;

@@ -1642,15 +1642,15 @@ No new architecture: one viewer-local transfer record and one helper.
 - The only as-is change is **E0 D5** (the repaired finding: the intended flip).
 - The P8 focus attribution (8/8) and the P7 staging attribution (7/7) reproduce with P9 neutralized.
 
-**Real-browser qualification: required.** Prepared package `tests/browser/ib11/IB11_P9_D5.user.js` (SHA-256 `5f5100bdd75b4fe934504c1e0e6f8199c8e7edd54e22073fdd1f9232953b9fd5`):
+**Real-browser qualification: required.** Prepared package `tests/browser/ib11/IB11_P9_D5.user.js` (SHA-256 `5f5100bdd75b4fe934504c1e0e6f8199c8e7edd54e22073fdd1f9232953b9fd5`; superseded by the corrected tooling in §19, package `34449b66…d43d`):
 - **Build:** `build_ib11_p9.cjs` from `ac3c9e8`; the body is byte-identical (`d64df2a6…8127`).
 - **Runner:** the V-VIEW runner plus declared runner-only patches (`p9_d5.js`). The V-VIEW and P1–P8 packages are unchanged.
-- **Page P9_D5** (automatic, real layout): two controlled targets open as a 320×180 image (16:9, like the 1280×720 fixture video). The same post is then delivered as a video through `viewer.updatePost`.
+- **Page P9_D5** (automatic, real layout): two controlled targets open as a 320×180 image (16:9, like the fixture video; §19: the pinned WebM decodes to 640×360, not the 1280×720 assumed here). The same post is then delivered as a video through `viewer.updatePost`.
   - **P9MAN:** a manual view (Rotate right, both flips, Zoom in ×2, a pan) is applied before the update. After the video's metadata (observed by its event) and 1000 ms later, the cell records the target, element type, intrinsic sizes, transform, rendered rectangle and centre, recorder media index, and blank frames.
   - **P9FIT:** the same change without a manual view.
 - **Server:** `vview_server.cjs --p9` serves an added 320×180 `v169` placeholder kind.
 - **Evaluator:** `vview_evaluate.cjs --p9`. The verdict is **P9 D5 QUALIFIED** only if:
-  - **P9MAN:** the manual view was applied before the update; the same target was rebuilt IMG → VIDEO (1280×720); rotation, flips and pan were kept with the scale ×320/1280; the rectangle and centre were kept after the metadata and at 1000 ms; there was no state text and no blank frame;
+  - **P9MAN:** the manual view was applied before the update; the same target was rebuilt IMG → VIDEO (1280×720 as originally written; corrected to the pinned 640×360 in §19); rotation, flips and pan were kept with the scale ×320/1280 (corrected to ×320/640 in §19); the rectangle and centre were kept after the metadata and at 1000 ms; there was no state text and no blank frame;
   - **P9FIT:** the video was fitted by fit-both.
 
 **Local qualification: `verify_ib11_p9.cjs --media` 33/33.**
@@ -1673,3 +1673,46 @@ Historical result files rewritten by these runs were restored unedited.
 **P9 status: PARTIAL, NOT COMPLETE.** **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P9".
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
+
+## 19. P9 attempt 1 (NOT QUALIFIED BY TOOLING) and the fixture-dimension correction
+
+**Scope:** qualification tooling only. Production is unchanged (`ac3c9e8`, blob `db54843`, body `d64df2a6…8127`). P9 semantics and geometry requirements are unchanged.
+
+**P9 attempt 1 — NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR.**
+- **Raw result:** `tests/results/ib11-p9-d5.json`, SHA-256 `1ba15c0c57d8b774db95afc17f657c217f6bb2de88cbc67d0f04ce1f00a9181f`. It is retained unchanged as local/private evidence and is not committed.
+- **The 1.3 evaluator as committed in `588ce68`** reported NOT QUALIFIED. Its P9 rules hard-coded the fixture video as 1280×720.
+- **Real Chrome reported** `videoWidth`×`videoHeight` = 640×360 for the pinned WebM.
+- **What production did:**
+  - **P9MAN:** the scale went from 7.18333 to 3.59167 (= ×320/640). Rotation, both flips and the pan were kept. The rendered rectangle (1293×2298.67) and its centre (1320, 588.5) were unchanged after the metadata and at 1000 ms. There were 0 blank frames.
+  - **P9FIT:** the scale was 3.34167 (fit-both for 640×360 in the stage) and the rectangle 2138.67×1203.
+  - This is the intended repair behaviour. The failure was the qualification tooling's, not production's.
+
+**Root cause:** four places assumed the fixture video was 1280×720 — the evaluator (`isVid`, the kept-scale rule, the P9FIT fit), the simulator (`videoWidth`/`videoHeight`), the verifier and the documentation. The 1280×720 came from the fixture page's card metadata (`vview_server.cjs` `data-width`/`data-height`), which is page metadata, not the decoded size. The simulator reproduced the same wrong value, so the local smoke could not expose the error.
+
+**Independent inspection:** `tests/browser/ib11/webm_fixture.cjs` parses the WebM's own EBML track header (Segment > Tracks > TrackEntry > Video). For the pinned file (SHA-256 `467649067aecd56d4d49ca9885eb87a6df5150af1bae6f565a1dba8b3eeb4a61`) it reads PixelWidth 640 and PixelHeight 360, with no DisplayWidth or DisplayHeight. That gives a decoded size of 640×360, matching what Chrome reported.
+
+**Correction (one authoritative fixture fact: `webm_fixture.cjs` `PINNED_WEBM_SHA256`, `PINNED_WEBM_DIMS = [640, 360]`):**
+- **Evaluator** (`vview_evaluate.cjs` `evaluateP9`; revision label unchanged, 1.3; other modes untouched):
+  - The video must report the pinned dimensions.
+  - The kept scale must be old × 320 / 640.
+  - P9FIT must fit-both for 640×360.
+  - The results file must name the pinned WebM by SHA-256; if it records parsed dimensions, they must be the pinned ones.
+- **Server** (`vview_server.cjs`): the results document now also records `fixtures.webm.dims`, parsed from the served bytes. The card metadata is unchanged, because older modes' evidence used it.
+- **Simulator** (`vview_sim.cjs`): the video reports `PINNED_WEBM_DIMS`. The P9 smoke document names the pinned WebM.
+- **Runner** (`p9_d5.js`): comment only. The package changes only in that comment, at `tests/browser/ib11/IB11_P9_D5.user.js`, SHA-256 `34449b66b2d032647e3891db8642bf741526665b49f2e1a212acc986a2d6d43d`. The executed production body is byte-identical (`d64df2a6…8127`).
+- **Verifier** (`verify_ib11_p9.cjs`): it adds a static check that the fixture file parses to `PINNED_WEBM_DIMS` with the pinned SHA. The server check now also requires the recorded fixture identity and dimensions. The kept-scale check is ×320/640. It adds evidence faults.
+
+**Local proof:**
+- **Corrected evaluator on attempt 1:** P9 D5 QUALIFIED (P9MAN and P9FIT BEHAVIOR_OK). This shows that the corrected rules accept a real 640×360 result. It is **not** a qualification: attempt 1 was produced under the uncorrected tooling and stays classified as above.
+- **`verify_ib11_p9.cjs --media` 41/41:**
+  - the smoke on the repaired production (640×360) is QUALIFIED;
+  - NOT QUALIFIED: prior `9d86484`, the refit mutant, and the raw-scale mutant (a ×2 apparent jump);
+  - 25 evidence faults are rejected. New ones: not the pinned WebM; no fixture identity; recorded dimensions 1280×720; reported intrinsic dimensions 1280×720 with the scale recomputed for them; correct dimensions with the kept scale ×320/1280; correct dimensions with a half-size rectangle; correct dimensions with the control laid out for 1280×720.
+- **Stale-generation mutant:** run through the package and classified QUALIFIED. This fault shows only on a second rebuild of the same viewer. The browser flow has one rebuild per target, so it cannot observe it; the host regression P9-6 rejects it. This is recorded, not hidden. Extending the browser probe would change P9 semantics, so it was not done.
+- **Regressions:** see the commit's suite record below. The P9 regression stays 12/12. The closed P1–P8 tests and their results are unedited.
+
+**Suite (tooling commit):** identical to the classification recorded at `ac3c9e8` (§18). IB01–IB09 pass, except the IB07 blob pins (item9, pagecount); IB10 64/67 (P7 staging-attributed); E0 25/38 (fault controls 37/46); P1 1/6, P2 6/11, P3 13/16, P4 11/15, P5 10/15 (as attributed); P6 15/15; P7 28/29 (P7-23 focus-attributed); P8 25/25; **P9 12/12**. The verifiers G-PLAY, V-VIEW and P1–P8 fail only their superseded working-tree production pin: no smoke changed with the simulator's corrected video size. Recovery verifiers 28/28 and 32/32; **P9 verifier 41/41**. Historical result and verification files rewritten by the run were restored unedited.
+
+**P9 status: PARTIAL, NOT COMPLETE.** Real-Chrome qualification attempt 2 is PENDING, with the corrected package `34449b66…d43d` (runbook: `tests/browser/ib11/README.md`, "IB11-P9").
+
+**Provenance:** no donor code; original to this repository (MIT).

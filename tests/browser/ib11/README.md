@@ -402,21 +402,30 @@ Press only the keys asked for, once each. The page does not need a screenshot.
 
 # IB11-P9: E0 D5 image → video view qualification (real Chrome; automatic, about 15 seconds)
 
-`IB11_P9_D5.user.js` (SHA-256 `5f5100bdd75b4fe934504c1e0e6f8199c8e7edd54e22073fdd1f9232953b9fd5`) contains the **repaired** production (commit `ac3c9e8`, blob `db54843`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p9_d5.js`). The page runs by itself; there are no prompts.
+`IB11_P9_D5.user.js` (SHA-256 `34449b66b2d032647e3891db8642bf741526665b49f2e1a212acc986a2d6d43d`; corrected qualification tooling, see below) contains the **repaired** production (commit `ac3c9e8`, blob `db54843`) unchanged, wrapped by the V-VIEW recorder and runner with declared runner-only patches (`p9_d5.js`). The page runs by itself; there are no prompts.
 
-**What the page does:** for each of two controlled targets, it opens the target as an **image** (a 320×180 placeholder, the same 16:9 aspect as the 1280×720 fixture video). It then delivers the **same post** as a **video** through the production enrichment path (`viewer.updatePost`).
+**What the page does:** for each of two controlled targets, it opens the target as an **image** (a 320×180 placeholder, the same 16:9 aspect as the fixture video). The fixture video is the SHA-256-pinned WebM (`467649…4a61`), which decodes to **640×360**. This is one fixture fact in `webm_fixture.cjs`, parsed from the file's own track header. The 1280×720 on the page's card is page metadata only. It then delivers the **same post** as a **video** through the production enrichment path (`viewer.updatePost`).
 - **P9MAN:** before the update, it applies a manual view (Rotate right, both flips, Zoom in ×2, a pan) with the viewer controls. After the video's metadata it measures the transform and the rendered rectangle, and again 1000 ms later.
 - **P9FIT:** the same change without a manual view; the video must be fitted normally.
 
 **Local qualification:**
 - `node tests/browser/ib11/build_ib11_p9.cjs --check`
-- `node tests/browser/ib11/verify_ib11_p9.cjs --media <fixture folder>` (33/33)
+- `node tests/browser/ib11/verify_ib11_p9.cjs --media <fixture folder>` (41/41)
+- `node tests/browser/ib11/webm_fixture.cjs <fixture folder>/ib10_v3c_fixture.webm` prints the parsed dimensions (640×360) and the SHA-256.
 
 **Operator steps:**
-1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p9`. It prints "1 pages (IB11-P9 D5 qualification)" and writes `tests/results/ib11-p9-d5.json`.
+1. **Start the server:** `node tests/browser/ib11/vview_server.cjs --media <fixture folder> --p9`. It prints "1 pages (IB11-P9 D5 qualification)" and writes `tests/results/ib11-p9-d5.json`. The file records the pinned WebM's SHA-256 and its parsed dimensions.
+   - **Attempt 1 is kept as-is.** Before starting, move it aside (for example, rename it `ib11-p9-d5.attempt1.json`) so that attempt 2 writes a fresh file. Do not edit or delete attempt 1.
 2. **Prepare Tampermonkey:** disable every other script, **including the V-VIEW and P1–P8 scripts**. Install and enable `IB11_P9_D5.user.js`.
 3. **Open** `http://127.0.0.1:8797/vview/start` in a normal window. Keep the tab in front and visible. Do not touch the page or resize the window.
 4. **Wait** for "P9 RECORDED" (about 15 seconds). If a page shows INVALID, press F5 to retry.
 5. **Return** `tests/results/ib11-p9-d5.json`.
 
 **Evaluate:** `node tests/browser/ib11/vview_evaluate.cjs --p9 tests/results/ib11-p9-d5.json`. The verdict must be **P9 D5 QUALIFIED**.
+
+**Expected geometry (from the pinned fixture):**
+- **P9MAN:** the video reports 640×360; the scale becomes old × 320/640; the rectangle and centre are unchanged.
+- **P9FIT:** the scale is min((stage width − 24)/640, (stage height − 24)/360).
+- **The evaluator also requires** that the results file names the pinned WebM.
+
+**Attempt 1** (`tests/results/ib11-p9-d5.json`, SHA-256 `1ba15c0c…181f`) is **NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR**. The tooling assumed 1280×720 (see `IB11_P_STAGE.md` §19).
