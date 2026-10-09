@@ -1,0 +1,48 @@
+{
+ "test": "ib12-p3-appended-card-parity",
+ "productionBlob": "3be0e1f849909a3b394c256b12dc09376f44df12",
+ "passed": 5,
+ "total": 5,
+ "results": [
+  {
+   "name": "P3-1 [G3] an appended card receives normal enhancement: present, enhancer classes and post ID, exactly one action bar with the same action surface as an initial card",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P3-2 [G3] owner-backed lifecycle: re-enhancing does not duplicate the bar; gallery disposal removes the enhancer UI and reverts the owned classes/post ID on the appended card while the card itself stays",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P3-3 [G3] admitted e621 rendition parity: the appended card gets the same admitted result as an initial card (OWNED_SAMPLE, WebP srcset = its sample); disposal restores its native WebP srcset",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P3-4 an out-of-scope context (not logged out) stays native: the appended card makes no rendition mutation (WebP srcset native; provenance out of scope like the initial card)",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  },
+  {
+   "name": "P3-5 [preserved] P2 liveness: normal append stays live (next trigger fetches the next page); a zero-unique page then stops append and reveals the paginator",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  }
+ ]
+}

@@ -4816,10 +4816,6 @@
 					const clonedImg = clonedWrap.tagName === 'IMG' ? clonedWrap : clonedWrap.querySelector('img');
 					if (!clonedImg) continue;
 
-					clonedWrap.classList.add('be-thumb-wrap');
-					clonedImg.classList.add('be-thumb-img');
-					clonedImg.dataset.bePostId = postId;
-
 					// Requirement 18: cloneNode never carries over JS event
 					// state — the per-thumbnail hover action bar (built via
 					// direct pointerenter/pointerleave listeners, not
@@ -4830,9 +4826,10 @@
 					if (staleActions) staleActions.remove();
 
 					galleryContainer.appendChild(clonedWrap);
-					if (getComputedStyle(clonedWrap).position === 'static') clonedWrap.style.position = 'relative';
-					buildThumbActions(clonedWrap, clonedImg);
-					applySiteThumbMedia(clonedImg, clonedWrap);
+					// IB12-P3 (G3): the attached native clone enters the same owner-based
+					// enhancement path as an initial card (card owner, classes, position,
+					// post ID, action bar, admitted rendition, hover-attribute handling).
+					enhanceThumbnail(clonedImg);
 
 					inserted++;
 				}
