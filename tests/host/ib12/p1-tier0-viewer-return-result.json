@@ -1,0 +1,40 @@
+{
+ "test": "ib12-p1-tier0-viewer-return",
+ "productionBlob": "c6d6655fb6d38c6fb4c2e9bb59f47c756c461913",
+ "passed": 4,
+ "total": 4,
+ "results": [
+  {
+   "name": "P1-1 [defect] A -> off-screen C, Escape: focus returns to C, and C is brought into view by exactly one close-time correction (nearest edge, instant); nothing scrolled while the viewer was open",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P1-2 C already visible: focus returns to C and the page does not scroll",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  },
+  {
+   "name": "P1-3 C removed before close: focus returns to the original opener A (no unrelated card); A is visible, so no scroll",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P1-4 C and A both unavailable: the existing fallback behaviour stays safe - no card receives focus, nothing scrolls, close completes",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": true
+   }
+  }
+ ]
+}

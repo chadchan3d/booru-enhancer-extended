@@ -3374,6 +3374,8 @@
 		let viewerOwner = null;
 		let returnFocusOrigin = null;
 		let returnFocusFallback = null;
+		// IB12-P1 (Tier 0): the session's original opener, kept while in-viewer navigation moves the return origin.
+		let sessionOpener = null;
 		let closeBtn = null;
 		// P9: a pending same-target image -> video view transfer { el, generation, prev: [w, h] }.
 		let typeTransfer = null;
@@ -3461,6 +3463,24 @@
 		}
 
 		// A focus target outside the viewer that focus may return to.
+		// IB12-P1 (Tier 0): one close-time correction. The return card is brought into view only
+		// when it is entirely outside the viewport (nearest edge, instant); a visible card keeps the
+		// page where it is. Never while the viewer is open; no retry, tracking or stored geometry.
+		function revealReturnTarget(el) {
+			if (typeof el.scrollIntoView !== 'function') return;
+			const r = el.getBoundingClientRect();
+			if (!(r.width > 0 && r.height > 0)) return;
+			const vw = window.innerWidth || document.documentElement.clientWidth;
+			const vh = window.innerHeight || document.documentElement.clientHeight;
+			if (r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw) return;
+			el.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+		}
+
+		function returnTo(el) {
+			revealReturnTarget(el);
+			el.focus({ preventScroll: true });
+		}
+
 		function usableReturnTarget(el) {
 			return !!el && el.nodeType === 1 && el !== document.body && el !== document.documentElement
 				&& typeof el.focus === 'function' && !(overlay && overlay.contains(el)) && !el.disabled && isRendered(el);
@@ -3879,6 +3899,7 @@
 			if (context.fallback) returnFocusFallback = context.fallback.isConnected ? context.fallback : null;
 			else if (!wasOpen) returnFocusFallback = null;
 			viewerOwner?.setFocusTargets(returnFocusOrigin, returnFocusFallback);
+			if (!wasOpen) sessionOpener = returnFocusOrigin;
 			currentPost = post;
 			onNext = navigation.next || null;
 			onPrev = navigation.prev || null;
@@ -3977,12 +3998,16 @@
 			onNext = null;
 			onPrev = null;
 			dragging = false;
+			// IB12-P1 (Tier 0): the last viewed card, else the session's original opener, else the
+			// declared fallback, else nothing (no unrelated card).
 			if (shouldReturnFocus) {
-				if (usableReturnTarget(returnFocusOrigin)) returnFocusOrigin.focus({ preventScroll: true });
+				if (usableReturnTarget(returnFocusOrigin)) returnTo(returnFocusOrigin);
+				else if (usableReturnTarget(sessionOpener)) returnTo(sessionOpener);
 				else if (usableReturnTarget(returnFocusFallback)) returnFocusFallback.focus({ preventScroll: true });
 			}
 			returnFocusOrigin = null;
 			returnFocusFallback = null;
+			sessionOpener = null;
 		}
 
 		function dispose() {
