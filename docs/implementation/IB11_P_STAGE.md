@@ -1670,7 +1670,7 @@ Historical result files rewritten by these runs were restored unedited.
 
 **Limitation:** differing image/video aspect ratios use bounded containment, not exact two-axis preservation, as accepted for P7.
 
-**P9 status: PARTIAL, NOT COMPLETE.** **Real-Chrome qualification is PENDING.** The operator step is in `tests/browser/ib11/README.md`, "IB11-P9".
+**P9 status (at `588ce68`): PARTIAL, NOT COMPLETE.** Real-Chrome qualification was pending; see §19–§20 for its outcome.
 
 **Provenance:** no donor code; all changes are original to this repository (MIT).
 
@@ -1713,6 +1713,43 @@ Historical result files rewritten by these runs were restored unedited.
 
 **Suite (tooling commit):** identical to the classification recorded at `ac3c9e8` (§18). IB01–IB09 pass, except the IB07 blob pins (item9, pagecount); IB10 64/67 (P7 staging-attributed); E0 25/38 (fault controls 37/46); P1 1/6, P2 6/11, P3 13/16, P4 11/15, P5 10/15 (as attributed); P6 15/15; P7 28/29 (P7-23 focus-attributed); P8 25/25; **P9 12/12**. The verifiers G-PLAY, V-VIEW and P1–P8 fail only their superseded working-tree production pin: no smoke changed with the simulator's corrected video size. Recovery verifiers 28/28 and 32/32; **P9 verifier 41/41**. Historical result and verification files rewritten by the run were restored unedited.
 
-**P9 status: PARTIAL, NOT COMPLETE.** Real-Chrome qualification attempt 2 is PENDING, with the corrected package `34449b66…d43d` (runbook: `tests/browser/ib11/README.md`, "IB11-P9").
+**P9 status (at `f8a2361`): PARTIAL, NOT COMPLETE**, with attempt 2 then planned. That plan was withdrawn under Blueprint v1.1 (§20).
 
 **Provenance:** no donor code; original to this repository (MIT).
+
+## 20. P9 closure under Blueprint v1.1 (designer ruling)
+
+**Basis:** Blueprint Version 1.1 (9 October 2026), qualification-proportionality amendment `1a15eeb` (blob `fe2b98cd…6be5`). Its rules:
+- a directly observed working browser behaviour that exposes an incorrect qualification assumption is resolved by fixing the tooling, not by treating the product as defective;
+- extra browser evidence, mutants and repeated artifact qualification are required only when they materially improve confidence in a meaningful risk.
+
+The designer ruled that **P9 attempt 1 is sufficient real-browser evidence** and that **no second Chrome run is required**. This section is documentation only. No production change, no new package, and no browser run.
+
+**Synchronized identity:** HEAD `d2d5615dfae4a96e2ee57d5663eb1565cdcddd7f`. Production commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3`, blob `db5484396de60a90711e3b566fb8f6bbc10b3181`, body SHA-256 `d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127` (the P9 repair, unchanged since §18).
+
+**Chronology (unchanged facts):**
+1. **`ac3c9e8`:** the P9 repair. **`588ce68`:** the package `5f5100bd…9fd5` and the evaluator rules, which assumed a 1280×720 fixture video.
+2. **Attempt 1:** raw `tests/results/ib11-p9-d5.json`, SHA-256 `1ba15c0c57d8b774db95afc17f657c217f6bb2de88cbc67d0f04ce1f00a9181f`. It is git-ignored, private and unchanged.
+   - Chrome 154 / Tampermonkey 5.5.0 / Windows; artifact identity MATCH_EXPECTED_ARTIFACT; the results file names the pinned WebM.
+   - **The original evaluator (revision 1.3 as committed in `588ce68`) reported NOT QUALIFIED.** The only cause was its false hard-coded 1280×720 assumption. It did **not** pass.
+3. **`f8a2361`, tooling correction (§19):** an independent parse of the pinned WebM (`467649…4a61`) gives 640×360, which is what Chrome reported. The evaluator, server, simulator, verifier and runbook now use that single fixture fact. Production is unchanged; the package changes only in a runner comment (`34449b66…d43d`).
+4. **The corrected evaluator on the unchanged attempt-1 raw: `P9 D5 QUALIFIED`.** P9MAN PASS/BEHAVIOR_OK and P9FIT PASS/BEHAVIOR_OK. This was re-run for this record and gave the same result.
+
+**Classification of attempt 1:** **VALID REAL-CHROME PRODUCT EVIDENCE; INITIAL QUALIFICATION VERDICT INVALIDATED BY TOOLING DEFECT; RE-EVALUATED UNDER CORRECTED RULE: P9 D5 QUALIFIED.** This supersedes the interim §19 statement that the re-evaluation was "not a qualification".
+
+**What attempt 1 shows:**
+- **P9MAN:**
+  - the same target was rebuilt IMG → VIDEO;
+  - the manual pan, rotation and both flips survived;
+  - the scale went 7.18333 → 3.59167 (×320/640);
+  - the rendered rectangle (1293×2298.67) and its centre (1320, 588.5) were unchanged after the metadata and at 1000 ms;
+  - 0 blank frames.
+- **P9FIT:** without a manual view, the video kept configured fit-both (scale 3.34167; 2138.67×1203).
+
+**Coverage and limitations:**
+- **Permanent regression** `tests/host/ib11/p9_d5_type_change_transform.cjs`: **12/12** on `ac3c9e8` (§19 suite).
+- **Stale generation** (a pending transfer reaching a later target): covered by host regression **P9-6**, which rejects the stale-gen mutant. Host regression coverage is sufficient. Under Blueprint v1.1 no separate browser mutant witness is required, and the P9 browser package is not expanded.
+- **Limitation retained:** differing image/video aspect ratios use bounded containment, not exact two-axis preservation (as accepted for P7).
+- **No second run:** attempt 2 is not required under Blueprint v1.1. The README runbook is kept as a re-qualification procedure only.
+
+**P9 status: COMPLETE, PASS(scope) in TC.** Production is unchanged at `ac3c9e8`.

@@ -2,10 +2,11 @@
 
 **Checkpoint:** IB11 — Existing viewer hardening (Blueprint §3 IB11, items 1–14).
 
-**Result: IB11 remains PARTIAL / BLOCKED. It is NOT marked complete.**
-- **Blocker (Step 7, Blueprint item 12): ITEM 12 FAILURE-SCREENSHOT ARTIFACT NOT FOUND.**
-- **E0 D5:** the designer ruled it an IB11 defect, so it became **P9, active** (`IB11_P_STAGE.md` §18). The repair is committed at `ac3c9e8`; real-Chrome qualification is pending. P9 must close before IB11 can be closed.
+**Result (final, under Blueprint v1.1 — §12): IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC.**
+- **E0 D5 → P9: COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §18–§20).
+- **Item 12 → SATISFIED(scope).** Equivalent, stronger structured real-browser failure evidence satisfies it. Literal failure screenshots were not produced and, under v1.1, are not an independent gate (§8, §12).
 - **Everything else audited** (items 1–11 and 13–14, the item-9 required tests, item-8 preservation, item-10 acceptance, gates, scope, current-production regressions) is supported as recorded below, within the TC scope.
+- **History:** the first audit (`85b4ad2`, Blueprint 1.0) found IB11 **PARTIAL / BLOCKED** on item 12 (ITEM 12 FAILURE-SCREENSHOT ARTIFACT NOT FOUND) and on the unclassified D5. Sections 0–11 keep that audit's text and evidence; resolutions are marked where they apply.
 
 ## 0. Synchronized starting identity
 
@@ -39,9 +40,9 @@ No mismatch.
 | 7 | Expected files/modules | Every change is in the viewer module's `open`/`updatePost`/media handlers, image readiness, transform-preserving replacement, error/focus handling, plus the gallery takeover catch (P4) | SRC | — | SATISFIED |
 | 8 | Master behavior unchanged | §3 | REG (+ BRW for G-PLAY) | TC | SATISFIED(scope) |
 | 9 | Required tests | §2 | REG + BRW | Rows 4 and 6 indirect/local (see §2) | SATISFIED(scope) |
-| 10 | Acceptance | §4 | REG + BRW | **D5 needs designer classification** | SATISFIED(scope), with one open question |
+| 10 | Acceptance | §4 | REG + BRW | D5 resolved: P9 COMPLETE (§12) | SATISFIED(scope) |
 | 11 | Failure/rollback | §9 | SRC | — | SATISFIED (statement) |
-| 12 | Artifacts: transform comparison, G-PLAY evidence, generation/takeover/focus timelines, **failure screenshots** | §8 | — | **Failure screenshots: NOT FOUND** | **OPEN/BLOCKED** |
+| 12 | Artifacts: transform comparison, G-PLAY evidence, generation/takeover/focus timelines, failure screenshots | §8, §12 | BRW (structured) | Literal failure screenshots not produced; structured real-browser failure evidence substitutes (Blueprint v1.1) | SATISFIED(scope) |
 | 13 | Gates opened: stable last-viewed identity/focus for IB12; page navigation reuse for IB17 | P8 (the return origin follows in-viewer navigation's explicit card origin; focus returned to it); viewer navigation unchanged (P7-21, P8-15) | REG + BRW | Last-viewed identity semantics not redesigned (as assigned) | SATISFIED(scope) |
 | 14 | Checkpoint ID | IB11 — Existing viewer hardening | — | — | SATISFIED |
 
@@ -95,12 +96,12 @@ No mismatch.
 | Existing interaction regressions pass | §3 and §6: every failure is classified; there are no unexplained failures | SATISFIED(scope) |
 | No blank uncommunicated failure | V-D6a (P4), V-D6b (P5), V-D1 (P2), staged failure P7-9/P7-26, video failure C2. A target without `postUrl` (C4, owner-frozen) shows the failure text without a link: communicated | SATISFIED(scope) |
 | No stale target | E0 D2; P7-8; P2-6 and D1 (staging-attributed; pass neutralized); P8-15 | SATISFIED(scope) |
-| No invalid transform reset | P6 (rotation-aware Fit), P7 (apparent view kept, no refit at upgrade), E3/P7-6 (rotation/flip kept). E6 (Fit button resets: owner-frozen) | SATISFIED(scope) **pending D5** |
+| No invalid transform reset | P6 (rotation-aware Fit), P7 (apparent view kept, no refit at upgrade), E3/P7-6 (rotation/flip kept), P9 (manual view kept across image → video). E6 (Fit button resets: owner-frozen) | SATISFIED(scope) |
 | Deliberate view distinct from hover cost eligibility | P7's placeholder source is the target's own post data only; IB10 behavior is unchanged apart from staging-attributed timeline checks (67/67 neutralized) | SATISFIED |
 | Native navigation usable after failure | P1/P2/P5 BRW; P7-25, P8-19 REG | SATISFIED(scope) |
 | Playback wording matches evidence | Recorded as G-PLAY(TC) PASS(scope): no general autoplay claim; the WebM no-activation limitation stated | SATISFIED(scope) |
 
-**E0 D5 (follow-up): designer ruling: an IB11 defect, now P9 (active).** The original audit text follows.
+**E0 D5: resolved.** The designer ruled it an IB11 defect, and it is now **P9 COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §18–§20). The original audit text follows.
 - **The finding:** when metadata reveals that an image placeholder is actually a video, the element is rebuilt as `<video>`. Rotation and flip are kept, but manual zoom and pan are discarded (a refit). It still passes on current production.
 - **Why it matters:** the owner decisions froze A4, C4, E6 and G4 as unchanged, and froze the placeholder→full *image* replacement rule (P7). D5 (an element-type change) was never classified. Whether it is an "invalid transform reset" under item 10 is a designer decision. No production change was made.
 
@@ -174,6 +175,8 @@ Run at HEAD `1aa84a2`, production `9d86484`. Historical result files rewritten b
 
 Per the assignment, no evidence was created, reconstructed or captured.
 
+**Resolution under Blueprint v1.1 (§12): SATISFIED(scope).** Literal failure screenshots were not produced. The required failure behaviour is supported by stronger structured real-browser evidence. Blueprint v1.1 states that an artifact's form is not an independent hard gate when equivalent or stronger evidence already demonstrates the requirement. The "not a substitute" statement above was correct under Blueprint 1.0 only.
+
 ## 9. Rollback statement (item 11)
 
 Each IB11 P item is an isolated, separately committed change. Rollback means reverting the affected item's production commit, which preserves the native link and saved preferences:
@@ -203,3 +206,42 @@ Playback integration was not changed by IB11 P. No hover-class result disables t
 2. **E0 D5:** ruled an IB11 defect, now **P9 (active)**. The repair is committed at `ac3c9e8`, with production blob `db54843…`. Real-Chrome qualification is pending.
 
 IB11 stays **PARTIAL / BLOCKED** (item 12 failure screenshots; P9 pending). IB12 is not started.
+
+**Both decisions are resolved in §12** (designer rulings under Blueprint v1.1).
+
+## 12. Final closure under Blueprint v1.1
+
+**Basis:** Blueprint Version 1.1 (9 October 2026), amendment `1a15eeb0a50cd1e07178564613d3f80858376b17`, plus the designer's rulings under it. Documentation only: no production change, no new package, no browser run, no screenshot capture.
+
+**Synchronized identity:**
+
+| Item | Value |
+| --- | --- |
+| Branch / HEAD | `implementation/ib00-baseline` at `d2d5615dfae4a96e2ee57d5663eb1565cdcddd7f` = origin |
+| Blueprint | Version 1.1, blob `fe2b98cd2f294fef4ed2cd0053dc9d13bff05be6` |
+| Production | commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3`, blob `db5484396de60a90711e3b566fb8f6bbc10b3181`, body SHA-256 `d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127` |
+
+**Resolutions:**
+
+| Open item (§11) | Resolution | Evidence |
+| --- | --- | --- |
+| **E0 D5** | **P9: COMPLETE, PASS(scope) in TC** | `IB11_P_STAGE.md` §18–§20. Repair `ac3c9e8`; regression 12/12. Attempt-1 raw `1ba15c0c…181f` (Chrome 154 / Tampermonkey 5.5.0 / Windows, identity MATCH) is classified **VALID REAL-CHROME PRODUCT EVIDENCE; INITIAL QUALIFICATION VERDICT INVALIDATED BY TOOLING DEFECT; RE-EVALUATED UNDER CORRECTED RULE: P9 D5 QUALIFIED**. The original evaluator's NOT QUALIFIED was caused only by its false 1280×720 assumption; the pinned WebM decodes to 640×360 (`f8a2361`). No second run is required. Stale generation is covered by host regression P9-6. |
+| **Item 12 failure screenshots** | **SATISFIED(scope)** through equivalent structured real-browser evidence | Literal failure screenshots were **not produced** and are not captured now. The required failure behaviour — a communicated failure state with a usable native recovery link — is shown in real Chrome by structured evidence: P1 `5b23289a…0bb8` (link hit test, trusted click, destination reached), P2 `d5015823…aece` (failure durable across a late update), P4 `04e21ce5…6b1c` (safe takeover on a build failure), P5 `341d4be9…31dc` (communicated in-viewer failure on the failing target), and the P7 staged-failure regressions (P7-9, P7-26). This evidence is stronger than a screenshot: it records the state text, the hit-testable link and the arrival. Under Blueprint v1.1 the artifact's form is not an independent gate here: no consequential risk depends on a literal image, and the owner has not required one. |
+
+**Current-production reconciliation (`ac3c9e8`):** recorded in `IB11_P_STAGE.md` §19 (run at `f8a2361`; production identical).
+- The results match §6, plus the intended E0 D5 flip and its repair-probe anchor: E0 25/38, fault controls 37/46.
+- P8 regression 25/25 and P9 regression 12/12. The P8 package verifier is 33/34; its one failure is its superseded working-tree pin.
+- Every other failure keeps its historical classification: superseded pins, P7 staging attribution, P8 focus attribution, or repaired defect witnesses. These historical attribution/pin classifications are not new product regressions.
+- **No new, unexplained behavioural failure.**
+
+**Limitations retained** (§10, plus P9):
+- TC-qualified scope only (Chrome 154 + Tampermonkey 5.5.0, controlled local fixtures); other runtime cells belong to IB18.
+- G-PLAY: the WebM no-activation playback path was not separately measured; this is not WebM autoplay certification.
+- Focus inside native video controls (shadow internals) is browser-managed.
+- Differing-aspect replacement uses bounded containment (P7 placeholder → full image; P9 image → video).
+- Raw browser evidence stays private and git-ignored (`tests/results/`, earlier raws under `tests/browser/ib10/`). The private P6 multi-monitor screenshot is unrelated to item 12 and stays private and uncommitted.
+- Required tests 4 and 6 are covered indirectly/locally (§2).
+
+**No significant known IB11 product defect remains.** The owner-frozen findings A4, C4, E6 and G4 are unchanged by decision, not defects carried forward.
+
+**IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC.**

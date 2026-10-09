@@ -428,4 +428,4 @@ Press only the keys asked for, once each. The page does not need a screenshot.
 - **P9FIT:** the scale is min((stage width − 24)/640, (stage height − 24)/360).
 - **The evaluator also requires** that the results file names the pinned WebM.
 
-**Attempt 1** (`tests/results/ib11-p9-d5.json`, SHA-256 `1ba15c0c…181f`) is **NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR**. The tooling assumed 1280×720 (see `IB11_P_STAGE.md` §19).
+**Attempt 1** (`tests/results/ib11-p9-d5.json`, SHA-256 `1ba15c0c…181f`): the original evaluator rejected it only because it assumed 1280×720. The corrected evaluator reads the unchanged raw result as **P9 D5 QUALIFIED**. Under Blueprint v1.1 this closes P9 (`IB11_P_STAGE.md` §19–§20). **No second run is required.** The steps above are kept only for any future re-qualification.

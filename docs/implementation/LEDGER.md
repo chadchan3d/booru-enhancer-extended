@@ -6,7 +6,10 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
-**IB11 — Existing viewer hardening: PARTIAL / BLOCKED** (final closeout audit, `IB11_CLOSEOUT_AUDIT.md`): all P items are complete, but **Blueprint item 12 "failure screenshots" was not found**. E0 D5 was ruled an IB11 defect and is P9 (active).
+**IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
+- P1–P9 are complete.
+- Item 12 is SATISFIED(scope) through structured real-browser failure evidence. Literal failure screenshots were not produced and are not an independent gate under v1.1.
+- No significant known IB11 product defect remains.
 - **E stage: complete for TC** (`IB11_BASELINE.md`).
   - G-PLAY(TC) E → PASS(scope).
   - V-VIEW browser evidence: 11/11 evidence PASS.
@@ -20,11 +23,11 @@
 - **P7 (V-D7): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §13–§15): attempt 1 NOT QUALIFIED (retained); corrected repair `7e4c643` qualified by attempt 2.
 - **P8 (focus ownership/return): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §16–§17).
 - **All frozen P items (P1–P8) are complete.**
-- **P9 (E0 D5, designer ruling: an IB11 defect): PARTIAL, NOT COMPLETE** (`IB11_P_STAGE.md` §18):
-  - production repair committed at `ac3c9e8`;
-  - local qualification PASS: regression 12/12, attribution 9/9, P9 package verifier 41/41 (corrected tooling, §19);
-  - **real-Chrome attempt 1: NOT QUALIFIED BY TOOLING; PRODUCTION BEHAVIOR CONSISTENT WITH INTENDED REPAIR.** Raw result retained unchanged (SHA-256 `1ba15c0c…181f`). The tooling assumed a 1280×720 fixture video; the pinned WebM decodes to 640×360. The tooling is corrected (§19); production is unchanged;
-  - **real-Chrome attempt 2 PENDING** (corrected package `34449b66…d43d`).
+- **P9 (E0 D5, designer ruling: an IB11 defect): COMPLETE, PASS(scope) in TC** (`IB11_P_STAGE.md` §18–§20):
+  - production repair `ac3c9e8`; regression 12/12; attribution 9/9; P9 package verifier 41/41 (corrected tooling, §19);
+  - attempt 1 (raw `1ba15c0c…181f`, unchanged): **VALID REAL-CHROME PRODUCT EVIDENCE; INITIAL QUALIFICATION VERDICT INVALIDATED BY TOOLING DEFECT; RE-EVALUATED UNDER CORRECTED RULE: P9 D5 QUALIFIED**. The original evaluator's 1280×720 assumption was false; the pinned WebM decodes to 640×360;
+  - **no attempt 2 is required** under Blueprint v1.1;
+  - stale generation is covered by host regression P9-6.
 
 **IB10 — Muted hover-video lifecycle: COMPLETE, PASS(scope)** at `4d793a2` (`IB10_COMPLETION_RECORD.md`).
 - **Automatic-video scope:**
@@ -35,10 +38,10 @@
   - original-file source.
 - **All other recognized video classes:** poster/View fallback; their G-VIDEO stays OPEN.
 
-**IB12 is not started.**
+**IB12 is not started.** It is the next checkpoint.
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the P9 record commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closure commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `ac3c9e8e4fbf425fa473ceae0dfa5b36640f03b3` (IB11-P9, E0 D5);
   - blob `db5484396de60a90711e3b566fb8f6bbc10b3181`;
@@ -112,7 +115,7 @@
 | **P5 — V-D6b** (communicated in-viewer build failure) | **COMPLETE, PASS(scope) in TC** |
 | **P7 — V-D7** (staged placeholder; preserve apparent view on replacement) | **COMPLETE, PASS(scope) in TC** (attempt 2; attempt 1 NOT QUALIFIED, retained) |
 | **P8 — Focus ownership/return** | **COMPLETE, PASS(scope) in TC** |
-| **P9 — E0 D5** (manual view kept across a same-target image → video rebuild) | **PARTIAL**: repair `ac3c9e8` locally qualified; real-Chrome qualification pending |
+| **P9 — E0 D5** (manual view kept across a same-target image → video rebuild) | **COMPLETE, PASS(scope) in TC** (attempt 1 re-evaluated under the corrected rule; Blueprint v1.1) |
 
 **P1 detail:**
 - **Change** (`9aeab36`, `Booru_Enhancer.user.js:3595`): the fallback anchor declares `pointer-events:auto`; `.be-media-state` keeps `none`.
@@ -295,14 +298,20 @@
   - The evaluator requires the pinned fixture identity, uses ×320/640, and fits P9FIT to 640×360.
   - The server records the parsed dimensions; the simulator reports them.
   - Verifier **41/41**; package `34449b66…d43d` (runner comment only; production body identical).
-  - The corrected evaluator reads attempt 1 as QUALIFIED. That is proof of the rule, not a qualification.
-  - The stale-gen mutant is caught only by host regression P9-6; the browser flow is classified QUALIFIED.
+  - The corrected evaluator reads the unchanged attempt-1 raw as **P9 D5 QUALIFIED**. The §19 interim note called this "not a qualification"; the v1.1 ruling (§20) supersedes that note.
+  - Stale generation: caught by host regression P9-6. That is sufficient coverage; under v1.1 no browser mutant witness is required.
 - **Regressions on `ac3c9e8`:** as at P8, plus E0 D5 (the intended flip) and its repair-probe anchor; P8 verifier 33/34 (pin).
-- **Real-Chrome qualification:** attempt 2 PENDING (`vview_server.cjs --p9` → `tests/results/ib11-p9-d5.json`; `vview_evaluate.cjs --p9` must report **P9 D5 QUALIFIED**).
+- **Real-Chrome qualification:** attempt 1 (Chrome 154 / Tampermonkey 5.5.0 / Windows; identity MATCH) is **VALID REAL-CHROME PRODUCT EVIDENCE; INITIAL QUALIFICATION VERDICT INVALIDATED BY TOOLING DEFECT; RE-EVALUATED UNDER CORRECTED RULE: P9 D5 QUALIFIED**.
+  - P9MAN: same target IMG → VIDEO; pan, rotation and flips kept; apparent geometry kept; 0 blank frames.
+  - P9FIT: configured Fit kept.
+  - No second run is required (Blueprint v1.1).
+- **Limitation:** differing aspect ratios use bounded containment.
+- **P9: COMPLETE, PASS(scope) in TC**; production unchanged at `ac3c9e8`.
 
 ## Gates
 - **G-PLAY(TC): PASS(scope)** (E stage), as above.
 - **IB11 V-VIEW browser evidence (TC): complete.**
+- **IB11: COMPLETE, PASS(scope) in TC.** No failure-screenshot blocker is pending; item 12 is SATISFIED(scope) (`IB11_CLOSEOUT_AUDIT.md` §12).
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
@@ -319,6 +328,12 @@
 - **Superseded attempts:** V-VIEW attempts 1 and 2 (packages `b7bd9ce9…` and `1662c903…`) stalled at G3 because of probe defects; none of their cells is used.
 - **R8 pack text:** not in the repository (UNVERIFIED); the Blueprint's IB11 item 9 was used instead.
 - **G-PLAY limitation:** the WebM no-activation and blocked-fallback paths are not separately measured.
+- **IB11 limitations (accepted):**
+  - TC only;
+  - native video-control shadow focus is browser-managed;
+  - differing-aspect replacement uses bounded containment (P7, P9);
+  - literal failure screenshots were not produced (item 12 satisfied by structured evidence);
+  - historical attribution/pin classifications are historical, not product regressions.
 - **IB10 limitations (non-blocking):**
   - unqualified video classes stay OPEN (fallback only);
   - the e926 MP4 ≥ 50 MB fallback is local-only;
@@ -329,19 +344,16 @@
 - **Fixtures:** the IB10 fixtures are externally supplied and not tracked.
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 - **Deferred:**
-  - IB12 pagination, IB13 downloads, IB14 favorites/actions, IB16/IB17 Pixiv, IB18 other runtime cells;
+  - IB12 pagination, IB13 downloads, IB14 favorites/actions (optional), IB16/IB17 Pixiv (**core release scope**), IB18 other runtime cells;
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
-- **Active: IB11-P9 (E0 D5 only), operator step.**
-  - Run P9 real-Chrome **attempt 2** with the corrected package (`tests/browser/ib11/README.md`, "IB11-P9"; automatic, about 15 seconds, tab kept visible; `vview_server.cjs --p9`; package `34449b66…d43d`).
-  - First move attempt 1 aside unchanged; do not edit or delete it.
-  - Return the new `tests/results/ib11-p9-d5.json`.
-  - It is evaluated with `vview_evaluate.cjs --p9`, which must report **P9 D5 QUALIFIED** before P9 closes.
-- **Still open for IB11 closure:** Blueprint item 12 failure screenshots (`IB11_CLOSEOUT_AUDIT.md`; not started, by assignment). IB12 is not started.
+- **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
+- **Next checkpoint: IB12 — Tiered place restoration and bounded traditional append.** It is not started; it begins only on assignment.
+- **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
   - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);
-  - no IB12 or later checkpoint before IB11 is complete;
+  - one checkpoint at a time (§11); do not begin IB12 without its assignment;
   - no production change without an assigned P item.
