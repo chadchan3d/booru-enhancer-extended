@@ -1,6 +1,6 @@
 # Booru Enhancer Extended — Final Implementation Blueprint
 
-Version 1.0 · 26 September 2026 · Authoritative implementation handoff · **No implementation or further validation executed in producing this document.**
+Version 1.1 · 9 October 2026 · Authoritative implementation handoff · **Qualification-proportionality amendment adopted; completed evidence is not reopened.**
 
 ## 1. Executive implementation strategy
 
@@ -48,6 +48,20 @@ A disabled skeleton is not mandatory preparation. Prefer leaving unvalidated cap
 
 Evidence classes remain distinct: source-confirmed; synthetic/harness-confirmed; external documentation/application source; architectural policy; and directly observed live runtime. Test logs must name their class. Existing EC1 Node/jsdom results cannot certify media cancellation, BFCache, autoplay, browser worlds, manager saved-file completion or live selectors.
 
+### Qualification proportionality — Version 1.1 amendment
+
+This project is a high-quality consumer image-browsing userscript, not safety-, security-, financial-, medical-, or other high-assurance software. Evidence and testing are therefore **proportional to realistic user risk and product value**. The purpose of qualification is to support correct product decisions and a reliable release, not to maximize proof machinery for its own sake.
+
+The default completion standard is: the intended workflow works reliably in the supported environment; significant regressions are covered; ordinary failures degrade cleanly and preserve native recovery; and no significant known product defect remains. Every confirmed product bug should receive a permanent regression when practical. Browser-dependent behavior needs real-browser confirmation when local testing cannot establish it. Beyond that, additional mutants, adversarial fault controls, repeated artifact qualification, exhaustive historical-attribution machinery, or extra browser evidence are required only when they materially improve confidence in a meaningful user-facing or stateful risk.
+
+Stronger qualification remains appropriate for consequential behavior: account mutations; downloads where duplicate dispatch, cancellation, or false completion matters; persistent settings or data migration; navigation/history ownership; irreversible or difficult-to-recover native-state modification; and similar operations. Ordinary presentation and interaction behavior — including layout, transforms, focus, hover presentation, viewer controls, and comparable UX — should normally use the smallest sufficient combination of implementation review, a regression for the actual defect, and targeted browser confirmation.
+
+A directly observed working browser behavior may expose an incorrect qualification assumption. In that case, fix the qualification tooling; do not treat the product as defective merely because an oracle encoded a false premise. Known low-impact limitations may be documented and accepted rather than exhaustively eliminated. Historical failures need only be classified well enough to distinguish obsolete pins, intentional behavior changes, and genuine new regressions.
+
+Evidence/artifact lists describe the evidence expected to support the checkpoint; the **form of an artifact is not an independent hard gate** when equivalent or stronger evidence already demonstrates the requirement, unless the artifact itself mitigates a consequential risk or the owner explicitly requires that exact artifact. Do not generate ceremonial screenshots, duplicate probes, or extra fault matrices solely to satisfy form.
+
+This amendment governs remaining IB11 work and IB12 onward. It does **not** invalidate or reopen completed IB00–IB11 evidence. Product completion has priority over marginal assurance work: Pixiv support is a core product promise, so IB16 and IB17 are required release scope unless the owner explicitly changes that promise. IB14 native-action convenience remains optional and independently gated.
+
 ## 2. Authoritative checkpoint sequence
 
 | ID | Checkpoint | Why it is here / completion boundary |
@@ -73,11 +87,11 @@ Evidence classes remain distinct: source-confirmed; synthetic/harness-confirmed;
 | IB18 | Cross-runtime and site qualification | Qualify one frozen artifact using explicit intersections and exclusions. |
 | IB19 | Release audit and handoff | Provenance, notices, sanitation, recovery and support claims agree with evidence. |
 
-IB02 and IB03 are not mutually dependent: if real browsers are unavailable after local work, qualified fixture work can finish but IB04 remains blocked. IB13 can proceed without hover-video admission once its own prerequisites pass. IB14 and IB16–IB17 are optional branches; a failed favorite or missing SPA signal must not hold otherwise qualified booru viewing hostage. IB18 selects a release scope explicitly; omission is never reported as a feature pass.
+IB02 and IB03 are not mutually dependent: if real browsers are unavailable after local work, qualified fixture work can finish but IB04 remains blocked. IB13 can proceed without hover-video admission once its own prerequisites pass. **IB14 remains optional. IB16–IB17 are core release scope because Pixiv support is a product promise; if route evidence blocks Pixiv work, record that blocker rather than silently omitting Pixiv or weakening its claim.** IB18 still selects supported runtime/site intersections explicitly, but Pixiv cannot be removed from the intended product scope without an owner-approved scope change.
 
 ## 3. Full checkpoint specifications
 
-The tests listed below supplement, and do not replace, the corresponding V1–V9 cards and R1–R8 execution packs. Every new assertion must detect a known failing baseline or deliberate fault. Shared requirements: deterministic local tests; isolated storage and teardown; sanitized evidence; no live quota discovery; no production preference experiments; preserve exact candidate/grants/environment identity. “Rollback” always means the checkpoint's change and affected capability, never deletion of user data or reactivation of a known unsafe behavior.
+The tests listed below supplement, and do not replace, the corresponding V1–V9 cards and R1–R8 execution packs. **A regression intended to prove a specific defect repair must fail on the known defective behavior or an equivalent controlled fault when practical. Additional mutants and fault controls are risk-based, not mandatory for every assertion.** Shared requirements: deterministic local tests where practical; isolated storage and teardown; sanitized evidence; no live quota discovery; no production preference experiments; preserve exact candidate/grants/environment identity when that identity is material to the claim. “Rollback” always means the checkpoint's change and affected capability, never deletion of user data or reactivation of a known unsafe behavior.
 
 ### IB00 — Baseline and recovery
 
