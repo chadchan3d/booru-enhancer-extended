@@ -6,9 +6,9 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
-**IB12 — Tiered place restoration and bounded traditional append: ACTIVE, E stage** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`). PARTIAL—NOT COMPLETE.
-- Source inspection only; **no production change**; production remains `ac3c9e8`.
-- **G-PLACE-T: OPEN** for every route and tier; no pass yet.
+**IB12 — Tiered place restoration and bounded traditional append: ACTIVE** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`, `IB12_P_STAGE.md`). PARTIAL—NOT COMPLETE.
+- E0 was source inspection only (production `ac3c9e8`). **P1 changed production to `ba6e600`.**
+- **G-PLACE-T: (e621, Tier 0) E: PASS**; every other route and tier (including e621 Tier 1/2) OPEN.
 - **Behaviour at E0 (`ac3c9e8`; P1 changes viewer return):**
   - focus return only (`preventScroll`), with no last-viewed identity or scroll correction;
   - no session anchor;
@@ -383,7 +383,7 @@
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
-- **Active: IB12 — Tiered place restoration and bounded traditional append, E0 baseline recorded** (`IB12_BASELINE.md`).
+- **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1 COMPLETE).
   - **P1 is closed:** COMPLETE, PASS(scope) in TC. **No other IB12 item is active; the next step awaits designer assignment.**
   - G1, G2 and G3 remain ruled IB12 defects and are unrepaired. Tier 1 and Tier 2 remain OPEN. IB12 is not complete.
 - **Pixiv (IB16–IB17) remains core release scope.**
