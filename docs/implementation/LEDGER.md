@@ -72,7 +72,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB11 closure commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P1 closure commits.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `ba6e600fb799504c68afe2ca8bed38f4bbe71963` (IB12-P1, Tier-0 viewer return);
   - blob `c6d6655fb6d38c6fb4c2e9bb59f47c756c461913`;
