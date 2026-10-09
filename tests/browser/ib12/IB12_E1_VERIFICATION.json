@@ -1,0 +1,86 @@
+{
+ "probe": "ib12-e1-verification",
+ "commit": "ac3c9e8",
+ "blob": "db5484396de60a90711e3b566fb8f6bbc10b3181",
+ "bodySha256": "d64df2a6ec8a3b5985ea5ab3f8e425cee4f1608f11c3308de37b94fd1d138127",
+ "packageSha256": "439bdd873263fc146c5447f09449fdedbafc2aa3e375c1e0a6586a013aa66d0a",
+ "passed": 15,
+ "total": 15,
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "executed body = production ac3c9e8 byte for byte (blob db54843, body d64df2a6…8127) = the working tree; no hooks",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: @match e621.net only; distinct name/namespace; grants unchanged from production",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "postamble: no history, scroll, focus, network, storage, settings or event-cancelling call",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "postamble: BE.modules.viewer.open and BE.log.error wrapped pass-through (same arguments and return value)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path tests/results/ib12-e1-e621-tier0.json is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: a completed run is recorded and shown (marker and status drawn; result box after the measurement)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: intended values recorded (identity, runtime, start scrollY, A and C ordinals and rects, before-close and 4 after-close snapshots with focus facts)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: sanitized - no URL and no post ID in the result",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: production close semantics (focus to C, no scroll) -> PREMISE ESTABLISHED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: a browser that scrolls C into view on close -> BROWSER BRINGS C INTO VIEW (not a PASS)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: closing on A (no viewer navigation) -> INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: an executed body that is not the expected artifact -> identity MISMATCH -> INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator: operator input after close -> INVALID",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator: focus not returned to C -> NOT ESTABLISHED",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

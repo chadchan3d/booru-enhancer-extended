@@ -6,7 +6,7 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
-**IB12 — Tiered place restoration and bounded traditional append: ACTIVE at E0 baseline** (`IB12_BASELINE.md`). PARTIAL—NOT COMPLETE.
+**IB12 — Tiered place restoration and bounded traditional append: ACTIVE, E stage** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`). PARTIAL—NOT COMPLETE.
 - Source inspection only; **no production change**; production remains `ac3c9e8`.
 - **G-PLACE-T: OPEN** for every route and tier; no pass yet.
 - **Current behaviour:**
@@ -19,11 +19,15 @@
   - gelbooru.com: same, needing its own host confirmation;
   - e621/e926: Tier 0 candidate; Tier 1/2 evidence needed (no native next link observed in IB07);
   - non-admitted hosts: evidence needed.
-- **Gaps found in source:**
-  - G1: loop termination leaves the paginator hidden;
-  - G2: a duplicate-only page stalls with the paginator hidden;
-  - G3: appended cards get no action bar or IB08 rendition (owner argument missing; designer classification needed).
-- **Proposed first V4-T route:** rule34.xxx logged-out listing (`IB12_BASELINE.md` §5). Not built.
+- **Designer rulings (`IB12_E_STAGE.md` §1), recorded but not repaired:**
+  - **G1** (loop termination leaves the paginator hidden): IB12 defect;
+  - **G2** (a duplicate-only page stalls append with the paginator hidden): IB12 defect; preferred repair: stop the chain and reveal native pagination;
+  - **G3** (appended cards bypass owner-based enhancement): IB12 append-integration defect, not a reopening of IB04/IB08; the repair reuses the established owner path.
+- **Route order:** the first product target is **e621 `/posts`, Tier 0 only**. Rule34 remains the preferred first Tier-2/page-addressable route (not started).
+- **IB12-E1** (e621 Tier-0 viewer return check): prepared.
+  - Package `tests/browser/ib12/IB12_E1_e621_Tier0.user.js` (`439bdd87…6d0a`): unchanged `ac3c9e8` body plus an observe-only recorder.
+  - Verifier 15/15.
+  - **G-PLACE-T(e621, Tier 0): PENDING** (operator run).
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
@@ -333,7 +337,7 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
-- **G-PLACE-T:** OPEN for all routes/tiers (IB12 E0 baseline only).
+- **G-PLACE-T:** OPEN for all routes/tiers; **(e621, Tier 0) PENDING** the IB12-E1 operator run.
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -370,8 +374,9 @@
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
 - **Active: IB12 — Tiered place restoration and bounded traditional append, E0 baseline recorded** (`IB12_BASELINE.md`).
-  - **The next step awaits designer review of the baseline:** the first V4-T route (rule34.xxx proposed), the G3 classification, and whether G1/G2 enter IB12 P.
-  - No probe is built; no browser run; no production change.
+  - **Operator step: IB12-E1** (`tests/browser/ib12/README.md`, "IB12-E1"; under one minute; logged-out e621 `/posts`). Return `tests/results/ib12-e1-e621-tier0.json`.
+  - It is evaluated with `evaluate_ib12_e1.cjs`. **PREMISE ESTABLISHED** → G-PLACE-T(e621, Tier 0) E: PASS (not Tier 1/2).
+  - No Tier-0 implementation and no G1–G3 repair until then. No production change.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
