@@ -7,7 +7,7 @@
 
 ## Current milestone
 **IB12 — Tiered place restoration and bounded traditional append: ACTIVE** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`, `IB12_P_STAGE.md`). PARTIAL—NOT COMPLETE.
-- E0 was source inspection only (production `ac3c9e8`). P1 changed production to `ba6e600` and P2 to `3fcbf15`; **P3 changed it to `466a480`.**
+- E0 was source inspection only (production `ac3c9e8`). P1 changed production to `ba6e600`, P2 to `3fcbf15` and P3 to `466a480`; **P4 changed it to `11af9f6`.**
 - **G-PLACE-T: (e621, Tier 0) E: PASS**; every other route and tier (including e621 Tier 1/2) OPEN.
 - **Behaviour at E0 (`ac3c9e8`; P1 changes viewer return):**
   - focus return only (`preventScroll`), with no last-viewed identity or scroll correction;
@@ -51,10 +51,14 @@
   - The fresh-load path stays unqualified (no negative conclusion drawn). The native `pid`-page check is NON-DIAGNOSTIC (readiness/timing).
   - **Rule34 Tier 1/2: OPEN / NOT ACTIVATED.** No further E2 owner run.
   - Earlier attempts E2 and E2R were ABORTED with no evidence; their packages are historical.
-- **Remaining-obligations audit** (`IB12_P_STAGE.md` §5):
-  - **One actual blocker:** append route admission. Append still runs on every matched host, including synthesized `page + 1` on non-admitted hosts, with no G-PLACE-T append pass.
-  - **Plus test coverage:** 403/429/5xx-retry-exhaustion append cases.
-  - Tier 0 per-route scope needs designer acceptance. Everything else is satisfied or an accepted limitation.
+- **Remaining-obligations audit** (`IB12_P_STAGE.md` §5): the one blocker was append route admission plus the 403/429/5xx coverage. **Both are addressed by P4.** Tier 0 per-route scope still needs designer acceptance.
+- **IB12-P4** (automatic append route admission): **COMPLETE, PASS(scope)** (`IB12_P_STAGE.md` §6; local deterministic evidence).
+  - Production `11af9f6` / blob `8d828cd` / body `d218b9a2…085f`.
+  - Automatic append is admitted **only on the rule34.xxx native listing** (`page=post&s=list`).
+  - **All other routes are unavailable and inert, with the preference retained:** gelbooru.com, e621/e926, Danbooru, the Moebooru family, generic, other Gelbooru-family hosts, and other Rule34 routes. The adapters' synthesis is now unreachable.
+  - Regression 10/10: the prior `466a480` fails the four unadmitted-route checks; it also closes the 403/429/5xx-retry-exhaustion append cases.
+  - `p2`/`p3` closed regressions (e621 fixtures) now 0/4 and 0/5: **P4-attributed**; their behaviour is re-established on Rule34 by P4-6 to P4-9.
+  - **Rule34 Tier 1/2 remain OPEN / NOT ACTIVATED** (admission is not a Tier-2 pass).
   - It decides whether Tier 1 is useful on Rule34 and whether the observed native `pid` page can recover C (CASE A / B / C).
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
@@ -91,12 +95,13 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-E2 closeout / audit commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P4 commits.
 - **Production `Booru_Enhancer.user.js`:**
-  - commit `466a48092ed280d9f66b54623ccd9bf4231953d1` (IB12-P3, appended-card parity);
-  - blob `3be0e1f849909a3b394c256b12dc09376f44df12`;
-  - production body SHA-256 `9fa6ab28d88d367947ef5807761218f9e5264ba2fd8194da5a1338bb322236b3`.
+  - commit `11af9f6de2b47c7b9d13caffd211483102e69ae1` (IB12-P4, append route admission);
+  - blob `8d828cd852f74022cda79d4b2d2f86a16b137165`;
+  - production body SHA-256 `d218b9a22b4e02f076a890a5af0d6df6da2a55605feb8d63d554599e1256085f`.
 - **Previous production artifacts:**
+  - `466a480` / `3be0e1f` / body `9fa6ab28…36b3`: IB12-P3 (the E2/E2R2 observation artifact);
   - `3fcbf15` / `5d0b1cf` / body `4a18aa76…6d9c`: IB12-P2;
   - `ba6e600` / `c6d6655` / body `62f05376…099f`: IB12-P1 (the P1 confirmation artifact);
   - `ac3c9e8` / `db54843` / body `d64df2a6…8127`: IB11-P9 (the P9 artifact; IB11 final production; the IB12-E1 artifact);
@@ -368,7 +373,8 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
-- **G-PLACE-T:** **(e621, Tier 0) E: PASS**. Rule34 Tier 1/2 OPEN / NOT ACTIVATED (E2: normal Back native-sufficient; fresh path unqualified). Every other route/tier OPEN. No append pass on any route.
+- **G-PLACE-T:** **(e621, Tier 0) E: PASS**. Rule34 Tier 1/2 OPEN / NOT ACTIVATED (E2: normal Back native-sufficient; fresh path unqualified). Every other route/tier OPEN.
+- **Automatic append admission (P4):** Rule34 native listing only. All other routes are unavailable and inert, with the saved preference retained.
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -407,7 +413,9 @@
 - **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
   - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
   - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
-  - E2 is closed (FRESH BACK NOT ACHIEVED). The remaining-obligations audit names append route admission as the one blocker. **The next step awaits designer assignment.** Production is unchanged.
+  - E2 is closed (FRESH BACK NOT ACHIEVED). **P4 is COMPLETE, PASS(scope)**: append is admitted on the Rule34 native listing only.
+  - P1–P4 COMPLETE. Rule34 Tier 1/2 are OPEN / NOT ACTIVATED; every other append route is unavailable and inert.
+  - **The next step is the designer's final IB12 closeout decision** (including acceptance of the Tier-0 per-route scope). IB12 is not closed here.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;

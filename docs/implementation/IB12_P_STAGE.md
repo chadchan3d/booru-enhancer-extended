@@ -233,3 +233,60 @@ No mutant matrix (v1.1).
 - **Optional / unactivated tiers:** Tier 1 and Tier 2 on every route.
 - **Accepted limitations:** E2 fresh-load path unqualified; native `pid`-page check non-diagnostic; P2 zero-progress stop; Tier-0 per-route scope (pending acceptance); the `enrichThumbnails` owner-less no-op.
 - **No other blocker found.**
+
+## 6. P4 — automatic append route admission
+
+**Admission decision (designer):** automatic append is admitted **only on the `rule34.xxx` native listing route** (`index.php?page=post&s=list`). Tags are ordinary parameters of that route; there is no tag allowlist.
+
+**Evidence basis** (append-route admission only):
+- IB07 observed a native next link (`page=post&s=list&pid=42`).
+- IB12-E2 (E2R2) observed production follow two advancing native listing addresses (`pid` 42, 84), both on the same native route.
+- Normal Back restored the appended DOM and place through native BFCache, with no enhancer reconstruction and no history writes.
+- **This does not pass or activate Rule34 Tier 1 or Tier 2.** G-PLACE-T(rule34, Tier 1/2) stays OPEN / NOT ACTIVATED.
+
+**Not admitted** (saved preference retained, inert):
+- **gelbooru.com:** its next link was only observed (IB07), with no append observation.
+- **e621 / e926:** no native next link was observed (IB07).
+- **Danbooru and the Moebooru family:** no G-HOST row; their adapters synthesize `page + 1` without observation.
+- **Generic fallback, and the other Gelbooru-family hosts** (safebooru, realbooru, tbib, xbooru, hypnohub): no G-HOST row.
+- **Rule34 post pages and other Rule34 routes.**
+
+**Implementation boundary** — production commit `11af9f6de2b47c7b9d13caffd211483102e69ae1`, blob `8d828cd852f74022cda79d4b2d2f86a16b137165`, body SHA-256 `d218b9a22b4e02f076a890a5af0d6df6da2a55605feb8d63d554599e1256085f`:
+- **The predicate:** one narrow helper, `appendAdmitted()`, true only for hostname `rule34.xxx` + active adapter `gelbooru-family` + pathname `/index.php` + `page=post` + `s=list`. There is no capability registry or route framework.
+- **Where it sits:** `setupInfiniteScroll()` checks it after removing any previous observer and sentinel. When it is false, the function restores the paginator if the enhancer had hidden it and returns: no sentinel, no observer, so no `gallery-pagination` request and no synthesized continuation.
+- **Coverage:** all three activation paths go through `setupInfiniteScroll` — startup mount, body-observer re-init and the live `gallery.infiniteScroll` toggle.
+- **Native continuation:** on Rule34, append still starts from a real native advancing page address. The Gelbooru-family `getNextUrl` prefers the native next link, and the `pid` stride is learned only after a real link was seen. Without a usable native continuation, append stays unavailable.
+- **Preference inert:** route admission never writes the setting. The stored value follows only the operator.
+- **Adapters unchanged:** the Danbooru, Moebooru and generic `calculateNextUrl` synthesis remains in the source but is now **unreachable by automatic append**. Removing it is separate cleanup, not needed for IB12.
+
+**Regression:** `tests/host/ib12/p4_append_route_admission.cjs` **10/10**. It runs real production in jsdom, with a route-table `GM_xmlhttpRequest`, a triggerable observer, and pass-through counters on `BE.net.request` and `calculateNextUrl`.
+
+| Check | Prior `466a480` |
+| --- | --- |
+| P4-1 Rule34 admitted listing: sentinel/observer install; the trigger requests the native next page (`pid` 42), then 84; unique posts append; the paginator hides only after success; no synthesis | passes |
+| P4-2 Rule34 `s=view` (gallery container present): not admitted; no sentinel, observer or request; paginator native; preference true | **fails** (global append) |
+| P4-3 gelbooru.com (same adapter, native next link): adapter membership is not admission; inert; preference unchanged | **fails** |
+| P4-4 Danbooru, whose `calculateNextUrl` could synthesize `page=2`: never invoked; zero requests; no sentinel | **fails** |
+| P4-5a unadmitted route: true at startup → inert; toggled false → inert; toggled true → inert; exactly the operator's two writes | **fails** |
+| P4-5b admitted Rule34: disabling removes the sentinel/observer and restores the paginator; re-enabling restores append | passes |
+| P4-6 preserved P2/P3 on Rule34: loop → paginator visible, terminal; zero-unique → paginator visible, no chase; appended action bar = initial; disposal reverts it | passes |
+| P4-7 403 after a success: terminal (one attempt), paginator visible, content kept | passes |
+| P4-8 429 after a success: terminal after the gate's rate-limited handling (one attempt), paginator visible, content kept | passes |
+| P4-9 5xx on every attempt: the finite budget (4 attempts) is used, then append stops; paginator visible; content kept; no further request | passes |
+
+The prior fails exactly the four unadmitted-route checks. The **403/429/5xx cases close IB12 item 9's missing deterministic append coverage**. They pass on the prior too: they are missing coverage, not ruled defects.
+
+**Suite on the P4 working tree:**
+- **Identical to the P3 record**, including IB08 66/66 and the disposal suites, IB09 111/111, IB12-P1 4/4, and the same historical/attributed classifications and package pins.
+- **Two intended, P4-attributed changes:**
+  - `p2_append_liveness.cjs` **0/4** and `p3_appended_card_parity.cjs` **0/5**. Both closed regressions use e621 fixtures, where automatic append is now intentionally not admitted.
+  - Their behaviours are re-established on the admitted Rule34 route by P4-6 (loop, zero-progress, appended-card parity and disposal) and P4-7 to P4-9.
+  - P3-3's e621 IB08 rendition parity for appended cards is now moot rather than lost: no appended cards exist on e621.
+  - The closed tests are not edited.
+- Historical result files rewritten by the run were restored unedited.
+
+**Browser qualification:** not required. The route boundary is deterministic in the production-code regression, and Rule34's admitted path is the native mechanism already observed in real Chrome (E2R2).
+
+**P4 — automatic append route admission: COMPLETE, PASS(scope).** IB12 itself is not closed here; that is a separate designer closeout.
+
+**Provenance:** no donor code; original to this repository (MIT).
