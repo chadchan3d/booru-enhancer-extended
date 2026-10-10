@@ -1,6 +1,7 @@
 {
  "test": "ib12-p2-append-liveness",
- "productionBlob": "5d0b1cf16ca9d75575b29615cb6de5d703ebfef0",
+ "route": "rule34-native-listing (realigned after P4)",
+ "productionBlob": "8d828cd852f74022cda79d4b2d2f86a16b137165",
  "passed": 4,
  "total": 4,
  "results": [
@@ -21,7 +22,7 @@
    }
   },
   {
-   "name": "P2-3 normal append: unique posts appended, paginator hidden after the demonstrated success, still eligible (the next trigger fetches the next page)",
+   "name": "P2-3 normal append: the native advancing page is fetched, unique posts appended, paginator hidden after the demonstrated success, still eligible (the next trigger fetches the next native page)",
    "pass": true,
    "got": {
     "repair": true,

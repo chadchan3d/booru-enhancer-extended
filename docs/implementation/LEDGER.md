@@ -57,7 +57,11 @@
   - Automatic append is admitted **only on the rule34.xxx native listing** (`page=post&s=list`).
   - **All other routes are unavailable and inert, with the preference retained:** gelbooru.com, e621/e926, Danbooru, the Moebooru family, generic, other Gelbooru-family hosts, and other Rule34 routes. The adapters' synthesis is now unreachable.
   - Regression 10/10: the prior `466a480` fails the four unadmitted-route checks; it also closes the 403/429/5xx-retry-exhaustion append cases.
-  - `p2`/`p3` closed regressions (e621 fixtures) now 0/4 and 0/5: **P4-attributed**; their behaviour is re-established on Rule34 by P4-6 to P4-9.
+  - **Closeout regression realignment** (`IB12_P_STAGE.md` §7; tests only):
+    - P2 and P3 now run on the Rule34 native listing. **P2 4/4** (pre-P2 `ba6e600` fails G1/G2). **P3 4/4** (pre-P3 `3fcbf15` fails the G3 checks).
+    - The two appended-e621 rendition checks are **retired as non-applicable** (superseded by P4 route admission). They are not product failures.
+    - **P4 11/11**, now including explicit e621/e926 exclusion.
+    - The current permanent append regressions align with the Rule34-only final append scope.
   - **Rule34 Tier 1/2 remain OPEN / NOT ACTIVATED** (admission is not a Tier-2 pass).
   - It decides whether Tier 1 is useful on Rule34 and whether the observed native `pid` page can recover C (CASE A / B / C).
 
@@ -95,7 +99,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P4 commits.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12 closeout regression-realignment commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `11af9f6de2b47c7b9d13caffd211483102e69ae1` (IB12-P4, append route admission);
   - blob `8d828cd852f74022cda79d4b2d2f86a16b137165`;
@@ -413,9 +417,10 @@
 - **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
   - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
   - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
-  - E2 is closed (FRESH BACK NOT ACHIEVED). **P4 is COMPLETE, PASS(scope)**: append is admitted on the Rule34 native listing only.
-  - P1–P4 COMPLETE. Rule34 Tier 1/2 are OPEN / NOT ACTIVATED; every other append route is unavailable and inert.
-  - **The next step is the designer's final IB12 closeout decision** (including acceptance of the Tier-0 per-route scope). IB12 is not closed here.
+  - E2 is closed (FRESH BACK NOT ACHIEVED). **P1–P4 COMPLETE.** Automatic append is admitted on the Rule34 native listing only.
+  - The permanent append regressions are realigned to that scope; the obsolete appended-e621 rendition checks are retired as non-applicable.
+  - Rule34 Tier 1/2 are OPEN / NOT ACTIVATED; every other append route is unavailable and inert.
+  - **IB12 awaits only the designer's final closeout** (including acceptance of the Tier-0 per-route scope). IB12 is not closed here.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;

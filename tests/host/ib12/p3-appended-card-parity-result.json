@@ -1,8 +1,9 @@
 {
  "test": "ib12-p3-appended-card-parity",
- "productionBlob": "3be0e1f849909a3b394c256b12dc09376f44df12",
- "passed": 5,
- "total": 5,
+ "route": "rule34-native-listing (realigned after P4)",
+ "productionBlob": "8d828cd852f74022cda79d4b2d2f86a16b137165",
+ "passed": 4,
+ "total": 4,
  "results": [
   {
    "name": "P3-1 [G3] an appended card receives normal enhancement: present, enhancer classes and post ID, exactly one action bar with the same action surface as an initial card",
@@ -21,7 +22,7 @@
    }
   },
   {
-   "name": "P3-3 [G3] admitted e621 rendition parity: the appended card gets the same admitted result as an initial card (OWNED_SAMPLE, WebP srcset = its sample); disposal restores its native WebP srcset",
+   "name": "P3-6 [G3] the appended card enters the canonical owner path: the gallery records a rendition provenance for it exactly as for an initial card (enhanceThumbnail ran; none on the prior)",
    "pass": true,
    "got": {
     "repair": true,
@@ -29,20 +30,22 @@
    }
   },
   {
-   "name": "P3-4 an out-of-scope context (not logged out) stays native: the appended card makes no rendition mutation (WebP srcset native; provenance out of scope like the initial card)",
+   "name": "P3-5 [preserved] P2 liveness: normal append stays live (next trigger fetches the next native page); a zero-unique page then stops append and reveals the paginator",
    "pass": true,
    "got": {
     "repair": true,
     "prior": true
    }
+  }
+ ],
+ "retired": [
+  {
+   "name": "P3-3 (former) admitted e621 rendition parity for an appended card (OWNED_SAMPLE; disposal restores the native WebP srcset)",
+   "reason": "SUPERSEDED BY P4 ROUTE ADMISSION - e621 automatic append unavailable; no appended-e621 rendition claim remains"
   },
   {
-   "name": "P3-5 [preserved] P2 liveness: normal append stays live (next trigger fetches the next page); a zero-unique page then stops append and reveals the paginator",
-   "pass": true,
-   "got": {
-    "repair": true,
-    "prior": true
-   }
+   "name": "P3-4 (former) out-of-scope (logged-in) e621 context: the appended card makes no rendition mutation",
+   "reason": "SUPERSEDED BY P4 ROUTE ADMISSION - e621 automatic append unavailable; no appended-e621 rendition claim remains"
   }
  ]
 }

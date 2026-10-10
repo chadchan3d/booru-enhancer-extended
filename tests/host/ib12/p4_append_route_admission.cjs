@@ -78,6 +78,15 @@ const CHECKS = [
     await a.trigger();
     const couldSynthesize = /page=2/.test(a.BE.adapters.active.pagination.calculateNextUrl.call(a.BE.adapters.active.pagination, d.url) || ''); a.calc.length = Math.max(0, a.calc.length - 1);
     return a.BE.adapters.active.id === 'danbooru' && couldSynthesize && inert(a); }, { prior: false }],
+  ['P4-4b e621 and e926 /posts listings (gallery container and a plausible native next control present): automatic append not admitted - no sentinel, no active observer, zero gallery-pagination requests, native paginator untouched, preference true', async (src) => {
+    for (const host of ['e621.net', 'e926.net']) {
+      const l = hh.listing(host, 3);
+      const html = l.html.replace('</section>', '</section><nav id="paginator" class="paginator"><a rel="next" href="/posts?page=2">Next</a></nav>');
+      const a = await session(src, { url: l.url, html, routes: {} });
+      await a.trigger();
+      if (!(a.BE.adapters.active.id === 'e621' && !!a.doc.querySelector('#posts-container') && inert(a) && a.BE.settings.get('gallery.infiniteScroll') === true)) return false;
+    }
+    return true; }, { prior: false }],
   ['P4-5a unadmitted route: preference true at startup -> inert; toggled false -> still inert; toggled true -> still inert; the stored value follows only the operator (exactly the two writes)', async (src) => {
     const g = fx.gelbooruListing({ withContainer: true }); const a = await session(src, { url: g.url, html: g.html });
     const s0 = inert(a); await a.setPref(false); const s1 = inert(a) && a.BE.settings.get('gallery.infiniteScroll') === false; await a.setPref(true); await a.trigger();

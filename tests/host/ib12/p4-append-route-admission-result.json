@@ -1,8 +1,8 @@
 {
  "test": "ib12-p4-append-route-admission",
  "productionBlob": "8d828cd852f74022cda79d4b2d2f86a16b137165",
- "passed": 10,
- "total": 10,
+ "passed": 11,
+ "total": 11,
  "results": [
   {
    "name": "P4-1 Rule34 admitted listing: sentinel and observer install; a trigger requests the NATIVE next page (pid 42); unique posts append; the paginator hides only after that success; append stays live",
@@ -30,6 +30,14 @@
   },
   {
    "name": "P4-4 Danbooru listing whose calculateNextUrl could synthesize page=2: the continuation is never invoked or used - zero pagination requests, no sentinel, native pagination untouched",
+   "pass": true,
+   "got": {
+    "repair": true,
+    "prior": false
+   }
+  },
+  {
+   "name": "P4-4b e621 and e926 /posts listings (gallery container and a plausible native next control present): automatic append not admitted - no sentinel, no active observer, zero gallery-pagination requests, native paginator untouched, preference true",
    "pass": true,
    "got": {
     "repair": true,

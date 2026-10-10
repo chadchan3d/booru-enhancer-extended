@@ -290,3 +290,48 @@ The prior fails exactly the four unadmitted-route checks. The **403/429/5xx case
 **P4 — automatic append route admission: COMPLETE, PASS(scope).** IB12 itself is not closed here; that is a separate designer closeout.
 
 **Provenance:** no donor code; original to this repository (MIT).
+
+## 7. Closeout regression realignment (tests and records only)
+
+**Why:** P4 narrowed automatic append to the Rule34 native listing. The P2 and P3 permanent regressions used e621 fixtures under the then-global append, so after P4 they reported 0/4 and 0/5. Those were not product regressions, but permanently red "permanent regressions" would make the suite misleading. Production is unchanged (`11af9f6`, blob `8d828cd`).
+
+**History is preserved:**
+- P2 (§3) and P3 (§4) were qualified with e621 fixtures while append was global. Their recorded results stay historically valid for the production on which they were collected.
+- P4 (§6) later narrowed automatic append to Rule34.
+- The permanent regressions were then realigned to that surviving scope. The P2/P3 qualification commits and their results are not rewritten.
+
+**`tests/host/ib12/p2_append_liveness.cjs` — realigned to the Rule34 native listing (`pid` pagination, native next links): 4/4.**
+- The same four checks:
+  - G1 visited-page loop;
+  - G2 zero-unique page, no chase;
+  - normal append fetches the native advancing page and stays eligible;
+  - 404, malformed, empty and native end reveal the paginator and keep appended cards.
+- The pre-P2 artifact `ba6e600` (global append, so it runs on Rule34) still **fails G1 and G2** and passes 3 and 4.
+
+**`tests/host/ib12/p3_appended_card_parity.cjs` — realigned to the Rule34 native listing: 4/4, with 2 retired.**
+- **Run on Rule34:**
+  - P3-1: enhancer classes, post ID, exactly one action bar, action surface equal to an initial card's;
+  - P3-2: re-enhancement does not duplicate; disposal reverts owned UI and keeps the native appended card;
+  - P3-6: the appended card enters the canonical owner path, with its rendition provenance recorded exactly as for an initial card;
+  - P3-5: P2 liveness preserved.
+- The pre-P3 artifact `3fcbf15` **fails P3-1, P3-2 and P3-6** (the owner-less defect) and passes P3-5.
+- **Retired, not run:** the former P3-3 (appended-e621 `OWNED_SAMPLE` rendition parity) and P3-4 (appended-e621 out-of-scope rendition) — **SUPERSEDED BY P4 ROUTE ADMISSION — e621 automatic append unavailable; no appended-e621 rendition claim remains.** No impossible appended-e621 card is simulated. Ordinary e621 IB08 rendition of native cards stays covered by IB08 (66/66) and is not reopened.
+
+**`tests/host/ib12/p4_append_route_admission.cjs` — 11/11.**
+- Added P4-4b: **e621 and e926** `/posts` listings, with a gallery container and a plausible native next control, are not admitted. No sentinel, no active observer, zero `gallery-pagination` requests, native paginator untouched, preference true.
+- The prior `466a480` fails it (global append), as it fails the other unadmitted-route checks.
+
+**Surrounding suite (production `11af9f6`):**
+- **IB12:** P1 4/4; P2 4/4; P3 4/4 (2 retired); P4 11/11.
+- **IB08:** rendition 66/66; disposal suites 24/24, 12/12, 14/14.
+- **IB09:** 111/111.
+- **Unchanged historical classifications** (exactly as recorded at P3/P4):
+  - IB01–IB07 pass, except the IB07 blob pins (`item9`, `pagecount`);
+  - IB10 64/67 (P7-attributed);
+  - E0 25/38, fault controls 37/46;
+  - IB11 P1–P5 as attributed; P6 15/15; P7 28/29 (P7-23 focus-attributed); P8 24/25 (P8-13 IB12-P1-attributed); P9 12/12;
+  - recoveries 28/28 and 32/32;
+  - the G-PLAY, V-VIEW and IB11 P1–P9 package verifiers and the IB12 E1/P1 package verifiers fail only their superseded working-tree production pins.
+- Historical result files rewritten by the run were restored unedited.
+
+**Result:** no current-production P2/P3 failure attributable merely to e621 append being disabled. The realigned P2/P3 and P4 (with e621/e926) are green. There is no new product failure.
