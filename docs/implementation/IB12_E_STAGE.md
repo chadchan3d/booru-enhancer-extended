@@ -126,3 +126,41 @@ Rule34 is the first route because its observed `pid` pagination (IB07) is a genu
 **Provisional tier-boundary analysis** (from source; final after the run). After a fresh-load Back the appended cards are gone, and production does not reconstruct them (E0 §1.2). A remembered post ID alone therefore cannot bring the user back to an appended card C after a fresh load: the card is not in the DOM. A useful fresh-load correction has to know **which native page supplied C** — the Tier-2 page association — and send the user there or offer it. If the run shows Case B, Tier 1 (a bounded session anchor) is not useful on its own for the appended-card workflow. It depends on Tier-2 page association, and the two would be designed together, though still implemented in separate assignments. If normal Back with BFCache already restores the place (and fresh loads are uncommon in practice), Tier 1 may be omitted for this route. The run decides.
 
 **Status:** G-PLACE-T(rule34, Tier 1/2) remains OPEN. E2 is **PENDING** the operator run. No production change.
+
+### E2 first owner attempt and the guided revision (IB12-E2R)
+
+**First owner attempt (package `3e703639…372d`): ABORTED — operator flow ambiguous; no product evidence.**
+- The owner stopped after navigating to C's post page and pressing browser Back, because the panel left it unclear what to do next.
+- Nothing from that attempt is used.
+- The E2 package, its recorder and its verifier (15/15) stay as historical artifacts.
+
+**E2 questions unchanged.** The revision changes only the operator panel. These stay the same:
+- the production body and the Rule34 route;
+- the batch/page-association observation;
+- the normal-Back observation;
+- the probe-only BFCache-ineligibility for the second leave;
+- the fresh-Back criteria (`pageshow.persisted` false and navigation type `back_forward`);
+- the exact observed native-page check;
+- sanitization;
+- no history writes, no scrolling or restoration, no settings changes, and no automatic `history.back()`.
+
+**Revised probe — prepared:** `tests/browser/ib12/IB12_E2R_Rule34_Back.user.js`, SHA-256 `0a458aa17f382f78da4ef230e47bd547a25e2e4e0f21a505f793b1bc62aeb8fe`.
+- **Build:** the same `build_ib12_e2.cjs` from production `466a480`, with the guided recorder `ib12e2r_postamble.js` (version `1.1.0-guided`).
+- **Guided panel:** a fixed, dominant "IB12-E2 TEST — STEP k OF 4" panel shows exactly one next action at a time:
+  - **STEP 1 — LOAD TWO APPENDED PAGES:** "Appended pages: n / 2", then "C FOUND — scroll until the pink card is visible.", then one large probe control, **OPEN C POST IN SAME TAB**. The operator is never told to click the card.
+  - **Post page:** **STEP 2 — NORMAL BACK TEST** / **STEP 3 — FRESH-LOAD BACK TEST**, with "Now press Chrome's Back button once."
+  - **On return:** **BACK DETECTED — RECORDING**, "Do not scroll or click.", and a countdown. No action and no reset control appear until the observation window is over.
+  - **STEP 3:** "Normal Back: Recorded." and **OPEN C POST IN SAME TAB**.
+  - **STEP 4 — CHECK C'S OBSERVED NATIVE PAGE:** "Fresh Back confirmed." or "Chrome used BFCache; fresh Back was not achieved. This is a valid recorded outcome.", then **OPEN OBSERVED PAGE**.
+  - **TEST COMPLETE:** the result box and Download.
+  - **Inconsistent state:** "TEST STATE INVALID — press Reset and start over".
+  - **Reset:** an "Emergency: Reset test" control, visually separated below the instructions.
+- **Evaluator adjustment (no new requirement):** C must be usefully visible at the second leave only while C still exists. If the normal Back already lost the appended cards, the fresh-load test starts without C.
+- **Local qualification:** `verify_ib12_e2r.cjs` **15/15** (`IB12_E2R_VERIFICATION.json`).
+  - **Static:** E2R package current; body = production = working tree; the E2 package unchanged; every measurement function, the request wrappers and the pageshow observation byte-identical to E2's (only the panel and one panel refresh differ); no forbidden call; one `sessionStorage` key.
+  - **Guided flow** (multi-document jsdom): each specified panel state at each step; exactly one action where one is expected; none while recording.
+  - **Outcomes:** the same evidence (CASE B); the BFCache outcome text and completion for a non-fresh second Back; TEST STATE INVALID for an out-of-flow post page.
+  - The original E2 verifier still passes 15/15.
+- **Runbook:** `tests/browser/ib12/README.md`, "IB12-E2R" (five short lines).
+
+**Status:** E2 is **PENDING** the operator run with the E2R package. G-PLACE-T(rule34, Tier 1/2) stays OPEN. No production change.

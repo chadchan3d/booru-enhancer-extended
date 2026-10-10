@@ -56,7 +56,9 @@ The package uses its own userscript storage, so production runs with default set
 - nothing scrolled while the viewer was open;
 - there is no further scroll after the correction.
 
-## IB12-E2: Rule34 native Back and page-address observation (real Chrome; about 3 minutes)
+## IB12-E2: Rule34 native Back and page-address observation (historical; superseded by IB12-E2R below)
+
+The first owner attempt with this package was **ABORTED — operator flow ambiguous; no product evidence**. Use **IB12-E2R**.
 
 `IB12_E2_Rule34_Back.user.js` contains production commit `466a480` (blob `3be0e1f`, body `9fa6ab28…36b3`) **unchanged**, followed by an observe-only recorder (`ib12e2_postamble.js`). It runs on rule34.xxx only.
 
@@ -92,3 +94,20 @@ If anything goes wrong, press **Reset** in the panel and start again from step 2
 | **CASE C** | The fresh load loses the place, and the observed page does not recover C. |
 | **FRESH BACK NOT ACHIEVED** | The probe's method did not produce a confirmed fresh load. Recorded and stopped. |
 | **OTHER** | Facts listed for the designer. |
+
+## IB12-E2R: Rule34 native Back and page-address observation — guided (real Chrome; about 3 minutes)
+
+`IB12_E2R_Rule34_Back.user.js` is the same E2 measurement with a strict guided panel: one next action at a time.
+- Production commit `466a480` runs unchanged.
+- Every measurement function is identical to E2's.
+- `verify_ib12_e2r.cjs` passes 15/15.
+
+In Tampermonkey, enable only `IB12_E2R_Rule34_Back.user.js`. Then:
+
+1. Open `https://rule34.xxx/index.php?page=post&s=list`, logged out.
+2. Follow the instructions in the **IB12-E2 TEST** panel.
+3. Whenever the post page says to press Back, press Chrome's Back button once.
+4. Otherwise, do only what the panel says.
+5. When it says **TEST COMPLETE**, click **Download results** and save the file as `tests/results/ib12-e2-rule34.json`.
+
+**Evaluate:** `node tests/browser/ib12/evaluate_ib12_e2.cjs tests/results/ib12-e2-rule34.json`

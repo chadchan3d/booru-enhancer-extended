@@ -1,0 +1,86 @@
+{
+ "probe": "ib12-e2r-verification",
+ "commit": "466a480",
+ "blob": "3be0e1f849909a3b394c256b12dc09376f44df12",
+ "bodySha256": "9fa6ab28d88d367947ef5807761218f9e5264ba2fd8194da5a1338bb322236b3",
+ "packageSha256": "0a458aa17f382f78da4ef230e47bd547a25e2e4e0f21a505f793b1bc62aeb8fe",
+ "passed": 15,
+ "total": 15,
+ "results": [
+  {
+   "name": "E2R package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "executed body = production 466a480 byte for byte (blob 3be0e1f, body 9fa6ab28…36b3) = the working tree",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the E2 package is unchanged (historical 3e703639…372d; fresh build identical)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: @match rule34.xxx only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evidence unchanged: every measurement function and the request wrappers / pageshow observation are byte-identical to the E2 recorder (only the panel and a panel refresh differ)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recorder: no history write, scroll, focus, network, settings, cookie/localStorage or event-cancelling call; one sessionStorage key",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path tests/results/ib12-e2-rule34.json is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "STEP 1: \"IB12-E2 TEST — STEP 1 OF 4\", \"STEP 1 — LOAD TWO APPENDED PAGES\", counts 0 / 2 and 1 / 2, then \"C FOUND — scroll until the pink card is visible.\" with no action; once C is visible exactly one action \"OPEN C POST IN SAME TAB\"",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "STEP 2 on the post page: \"STEP 2 — NORMAL BACK TEST\" and \"Now press Chrome's Back button once.\" with no action",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recording after Back: \"BACK DETECTED — RECORDING\", \"Do not scroll or click.\", Recording…; no action and no reset control",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "STEP 3: \"Normal Back: Recorded.\" and exactly one \"OPEN C POST IN SAME TAB\"; on the post page \"STEP 3 — FRESH-LOAD BACK TEST\" + press Back; recording again on return with no action",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "STEP 4: \"Fresh Back confirmed.\" and exactly one \"OPEN OBSERVED PAGE\"; then \"TEST COMPLETE\" with the result box",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evidence: the guided run records the E2 evidence (two batches pid 42/84, C ordinal 84) - evaluator CASE B; sanitized output",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "non-fresh second Back: STEP 4 states \"Chrome used BFCache; fresh Back was not achieved. This is a valid recorded outcome.\" and the run completes (FRESH BACK NOT ACHIEVED)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "inconsistent state: a post page opened outside the flow shows \"TEST STATE INVALID — press Reset and start over\" with a reset control",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

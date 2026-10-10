@@ -33,7 +33,10 @@ function evaluate(doc) {
   const batches = (doc.batches || []).filter((b) => b.inserted > 0);
   if (batches.length < 2) fail('fewer than two appended native batches');
   if (!doc.C || !doc.C.laterThanFirstBatch) fail('C is not from a later native page than the first batch');
-  for (const k of ['leave1', 'leave2']) if (!doc[k] || !doc[k].c || doc[k].c.visibleFraction < USEFUL) fail(`C was not usefully visible at ${k}`);
+  // C must be usefully visible when leaving; at the second leave this applies only while C still exists
+  // (if the normal Back already lost the appended cards, the fresh-load test starts without C) - IB12-E2R.
+  if (!doc.leave1 || !doc.leave1.c || doc.leave1.c.visibleFraction < USEFUL) fail('C was not usefully visible at leave1');
+  if (!doc.leave2 || (doc.leave2.cConnected && (!doc.leave2.c || doc.leave2.c.visibleFraction < USEFUL))) fail('C was not usefully visible at leave2');
   for (const k of ['back1', 'back2']) { if (!lastSnap(doc[k])) fail(`${k} not observed`); else if (doc[k].inputAfterReturn > 0) fail(`operator input during ${k}`); }
   if (!doc.pageCheck) fail('the native page check did not run');
   if (out.reasons.length) return out;
