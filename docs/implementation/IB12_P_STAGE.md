@@ -335,3 +335,81 @@ The prior fails exactly the four unadmitted-route checks. The **403/429/5xx case
 - Historical result files rewritten by the run were restored unedited.
 
 **Result:** no current-production P2/P3 failure attributable merely to e621 append being disabled. The realigned P2/P3 and P4 (with e621/e926) are green. There is no new product failure.
+
+## 8. IB12 final checkpoint closeout (designer decision)
+
+**IB12 — Tiered place restoration and bounded traditional append: COMPLETE, PASS(scope).** This is a deliberately narrower Blueprint-v1.1 closure. It does not claim every optional restoration tier or every host. Documentation only: no production, test or probe change.
+
+**Synchronized identity:**
+- HEAD `e3ef764760b014fd839ed2902e2d7c11969c48fc`.
+- Production `11af9f6de2b47c7b9d13caffd211483102e69ae1`, blob `8d828cd852f74022cda79d4b2d2f86a16b137165`, body SHA-256 `d218b9a22b4e02f076a890a5af0d6df6da2a55605feb8d63d554599e1256085f`.
+
+### Qualified final scope
+
+- **Tier 0 — G-PLACE-T(e621, Tier 0): PASS.**
+  - P1 is COMPLETE. Its real-Chrome confirmation established: A → off-screen C; close returns to C with one bounded correction; C visible and focused.
+  - The regression established the missing-C opener fallback and no unrelated-card jump.
+  - The same viewer implementation exists on other hosts, but **no Tier-0 qualification is claimed for them from code sharing alone**.
+- **Rule34 automatic append:**
+  - **Where:** admitted only on `rule34.xxx/index.php?page=post&s=list` with the Gelbooru-family adapter.
+  - **Preference:** the saved `gallery.infiniteScroll` preference is preserved. On every other route it is inert, and native pagination stays authoritative.
+  - **Supported by:** the native Rule34 next-page evidence (IB07); the E2 observation of advancing native `pid` addresses; the P4 route-admission regression; the P2/P3 liveness and ownership regressions realigned to Rule34; and the deterministic append-failure coverage (403/429/5xx).
+  - **This is not a Tier-2 restoration PASS.**
+- **Rule34 native Back (observed):** normal browser Back restored the appended Rule34 DOM, the exact scroll position and a visible C entirely through BFCache. There was no reconstruction, no enhancer request, and `history.state` was unchanged. Native behaviour was sufficient for that observed workflow.
+
+### Unactivated tiers
+
+- **Rule34 Tier 1 — OPEN / NOT ACTIVATED.** No production Tier-1 session-anchor correction exists.
+- **Rule34 Tier 2 — OPEN / NOT ACTIVATED.** No production Tier-2 page-association/restoration integration exists.
+- The fresh-load case was not established, so proportional qualification did not justify adding those mechanisms merely to make the tiers exist. **These OPEN rows are accepted, unimplemented capability boundaries, not unfinished IB12 blockers.**
+
+### E2 final disposition
+
+**E2 CLOSED — FRESH BACK NOT ACHIEVED.**
+- Normal Back gave valid positive BFCache evidence. The probe's attempted fresh-load Back still used BFCache.
+- Per the predetermined stop rule: no further BFCache-defeat machinery was built, no negative conclusion is drawn about fresh-load product behaviour, and no further owner run is required.
+- The native `pid` page check is **NON-DIAGNOSTIC — readiness/timing not established**. It is not cited as proving either that C is or that C is not on that native page.
+
+### P-stage final state
+
+| Item | Status | Current-scope regression |
+| --- | --- | --- |
+| **P1** — Tier-0 last-viewed viewer return | **COMPLETE, PASS(scope)** (e621, TC) | 4/4 |
+| **P2** — append liveness / native paginator recovery (G1, G2 resolved) | **COMPLETE, PASS(scope)** | 4/4 (realigned to Rule34) |
+| **P3** — canonical appended-card enhancement/ownership (G3 resolved) | **COMPLETE, PASS(scope)** | 4/4 (realigned to Rule34) |
+| **P4** — automatic append route admission (Rule34 native listing only) | **COMPLETE, PASS(scope)** | 11/11 |
+
+The two former appended-e621 rendition tests remain recorded as **SUPERSEDED BY P4 ROUTE ADMISSION — e621 automatic append unavailable**. They are non-applicable, not failures. Ordinary e621 rendition stays covered by IB08.
+
+### Accepted limitations (non-blocking)
+
+- Fresh-load traditional return remains unqualified.
+- The E2 native-page check was non-diagnostic.
+- Tier-0 qualification is route-scoped to e621.
+- Tier 1 and Tier 2 remain unactivated.
+- A valid append page with zero unique new posts stops automatic append and exposes native pagination, rather than chasing another page.
+- The pre-existing owner-less `applySiteThumbMedia` call in `enrichThumbnails` remains an inert no-op. Appended cards already enter the canonical P3 enhancement path, and no user-facing defect has been demonstrated from it.
+- The historical Danbooru, Moebooru and generic pagination synthesis remains in adapter code but is unreachable from automatic append after P4. Removing it is not an IB12 requirement.
+
+### Blueprint acceptance statement
+
+IB12 closes under Blueprint v1.1's proportional qualification rule:
+- native behaviour is preferred where sufficient;
+- unavailable or unqualified tiers stay inactive;
+- no reconstruction journal was introduced;
+- no preceding appended pages are fetched on return;
+- no generalized GalleryPage/cursor abstraction was added;
+- no SPA history ownership was added;
+- production makes no enhancer `pushState` or `replaceState` writes;
+- failure stays bounded and returns control to native pagination;
+- the saved append preference survives even where the capability is unavailable.
+
+**No known significant IB12 defect remains within the qualified scope.**
+
+### Gates and downstream effect
+
+- `G-PLACE-T(e621, Tier 0)` — **PASS**
+- `G-PLACE-T(rule34, Tier 1)` — **OPEN / NOT ACTIVATED**
+- `G-PLACE-T(rule34, Tier 2)` — **OPEN / NOT ACTIVATED**
+- Other traditional-host Tier-1/2 rows stay **OPEN** unless independently qualified later. There is no blanket G-PLACE-T pass.
+- IB12 opens its qualified place/append primitives for later checkpoints, **without granting SPA history authority**.

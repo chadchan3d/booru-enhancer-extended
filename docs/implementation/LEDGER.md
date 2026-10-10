@@ -6,7 +6,18 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
-**IB12 — Tiered place restoration and bounded traditional append: ACTIVE** (`IB12_BASELINE.md`, `IB12_E_STAGE.md`, `IB12_P_STAGE.md`). PARTIAL—NOT COMPLETE.
+**IB12 — Tiered place restoration and bounded traditional append: COMPLETE, PASS(scope)** (designer closeout, `IB12_P_STAGE.md` §8; a deliberately narrower Blueprint-v1.1 closure).
+- **Production:** `11af9f6de2b47c7b9d13caffd211483102e69ae1` (blob `8d828cd`, body `d218b9a2…085f`).
+- **Qualified:**
+  - Tier 0 on e621 (`G-PLACE-T(e621, Tier 0)` PASS);
+  - automatic append admitted only on the Rule34 native listing (the preference is preserved and inert elsewhere);
+  - Rule34 normal Back observed native-sufficient (BFCache).
+- **Not activated (accepted capability boundaries, not blockers):** Rule34 Tier 1 and Tier 2, OPEN / NOT ACTIVATED.
+- **E2:** CLOSED — FRESH BACK NOT ACHIEVED. The native `pid` page check is NON-DIAGNOSTIC.
+- **P-stage:** P1–P4 COMPLETE, PASS(scope). Current-scope regressions: P1 4/4, P2 4/4, P3 4/4 (2 superseded appended-e621 checks), P4 11/11.
+- **No known significant IB12 defect remains within the qualified scope.**
+
+**IB12 detail (history):**
 - E0 was source inspection only (production `ac3c9e8`). P1 changed production to `ba6e600`, P2 to `3fcbf15` and P3 to `466a480`; **P4 changed it to `11af9f6`.**
 - **G-PLACE-T: (e621, Tier 0) E: PASS**; every other route and tier (including e621 Tier 1/2) OPEN.
 - **Behaviour at E0 (`ac3c9e8`; P1 changes viewer return):**
@@ -99,7 +110,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12 closeout regression-realignment commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12 final closeout commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `11af9f6de2b47c7b9d13caffd211483102e69ae1` (IB12-P4, append route admission);
   - blob `8d828cd852f74022cda79d4b2d2f86a16b137165`;
@@ -377,8 +388,12 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
-- **G-PLACE-T:** **(e621, Tier 0) E: PASS**. Rule34 Tier 1/2 OPEN / NOT ACTIVATED (E2: normal Back native-sufficient; fresh path unqualified). Every other route/tier OPEN.
+- **G-PLACE-T(e621, Tier 0): PASS.**
+- **G-PLACE-T(rule34, Tier 1): OPEN / NOT ACTIVATED.**
+- **G-PLACE-T(rule34, Tier 2): OPEN / NOT ACTIVATED.**
+- Other traditional-host Tier-1/2 rows: OPEN unless independently qualified later. There is no blanket G-PLACE-T pass.
 - **Automatic append admission (P4):** Rule34 native listing only. All other routes are unavailable and inert, with the saved preference retained.
+- IB12 opens its qualified place/append primitives without granting SPA history authority.
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -414,13 +429,17 @@
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
-- **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
+- **IB12 is closed:** COMPLETE, PASS(scope) (`IB12_P_STAGE.md` §8).
+- **Next Blueprint-eligible checkpoint: IB13 — Download lifecycle and honest outcomes.** It is next in the §2 sequence, and its prerequisite (IB07) is complete. It becomes active only on designer assignment; it is not started.
+  - IB16 (SPA route observation) now also has its dependency-graph prerequisites (IB12, IB03), but the §2 sequence and the one-active-checkpoint rule place IB13 first.
+  - **IB14 (validated native actions) stays optional and independently gated.** It is not promoted to a required next checkpoint.
+- **IB12 history** (completed):
   - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
   - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
   - E2 is closed (FRESH BACK NOT ACHIEVED). **P1–P4 COMPLETE.** Automatic append is admitted on the Rule34 native listing only.
   - The permanent append regressions are realigned to that scope; the obsolete appended-e621 rendition checks are retired as non-applicable.
   - Rule34 Tier 1/2 are OPEN / NOT ACTIVATED; every other append route is unavailable and inert.
-  - **IB12 awaits only the designer's final closeout** (including acceptance of the Tier-0 per-route scope). IB12 is not closed here.
+  - The designer's final closeout recorded IB12 COMPLETE, PASS(scope), with the Tier-0 per-route scope and the limitations accepted.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
