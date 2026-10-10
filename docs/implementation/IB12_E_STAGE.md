@@ -164,3 +164,45 @@ Rule34 is the first route because its observed `pid` pagination (IB07) is a genu
 - **Runbook:** `tests/browser/ib12/README.md`, "IB12-E2R" (five short lines).
 
 **Status:** E2 is **PENDING** the operator run with the E2R package. G-PLACE-T(rule34, Tier 1/2) stays OPEN. No production change.
+
+### E2R owner attempt and the durable-state revision (IB12-E2R2)
+
+**Attempts so far — neither produced product evidence:**
+- **First E2** (package `3e703639…372d`): ABORTED — ambiguous operator flow.
+- **E2R** (package `0a458aa1…b8fe`): **ABORTED — probe run-state did not survive/was not recoverable across the real navigation; no product evidence.**
+  - Observed: Step 1 started; C was reached; navigation reached the post page.
+  - The post page showed "IB12-E2 TEST — not started" instead of Step 2.
+  - Opening the listing again silently started a new Step 1, so the sequence looped.
+
+**Root cause (probe):**
+1. The run state lived only in `sessionStorage`, and it was not available to the next document in the real Chrome/Tampermonkey run.
+2. The listing silently initialized a new run whenever no state was found, so lost state looked exactly like a legitimate new test.
+
+**The E2R verifier's assumption is invalidated.** It shared one `sessionStorage` object across its simulated documents, so it could not see the loss. Real Chrome contradicted that assumption.
+
+**E2 questions unchanged.** Same production body (`466a480`), Rule34 route, two native append batches, C from the second batch, normal-Back observation, probe-only fresh-load test, fresh-Back criteria, exact observed native-page check, `history.state` and request observation, and sanitization. No production scrolling, restoration, history or settings change.
+
+**E2R2 prepared:** `tests/browser/ib12/IB12_E2R2_Rule34_Back.user.js`, SHA-256 `59906a9175b6a695312ef6e2b95898d046b9c57d77a8b512db0f4083dd415361` (recorder `ib12e2r2_postamble.js`, version `1.2.0-gm-state`).
+- **Run state:** one Tampermonkey probe key, `ib12-e2r2-run-state` (`GM_getValue` / `GM_setValue` / `GM_deleteValue`), with the same private/public split and sanitization. It never touches `BE.settings`. A `sessionStorage` marker serves only to detect a lost run.
+  - Production's settings store lists raw GM keys, so this key is visible to it as an inert unknown raw key (IB05: unknown keys are preserved and inert). Production's store-level provenance label may then read `LEGACY_OR_EXISTING` instead of `AMBIGUOUS_EMPTY`. That label is only reported (`migrationInfo`); effective values for absent settings are the same legacy defaults. Nothing else in production reads it.
+  - The key is cleared by Reset / START OVER and replaced at the next START.
+- **Never silent:**
+  - With no run state, every Rule34 page shows one action, **START IB12-E2 TEST**. It creates the run and opens `https://rule34.xxx/index.php?page=post&s=list` in the same tab.
+  - Missing (while the run marker exists), corrupt or incompatible state shows **TEST ABORTED — RUN STATE LOST** ("This run cannot produce evidence. Press START OVER.") and never starts Step 1.
+  - A page that does not match the phase, or a return that is not a browser Back (neither a BFCache restore nor a `back_forward` load of the canonical listing), shows **TEST ABORTED — UNEXPECTED NAVIGATION**.
+- **Panel:** "IB12-E2 TEST — STEP X OF 4" and a monotonic "Completed: Start | Normal Back | Fresh Back | Page Check" line. The states are:
+  - STEP 1 OF 4 — LOAD TWO APPENDED PAGES (page count, then OPEN C POST IN SAME TAB);
+  - STEP 2 OF 4 — NORMAL BACK TEST ("Press Chrome Back once");
+  - BACK DETECTED — RECORDING (no controls);
+  - NORMAL BACK RECORDED ✓ and STEP 3 OF 4 — FRESH-LOAD BACK TEST;
+  - FRESH BACK CONFIRMED ✓, or the BFCache outcome;
+  - STEP 4 OF 4 — CHECK OBSERVED NATIVE PAGE;
+  - TEST COMPLETE — 4 OF 4 ✓.
+- **Local qualification:** `verify_ib12_e2r2.cjs` **23/23** (`IB12_E2R2_VERIFICATION.json`).
+  - Every document is an **independent jsdom runtime with its own fresh `sessionStorage`**. Cross-page persistence comes only from a per-script GM store, as in Tampermonkey.
+  - It **reproduces the real E2R defect**: the E2R recorder's post page shows "not started".
+  - E2R2 completes the whole flow across independent runtimes. The post page shows STEP 2; each return records and continues; TEST COMPLETE; the progress line is monotonic; the evidence is recorded.
+  - Missing, corrupt and incompatible state abort without starting Step 1. A non-Back return and an off-flow page abort. START is explicit; Reset clears the key; START OVER restarts explicitly.
+  - Static: body = production; E2 and E2R packages unchanged; measurement functions identical; no forbidden call; GM used only under the probe key.
+
+**Status:** E2 is **PENDING** the owner run with the E2R2 package. G-PLACE-T(rule34, Tier 1/2) stays OPEN. No production change.

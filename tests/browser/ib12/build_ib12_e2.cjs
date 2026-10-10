@@ -24,6 +24,12 @@ const E2R = {
   name: '// @name         Booru Enhancer Extended — IB12 E2R Rule34 Native Back and Page-Address Observation (guided, E stage)',
   namespace: '// @namespace    https://github.com/chadchan3d/booru-enhancer-extended/ib12-e2r-rule34',
 };
+const E2R2 = {
+  postamble: 'ib12e2r2_postamble.js', marker: '/* IB12E2R2 RULE34 NATIVE BACK AND PAGE-ADDRESS OBSERVER POSTAMBLE (guided, GM run state)',
+  out: path.join(__dirname, 'IB12_E2R2_Rule34_Back.user.js'),
+  name: '// @name         Booru Enhancer Extended — IB12 E2R2 Rule34 Native Back and Page-Address Observation (guided, GM run state, E stage)',
+  namespace: '// @namespace    https://github.com/chadchan3d/booru-enhancer-extended/ib12-e2r2-rule34',
+};
 const REPO = path.resolve(__dirname, '../../..');
 
 function productionSource() {
@@ -62,16 +68,17 @@ function build(v = null) {
 }
 
 const buildE2R = () => build(E2R);
+const buildE2R2 = () => build(E2R2);
 
-module.exports = { build, buildE2R, E2R, COMMIT, EXPECTED_PRODUCTION_BLOB, EXPECTED_BODY_SHA256, POSTAMBLE_MARKER, HOST, OUT };
+module.exports = { build, buildE2R, E2R, buildE2R2, E2R2, COMMIT, EXPECTED_PRODUCTION_BLOB, EXPECTED_BODY_SHA256, POSTAMBLE_MARKER, HOST, OUT };
 
 if (require.main === module) {
-  for (const [file, text] of [[OUT, build().text], [E2R.out, buildE2R().text]]) {
+  for (const [file, text] of [[OUT, build().text], [E2R.out, buildE2R().text], [E2R2.out, buildE2R2().text]]) {
     if (process.argv.includes('--check')) {
       const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
       console.log(`${path.basename(file)}: ${current === text ? 'DERIVED_SCRIPT_UP_TO_DATE' : 'DERIVED_SCRIPT_STALE'}`);
       if (current !== text) process.exitCode = 1;
-    } else if (file === OUT && fs.existsSync(OUT)) console.log('KEPT', path.basename(OUT), '(historical)');
+    } else if ((file === OUT || file === E2R.out) && fs.existsSync(file)) console.log('KEPT', path.basename(file), '(historical)');
     else { fs.writeFileSync(file, text); console.log('WROTE', path.basename(file)); }
   }
 }

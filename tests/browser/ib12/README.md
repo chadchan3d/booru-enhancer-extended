@@ -95,7 +95,9 @@ If anything goes wrong, press **Reset** in the panel and start again from step 2
 | **FRESH BACK NOT ACHIEVED** | The probe's method did not produce a confirmed fresh load. Recorded and stopped. |
 | **OTHER** | Facts listed for the designer. |
 
-## IB12-E2R: Rule34 native Back and page-address observation — guided (real Chrome; about 3 minutes)
+## IB12-E2R: Rule34 native Back and page-address observation — guided (historical; superseded by IB12-E2R2 below)
+
+The owner attempt with this package was **ABORTED — the probe run state did not survive the real navigation; no product evidence**. Use **IB12-E2R2**.
 
 `IB12_E2R_Rule34_Back.user.js` is the same E2 measurement with a strict guided panel: one next action at a time.
 - Production commit `466a480` runs unchanged.
@@ -109,5 +111,23 @@ In Tampermonkey, enable only `IB12_E2R_Rule34_Back.user.js`. Then:
 3. Whenever the post page says to press Back, press Chrome's Back button once.
 4. Otherwise, do only what the panel says.
 5. When it says **TEST COMPLETE**, click **Download results** and save the file as `tests/results/ib12-e2-rule34.json`.
+
+**Evaluate:** `node tests/browser/ib12/evaluate_ib12_e2.cjs tests/results/ib12-e2-rule34.json`
+
+## IB12-E2R2: Rule34 native Back and page-address observation — guided, durable run state (real Chrome; about 3 minutes)
+
+`IB12_E2R2_Rule34_Back.user.js` runs the same E2 measurement.
+- Production commit `466a480` runs unchanged, and every measurement function is identical to E2's.
+- The run state is kept in one Tampermonkey probe key, `ib12-e2r2-run-state`. It is never an enhancer setting.
+- A test starts only from **START IB12-E2 TEST**. Lost state or unexpected navigation aborts the run visibly.
+- `verify_ib12_e2r2.cjs` passes 23/23.
+
+In Tampermonkey, enable only `IB12_E2R2_Rule34_Back.user.js`. Then:
+
+1. Open any rule34.xxx page, logged out, and click **START IB12-E2 TEST** in the panel.
+2. Follow the instructions in the **IB12-E2 TEST** panel.
+3. Whenever the post page says to press Back, press Chrome's Back button once.
+4. Otherwise, do only what the panel says.
+5. When it says **TEST COMPLETE — 4 OF 4 ✓**, click **Download results** and save the file as `tests/results/ib12-e2-rule34.json`.
 
 **Evaluate:** `node tests/browser/ib12/evaluate_ib12_e2.cjs tests/results/ib12-e2-rule34.json`
