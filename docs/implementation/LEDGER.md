@@ -46,9 +46,15 @@
   - Appended clones now go through the canonical `enhanceThumbnail` path: owner, action bar, admitted IB08 rendition, disposal revert.
   - Regression 5/5 (the prior `3fcbf15` fails the three G3 checks). Suite identical to P2.
   - Pre-existing limitation, untouched: the owner-less `applySiteThumbMedia` call in `enrichThumbnails` is a no-op for all cards.
-- **IB12-E2** (Rule34 native Back and page-address observation): **operator run PENDING** with the **E2R2** package (`IB12_E_STAGE.md` §3).
-  - E2 (`3e703639…372d`): ABORTED, ambiguous flow. E2R (`0a458aa1…b8fe`): ABORTED, the run state was lost across real navigation. Neither produced product evidence; both are historical.
-  - **Active package: E2R2** `IB12_E2R2_Rule34_Back.user.js` (`59906a91…5361`). Same measurement; run state in one Tampermonkey probe key; explicit START; explicit abort on lost state or unexpected navigation. Verifier 23/23, with independent runtimes.
+- **IB12-E2** (Rule34 native Back and page-address observation): **closed — FRESH BACK NOT ACHIEVED** (`IB12_E_STAGE.md` §3; E2R2 owner run; Chrome 154 / Windows / Tampermonkey 5.5.0; identity MATCH).
+  - **Normal Rule34 Back was observed sufficient by native BFCache:** 126 cards kept, `scrollY` 25100 exact, C visible, no enhancer request, `history.state` unchanged.
+  - The fresh-load path stays unqualified (no negative conclusion drawn). The native `pid`-page check is NON-DIAGNOSTIC (readiness/timing).
+  - **Rule34 Tier 1/2: OPEN / NOT ACTIVATED.** No further E2 owner run.
+  - Earlier attempts E2 and E2R were ABORTED with no evidence; their packages are historical.
+- **Remaining-obligations audit** (`IB12_P_STAGE.md` §5):
+  - **One actual blocker:** append route admission. Append still runs on every matched host, including synthesized `page + 1` on non-admitted hosts, with no G-PLACE-T append pass.
+  - **Plus test coverage:** 403/429/5xx-retry-exhaustion append cases.
+  - Tier 0 per-route scope needs designer acceptance. Everything else is satisfied or an accepted limitation.
   - It decides whether Tier 1 is useful on Rule34 and whether the observed native `pid` page can recover C (CASE A / B / C).
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
@@ -85,7 +91,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-E2R2 preparation commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-E2 closeout / audit commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `466a48092ed280d9f66b54623ccd9bf4231953d1` (IB12-P3, appended-card parity);
   - blob `3be0e1f849909a3b394c256b12dc09376f44df12`;
@@ -362,7 +368,7 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
-- **G-PLACE-T:** **(e621, Tier 0) E: PASS**; all other routes/tiers (including e621 Tier 1/2) OPEN.
+- **G-PLACE-T:** **(e621, Tier 0) E: PASS**. Rule34 Tier 1/2 OPEN / NOT ACTIVATED (E2: normal Back native-sufficient; fresh path unqualified). Every other route/tier OPEN. No append pass on any route.
 
 ## Verified (other)
 - **IB11 local tooling:**
@@ -401,7 +407,7 @@
 - **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
   - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
   - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
-  - **Operator step: IB12-E2R2** (`tests/browser/ib12/README.md`, "IB12-E2R2"; about 3 minutes; logged-out Rule34; package `59906a91…5361`). Return `tests/results/ib12-e2-rule34.json` for `evaluate_ib12_e2.cjs`.
+  - E2 is closed (FRESH BACK NOT ACHIEVED). The remaining-obligations audit names append route admission as the one blocker. **The next step awaits designer assignment.** Production is unchanged.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;

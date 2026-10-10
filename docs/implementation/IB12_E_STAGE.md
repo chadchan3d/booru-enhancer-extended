@@ -206,3 +206,40 @@ Rule34 is the first route because its observed `pid` pagination (IB07) is a genu
   - Static: body = production; E2 and E2R packages unchanged; measurement functions identical; no forbidden call; GM used only under the probe key.
 
 **Status:** E2 is **PENDING** the owner run with the E2R2 package. G-PLACE-T(rule34, Tier 1/2) stays OPEN. No production change.
+
+### E2R2 owner result — E2 closeout
+
+**Raw result:** private, not committed. It is not present in this working tree, so these are the designer-supplied facts.
+- **Identity and runtime:** production identity `MATCH_EXPECTED_ARTIFACT` (`466a480`); Chrome/Chromium 154, Windows, Tampermonkey 5.5.0.
+- **Run quality:** complete; no probe errors; no operator input during either return observation.
+
+**Native append facts:**
+- Two successful later-page requests, `pid` 42 and `pid` 84.
+- C came from the second recorded batch: batch `pid` 84, ordinal 84, `laterThanFirstBatch` true, native post link present.
+- **Observation artifact:** `start.cardCount` was 0, the `pid`-42 batch reported `inserted` 84, and the `pid`-84 batch reported 42. This is consistent with the probe starting before the initial native cards were countable. It is **not** read as a native page size of 84.
+
+**Normal Back — valid positive evidence:**
+- **Before leaving:** `scrollY` 25100; 126 cards; C connected and fully visible (`visibleFraction` 1).
+- **After Back:** `pageshow.persisted` true, with the navigation entry still `navigate`.
+  - `scrollY` was 25100 at pageshow, 300 ms and 1500 ms.
+  - 126 cards remained, and every recorded appended card remained; C was still ordinal 84 and fully visible.
+  - No `gallery-pagination` or other enhancer requests; no operator input; `history.state` unchanged.
+- **Product fact:** the observed normal Back was satisfied entirely by BFCache/native browser restoration. No enhancer place correction or reconstruction was needed.
+
+**Fresh-load Back — not achieved:**
+- The probe armed an `unload` listener and a Web Lock.
+- The second Back still reported `pageshow.persisted` true, navigation type `navigate`, and the same restored DOM, scroll and C (`freshLoadConfirmed` false).
+- **Committed evaluator classification: FRESH BACK NOT ACHIEVED** — the intended stop condition. No other BFCache-disabling mechanism will be built, and no further owner run is requested.
+- **The fresh-load return path remains unqualified. No negative product conclusion is drawn from it.**
+
+**Native-page check — NON-DIAGNOSTIC (readiness/timing not established):**
+- The exact observed `pid`-84 URL was opened and its route parameters matched.
+- The probe recorded `cardCount` 0 and `cOnPage` false.
+- The same run also recorded `start.cardCount` 0 on the ordinary starting listing, so this read can precede card availability or adapter visibility. It is **not** evidence that `pid` 84 lacks C.
+- The probe is not repaired for this.
+
+**Tier decision (Blueprint v1.1 proportionality; the tier definitions are not removed):**
+- On the observed normal Rule34 Back, native BFCache already restores the appended DOM, the exact scroll and a visible C, with no reconstruction request and untouched history. A Tier-1 correction would add machinery to a path that already works.
+- The fresh-load case was not established.
+- **Rule34 Tier 1: OPEN / NOT ACTIVATED. Rule34 Tier 2: OPEN / NOT ACTIVATED.** G-PLACE-T(rule34, Tier 2) remains OPEN.
+- No further owner qualification is justified merely to force these tiers. **No further E2 owner run.**

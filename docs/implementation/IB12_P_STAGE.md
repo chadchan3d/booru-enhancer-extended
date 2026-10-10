@@ -195,3 +195,41 @@ No mutant matrix (v1.1).
 **P3 — appended-card enhancement parity: COMPLETE, PASS(scope)** (local deterministic evidence, per assignment). G3 is resolved.
 
 **Provenance:** no donor code; original to this repository (MIT).
+
+## 5. Remaining-obligations audit (after E2; documentation only)
+
+**Question:** what, if anything, still blocks IB12 from closing at its narrower qualified scope?
+
+**Basis:** Blueprint §3 IB12, items 2–12. Production `466a480` (blob `3be0e1f`). Records: `IB12_BASELINE.md`, `IB12_E_STAGE.md` §1–§3, and this file §1–§4.
+
+**Append activation boundary (source):**
+- `setupInfiniteScroll` runs whenever `gallery.infiniteScroll` is on and the adapter finds a gallery container (`Booru_Enhancer.user.js` mount block; re-init in the body observer). There is no route admission.
+- The next URL comes from each adapter:
+  - **Danbooru** (`calculateNextUrl`, `:1847`) and **Moebooru** (`:2280`) synthesize `page + 1` without any native observation, on hosts that have no G-HOST row.
+  - **gelbooru-family:** a native next link or the smallest advancing `pid` link, then a `pid` stride only after a real link was seen. This covers rule34.xxx, gelbooru.com, and the non-admitted safebooru, realbooru, tbib, xbooru and hypnohub.
+  - **e621/e926:** native next-link selectors only, no synthesis. IB07 observed no matching link, so whether append starts at all is unknown.
+- The Blueprint says:
+  - "append on non-addressable routes" is forbidden (item 4);
+  - "G-PLACE-T(route, tier), E → PASS before that restoration/append tier activates" (item 6);
+  - "Unavailable append retains its preference inertly" (item 8).
+- No route has a G-PLACE-T pass for append; only (e621, Tier 0) has passed. **Current append activation is therefore inconsistent with IB12's required final boundary.** P2 and P3 made append safe and complete where it runs, but did not bound where it runs.
+
+| Remaining obligation | Current production | Evidence / gate | Blocks IB12 close? | Recommended next action |
+| --- | --- | --- | --- | --- |
+| **Tier-0 return** (last viewed → opener → fallback; one close-time correction) | P1 (`ba6e600`, carried forward) | G-PLACE-T(e621, Tier 0) E PASS; P1 COMPLETE in TC (regression 4/4; real Chrome P1 TIER0 QUALIFIED) | **No**, for e621. The mechanism is host-independent viewer code and runs on every host; it is qualified on e621 only. | **Scope statement for designer acceptance:** Tier 0 is qualified on e621 `/posts` (TC); on other hosts it is the same viewer code, unqualified per route. No new evidence is proposed. |
+| **Tier-1 correction** (session anchor / native-page correction) | Not implemented | Rule34 E2: normal Back is fully native (BFCache); fresh load not achieved; e621 not observed | **No.** It is an optional, unactivated tier. | None. OPEN / NOT ACTIVATED. |
+| **Tier-2 page association / restoration** | Not implemented: no page association, no URL replacement | Rule34 native-page check NON-DIAGNOSTIC; no route passes | **No.** It is an optional, unactivated tier. | None. OPEN / NOT ACTIVATED. |
+| **Append route admission** | **Not bounded.** Append runs on every matched host with a container, including synthesized `page + 1` on non-admitted Danbooru/Moebooru; no G-PLACE-T append pass exists for any route. | Blueprint items 4, 6, 8 | **Yes — the actual blocker.** | One production item: gate automatic append by route admission. Unadmitted routes keep native pagination and retain the saved preference inertly. Which routes are admitted is a designer decision (see recommendation). |
+| **Native paginator recovery** | P2: loop and zero-progress reveal; ordinary failure, empty and end reveal (pre-existing) | P2 regression 4/4 | No | None. |
+| **Readable appended-content preservation** | Kept on failure, termination and gallery dispose (only enhancer-owned changes revert) | P2-4, P3-2 | No | None. |
+| **History/state preservation** | No `pushState`/`replaceState` writes; the SPA watcher only wraps | E0 §1.5; E2 normal Back `history.state` unchanged | No | None. |
+| **Settings/preference preservation** | `gallery.infiniteScroll` untouched by P1–P3; IB05 provenance; no new Auto/append-off policy | IB05; P2 (runtime stop, not a settings change) | No today. It becomes part of route admission ("retains its preference inertly"). | Covered by the route-admission item. |
+| **G1 / G2 / G3** | Resolved (P2, P3) | P2 4/4, P3 5/5 | No | None. |
+| **Deterministic append failures** (item 9: 403/429/malformed/duplicate/loop/end beyond all retry windows) | Behaviour present: the IB06 gate makes 401/403 and 429 terminal and retries 5xx/transport within a finite budget; any terminal failure → `ERROR` + paginator revealed | P2 covers 404, malformed, empty, end, loop and duplicate. **403, 429 and 5xx-after-retry-exhaustion are not in a regression.** | **Minor — required test coverage, not a product defect** | Add 403, 429 and 5xx-retry-exhaustion cases to the next item's regression (no separate item). |
+| **Explicit disposal / ownership** | Gallery `dispose()` restores the paginator and disposes card and hover owners; appended cards are owned since P3 | IB08 dispose suites 24/24, 12/12, 14/14; P3-2 | No | None. |
+
+**Classification:**
+- **Required for a narrower valid IB12 close:** append route admission (the actual blocker), plus the missing 403/429/retry-exhaustion regression cases.
+- **Optional / unactivated tiers:** Tier 1 and Tier 2 on every route.
+- **Accepted limitations:** E2 fresh-load path unqualified; native `pid`-page check non-diagnostic; P2 zero-progress stop; Tier-0 per-route scope (pending acceptance); the `enrichThumbnails` owner-less no-op.
+- **No other blocker found.**
