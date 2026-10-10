@@ -1,0 +1,268 @@
+{
+ "test": "ib13-e0-downloader-baseline",
+ "productionBlob": "8d828cd852f74022cda79d4b2d2f86a16b137165",
+ "passed": 13,
+ "total": 13,
+ "results": [
+  {
+   "name": "E0-S static: BE.gm.download is the direct GM_download / GM.download facade (no BE.runtime download); the 8 s timer and the fallback inside finishFail are present; download.retries is read but unused; 4 downloadPost call sites (viewer button, viewer key, thumbnail action, shared post-page/toolbar handler); download.openMode is read only by the post-page/toolbar Open Original handler",
+   "pass": true,
+   "observed": {
+    "facadeIsDirectGM": true,
+    "noRuntimeDownload": true,
+    "timer8s": true,
+    "fallbackInFinishFail": true,
+    "retriesReadNotUsed": true,
+    "downloadPostCallSites": 4,
+    "openModeHonoredOnlyInActionHandlers": true,
+    "ok": true
+   }
+  },
+  {
+   "name": "E0-1 slow unresolved GM transfer past 8 s: at 7999 ms nothing else happens; at 8000 ms the browser fallback anchor dispatches while the manager attempt is still unresolved and NOT aborted; one JS settlement (true, \"Download started via browser\"); a later manager success still arrives and is ignored by JS - 1 logical outcome, 2 underlying dispatches",
+   "pass": true,
+   "observed": {
+    "before": {
+     "logicalOutcomes": 0,
+     "settlementToasts": 0,
+     "managerCalls": 1,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 1,
+     "aborts": 0
+    },
+    "at8": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    },
+    "late": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    },
+    "fallbackToast": [
+     "Download started via browser: Char A - Artist B (501).png"
+    ]
+   }
+  },
+  {
+   "name": "E0-2 manager terminal error (onerror): an automatic second dispatch (anchor) follows immediately; 1 logical outcome, 2 underlying dispatches",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    },
+    "after": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-2b manager timeout callback (ontimeout): the same automatic anchor fallback",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-3 callback-only success before 8 s: one manager attempt, no fallback (the still-armed 8 s timer finds it settled)",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 1,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-4 Promise-only success (GM.download, no callbacks) before 8 s: one manager attempt, no fallback",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 1,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-4b Promise-only rejection: the automatic anchor fallback (2 underlying dispatches)",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-5 callback + Promise: onload then the Promise also resolves -> both feed the same settlement; settled once; one manager attempt; a later Promise rejection after a callback success is ignored (no fallback)",
+   "pass": true,
+   "observed": {
+    "okThenResolve": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 1,
+     "aborts": 0
+    },
+    "okThenReject": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 1,
+     "aborts": 0
+    },
+    "rejectThenLateOnload": {
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-6 two downloadPost calls for the SAME post before completion: two independent manager attempts (no shared in-flight operation); past 8 s, two anchor fallbacks - 2 logical outcomes, 4 underlying dispatches",
+   "pass": true,
+   "observed": {
+    "beforeTimeout": {
+     "logicalOutcomes": 0,
+     "settlementToasts": 0,
+     "managerCalls": 2,
+     "anchorDispatches": 0,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    },
+    "after": {
+     "logicalOutcomes": 2,
+     "settlementToasts": 2,
+     "managerCalls": 2,
+     "anchorDispatches": 2,
+     "underlyingDispatches": 4,
+     "aborts": 0
+    },
+    "sameUrl": true
+   }
+  },
+  {
+   "name": "E0-7 two DIFFERENT posts: independent attempts and settlements (one succeeds, the other times out to its own fallback)",
+   "pass": true,
+   "observed": {
+    "counts": {
+     "logicalOutcomes": 2,
+     "settlementToasts": 2,
+     "managerCalls": 2,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 3,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-8 browser fallback knows only that a.click() was attempted: the intercepted click does nothing, yet downloadPost resolves true with \"Download started via browser\" - no file completion is known",
+   "pass": true,
+   "observed": {
+    "anchor": {
+     "download": "Char A - Artist B (501).png",
+     "hrefIsOriginal": true
+    },
+    "value": true
+   }
+  },
+  {
+   "name": "E0-9 download.retries (0 vs 10) does not change the attempt count: a manager error gives the same 1 manager call + 1 anchor in both",
+   "pass": true,
+   "observed": {
+    "retries0": {
+     "effective": 0,
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    },
+    "retries10": {
+     "effective": 10,
+     "logicalOutcomes": 1,
+     "settlementToasts": 1,
+     "managerCalls": 1,
+     "anchorDispatches": 1,
+     "underlyingDispatches": 2,
+     "aborts": 0
+    }
+   }
+  },
+  {
+   "name": "E0-N naming baseline reproduced (template, ID fallback, max characters, delimiter, Unknown values, qualifier strip, empty-name fallback, no page field, sanitation, 180-char cap, extension inference; malformed Post without arrays throws, the production Post shape does not)",
+   "pass": true,
+   "observed": {
+    "observed": {
+     "defaultTemplate": "{character} - {artist} ({id})",
+     "defaultName": "Char A - Artist B (123)",
+     "maxCharactersDefault3": "C One, C Two, C Three - Artist B (123)",
+     "unknowns": "Unknown Character - Unknown Artist (123)",
+     "otherFields": "Unknown Copyright _ Artist B _ 123 _ safe _ 7 _ 640x480 _ 2026-01-02",
+     "delimiterAndMax": "C One & C Two",
+     "qualifierStripped": "Name X",
+     "emptyFallsBackToId": "123",
+     "emptyNoIdFallsBackToDownload": "download",
+     "pageFieldNotSupported": "123",
+     "sanitized": "a_b_c_d_e_f_g_h_i_j_k l",
+     "truncatedLength": 180,
+     "sanitizeEmpty": "untitled",
+     "ext": {
+      "png": "png",
+      "queryStripped": "webm",
+      "upper": "JPG",
+      "sampleUsedWhenNoOriginal": "jpeg",
+      "noExtImage": "jpg",
+      "noExtVideo": "mp4"
+     },
+     "malformedPostWithoutArrays": "throws TypeError",
+     "emptyPostShape": "Unknown Character - Unknown Artist (9)"
+    },
+    "ok": true,
+    "mismatches": []
+   }
+  }
+ ]
+}

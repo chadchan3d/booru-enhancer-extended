@@ -6,6 +6,19 @@
 **Version 1.1 governing rule:** qualification is proportional to realistic user risk and product value. Ordinary UX work uses the smallest sufficient review/regression/browser confirmation; extra mutants, fault matrices, repeated artifact qualification, and historical-attribution machinery are risk-based rather than automatic. Stronger proof remains appropriate for consequential stateful behavior such as account mutation, downloads, persistent settings/data migration, navigation/history ownership, and hard-to-recover native-state changes. Existing IB00–IB11 evidence is not reopened. **Pixiv is core release scope: IB16–IB17 are required unless the owner explicitly changes that product promise. IB14 remains optional.**
 
 ## Current milestone
+**IB13 — Download lifecycle and honest outcomes: ACTIVE, E0 baseline** (`IB13_E0_BASELINE.md`). PARTIAL—NOT COMPLETE.
+- **E0** (source audit and deterministic local characterization; no production change, no live probe, no real download):
+  - `BE.gm.download` is a direct `GM_download` / `GM.download` facade with no runtime contract.
+  - An uncleared **8 s timer** and any manager error **automatically dispatch an anchor fallback without aborting the first transfer**: one click → one JS settlement but **two underlying dispatches**.
+  - There is no shared in-flight operation (two calls for the same post → 2 manager attempts, then 2 fallbacks).
+  - The fallback reports success from `a.click()` alone. `download.retries` is read but unused.
+  - Open Original honours `download.openMode` only on the post-page bar and toolbar (the viewer and thumbnail paths ignore it).
+  - Naming baseline recorded (no page-index field).
+  - Site download premises: original URLs and native links known; cookies, referrer, headers, redirects and the e621/e926/Gelbooru media origins are UNKNOWN; no enhanced download qualified.
+- **Local characterization:** `tests/host/ib13/e0_downloader_baseline.cjs` **13/13** baseline facts reproduced (logical outcomes counted separately from underlying dispatches).
+- **G-DOWNLOAD-R and G-DOWNLOAD-S: OPEN.**
+- **Next:** a single V8-R(TC) manager-outcome experiment against a local controlled fixture server (`IB13_E0_BASELINE.md` §7). It needs explicit owner authorization and a dedicated download directory. Not built.
+
 **IB12 — Tiered place restoration and bounded traditional append: COMPLETE, PASS(scope)** (designer closeout, `IB12_P_STAGE.md` §8; a deliberately narrower Blueprint-v1.1 closure).
 - **Production:** `11af9f6de2b47c7b9d13caffd211483102e69ae1` (blob `8d828cd`, body `d218b9a2…085f`).
 - **Qualified:**
@@ -110,7 +123,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12 final closeout commit.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB13-E0 baseline commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `11af9f6de2b47c7b9d13caffd211483102e69ae1` (IB12-P4, append route admission);
   - blob `8d828cd852f74022cda79d4b2d2f86a16b137165`;
@@ -388,6 +401,8 @@
 - **G-OWN(viewer), G-SETTINGS, G-HOST / G-REQUEST:** PASS for the active TC path.
 - **G-VIDEO:** PASS(scope) for the two admitted hover classes in TC; OPEN elsewhere.
 - **G-RUNTIME:** only the TC cell is measured; other cells are open (IB18).
+- **G-DOWNLOAD-R: OPEN** — `G-DOWNLOAD-R(Tampermonkey × Chromium, mode)` and every other runtime download cell are OPEN. IB03 left download semantics `unvalidated`.
+- **G-DOWNLOAD-S: OPEN** — for every site (Rule34, e621, e926, Gelbooru and others); no enhanced download is qualified.
 - **G-PLACE-T(e621, Tier 0): PASS.**
 - **G-PLACE-T(rule34, Tier 1): OPEN / NOT ACTIVATED.**
 - **G-PLACE-T(rule34, Tier 2): OPEN / NOT ACTIVATED.**
@@ -423,19 +438,20 @@
 - **Fixtures:** the IB10 fixtures are externally supplied and not tracked.
 - **Parked:** raw IDs in other hosts' manifest rows; the IB04 checksum/line-ending issue; stale IB08 audit wording.
 - **Deferred:**
-  - IB13 downloads, IB14 favorites/actions (optional), IB16/IB17 Pixiv (**core release scope**), IB18 other runtime cells;
+  - IB14 favorites/actions (optional), IB16/IB17 Pixiv (**core release scope**), IB18 other runtime cells;
   - IB15 UI note: increase the settings-window text/font size for readability.
 
 ## Next
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
 - **IB12 is closed:** COMPLETE, PASS(scope) (`IB12_P_STAGE.md` §8).
-- **Next Blueprint-eligible checkpoint: IB13 — Download lifecycle and honest outcomes.** It is next in the §2 sequence, and its prerequisite (IB07) is complete. It becomes active only on designer assignment; it is not started.
-  - IB16 (SPA route observation) now also has its dependency-graph prerequisites (IB12, IB03), but the §2 sequence and the one-active-checkpoint rule place IB13 first.
+- **Active: IB13 — Download lifecycle and honest outcomes, E0 baseline recorded** (`IB13_E0_BASELINE.md`).
+  - **Next step:** the single V8-R(TC) manager-outcome experiment (local fixture server; owner authorization of the controlled test and a dedicated download directory required). Not built.
+  - No P-stage repair until the G-DOWNLOAD-R evidence exists. IB16 waits behind IB13 (one active checkpoint).
   - **IB14 (validated native actions) stays optional and independently gated.** It is not promoted to a required next checkpoint.
 - **IB12 history** (completed):
   - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
-  - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
+  - (At E2, Tier 1 and Tier 2 remained OPEN, and E2 made no production change; IB12 was closed later, §8.)
   - E2 is closed (FRESH BACK NOT ACHIEVED). **P1–P4 COMPLETE.** Automatic append is admitted on the Rule34 native listing only.
   - The permanent append regressions are realigned to that scope; the obsolete appended-e621 rendition checks are retired as non-applicable.
   - Rule34 Tier 1/2 are OPEN / NOT ACTIVATED; every other append route is unavailable and inert.
@@ -443,6 +459,6 @@
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
-  - no scope beyond the frozen list (A4, C4, E6, G4 stay unchanged);
-  - one checkpoint at a time (§11); no IB13+ and no Pixiv route work in IB12;
+  - one checkpoint at a time (§11): IB13 only; no Pixiv route work;
+  - no real download, live download probe or account/site download experiment without explicit owner authorization;
   - no production change without an assigned P item.
