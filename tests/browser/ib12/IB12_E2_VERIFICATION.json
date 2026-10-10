@@ -1,0 +1,86 @@
+{
+ "probe": "ib12-e2-verification",
+ "commit": "466a480",
+ "blob": "3be0e1f849909a3b394c256b12dc09376f44df12",
+ "bodySha256": "9fa6ab28d88d367947ef5807761218f9e5264ba2fd8194da5a1338bb322236b3",
+ "packageSha256": "3e7036399b7ba25a75647ec4e45a25a19b14f2cc95691fd2c10d819106ec372d",
+ "passed": 15,
+ "total": 15,
+ "results": [
+  {
+   "name": "package matches a fresh build",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "executed body = production 466a480 byte for byte (blob 3be0e1f, body 9fa6ab28…36b3) = the working tree; no hooks",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "scope: @match rule34.xxx only; distinct name/namespace",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recorder: no history write, scroll, focus, network, settings, cookie/localStorage or event-cancelling call",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "recorder: sessionStorage used only under its one key; BE.net.request/json wrapped pass-through (the same promise returned)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "results path tests/results/ib12-e2-rule34.json is git-ignored",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: the full flow completes across documents (shared sessionStorage) and shows a result",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: native append facts recorded - two batches with pids 42 and 84 and their ordinal ranges; C = the first card of the second batch (ordinal 84, later pid)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: returns recorded - back1 BFCache (persisted, C kept), back2 a confirmed fresh back_forward load (C gone, only the starting page), unload-listener armed; page check finds C on its observed page",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: sanitized - no URL, no post ID, no tag text",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: evaluator on the full flow -> CASE B",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke: a second Back that is still a BFCache restore -> FRESH BACK NOT ACHIEVED (record and stop)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator: both returns useful -> CASE A",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator: fresh return loses C and C is not on its observed page -> CASE C",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "evaluator: operator input during a return -> INVALID",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

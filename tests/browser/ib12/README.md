@@ -55,3 +55,40 @@ The package uses its own userscript storage, so production runs with default set
 - there is exactly one close-time `scrollIntoView` on C;
 - nothing scrolled while the viewer was open;
 - there is no further scroll after the correction.
+
+## IB12-E2: Rule34 native Back and page-address observation (real Chrome; about 3 minutes)
+
+`IB12_E2_Rule34_Back.user.js` contains production commit `466a480` (blob `3be0e1f`, body `9fa6ab28…36b3`) **unchanged**, followed by an observe-only recorder (`ib12e2_postamble.js`). It runs on rule34.xxx only.
+
+**What the recorder does and does not do:**
+- It wraps `BE.net.request` and `BE.net.json` pass-through, to see which native listing URL supplied each appended batch and to count enhancer requests after a return.
+- It keeps its state across the same-tab navigations under one `sessionStorage` key. Post IDs and URLs never reach the output.
+- It offers plain native links in a small panel, outside the gallery.
+- For the fresh-load test only, it makes the listing BFCache-ineligible right before leaving (an `unload` listener and a held Web Lock) and records Chrome's own evidence (`pageshow.persisted`, navigation type, `notRestoredReasons`).
+- It does not change settings, history, append, scrolling, or restore anything.
+
+**Local qualification:**
+- `node tests/browser/ib12/build_ib12_e2.cjs --check`
+- `node tests/browser/ib12/verify_ib12_e2.cjs` (15/15)
+
+**Operator steps.** Use one tab and don't click cards; doing so would open the viewer.
+1. **Tampermonkey:** disable every other script, including Booru Enhancer Extended and the IB12 E1/P1 packages. Install and enable `IB12_E2_Rule34_Back.user.js`.
+2. **Open** `https://rule34.xxx/index.php?page=post&s=list`, logged out, at the top of the page. A panel appears at the bottom left.
+3. **Scroll down slowly** until the panel says two pages were appended and card C is outlined in pink. Keep scrolling until C is visible.
+4. **Click panel link 1)** to open C's post page. On the post page, press the **browser Back** button. Wait about two seconds without touching anything, until the panel shows step 2.
+5. **Without scrolling, click panel link 2)** to open C's post page again. Press the **browser Back** button again and wait about two seconds.
+   - If the panel says the Back was **not** a fresh load, continue anyway; the result records it.
+6. **Click panel link 3)**: C's observed native page opens.
+7. A result box appears. Click **Download results**, or copy the text, and save it as `tests/results/ib12-e2-rule34.json`. This path is private and git-ignored.
+
+If anything goes wrong, press **Reset** in the panel and start again from step 2.
+
+**Evaluate:** `node tests/browser/ib12/evaluate_ib12_e2.cjs tests/results/ib12-e2-rule34.json`
+
+| Verdict | Meaning |
+| --- | --- |
+| **CASE A** | Native behaviour is sufficient. |
+| **CASE B** | BFCache is sufficient; the fresh load loses the place; C is on its observed native page. |
+| **CASE C** | The fresh load loses the place, and the observed page does not recover C. |
+| **FRESH BACK NOT ACHIEVED** | The probe's method did not produce a confirmed fresh load. Recorded and stopped. |
+| **OTHER** | Facts listed for the designer. |

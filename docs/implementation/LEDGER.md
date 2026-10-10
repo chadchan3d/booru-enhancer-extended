@@ -46,6 +46,9 @@
   - Appended clones now go through the canonical `enhanceThumbnail` path: owner, action bar, admitted IB08 rendition, disposal revert.
   - Regression 5/5 (the prior `3fcbf15` fails the three G3 checks). Suite identical to P2.
   - Pre-existing limitation, untouched: the owner-less `applySiteThumbMedia` call in `enrichThumbnails` is a no-op for all cards.
+- **IB12-E2** (Rule34 native Back and page-address observation): prepared, **operator run PENDING** (`IB12_E_STAGE.md` §3).
+  - Package `IB12_E2_Rule34_Back.user.js` (`3e703639…372d`): unchanged `466a480` body plus an observe-only recorder. Verifier 15/15.
+  - It decides whether Tier 1 is useful on Rule34 and whether the observed native `pid` page can recover C (CASE A / B / C).
 
 **IB11 — Existing viewer hardening: COMPLETE, PASS(scope) in TC** (final closeout under Blueprint v1.1, `IB11_CLOSEOUT_AUDIT.md` §12).
 - P1–P9 are complete.
@@ -81,7 +84,7 @@
 
 
 ## Current state
-- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-P3 commits.
+- **Branch:** `implementation/ib00-baseline`, pushed; equals `origin/implementation/ib00-baseline` after the IB12-E2 preparation commit.
 - **Production `Booru_Enhancer.user.js`:**
   - commit `466a48092ed280d9f66b54623ccd9bf4231953d1` (IB12-P3, appended-card parity);
   - blob `3be0e1f849909a3b394c256b12dc09376f44df12`;
@@ -395,9 +398,9 @@
 - **Blueprint v1.1 now governs all remaining work.** Apply the proportional qualification standard above; do not reproduce IB11-level assurance machinery by default when a smaller product-QA check is sufficient.
 - **IB11 is closed:** COMPLETE, PASS(scope) in TC. There is no pending P9 attempt-2 requirement and no failure-screenshot blocker.
 - **Active: IB12 — Tiered place restoration and bounded traditional append** (E0 baseline, E1 PASS, P1, P2 and P3 COMPLETE).
-  - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). **P3 COMPLETE, PASS(scope)** (G3).
-  - Tier 1 and Tier 2 remain OPEN. IB12 is not complete.
-  - **No other IB12 item is active; the next step awaits designer assignment.**
+  - P1 COMPLETE, PASS(scope) in TC. P2 COMPLETE, PASS(scope) (G1, G2). P3 COMPLETE, PASS(scope) (G3). G1–G3 resolved.
+  - Tier 1 and Tier 2 remain OPEN. IB12 is not complete. No production change in E2.
+  - **Operator step: IB12-E2** (`tests/browser/ib12/README.md`, "IB12-E2"; about 3 minutes; logged-out Rule34 listing; package `3e703639…372d`). Return `tests/results/ib12-e2-rule34.json` for `evaluate_ib12_e2.cjs`.
 - **Pixiv (IB16–IB17) remains core release scope.**
 - **Forbidden:**
   - no batching of P items;
