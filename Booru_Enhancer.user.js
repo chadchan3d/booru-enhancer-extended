@@ -4694,6 +4694,16 @@
 			paginatorHiddenByUs = false;
 		}
 
+		// IB12-P4: automatic append is admitted only on the Rule34 native listing route
+		// (rule34.xxx, index.php?page=post&s=list, Gelbooru-family adapter), where native
+		// page-addressable continuation was observed (IB07, IB12-E2). Every other route stays
+		// native-pagination-only; the saved preference is left as it is (inert there).
+		function appendAdmitted() {
+			if (location.hostname !== 'rule34.xxx' || BE.adapters.active?.id !== 'gelbooru-family') return false;
+			const p = new URLSearchParams(location.search);
+			return location.pathname === '/index.php' && p.get('page') === 'post' && p.get('s') === 'list';
+		}
+
 		function setupInfiniteScroll() {
 			// Requirement 6: fully idempotent — never leaves more than one
 			// observer/sentinel behind, however many times this is called
@@ -4704,6 +4714,8 @@
 			sentinel = null;
 
 			if (!galleryContainer) return;
+			// IB12-P4: not admitted here - no sentinel, observer or request; native pagination stays visible.
+			if (!appendAdmitted()) { restorePaginatorVisibility(); return; }
 
 			sentinel = document.createElement('div');
 			sentinel.id = 'be-infinite-scroll-sentinel';
